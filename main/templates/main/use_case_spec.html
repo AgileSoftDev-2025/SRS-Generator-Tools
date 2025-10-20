@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Use Case Specification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        
+        button {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        
+        header h1 {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div style="min-height: 100vh; background-color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <!-- Header -->
+        <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0 24px;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px;">
+                <!-- Logo -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 24px; height: 24px; background-color: #111827; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                    </div>
+                    <span style="font-size: 20px; font-weight: 600; color: #111827;">One UML</span>
+                </div>
+                
+                <!-- Navigation -->
+                <nav style="display: flex; align-items: center; gap: 32px;">
+                    <a href="#" style="color: #6b7280; text-decoration: none; font-size: 14px;">Dashboard</a>
+                    <a href="#" style="color: #6b7280; text-decoration: none; font-size: 14px;">User Stories</a>
+                    <a href="#" style="color: #111827; text-decoration: none; font-size: 14px; font-weight: 500;">Use Cases</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main style="max-width: 800px; margin: 0 auto; padding: 32px 24px;">
+            <div style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 32px;">
+                <!-- Header -->
+                <div style="margin-bottom: 32px; text-align: center;">
+                    <h1 style="font-size: 24px; font-weight: 600; color: #2c3e50; margin-bottom: 8px;">Use Case Specification</h1>
+                </div>
+
+                <form id="useCaseForm">
+                    <!-- Use Case Name -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Use Case Name</label>
+                        <input id="useCaseName" type="text" placeholder="Enter use case name" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    </div>
+
+                    <!-- Actor(s) -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Actor(s)</label>
+                        <div id="actorContainer" style="border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; background-color: #ffffff; margin-bottom: 12px;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <span class="actor-tag" data-actor="Student" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Student</span>
+                                <span class="actor-tag" data-actor="Teacher" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Teacher</span>
+                                <span class="actor-tag" data-actor="Administrator" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Administrator</span>
+                                <span class="actor-tag" data-actor="System" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">System</span>
+                            </div>
+                        </div>
+                        <button id="addActorBtn" type="button" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none;">
+                            <span style="font-size: 16px;">+</span> Add new actor
+                        </button>
+                    </div>
+
+                    <!-- Preconditions -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Precondition(s)</label>
+                        <textarea id="preconditions" placeholder="Enter preconditions" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                    </div>
+
+                    <!-- Trigger -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Trigger</label>
+                        <input id="trigger" type="text" placeholder="Enter trigger event" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    </div>
+
+                    <!-- Main Flow -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Main Flow (Steps)</label>
+                        
+                        <div id="mainFlowSteps">
+                            <div class="main-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="min-width: 25px; height: 32px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; color: #333;">
+                                    <span class="step-number">1</span>
+                                </div>
+                                <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <button type="button" class="remove-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                            </div>
+                            <div class="main-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="min-width: 25px; height: 32px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; color: #333;">
+                                    <span class="step-number">2</span>
+                                </div>
+                                <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <button type="button" class="remove-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                            </div>
+                        </div>
+
+                        <button id="addMainStepBtn" type="button" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none;">
+                            <span style="font-size: 16px;">+</span> Add Step
+                        </button>
+                    </div>
+
+                    <!-- Alternative Flow -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Alternative Flow (optional)</label>
+                        
+                        <div id="alternativeFlows">
+                            <div class="alt-flow" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" class="condition-input" placeholder="Condition" style="min-width: 120px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <input type="text" class="step-input" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <button type="button" class="remove-alt-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                            </div>
+                        </div>
+
+                        <button id="addAltStepBtn" type="button" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; margin-top: 5px;">
+                            <span style="font-size: 16px;">+</span> Add Alternative Step
+                        </button>
+                    </div>
+
+                    <!-- Exception Flow -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Exception Flow (optional)</label>
+                        
+                        <div id="exceptionFlows">
+                            <div class="exc-flow" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" class="exception-input" placeholder="Exception" style="min-width: 120px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <input type="text" class="step-input" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                <button type="button" class="remove-exc-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                            </div>
+                        </div>
+
+                        <button id="addExcStepBtn" type="button" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; margin-top: 5px;">
+                            <span style="font-size: 16px;">+</span> Add Exception Step
+                        </button>
+                    </div>
+
+                    <!-- Postconditions -->
+                    <div style="margin-bottom: 32px;">
+                        <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Postcondition(s)</label>
+                        <textarea id="postconditions" placeholder="Enter postconditions" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                        <button type="submit" style="background-color: #111827; color: #ffffff; border-radius: 6px; font-size: 14px; font-weight: 500; border: none;">
+                            Save Specification
+                        </button>
+                        <button type="button" style="color: #6b7280; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; background-color: #ffffff;">
+                            Back
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer style="background-color: #ffffff; border-top: 1px solid #e5e7eb; padding: 16px 24px; margin-top: 48px;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+                <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        class UseCaseSpecification {
+            constructor() {
+                this.selectedActors = new Set();
+                this.init();
+            }
+
+            init() {
+                this.bindActorEvents();
+                this.bindStepEvents();
+                this.bindFormEvents();
+            }
+
+            // Actor Management
+            bindActorEvents() {
+                const actorTags = document.querySelectorAll('.actor-tag');
+                actorTags.forEach(tag => {
+                    tag.addEventListener('click', () => this.toggleActor(tag));
+                });
+
+                document.getElementById('addActorBtn').addEventListener('click', () => {
+                    const actorName = prompt('Enter new actor name:');
+                    if (actorName && actorName.trim()) {
+                        this.addCustomActor(actorName.trim());
+                    }
+                });
+            }
+
+            toggleActor(tag) {
+                const actor = tag.dataset.actor;
+                if (this.selectedActors.has(actor)) {
+                    this.selectedActors.delete(actor);
+                    tag.style.backgroundColor = '#f3f4f6';
+                    tag.style.color = '#374151';
+                } else {
+                    this.selectedActors.add(actor);
+                    tag.style.backgroundColor = '#2563eb';
+                    tag.style.color = '#ffffff';
+                }
+            }
+
+            addCustomActor(actorName) {
+                const container = document.querySelector('#actorContainer > div');
+                const newTag = document.createElement('span');
+                newTag.className = 'actor-tag';
+                newTag.dataset.actor = actorName;
+                newTag.style.cssText = 'background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;';
+                newTag.textContent = actorName;
+                newTag.addEventListener('click', () => this.toggleActor(newTag));
+                container.appendChild(newTag);
+            }
+
+            // Step Management
+            bindStepEvents() {
+                document.getElementById('addMainStepBtn').addEventListener('click', () => {
+                    this.addMainStep();
+                });
+
+                document.getElementById('addAltStepBtn').addEventListener('click', () => {
+                    this.addAlternativeStep();
+                });
+
+                document.getElementById('addExcStepBtn').addEventListener('click', () => {
+                    this.addExceptionStep();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-step')) {
+                        this.removeMainStep(e.target.closest('.main-step'));
+                    }
+                    if (e.target.classList.contains('remove-alt-step')) {
+                        e.target.closest('.alt-flow').remove();
+                    }
+                    if (e.target.classList.contains('remove-exc-step')) {
+                        e.target.closest('.exc-flow').remove();
+                    }
+                });
+            }
+
+            addMainStep() {
+                const container = document.getElementById('mainFlowSteps');
+                const stepCount = container.querySelectorAll('.main-step').length + 1;
+                
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'main-step';
+                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
+                stepDiv.innerHTML = `
+                    <div style="min-width: 25px; height: 32px; display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; color: #333;">
+                        <span class="step-number">${stepCount}</span>
+                    </div>
+                    <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <button type="button" class="remove-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                `;
+                container.appendChild(stepDiv);
+            }
+
+            removeMainStep(stepElement) {
+                stepElement.remove();
+                this.updateStepNumbers();
+            }
+
+            updateStepNumbers() {
+                const steps = document.querySelectorAll('#mainFlowSteps .step-number');
+                steps.forEach((step, index) => {
+                    step.textContent = index + 1;
+                });
+            }
+
+            addAlternativeStep() {
+                const container = document.getElementById('alternativeFlows');
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'alt-flow';
+                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+                stepDiv.innerHTML = `
+                    <input type="text" class="condition-input" placeholder="Condition" style="min-width: 120px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <input type="text" class="step-input" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <button type="button" class="remove-alt-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                `;
+                container.appendChild(stepDiv);
+            }
+
+            addExceptionStep() {
+                const container = document.getElementById('exceptionFlows');
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'exc-flow';
+                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+                stepDiv.innerHTML = `
+                    <input type="text" class="exception-input" placeholder="Exception" style="min-width: 120px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <input type="text" class="step-input" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <button type="button" class="remove-exc-step" style="color: #999; background: none; border: none; font-size: 16px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 3px;">🗑</button>
+                `;
+                container.appendChild(stepDiv);
+            }
+
+            // Form Management
+            bindFormEvents() {
+                document.getElementById('useCaseForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveSpecification();
+                });
+
+                document.querySelector('button[type="button"]:last-child').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to go back? Any unsaved changes will be lost.')) {
+                        window.history.back();
+                    }
+                });
+            }
+
+            saveSpecification() {
+                const data = this.collectFormData();
+                console.log('Saving use case specification:', data);
+                alert('Use Case Specification saved successfully!');
+            }
+
+            collectFormData() {
+                return {
+                    name: document.getElementById('useCaseName').value,
+                    actors: Array.from(this.selectedActors),
+                    preconditions: document.getElementById('preconditions').value,
+                    trigger: document.getElementById('trigger').value,
+                    postconditions: document.getElementById('postconditions').value,
+                    mainFlow: this.getMainFlowSteps(),
+                    alternativeFlow: this.getAlternativeSteps(),
+                    exceptionFlow: this.getExceptionSteps()
+                };
+            }
+
+            getMainFlowSteps() {
+                const steps = document.querySelectorAll('#mainFlowSteps .main-step input');
+                return Array.from(steps).map(input => input.value).filter(value => value.trim());
+            }
+
+            getAlternativeSteps() {
+                const flows = document.querySelectorAll('.alt-flow');
+                return Array.from(flows).map(flow => {
+                    const condition = flow.querySelector('.condition-input').value;
+                    const description = flow.querySelector('.step-input').value;
+                    return { condition, description };
+                }).filter(flow => flow.condition.trim() || flow.description.trim());
+            }
+
+            getExceptionSteps() {
+                const flows = document.querySelectorAll('.exc-flow');
+                return Array.from(flows).map(flow => {
+                    const exception = flow.querySelector('.exception-input').value;
+                    const description = flow.querySelector('.step-input').value;
+                    return { exception, description };
+                }).filter(flow => flow.exception.trim() || flow.description.trim());
+            }
+        }
+
+        // Initialize the form when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new UseCaseSpecification();
+        });
+    </script>
+</body>
+</html>

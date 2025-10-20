@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneUML - Generate Sequence Diagram</title>
+  <link rel="stylesheet" href="{% static 'main/css/global.css' %}">
+</head>
+<body>
+  
+  <!-- Header -->
+  <header style="background-color: var(--bg-white); border-bottom: 1px solid var(--border-light); position: sticky; top: 0; z-index: 100;">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">OneUML</div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--bg-main); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span style="color: var(--text-secondary); font-size: 14px;">Hi, Username</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main style="max-width: 1280px; margin: 0 auto; padding: 40px 24px;">
+    
+    <!-- Page Title -->
+    <div style="margin-bottom: 32px;">
+      <h1 style="font-size: 32px; font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Generate Sequence Diagram</h1>
+      <p style="font-size: 14px; color: var(--text-secondary);">Create and organize the sequence of interactions between system components based on user scenarios.</p>
+    </div>
+
+    <!-- Sequence Diagram Data Section -->
+    <section style="background-color: var(--bg-white); border-radius: 8px; padding: 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+      <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 24px;">Sequence Diagram Data</h2>
+      
+      <!-- Source Data -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">Source Data</label>
+        <select style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;">
+          <option>Select the data source for this sequence</option>
+        </select>
+      </div>
+
+      <!-- Actor -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">Actor</label>
+        <select style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;">
+          <option>Select main actor involved in this sequence</option>
+        </select>
+      </div>
+
+      <!-- Feature -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">Feature</label>
+        <select style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;">
+          <option>Select related feature or function</option>
+        </select>
+      </div>
+
+      <!-- Entity -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">Entity</label>
+        <select style="width: 100%; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer;">
+          <option>Select related system entity</option>
+        </select>
+      </div>
+
+      <!-- System Boundary Description -->
+      <div>
+        <label style="display: block; font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">System Boundary Description</label>
+        <textarea placeholder="Describe system boundary if needed (optional)" style="width: 100%; min-height: 100px; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-primary); font-size: 14px; resize: vertical;"></textarea>
+      </div>
+    </section>
+
+    <!-- Task Sequence Section -->
+    <section style="background-color: var(--bg-white); border-radius: 8px; padding: 32px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+      <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 24px;">Task Sequence</h2>
+      
+      <!-- Task Row 1 -->
+      <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+        <select style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; min-width: 180px;">
+          <option>Select actor/entity</option>
+        </select>
+        <input type="text" placeholder="Enter message or action" style="flex: 2; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-primary); font-size: 14px;">
+        <button style="width: 36px; height: 36px; background-color: #374151; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button style="width: 36px; height: 36px; background-color: transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Task Row 2 -->
+      <div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: center;">
+        <select style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; min-width: 180px;">
+          <option>Select actor/entity</option>
+        </select>
+        <input type="text" placeholder="Enter message or action" style="flex: 2; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-primary); font-size: 14px;">
+        <button style="width: 36px; height: 36px; background-color: #374151; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button style="width: 36px; height: 36px; background-color: transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Task Row 3 -->
+      <div style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center;">
+        <select style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; min-width: 180px;">
+          <option>Select actor/entity</option>
+        </select>
+        <input type="text" placeholder="Enter message or action" style="flex: 2; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-primary); font-size: 14px;">
+        <button style="width: 36px; height: 36px; background-color: #374151; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button style="width: 36px; height: 36px; background-color: transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Add Step Button -->
+      <button style="background-color: #374151; color: white; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; display: inline-flex; align-items: center; gap: 8px; transition: background-color 0.2s;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Add Step
+      </button>
+    </section>
+
+    <!-- Generate Button -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <button style="background-color: #374151; color: white; padding: 12px 32px; border-radius: 6px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; transition: background-color 0.2s;">
+        GENERATE DIAGRAM
+      </button>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 12px;">Ensure the sequence steps are complete before generating the diagram.</p>
+    </div>
+
+    <!-- Sequence Diagram Result Section -->
+    <section style="background-color: var(--bg-white); border-radius: 8px; padding: 32px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
+      <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 24px;">Sequence Diagram Result</h2>
+      
+      <div style="min-height: 200px; border: 1px dashed var(--border-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 40px;">
+        <p style="font-size: 14px; color: var(--text-muted); text-align: center;">The generated sequence diagram will appear here.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px;">
+    © 2025 OneUML. All rights reserved.
+  </footer>
+
+  <script>
+    // Add new task row
+    function addTaskRow() {
+      const container = document.getElementById('taskContainer');
+      const newRow = document.createElement('div');
+      newRow.className = 'task-row';
+      newRow.style.cssText = 'display: flex; gap: 12px; margin-bottom: 12px; align-items: center;';
+      
+      newRow.innerHTML = `
+        <select style="flex: 1; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-secondary); font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%239CA3AF%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 14px center; cursor: pointer; min-width: 180px;">
+          <option>Select actor/entity</option>
+        </select>
+        <input type="text" placeholder="Enter message or action" style="flex: 2; padding: 10px 14px; border: 1px solid var(--border-light); border-radius: 6px; background-color: var(--bg-white); color: var(--text-primary); font-size: 14px;">
+        <button onclick="addTaskRow()" style="width: 36px; height: 36px; background-color: #374151; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M8 3.5V12.5M3.5 8H12.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button onclick="removeTaskRow(this)" style="width: 36px; height: 36px; background-color: transparent; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M3.5 3.5L12.5 12.5M12.5 3.5L3.5 12.5" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      `;
+      
+      const addButton = document.getElementById('addStepButton');
+      container.insertBefore(newRow, addButton);
+    }
+
+    // Remove task row
+    function removeTaskRow(button) {
+      const row = button.closest('.task-row');
+      const container = document.getElementById('taskContainer');
+      const rows = container.querySelectorAll('.task-row');
+      
+      // Prevent removing if only one row left
+      if (rows.length > 1) {
+        row.remove();
+      }
+    }
+  </script>
+
+  <style>
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      main {
+        padding: 24px 16px !important;
+      }
+
+      section {
+        padding: 24px !important;
+      }
+
+      h1 {
+        font-size: 24px !important;
+      }
+
+      .task-row {
+        flex-direction: column;
+      }
+
+      select, input {
+        width: 100%;
+      }
+    }
+
+    /* Hover Effects */
+    button:hover {
+      opacity: 0.9;
+    }
+
+    select:hover, input:hover, textarea:hover {
+      border-color: #d1d5db;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  </style>
+
+</body>
+</html>
