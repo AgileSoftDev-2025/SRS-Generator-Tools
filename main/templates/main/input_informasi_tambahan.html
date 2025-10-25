@@ -1,11 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Story</title>
-</head>
-<body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
-</body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/additional_information.css' %}">
+
+<div class="container my-5">
+  <!-- Header Section -->
+  <h2>Additional Information</h2>
+  <p>Select a feature to review or add its Use Case Specification.</p>
+
+  <!-- Features Grid -->
+  <div class="row g-4 mt-4">
+    {% for feature in features %}
+    <div class="col-md-4 col-sm-6">
+      <div
+        class="feature-card p-4 text-center"
+        data-bs-toggle="modal"
+        data-bs-target="#modal{{ feature.id }}"
+      >
+        <div class="fs-1 mb-3">⚙️</div>
+        <h5 class="fw-semibold mb-2">{{ feature.name }}</h5>
+        <p class="text-secondary mb-0">
+          {{ feature.description|default:"No description available." }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Modal Form for Each Feature -->
+    <div
+      class="modal fade"
+      id="modal{{ feature.id }}"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title">Use Case Specification</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+
+          <form method="POST" action="{% url 'save_use_case_spec' feature.id %}">
+            {% csrf_token %}
+            <div class="modal-body">
+              <div class="mb-3">
+                <label class="form-label">Summary Description</label>
+                <textarea
+                  name="summary"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Describe what this use case is about."
+                ></textarea>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Priority</label>
+                  <select name="priority" class="form-select">
+                    <option value="">Select Priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Status</label>
+                  <select name="status" class="form-select">
+                    <option value="">Select Status</option>
+                    <option value="Draft">Draft</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Pre-Condition</label>
+                <textarea
+                  name="pre_condition"
+                  class="form-control"
+                  rows="2"
+                  placeholder="State any preconditions."
+                ></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Post-Condition</label>
+                <textarea
+                  name="post_condition"
+                  class="form-control"
+                  rows="2"
+                  placeholder="State the expected result."
+                ></textarea>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label">Basic Path (Actor Actions)</label>
+                  <textarea
+                    name="basic_actor"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Describe actor actions step by step"
+                  ></textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">System Responses</label>
+                  <textarea
+                    name="basic_system"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Describe system responses step by step"
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Alternative Path</label>
+                <textarea
+                  name="alternative"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Describe alternative flows if any."
+                ></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Exception</label>
+                <textarea
+                  name="exception"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Describe exceptions or error handling."
+                ></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer border-0">
+              <button
+                type="button"
+                class="btn btn-outline-dark"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-dark">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Navigation Buttons -->
+  <div class="d-flex justify-content-between mt-5">
+    <a href="{% url 'previous_page' %}" class="btn btn-outline-dark px-4">← Back</a>
+    <a href="{% url 'next_page' %}" class="btn btn-dark px-4">Next →</a>
+  </div>
+</div>
+{% endblock %}
