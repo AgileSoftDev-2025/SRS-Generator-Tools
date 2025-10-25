@@ -1,7 +1,12 @@
+<<<<<<< HEAD
+=======
+{% load static %}
+>>>>>>> a10acfa377f66ca4409b4b4cd307891e864bd93c
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+<<<<<<< HEAD
     <title>User Story</title>
 </head>
 <body>
@@ -9,3 +14,906 @@
     <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
 </body>
 </html>
+=======
+    <title>One UML - Use Case & User Story</title>
+    <link rel="stylesheet" href="{% static 'main/css/global.css' %}">
+    <style>
+        /* Additional styles for the combined interface */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 24px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: #111827;
+            border-bottom-color: #111827;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .conversion-info {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .conversion-info h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0369a1;
+        }
+        
+        .conversion-info p {
+            margin: 0;
+            font-size: 13px;
+            color: #0369a1;
+        }
+        
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #059669;
+        }
+        
+        .sync-indicator .dot {
+            width: 8px;
+            height: 8px;
+            background-color: #059669;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div style="min-height: 100vh; background-color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <!-- Header -->
+        <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0 24px;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px;">
+                <!-- Logo -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 24px; height: 24px; background-color: #111827; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                        <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                    </div>
+                    <span style="font-size: 20px; font-weight: 600; color: #111827;">One UML</span>
+                </div>
+                
+                <!-- Navigation -->
+                <nav style="display: flex; align-items: center; gap: 32px;">
+                    <a href="{%  url 'home' %}" style="color: #6b7280; text-decoration: none; font-size: 14px;">Home</a>
+                    <a href="#" class="tab-link" data-tab="user-story" style="color: #6b7280; text-decoration: none; font-size: 14px;">User Stories</a>
+                    <a href="#" class="tab-link" data-tab="use-case" style="color: #111827; text-decoration: none; font-size: 14px; font-weight: 500;">Use Cases</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px;">
+            <!-- Tab Navigation -->
+            <div class="tab-container">
+                <button class="tab active" data-tab="use-case">Use Case</button>
+                <button class="tab" data-tab="user-story">User Story</button>
+            </div>
+            
+            <!-- Sync Indicator -->
+            <div class="sync-indicator" id="syncIndicator">
+                <div class="dot"></div>
+                <span>Data is automatically synchronized between forms</span>
+            </div>
+            
+            <!-- Use Case Tab Content -->
+            <div id="use-case-tab" class="tab-content active">
+                <div class="conversion-info">
+                    <h4>Auto-Conversion to User Story</h4>
+                    <p>When you fill out this Use Case form, the User Story form will be automatically populated with the corresponding data.</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 320px; gap: 48px;">
+                    <!-- Left Column - Form -->
+                    <div style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 32px;">
+                        <!-- Header -->
+                        <div style="margin-bottom: 32px;">
+                            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Input Use Case</h1>
+                            <p style="color: #6b7280; font-size: 14px;">Create a new use case and optionally generate a corresponding user story</p>
+                        </div>
+
+                        <!-- Actor Section -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">
+                                Actor(s) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <div id="actorContainer" style="border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; background-color: #ffffff; margin-bottom: 12px;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    <span class="actor-tag" data-actor="Student" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Student</span>
+                                    <span class="actor-tag" data-actor="Teacher" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Teacher</span>
+                                    <span class="actor-tag" data-actor="Administrator" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Administrator</span>
+                                    <span class="actor-tag" data-actor="System" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">System</span>
+                                </div>
+                            </div>
+                            <button id="addActorBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
+                                <span style="font-size: 16px;">+</span> Add new actor
+                            </button>
+                            <p style="font-size: 12px; color: #6b7280; margin-top: 4px;">Choose one or more actors involved in this use case</p>
+                        </div>
+
+                        <!-- Use Case Title -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">
+                                Use Case Title <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input id="useCaseTitle" type="text" placeholder="e.g., Upload Assignment" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                        </div>
+
+                        <!-- Brief Description -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Brief Description / Intent</label>
+                            <textarea id="briefDescription" placeholder="Short description to capture intent/reason" style="width: 100%; height: 100px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- Preconditions -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Precondition(s)</label>
+                            <textarea id="preconditions" placeholder="Conditions that must be true before the use case starts" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- Triggers -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Trigger(s)</label>
+                            <textarea id="triggers" placeholder="What initiates this use case" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- Main Flow -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Main Flow (Steps)</label>
+                            <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">Add steps one by one in the order they occur</p>
+                            
+                            <div id="mainFlowSteps">
+                                <div class="main-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 4px; color: #6b7280;">
+                                        <span style="cursor: move;">⋮⋮</span>
+                                        <span class="step-number" style="font-weight: 500;">1.</span>
+                                    </div>
+                                    <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                    <button class="remove-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                                </div>
+                            </div>
+
+                            <button id="addMainStepBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
+                                <span style="font-size: 16px;">+</span> Add Step
+                            </button>
+                        </div>
+
+                        <!-- Alternative Flow -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Alternative Flow(s)</label>
+                            
+                            <div id="alternativeFlows">
+                                <div class="alt-flow" style="margin-bottom: 24px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                    <input type="text" placeholder="Alternative flow title/condition" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; margin-bottom: 12px;" />
+                                    
+                                    <div class="alt-steps">
+                                        <div class="alt-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                            <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">1.</span>
+                                            <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                                            <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                                        </div>
+                                    </div>
+
+                                    <button class="add-alt-step" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer; margin-bottom: 12px;">
+                                        <span style="font-size: 16px;">+</span> Add Step
+                                    </button>
+
+                                    <button class="remove-alt-flow" style="color: #ef4444; font-size: 12px; background: none; border: none; cursor: pointer;">Remove Alternative Flow</button>
+                                </div>
+                            </div>
+
+                            <button id="addAltFlowBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
+                                <span style="font-size: 16px;">+</span> Add Alternative Flow
+                            </button>
+                        </div>
+
+                        <!-- Postconditions -->
+                        <div style="margin-bottom: 32px;">
+                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Postcondition(s)</label>
+                            <textarea id="postconditions" placeholder="Conditions that will be true after successful completion" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <button id="saveBtn" style="background-color: #111827; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer;">
+                                Save Use Case
+                            </button>
+                            <button id="saveGenerateBtn" style="background-color: #374151; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer;">
+                                Save + Generate User Story
+                            </button>
+                            <button id="previewBtn" style="color: #6b7280; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; background-color: #ffffff; cursor: pointer;">
+                                Preview Use Case Diagram
+                            </button>
+                            <button style="color: #6b7280; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; background-color: #ffffff; cursor: pointer;">
+                                Back
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Tutorial -->
+                    <div style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 24px; height: fit-content;">
+                        <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 16px;">Tutorial & Example</h3>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Mapping Guidance</h4>
+                            <p style="font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 12px;">When generating a User Story, fields will map as follows:</p>
+                            <ul style="font-size: 12px; color: #6b7280; line-height: 1.4;">
+                                <li style="margin-bottom: 4px;">• Actor → "As a [Actor]"</li>
+                                <li style="margin-bottom: 4px;">• Title → "I want [Title]"</li>
+                                <li style="margin-bottom: 4px;">• Description → "So that [Description]"</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Example</h4>
+                            <div style="background-color: #f9fafb; border-radius: 6px; padding: 16px;">
+                                <p style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">If actor = "Student" and title = "Upload Assignment":</p>
+                                <div id="exampleStory" style="background-color: #ffffff; border-radius: 4px; padding: 12px; border: 1px solid #e5e7eb;">
+                                    <p style="font-size: 13px; color: #111827; line-height: 1.4;">
+                                        <strong>"As a Student, I want to Upload Assignment, so that I can submit my work for grading."</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Story Tab Content -->
+            <div id="user-story-tab" class="tab-content">
+                <div class="conversion-info">
+                    <h4>Auto-Conversion to Use Case</h4>
+                    <p>When you fill out this User Story form, the Use Case form will be automatically populated with the corresponding data.</p>
+                </div>
+                
+                <div style="max-width: 680px; margin: 0 auto;">
+                    <!-- Form Card -->
+                    <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px;">
+                        
+                        <!-- As a (Actor) Field -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                                As a (Actor) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input 
+                                id="userStoryActor"
+                                type="text" 
+                                placeholder="e.g., student, admin, customer"
+                                style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; box-sizing: border-box;"
+                            >
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Specify the type of user or role</p>
+                        </div>
+
+                        <!-- I want (Goal / Feature) Field -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                                I want (Goal / Feature) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input 
+                                id="userStoryGoal"
+                                type="text" 
+                                placeholder="brief feature, e.g., upload assignment"
+                                style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; box-sizing: border-box;"
+                            >
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Describe the desired functionality or action</p>
+                        </div>
+
+                        <!-- So that (Reason / Benefit) Field -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                                So that (Reason / Benefit)
+                            </label>
+                            <textarea 
+                                id="userStoryReason"
+                                placeholder="value/benefit, e.g., submit tasks online" 
+                                rows="4"
+                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
+                            ></textarea>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Explain the value or benefit to the user (optional but recommended)</p>
+                        </div>
+
+                        <!-- Precondition(s) Field -->
+                        <div style="margin-bottom: 24px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                                Precondition(s)
+                            </label>
+                            <textarea 
+                                id="userStoryPreconditions"
+                                placeholder="Enter any conditions that must be true before this story can be executed" 
+                                rows="4"
+                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
+                            ></textarea>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Conditions that must hold before this story</p>
+                        </div>
+
+                        <!-- Trigger(s) Field -->
+                        <div style="margin-bottom: 32px;">
+                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
+                                Trigger(s)
+                            </label>
+                            <textarea 
+                                id="userStoryTriggers"
+                                placeholder="Describe what initiates or starts this user story" 
+                                rows="4"
+                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
+                            ></textarea>
+                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">What starts this story</p>
+                        </div>
+
+                        <!-- Example User Story Box -->
+                        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
+                            <h3 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0 0 8px 0;">Example User Story</h3>
+                            <p style="font-size: 14px; color: #6b7280; margin: 0; font-style: italic; line-height: 1.4;">"As a student, I want to upload assignments, so that I can submit tasks online."</p>
+                        </div>
+
+                        <!-- Related Data Collapsible -->
+                        <div style="margin-bottom: 0;">
+                            <button 
+                                type="button" 
+                                onclick="toggleRelatedData()" 
+                                style="display: flex; align-items: center; gap: 8px; background: none; border: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; padding: 0; font-family: inherit;"
+                            >
+                                <svg id="chevron" style="width: 16px; height: 16px; transition: transform 0.2s ease;" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                                Related Data
+                            </button>
+                            <div id="relatedData" style="display: none; margin-top: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px; background-color: #ffffff;">
+                                <p style="color: #6b7280; font-size: 14px; margin: 0; line-height: 1.4;">Additional data and relationships for this user story will be displayed here.</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 32px;">
+                        <button 
+                            id="saveUserStoryBtn"
+                            type="button"
+                            style="height: 40px; padding: 0 20px; background-color: #374151; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
+                        >
+                            Save
+                        </button>
+                        <button 
+                            id="saveGenerateUseCaseBtn"
+                            type="button"
+                            style="height: 40px; padding: 0 20px; background-color: #374151; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
+                        >
+                            Save + Generate Use Case
+                        </button>
+                        <button 
+                            type="button"
+                            style="height: 40px; padding: 0 20px; background-color: #ffffff; color: #6b7280; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+
+                    <!-- Help Text -->
+                    <p style="text-align: center; margin-top: 12px; font-size: 12px; color: #9ca3af; line-height: 1.4; max-width: 500px; margin-left: auto; margin-right: auto;">
+                        Selecting "Save + Generate Use Case" will pre-fill the Use Case form with data from this story
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer style="background-color: #ffffff; border-top: 1px solid #e5e7eb; padding: 16px 24px; margin-top: 48px;">
+            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+                <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+                <div style="display: flex; align-items: center; gap: 24px;">
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        class UnifiedFormManager {
+            constructor() {
+                this.selectedActors = new Set();
+                this.init();
+            }
+
+            init() {
+                this.bindTabEvents();
+                this.bindUseCaseEvents();
+                this.bindUserStoryEvents();
+                this.bindSyncEvents();
+                this.updateExample();
+            }
+
+            // Tab Management
+            bindTabEvents() {
+                const tabs = document.querySelectorAll('.tab');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const tabId = tab.dataset.tab;
+                        this.switchTab(tabId);
+                    });
+                });
+
+                const navLinks = document.querySelectorAll('.tab-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const tabId = link.dataset.tab;
+                        this.switchTab(tabId);
+                    });
+                });
+            }
+
+            switchTab(tabId) {
+                // Update tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            }
+
+            // Use Case Management
+            bindUseCaseEvents() {
+                // Actor Management
+                const actorTags = document.querySelectorAll('.actor-tag');
+                actorTags.forEach(tag => {
+                    tag.addEventListener('click', () => this.toggleActor(tag));
+                });
+
+                document.getElementById('addActorBtn').addEventListener('click', () => {
+                    const actorName = prompt('Enter new actor name:');
+                    if (actorName && actorName.trim()) {
+                        this.addCustomActor(actorName.trim());
+                    }
+                });
+
+                // Step Management
+                document.getElementById('addMainStepBtn').addEventListener('click', () => {
+                    this.addMainStep();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('remove-step')) {
+                        this.removeMainStep(e.target.closest('.main-step'));
+                    }
+                });
+
+                // Alternative Flow Management
+                document.getElementById('addAltFlowBtn').addEventListener('click', () => {
+                    this.addAlternativeFlow();
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('add-alt-step')) {
+                        this.addAlternativeStep(e.target.closest('.alt-flow'));
+                    }
+                    if (e.target.classList.contains('remove-alt-step')) {
+                        this.removeAlternativeStep(e.target.closest('.alt-step'));
+                    }
+                    if (e.target.classList.contains('remove-alt-flow')) {
+                        e.target.closest('.alt-flow').remove();
+                    }
+                });
+
+                // Form Management
+                const titleInput = document.getElementById('useCaseTitle');
+                const descInput = document.getElementById('briefDescription');
+                
+                titleInput.addEventListener('input', () => {
+                    this.updateExample();
+                    this.syncToUserStory();
+                });
+                descInput.addEventListener('input', () => {
+                    this.updateExample();
+                    this.syncToUserStory();
+                });
+
+                document.getElementById('saveBtn').addEventListener('click', () => {
+                    this.saveUseCase();
+                });
+
+                document.getElementById('saveGenerateBtn').addEventListener('click', () => {
+                    this.saveAndGenerateUserStory();
+                });
+
+                document.getElementById('previewBtn').addEventListener('click', () => {
+                    this.previewDiagram();
+                });
+            }
+
+            // User Story Management
+            bindUserStoryEvents() {
+                document.getElementById('saveUserStoryBtn').addEventListener('click', () => {
+                    this.saveUserStory();
+                });
+
+                document.getElementById('saveGenerateUseCaseBtn').addEventListener('click', () => {
+                    this.saveAndGenerateUseCase();
+                });
+
+                // Add input listeners for sync
+                document.getElementById('userStoryActor').addEventListener('input', () => {
+                    this.syncToUseCase();
+                });
+                
+                document.getElementById('userStoryGoal').addEventListener('input', () => {
+                    this.syncToUseCase();
+                });
+                
+                document.getElementById('userStoryReason').addEventListener('input', () => {
+                    this.syncToUseCase();
+                });
+                
+                document.getElementById('userStoryPreconditions').addEventListener('input', () => {
+                    this.syncToUseCase();
+                });
+                
+                document.getElementById('userStoryTriggers').addEventListener('input', () => {
+                    this.syncToUseCase();
+                });
+            }
+
+            // Sync between forms
+            bindSyncEvents() {
+                // Additional sync triggers for use case form
+                document.getElementById('preconditions').addEventListener('input', () => {
+                    this.syncToUserStory();
+                });
+                
+                document.getElementById('triggers').addEventListener('input', () => {
+                    this.syncToUserStory();
+                });
+            }
+
+            syncToUserStory() {
+                // Sync from Use Case to User Story
+                const actors = Array.from(this.selectedActors);
+                if (actors.length > 0) {
+                    document.getElementById('userStoryActor').value = actors[0];
+                }
+                
+                document.getElementById('userStoryGoal').value = document.getElementById('useCaseTitle').value;
+                document.getElementById('userStoryReason').value = document.getElementById('briefDescription').value;
+                document.getElementById('userStoryPreconditions').value = document.getElementById('preconditions').value;
+                document.getElementById('userStoryTriggers').value = document.getElementById('triggers').value;
+            }
+
+            syncToUseCase() {
+                // Sync from User Story to Use Case
+                const actor = document.getElementById('userStoryActor').value;
+                if (actor && !this.selectedActors.has(actor)) {
+                    // Clear previous selection
+                    this.selectedActors.clear();
+                    document.querySelectorAll('.actor-tag').forEach(tag => {
+                        tag.style.backgroundColor = '#f3f4f6';
+                        tag.style.color = '#374151';
+                    });
+                    
+                    // Add the actor from user story
+                    this.selectedActors.add(actor);
+                    
+                    // Try to find and select the matching actor tag
+                    const matchingTag = document.querySelector(`.actor-tag[data-actor="${actor}"]`);
+                    if (matchingTag) {
+                        matchingTag.style.backgroundColor = '#2563eb';
+                        matchingTag.style.color = '#ffffff';
+                    } else {
+                        // If no matching tag, create a custom one
+                        this.addCustomActor(actor);
+                        const newTag = document.querySelector(`.actor-tag[data-actor="${actor}"]`);
+                        if (newTag) {
+                            newTag.style.backgroundColor = '#2563eb';
+                            newTag.style.color = '#ffffff';
+                        }
+                    }
+                }
+                
+                document.getElementById('useCaseTitle').value = document.getElementById('userStoryGoal').value;
+                document.getElementById('briefDescription').value = document.getElementById('userStoryReason').value;
+                document.getElementById('preconditions').value = document.getElementById('userStoryPreconditions').value;
+                document.getElementById('triggers').value = document.getElementById('userStoryTriggers').value;
+                
+                this.updateExample();
+            }
+
+            // Actor Management
+            toggleActor(tag) {
+                const actor = tag.dataset.actor;
+                if (this.selectedActors.has(actor)) {
+                    this.selectedActors.delete(actor);
+                    tag.style.backgroundColor = '#f3f4f6';
+                    tag.style.color = '#374151';
+                } else {
+                    this.selectedActors.add(actor);
+                    tag.style.backgroundColor = '#2563eb';
+                    tag.style.color = '#ffffff';
+                }
+                this.updateExample();
+                this.syncToUserStory();
+            }
+
+            addCustomActor(actorName) {
+                const container = document.querySelector('#actorContainer > div');
+                const newTag = document.createElement('span');
+                newTag.className = 'actor-tag';
+                newTag.dataset.actor = actorName;
+                newTag.style.cssText = 'background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;';
+                newTag.textContent = actorName;
+                newTag.addEventListener('click', () => this.toggleActor(newTag));
+                container.appendChild(newTag);
+            }
+
+            // Step Management
+            addMainStep() {
+                const container = document.getElementById('mainFlowSteps');
+                const stepCount = container.querySelectorAll('.main-step').length + 1;
+                
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'main-step';
+                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
+                stepDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 4px; color: #6b7280;">
+                        <span style="cursor: move;">⋮⋮</span>
+                        <span class="step-number" style="font-weight: 500;">${stepCount}.</span>
+                    </div>
+                    <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <button class="remove-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                `;
+                container.appendChild(stepDiv);
+            }
+
+            removeMainStep(stepElement) {
+                stepElement.remove();
+                this.updateStepNumbers();
+            }
+
+            updateStepNumbers() {
+                const steps = document.querySelectorAll('#mainFlowSteps .step-number');
+                steps.forEach((step, index) => {
+                    step.textContent = `${index + 1}.`;
+                });
+            }
+
+            // Alternative Flow Management
+            addAlternativeFlow() {
+                const container = document.getElementById('alternativeFlows');
+                const flowDiv = document.createElement('div');
+                flowDiv.className = 'alt-flow';
+                flowDiv.style.cssText = 'margin-bottom: 24px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px;';
+                flowDiv.innerHTML = `
+                    <input type="text" placeholder="Alternative flow title/condition" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; margin-bottom: 12px;" />
+                    <div class="alt-steps">
+                        <div class="alt-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">1.</span>
+                            <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                            <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                        </div>
+                    </div>
+                    <button class="add-alt-step" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer; margin-bottom: 12px;">
+                        <span style="font-size: 16px;">+</span> Add Step
+                    </button>
+                    <button class="remove-alt-flow" style="color: #ef4444; font-size: 12px; background: none; border: none; cursor: pointer;">Remove Alternative Flow</button>
+                `;
+                container.appendChild(flowDiv);
+            }
+
+            addAlternativeStep(flowElement) {
+                const stepsContainer = flowElement.querySelector('.alt-steps');
+                const stepCount = stepsContainer.querySelectorAll('.alt-step').length + 1;
+                
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'alt-step';
+                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
+                stepDiv.innerHTML = `
+                    <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">${stepCount}.</span>
+                    <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
+                    <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                `;
+                stepsContainer.appendChild(stepDiv);
+            }
+
+            removeAlternativeStep(stepElement) {
+                const flowElement = stepElement.closest('.alt-flow');
+                stepElement.remove();
+                this.updateAltStepNumbers(flowElement);
+            }
+
+            updateAltStepNumbers(flowElement) {
+                const steps = flowElement.querySelectorAll('.alt-step-number');
+                steps.forEach((step, index) => {
+                    step.textContent = `${index + 1}.`;
+                });
+            }
+
+            // Example and Preview
+            updateExample() {
+                const actors = Array.from(this.selectedActors);
+                const title = document.getElementById('useCaseTitle').value || 'Upload Assignment';
+                const description = document.getElementById('briefDescription').value || 'I can submit my work for grading';
+                
+                const actor = actors.length > 0 ? actors[0] : 'Student';
+                const exampleText = `"As a ${actor}, I want to ${title}, so that ${description}."`;
+                
+                document.getElementById('exampleStory').innerHTML = `
+                    <p style="font-size: 13px; color: #111827; line-height: 1.4;">
+                        <strong>${exampleText}</strong>
+                    </p>
+                `;
+            }
+
+            // Action Methods
+            saveUseCase() {
+                const data = this.collectUseCaseData();
+                console.log('Saving use case:', data);
+                alert('Use case saved successfully!');
+            }
+
+            saveAndGenerateUserStory() {
+                const data = this.collectUseCaseData();
+                console.log('Saving and generating user story:', data);
+                alert('Use case saved and user story generated!');
+            }
+
+            saveUserStory() {
+                const data = this.collectUserStoryData();
+                console.log('Saving user story:', data);
+                alert('User story saved successfully!');
+            }
+
+            saveAndGenerateUseCase() {
+                const data = this.collectUserStoryData();
+                console.log('Saving and generating use case:', data);
+                alert('User story saved and use case generated!');
+            }
+
+            previewDiagram() {
+                alert('Preview diagram feature coming soon!');
+            }
+
+            collectUseCaseData() {
+                return {
+                    actors: Array.from(this.selectedActors),
+                    title: document.getElementById('useCaseTitle').value,
+                    description: document.getElementById('briefDescription').value,
+                    preconditions: document.getElementById('preconditions').value,
+                    triggers: document.getElementById('triggers').value,
+                    postconditions: document.getElementById('postconditions').value,
+                    mainFlow: this.getMainFlowSteps(),
+                    alternativeFlows: this.getAlternativeFlows()
+                };
+            }
+
+            collectUserStoryData() {
+                return {
+                    actor: document.getElementById('userStoryActor').value,
+                    goal: document.getElementById('userStoryGoal').value,
+                    reason: document.getElementById('userStoryReason').value,
+                    preconditions: document.getElementById('userStoryPreconditions').value,
+                    triggers: document.getElementById('userStoryTriggers').value
+                };
+            }
+
+            getMainFlowSteps() {
+                const steps = document.querySelectorAll('#mainFlowSteps .main-step input');
+                return Array.from(steps).map(input => input.value).filter(value => value.trim());
+            }
+
+            getAlternativeFlows() {
+                const flows = document.querySelectorAll('.alt-flow');
+                return Array.from(flows).map(flow => {
+                    const title = flow.querySelector('input[type="text"]').value;
+                    const steps = Array.from(flow.querySelectorAll('.alt-step input'))
+                        .map(input => input.value).filter(value => value.trim());
+                    return { title, steps };
+                });
+            }
+        }
+
+        // Toggle Related Data Section
+        function toggleRelatedData() {
+            const relatedData = document.getElementById('relatedData');
+            const chevron = document.getElementById('chevron');
+            
+            if (relatedData.style.display === 'none' || !relatedData.style.display) {
+                relatedData.style.display = 'block';
+                chevron.style.transform = 'rotate(180deg)';
+            } else {
+                relatedData.style.display = 'none';
+                chevron.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Initialize the form when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new UnifiedFormManager();
+            
+            // Add Focus States
+            document.querySelectorAll('input, textarea').forEach(element => {
+                element.addEventListener('focus', function() {
+                    this.style.borderColor = '#2563eb';
+                    this.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
+                });
+                
+                element.addEventListener('blur', function() {
+                    this.style.borderColor = '#d1d5db';
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // Add Button Hover Effects
+            document.querySelectorAll('button').forEach(button => {
+                const originalBg = getComputedStyle(button).backgroundColor;
+                
+                if (originalBg === 'rgb(55, 65, 81)' || originalBg === 'rgb(17, 24, 39)') {
+                    button.addEventListener('mouseenter', () => {
+                        button.style.backgroundColor = '#1f2937';
+                    });
+                    button.addEventListener('mouseleave', () => {
+                        button.style.backgroundColor = originalBg;
+                    });
+                } else if (originalBg === 'rgb(255, 255, 255)') {
+                    button.addEventListener('mouseenter', () => {
+                        button.style.backgroundColor = '#f9fafb';
+                    });
+                    button.addEventListener('mouseleave', () => {
+                        button.style.backgroundColor = '#ffffff';
+                    });
+                }
+            });
+
+            // Add Navigation Hover Effects
+            document.querySelectorAll('nav a').forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    link.style.color = '#374151';
+                });
+                link.addEventListener('mouseleave', () => {
+                    link.style.color = '#6b7280';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+>>>>>>> a10acfa377f66ca4409b4b4cd307891e864bd93c
