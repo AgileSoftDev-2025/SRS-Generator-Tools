@@ -1,0 +1,110 @@
+/* Additional Information Page Styles */
+
+/* Container heading */
+.container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.container p {
+  color: var(--text-secondary);
+}
+
+/* Feature Cards Grid */
+.feature-card {
+  background-color: var(--bg-white);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* Card icon */
+.feature-card .fs-1 {
+  font-size: 2.5rem;
+}
+
+/* Buttons at bottom */
+.btn {
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.btn-dark {
+  background-color: #111827;
+  color: #fff;
+  transition: background 0.2s ease;
+}
+
+.btn-dark:hover {
+  background-color: #1f2937;
+}
+
+.btn-outline-dark {
+  border: 1px solid #111827;
+  color: #111827;
+}
+
+.btn-outline-dark:hover {
+  background-color: #111827;
+  color: #fff;
+}
+
+/* Modal Styling */
+.modal-content {
+  border-radius: 18px;
+  background-color: var(--bg-white);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.form-control,
+.form-select {
+  background-color: #f9fafb;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--border-light);
+}
+
+/* Subtle animation for modal appearance */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: translateY(-10px);
+}
+.modal.show .modal-dialog {
+  transform: translateY(0);
+}
