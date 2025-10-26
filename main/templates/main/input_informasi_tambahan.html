@@ -1,167 +1,243 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Additional Information</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f9f9f9;
+      font-family: "Arial", sans-serif;
+    }
 
-{% block content %}
-<link rel="stylesheet" href="{% static 'css/additional_information.css' %}">
+    /* Header */
+    .header {
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 30px;
+      border-bottom: 1px solid #ddd;
+    }
 
-<div class="container my-5">
-  <!-- Header Section -->
-  <h2>Additional Information</h2>
-  <p>Select a feature to review or add its Use Case Specification.</p>
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      font-size: 20px;
+    }
 
-  <!-- Features Grid -->
-  <div class="row g-4 mt-4">
-    {% for feature in features %}
-    <div class="col-md-4 col-sm-6">
-      <div
-        class="feature-card p-4 text-center"
-        data-bs-toggle="modal"
-        data-bs-target="#modal{{ feature.id }}"
-      >
-        <div class="fs-1 mb-3">⚙️</div>
-        <h5 class="fw-semibold mb-2">{{ feature.name }}</h5>
-        <p class="text-secondary mb-0">
-          {{ feature.description|default:"No description available." }}
-        </p>
-      </div>
+    .logo img {
+      height: 35px;
+      margin-right: 10px;
+    }
+
+    .profile-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+
+    /* Feature Cards */
+    .feature-card {
+      background-color: #fff;
+      border-radius: 12px;
+      padding: 30px 20px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card h5 {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 50px;
+    }
+
+    .btn-light-gray {
+      background-color: #e6e6e6;
+      border: none;
+      color: #333;
+    }
+
+    .btn-dark {
+      background-color: #000;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="OneUML Logo">
+      OneUML
     </div>
+    <div>
+      <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img">
+    </div>
+  </header>
 
-    <!-- Modal Form for Each Feature -->
-    <div
-      class="modal fade"
-      id="modal{{ feature.id }}"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-          <div class="modal-header border-0">
-            <h5 class="modal-title">Use Case Specification</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
+  <!-- Content -->
+  <div class="container mt-5">
+    <h3 class="fw-bold">Additional Information</h3>
+    <p>Select a feature to review or add its Use Case Specification.</p>
 
-          <form method="POST" action="{% url 'save_use_case_spec' feature.id %}">
-            {% csrf_token %}
-            <div class="modal-body">
-              <div class="mb-3">
-                <label class="form-label">Summary Description</label>
-                <textarea
-                  name="summary"
-                  class="form-control"
-                  rows="2"
-                  placeholder="Describe what this use case is about."
-                ></textarea>
-              </div>
+    <!-- Feature Grid -->
+    <div class="row mt-4 g-4">
+      <!-- Fitur 1 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature1">
+          <h5>Feature 1</h5>
+          <p>Define the main functionality handled by this feature.</p>
+        </div>
+      </div>
 
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Priority</label>
-                  <select name="priority" class="form-select">
-                    <option value="">Select Priority</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Status</label>
-                  <select name="status" class="form-select">
-                    <option value="">Select Status</option>
-                    <option value="Draft">Draft</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-              </div>
+      <!-- Fitur 2 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature2">
+          <h5>Feature 2</h5>
+          <p>Specify detailed requirements and user interactions.</p>
+        </div>
+      </div>
 
-              <div class="mb-3">
-                <label class="form-label">Pre-Condition</label>
-                <textarea
-                  name="pre_condition"
-                  class="form-control"
-                  rows="2"
-                  placeholder="State any preconditions."
-                ></textarea>
-              </div>
+      <!-- Fitur 3 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature3">
+          <h5>Feature 3</h5>
+          <p>Configure system settings and preferences.</p>
+        </div>
+      </div>
 
-              <div class="mb-3">
-                <label class="form-label">Post-Condition</label>
-                <textarea
-                  name="post_condition"
-                  class="form-control"
-                  rows="2"
-                  placeholder="State the expected result."
-                ></textarea>
-              </div>
+      <!-- Fitur 4 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature4">
+          <h5>Feature 4</h5>
+          <p>Manage user profiles and authentication processes.</p>
+        </div>
+      </div>
 
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label class="form-label">Basic Path (Actor Actions)</label>
-                  <textarea
-                    name="basic_actor"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Describe actor actions step by step"
-                  ></textarea>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">System Responses</label>
-                  <textarea
-                    name="basic_system"
-                    class="form-control"
-                    rows="3"
-                    placeholder="Describe system responses step by step"
-                  ></textarea>
-                </div>
-              </div>
+      <!-- Fitur 5 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature5">
+          <h5>Feature 5</h5>
+          <p>Handle data storage and retrieval operations.</p>
+        </div>
+      </div>
 
-              <div class="mb-3">
-                <label class="form-label">Alternative Path</label>
-                <textarea
-                  name="alternative"
-                  class="form-control"
-                  rows="2"
-                  placeholder="Describe alternative flows if any."
-                ></textarea>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Exception</label>
-                <textarea
-                  name="exception"
-                  class="form-control"
-                  rows="2"
-                  placeholder="Describe exceptions or error handling."
-                ></textarea>
-              </div>
-            </div>
-
-            <div class="modal-footer border-0">
-              <button
-                type="button"
-                class="btn btn-outline-dark"
-                data-bs-dismiss="modal"
-              >
-                Cancel
-              </button>
-              <button type="submit" class="btn btn-dark">Save</button>
-            </div>
-          </form>
+      <!-- Fitur 6 -->
+      <div class="col-md-4">
+        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature6">
+          <h5>Feature 6</h5>
+          <p>Integrate with external services and APIs.</p>
         </div>
       </div>
     </div>
-    {% endfor %}
+
+    <!-- Bottom Buttons -->
+    <div class="bottom-buttons">
+      <button class="btn btn-light-gray px-4 py-2">← Back</button>
+      <button class="btn btn-dark px-4 py-2">Next →</button>
+    </div>
   </div>
 
-  <!-- Navigation Buttons -->
-  <div class="d-flex justify-content-between mt-5">
-    <a href="{% url 'previous_page' %}" class="btn btn-outline-dark px-4">← Back</a>
-    <a href="{% url 'next_page' %}" class="btn btn-dark px-4">Next →</a>
+  <!-- Modal Template (copy untuk 6 fitur) -->
+  <!-- Modal Feature 1 -->
+  <div class="modal fade" id="modalFeature1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Use Case Specification: Feature 1</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Summary Description</label>
+              <textarea class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Priority</label>
+                <select class="form-select">
+                  <option>Pilih Prioritas</option>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select">
+                  <option>Pilih Status</option>
+                  <option>Draft</option>
+                  <option>In Progress</option>
+                  <option>Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Pre-Condition</label>
+              <textarea class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Post-Condition</label>
+              <textarea class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Basic Path (Actor Actions)</label>
+                <textarea class="form-control" rows="3"></textarea>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">System Responses</label>
+                <textarea class="form-control" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Alternative Path</label>
+              <textarea class="form-control" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Exception</label>
+              <textarea class="form-control" rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-dark">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-</div>
-{% endblock %}
+
+  <!-- Duplikat modalFeature1 ke modalFeature2-6 sesuai kebutuhan -->
+  <!-- (Untuk singkatnya bisa disalin 6 kali dan ubah title/ID-nya saja) -->
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
