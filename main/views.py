@@ -28,3 +28,6 @@ def class_diagram(request):
 
 def generate_srs(request):
     return render(request, 'main/generate_srs.html')
+
+def input_informasi_tambahan(equest):
+    return render(request='main/input_informasi_tambahan.html')
