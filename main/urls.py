@@ -4,7 +4,10 @@ from . import views
 app_name = 'main' 
 
 urlpatterns = [
+    path('', views.login_view, name='login'),
     path('', views.home, name='home'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('user-story/', views.user_story, name='user_story'),
     path('use-case/', views.use_case, name='use_case'),
     path('scenario/', views.user_scenario, name='user_scenario'),
