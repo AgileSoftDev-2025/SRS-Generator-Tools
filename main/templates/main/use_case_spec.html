@@ -5,26 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generated Use Case Specification</title>
     <link rel="stylesheet" href="global.css" />
-
     <style>
-      /* Layout spesifik halaman use_case_spec.html */
-
+      /* ===== Page Styling ===== */
       .container {
         display: flex;
-        flex-direction: column;
-        align-items: center;
         justify-content: center;
+        align-items: center;
         min-height: 100vh;
-        padding: 40px 16px;
+        padding: 2rem;
       }
 
       .card {
         background-color: var(--bg-white);
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-        width: 90%;
-        max-width: 850px;
-        padding: 40px 48px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        padding: 2rem 2.5rem;
+        max-width: 720px;
+        width: 100%;
       }
 
       .card h2 {
@@ -32,174 +29,140 @@
         margin-bottom: 0.25rem;
       }
 
-      .subtitle {
-        font-size: 0.875rem;
+      .card .subtitle {
         color: var(--text-secondary);
+        font-size: 0.95rem;
         margin-bottom: 1.5rem;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.95rem;
+        border-radius: 8px;
+        overflow: hidden;
       }
 
-      tr {
+      table tr {
         border-bottom: 1px solid var(--border-light);
       }
 
-      td {
-        padding: 10px 8px;
+      table td {
+        padding: 0.75rem 1rem;
         vertical-align: top;
       }
 
-      td:first-child {
-        font-weight: 600;
-        width: 180px;
-        color: var(--text-primary);
-      }
-
-      td:last-child {
+      table td:first-child {
+        font-weight: 500;
         color: var(--text-secondary);
+        width: 25%;
       }
 
-      .gray-box {
-        background-color: var(--bg-main);
-        padding: 10px 14px;
-        border-radius: 8px;
+      table td:last-child {
         color: var(--text-primary);
-        line-height: 1.6;
       }
 
+      .highlight {
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+      }
+
+      /* ===== Button Next ===== */
       .btn-next {
         position: fixed;
         bottom: 32px;
-        right: 40px;
+        right: 32px;
         background-color: #000;
         color: #fff;
+        border: none;
         border-radius: 8px;
-        padding: 10px 22px;
-        font-size: 0.9rem;
+        padding: 0.6rem 1.4rem;
         font-weight: 500;
-        transition: background-color 0.2s ease;
+        transition: 0.3s ease;
       }
 
       .btn-next:hover {
-        background-color: #333;
+        background-color: #111827;
+        transform: scale(1.05);
       }
 
-      /* Pop-up sukses */
+      /* ===== Popup ===== */
       .popup {
         position: fixed;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%) scale(0);
         background-color: var(--bg-white);
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        padding: 30px 40px;
-        display: none;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 2rem;
         text-align: center;
-        z-index: 999;
+        width: 400px;
+        max-width: 90%;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 10;
       }
 
       .popup.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translate(-50%, -48%);
-        }
-        to {
-          opacity: 1;
-          transform: translate(-50%, -50%);
-        }
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
       }
 
       .popup h3 {
-        margin-bottom: 10px;
+        margin-bottom: 0.5rem;
+      }
+
+      .popup p {
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
       }
 
       .popup button {
-        margin-top: 15px;
         background-color: #000;
-        color: #fff;
+        color: white;
+        padding: 0.5rem 1.2rem;
         border-radius: 6px;
-        padding: 8px 18px;
+      }
+
+      .popup button:hover {
+        background-color: #111827;
+      }
+
+      /* ===== Overlay (background blur) ===== */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.3);
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.3s ease;
+        z-index: 5;
+      }
+
+      .overlay.active {
+        opacity: 1;
+        visibility: visible;
       }
     </style>
   </head>
 
   <body>
     <div class="container">
-      <div class="card">
+      <div class="card" id="useCaseCard">
         <h2>Generated Use Case Specification</h2>
         <p class="subtitle">
           Automatically generated specification based on your defined features and actors.
         </p>
 
-        <table>
-          <tr>
-            <td>Feature Name</td>
-            <td>Login</td>
-          </tr>
-          <tr>
-            <td>Actor(s)</td>
-            <td>User</td>
-          </tr>
-          <tr>
-            <td>Summary Description</td>
-            <td>User logs into the system using valid account credentials.</td>
-          </tr>
-          <tr>
-            <td>Priority</td>
-            <td><strong>Must have</strong></td>
-          </tr>
-          <tr>
-            <td>Status</td>
-            <td><strong>Active</strong></td>
-          </tr>
-          <tr>
-            <td>Pre-Condition</td>
-            <td>User already has an existing account.</td>
-          </tr>
-          <tr>
-            <td>Post-Condition</td>
-            <td>User successfully logs in and is redirected to the dashboard.</td>
-          </tr>
-          <tr>
-            <td>Basic Path</td>
-            <td>
-              <div class="gray-box">
-                1. User opens the login page.<br />
-                2. User enters username & password.<br />
-                3. System validates the credentials.<br />
-                4. System redirects the user to the dashboard.
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Alternative Path</td>
-            <td>
-              <div class="gray-box">
-                3A. If the username/password is invalid, the system displays an error message.
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>Exceptions</td>
-            <td>None</td>
-          </tr>
-        </table>
+        <table id="useCaseTable"></table>
       </div>
     </div>
 
     <button class="btn-next" id="nextBtn">Next</button>
 
-    <!-- Pop-up -->
+    <div class="overlay" id="overlay"></div>
     <div class="popup" id="popup">
       <h3>Use Case Generated Successfully!</h3>
       <p>Your use case specification has been created based on the input provided.</p>
@@ -208,14 +171,49 @@
 
     <script>
       const popup = document.getElementById("popup");
+      const overlay = document.getElementById("overlay");
       const nextBtn = document.getElementById("nextBtn");
+      const table = document.getElementById("useCaseTable");
+
+      // Ambil data dari localStorage
+      const data = JSON.parse(localStorage.getItem("useCaseData"));
+
+      // Kalau ada data hasil input sebelumnya, tampilkan ke tabel
+      if (data) {
+        table.innerHTML = `
+          <tr><td>Feature Name</td><td>${data.featureName || '-'}</td></tr>
+          <tr><td>Actor(s)</td><td>${data.actors || '-'}</td></tr>
+          <tr><td>Summary Description</td><td>${data.summary || '-'}</td></tr>
+          <tr><td>Priority</td><td><strong>${data.priority || '-'}</strong></td></tr>
+          <tr><td>Status</td><td><strong>${data.status || '-'}</strong></td></tr>
+          <tr><td>Pre-Condition</td><td>${data.precondition || '-'}</td></tr>
+          <tr><td>Post-Condition</td><td>${data.postcondition || '-'}</td></tr>
+          <tr>
+            <td>Basic Path</td>
+            <td>
+              <div class="highlight">${(data.basicPath || '').replace(/\n/g, '<br>')}</div>
+            </td>
+          </tr>
+          <tr>
+            <td>Alternative Path</td>
+            <td>
+              <div class="highlight">${(data.alternative || '').replace(/\n/g, '<br>')}</div>
+            </td>
+          </tr>
+          <tr><td>Exceptions</td><td>${data.exception || 'None'}</td></tr>
+        `;
+      } else {
+        table.innerHTML = `<tr><td colspan="2">No data found. Please go back and fill out the form first.</td></tr>`;
+      }
 
       nextBtn.addEventListener("click", () => {
         popup.classList.add("active");
+        overlay.classList.add("active");
       });
 
       function closePopup() {
         popup.classList.remove("active");
+        overlay.classList.remove("active");
       }
     </script>
   </body>
