@@ -12,4 +12,6 @@ urlpatterns = [
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
     path('class-diagram/', views.class_diagram, name='class_diagram'),
     path('generate-srs/', views.generate_srs, name='generate_srs'),
+    # New API endpoint
+    path('api/generate-use-case-diagram/', views.generate_use_case_diagram_api, name='generate_use_case_diagram_api'),
 ]

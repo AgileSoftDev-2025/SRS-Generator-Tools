@@ -1,12 +1,24 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>One UML - Use Case & User Story</title>
-    <link rel="stylesheet" href="{% static 'main/css/global.css' %}">
+    <title>One UML - Use Case & User Story Generator</title>
     <style>
-        /* Additional styles for the combined interface */
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Tab Styles */
         .tab-container {
             display: flex;
             border-bottom: 1px solid #e5e7eb;
@@ -22,6 +34,11 @@
             font-weight: 500;
             color: #6b7280;
             border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        
+        .tab:hover {
+            color: #374151;
         }
         
         .tab.active {
@@ -37,6 +54,7 @@
             display: block;
         }
         
+        /* Info Boxes */
         .conversion-info {
             background-color: #f0f9ff;
             border: 1px solid #bae6fd;
@@ -75,368 +93,900 @@
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
+
+        /* Preview Styles */
+        .preview-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 15px;
+        }
+
+        .user-story-preview {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 15px;
+        }
+
+        .use-case-preview {
+            background-color: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #10b981;
+        }
+
+        .diagram-container {
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 400px;
+            overflow: auto;
+        }
+
+        .success-message {
+            background-color: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
         
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Actor Tags */
+        .actor-tag {
+            background-color: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+            display: inline-block;
+            margin: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .actor-tag.selected {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+        
+        .actor-tag:hover {
+            background-color: #e5e7eb;
+        }
+        
+        .actor-tag.selected:hover {
+            background-color: #1d4ed8;
+        }
+        
+        /* Step Management */
+        .step-container {
+            margin-bottom: 12px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .step-handle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #6b7280;
+            cursor: move;
+        }
+        
+        .step-number {
+            font-weight: 500;
+            min-width: 20px;
+        }
+        
+        .remove-btn {
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            background-color: #f3f4f6;
+            color: #ef4444;
+        }
+        
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #2563eb;
+            font-size: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 0;
+            transition: color 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            color: #1d4ed8;
+        }
+        
+        /* Alternative Flow */
+        .alt-flow {
+            margin-bottom: 24px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            background-color: #fafafa;
+        }
+        
+        .alt-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-secondary {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        /* Header & Footer */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+        }
+        
+        .card-sidebar {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            height: fit-content;
+        }
+        
+        /* Animations */
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+        
+        /* UML Diagram Styles */
+        .uml-diagram-container {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            padding: 20px;
+        }
+        
+        .system-boundary {
+            border: 2px dashed #6b7280;
+            border-radius: 10px;
+            padding: 40px 20px;
+            margin: 0 auto;
+            width: 80%;
+            min-height: 300px;
+            position: relative;
+            background-color: #f8fafc;
+        }
+        
+        .system-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .actor {
+            text-align: center;
+            margin: 0 20px;
+        }
+        
+        .use-case {
+            width: 200px;
+            height: 80px;
+            border: 2px solid #10b981;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0fdf4;
+            position: relative;
+            margin: 15px auto;
+        }
+        
+        .use-case-text {
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            padding: 0 15px;
+        }
+        
+        /* Stick Figure Styles */
+        .stick-figure {
+            position: relative;
+            width: 80px;
+            height: 120px;
+            margin: 0 auto 10px;
+        }
+        
+        .stick-head {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 25px;
+        }
+        
+        .stick-body {
+            width: 2px;
+            height: 40px;
+            background-color: #3b82f6;
+            position: absolute;
+            top: 30px;
+            left: 39px;
+        }
+        
+        .stick-arms {
+            width: 30px;
+            height: 2px;
+            background-color: #3b82f6;
+            position: absolute;
+            top: 45px;
+            left: 25px;
+        }
+        
+        .stick-legs {
+            width: 20px;
+            height: 2px;
+            background-color: #3b82f6;
+            position: absolute;
+            top: 70px;
+            left: 30px;
+            transform: rotate(-20deg);
+        }
+        
+        .stick-legs::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 2px;
+            background-color: #3b82f6;
+            transform: rotate(40deg);
+            left: 0;
+        }
+        
+        .actor-name {
+            margin-top: 90px;
+            font-weight: 500;
+            color: #111827;
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background-color: #6b7280;
+            z-index: 1;
+        }
+        
+        .connection-line::before {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: -3px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid #6b7280;
+            border-top: 3px solid transparent;
+            border-bottom: 3px solid transparent;
+        }
+        
+        /* Actors and Use Cases Layout */
+        .actors-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+        }
+        
+        .use-cases-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <div style="min-height: 100vh; background-color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        <!-- Header -->
-        <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0 24px;">
-            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px;">
-                <!-- Logo -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 24px; height: 24px; background-color: #111827; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                        <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
-                    </div>
-                    <span style="font-size: 20px; font-weight: 600; color: #111827;">One UML</span>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
                 </div>
-                
-                <!-- Navigation -->
-                <nav style="display: flex; align-items: center; gap: 32px;">
-                    <a href="{%  url 'home' %}" style="color: #6b7280; text-decoration: none; font-size: 14px;">Home</a>
-                    <a href="#" class="tab-link" data-tab="user-story" style="color: #6b7280; text-decoration: none; font-size: 14px;">User Stories</a>
-                    <a href="#" class="tab-link" data-tab="use-case" style="color: #111827; text-decoration: none; font-size: 14px; font-weight: 500;">Use Cases</a>
-                </nav>
+                <span class="logo-text">One UML</span>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <main style="max-width: 1200px; margin: 0 auto; padding: 32px 24px;">
-            <!-- Tab Navigation -->
-            <div class="tab-container">
-                <button class="tab active" data-tab="use-case">Use Case</button>
-                <button class="tab" data-tab="user-story">User Story</button>
+    <!-- Main Content -->
+    <main>
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab active" data-tab="use-case">Use Case</button>
+            <button class="tab" data-tab="user-story">User Story</button>
+        </div>
+        
+        <!-- Sync Indicator -->
+        <div class="sync-indicator" id="syncIndicator">
+            <div class="dot"></div>
+            <span>Data is automatically synchronized between forms</span>
+        </div>
+        
+        <!-- Use Case Tab Content -->
+        <div id="use-case-tab" class="tab-content active">
+            <div class="conversion-info">
+                <h4>Auto-Conversion to User Story</h4>
+                <p>When you fill out this Use Case form, the User Story form will be automatically populated with the corresponding data.</p>
             </div>
             
-            <!-- Sync Indicator -->
-            <div class="sync-indicator" id="syncIndicator">
-                <div class="dot"></div>
-                <span>Data is automatically synchronized between forms</span>
-            </div>
-            
-            <!-- Use Case Tab Content -->
-            <div id="use-case-tab" class="tab-content active">
-                <div class="conversion-info">
-                    <h4>Auto-Conversion to User Story</h4>
-                    <p>When you fill out this Use Case form, the User Story form will be automatically populated with the corresponding data.</p>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 320px; gap: 48px;">
-                    <!-- Left Column - Form -->
-                    <div style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 32px;">
-                        <!-- Header -->
-                        <div style="margin-bottom: 32px;">
-                            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Input Use Case</h1>
-                            <p style="color: #6b7280; font-size: 14px;">Create a new use case and optionally generate a corresponding user story</p>
-                        </div>
-
-                        <!-- Actor Section -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">
-                                Actor(s) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <div id="actorContainer" style="border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; background-color: #ffffff; margin-bottom: 12px;">
-                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                    <span class="actor-tag" data-actor="Student" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Student</span>
-                                    <span class="actor-tag" data-actor="Teacher" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Teacher</span>
-                                    <span class="actor-tag" data-actor="Administrator" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">Administrator</span>
-                                    <span class="actor-tag" data-actor="System" style="background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;">System</span>
-                                </div>
-                            </div>
-                            <button id="addActorBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
-                                <span style="font-size: 16px;">+</span> Add new actor
-                            </button>
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 4px;">Choose one or more actors involved in this use case</p>
-                        </div>
-
-                        <!-- Use Case Title -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">
-                                Use Case Title <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input id="useCaseTitle" type="text" placeholder="e.g., Upload Assignment" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                        </div>
-
-                        <!-- Brief Description -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Brief Description / Intent</label>
-                            <textarea id="briefDescription" placeholder="Short description to capture intent/reason" style="width: 100%; height: 100px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
-                        </div>
-
-                        <!-- Preconditions -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Precondition(s)</label>
-                            <textarea id="preconditions" placeholder="Conditions that must be true before the use case starts" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
-                        </div>
-
-                        <!-- Triggers -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Trigger(s)</label>
-                            <textarea id="triggers" placeholder="What initiates this use case" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
-                        </div>
-
-                        <!-- Main Flow -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Main Flow (Steps)</label>
-                            <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">Add steps one by one in the order they occur</p>
-                            
-                            <div id="mainFlowSteps">
-                                <div class="main-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                    <div style="display: flex; align-items: center; gap: 4px; color: #6b7280;">
-                                        <span style="cursor: move;">⋮⋮</span>
-                                        <span class="step-number" style="font-weight: 500;">1.</span>
-                                    </div>
-                                    <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                                    <button class="remove-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
-                                </div>
-                            </div>
-
-                            <button id="addMainStepBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
-                                <span style="font-size: 16px;">+</span> Add Step
-                            </button>
-                        </div>
-
-                        <!-- Alternative Flow -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Alternative Flow(s)</label>
-                            
-                            <div id="alternativeFlows">
-                                <div class="alt-flow" style="margin-bottom: 24px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px;">
-                                    <input type="text" placeholder="Alternative flow title/condition" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; margin-bottom: 12px;" />
-                                    
-                                    <div class="alt-steps">
-                                        <div class="alt-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                                            <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">1.</span>
-                                            <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                                            <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
-                                        </div>
-                                    </div>
-
-                                    <button class="add-alt-step" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer; margin-bottom: 12px;">
-                                        <span style="font-size: 16px;">+</span> Add Step
-                                    </button>
-
-                                    <button class="remove-alt-flow" style="color: #ef4444; font-size: 12px; background: none; border: none; cursor: pointer;">Remove Alternative Flow</button>
-                                </div>
-                            </div>
-
-                            <button id="addAltFlowBtn" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer;">
-                                <span style="font-size: 16px;">+</span> Add Alternative Flow
-                            </button>
-                        </div>
-
-                        <!-- Postconditions -->
-                        <div style="margin-bottom: 32px;">
-                            <label style="display: block; font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Postcondition(s)</label>
-                            <textarea id="postconditions" placeholder="Conditions that will be true after successful completion" style="width: 100%; height: 80px; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; resize: vertical;"></textarea>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                            <button id="saveBtn" style="background-color: #111827; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer;">
-                                Save Use Case
-                            </button>
-                            <button id="saveGenerateBtn" style="background-color: #374151; color: #ffffff; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer;">
-                                Save + Generate User Story
-                            </button>
-                            <button id="previewBtn" style="color: #6b7280; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; background-color: #ffffff; cursor: pointer;">
-                                Preview Use Case Diagram
-                            </button>
-                            <button style="color: #6b7280; padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: 1px solid #d1d5db; background-color: #ffffff; cursor: pointer;">
-                                Back
-                            </button>
-                        </div>
+            <div style="display: grid; grid-template-columns: 1fr 320px; gap: 48px;">
+                <!-- Left Column - Form -->
+                <div class="card">
+                    <!-- Header -->
+                    <div style="margin-bottom: 32px;">
+                        <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Input Use Case</h1>
+                        <p style="color: #6b7280; font-size: 14px;">Create a new use case and optionally generate a corresponding user story</p>
                     </div>
 
-                    <!-- Right Column - Tutorial -->
-                    <div style="background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 24px; height: fit-content;">
-                        <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 16px;">Tutorial & Example</h3>
+                    <!-- Actor Section -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Actor(s) <span class="required">*</span>
+                        </label>
+                        <div style="border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; background-color: #ffffff; margin-bottom: 12px;">
+                            <div id="actorContainer">
+                                <span class="actor-tag" data-actor="Student">Student</span>
+                                <span class="actor-tag" data-actor="Teacher">Teacher</span>
+                                <span class="actor-tag" data-actor="Administrator">Administrator</span>
+                                <span class="actor-tag" data-actor="System">System</span>
+                            </div>
+                        </div>
+                        <button id="addActorBtn" class="add-btn">
+                            <span style="font-size: 16px;">+</span> Add new actor
+                        </button>
+                        <p class="help-text">Choose one or more actors involved in this use case</p>
+                    </div>
+
+                    <!-- Use Case Title -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Use Case Title <span class="required">*</span>
+                        </label>
+                        <input id="useCaseTitle" type="text" class="form-input" placeholder="e.g., Upload Assignment" value="Upload Tugas" />
+                    </div>
+
+                    <!-- Brief Description -->
+                    <div class="form-group">
+                        <label class="form-label">Brief Description / Intent</label>
+                        <textarea id="briefDescription" class="form-textarea" placeholder="Short description to capture intent/reason">Mahasiswa dapat mengunggah file tugas mereka ke sistem untuk dinilai oleh dosen</textarea>
+                    </div>
+
+                    <!-- Preconditions -->
+                    <div class="form-group">
+                        <label class="form-label">Precondition(s)</label>
+                        <textarea id="preconditions" class="form-textarea" placeholder="Conditions that must be true before the use case starts">1. Mahasiswa sudah login ke sistem
+2. Tugas sudah tersedia dan deadline belum lewat
+3. File tugas sudah disiapkan dalam format yang sesuai
+4. Koneksi internet stabil</textarea>
+                    </div>
+
+                    <!-- Triggers -->
+                    <div class="form-group">
+                        <label class="form-label">Trigger(s)</label>
+                        <textarea id="triggers" class="form-textarea" placeholder="What initiates this use case">Mahasiswa memilih menu "Upload Tugas" dari dashboard utama</textarea>
+                    </div>
+
+                    <!-- Main Flow -->
+                    <div class="form-group">
+                        <label class="form-label">Main Flow (Steps)</label>
+                        <p class="help-text">Add steps one by one in the order they occur</p>
                         
-                        <div style="margin-bottom: 24px;">
-                            <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Mapping Guidance</h4>
-                            <p style="font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 12px;">When generating a User Story, fields will map as follows:</p>
-                            <ul style="font-size: 12px; color: #6b7280; line-height: 1.4;">
-                                <li style="margin-bottom: 4px;">• Actor → "As a [Actor]"</li>
-                                <li style="margin-bottom: 4px;">• Title → "I want [Title]"</li>
-                                <li style="margin-bottom: 4px;">• Description → "So that [Description]"</li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Example</h4>
-                            <div style="background-color: #f9fafb; border-radius: 6px; padding: 16px;">
-                                <p style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">If actor = "Student" and title = "Upload Assignment":</p>
-                                <div id="exampleStory" style="background-color: #ffffff; border-radius: 4px; padding: 12px; border: 1px solid #e5e7eb;">
-                                    <p style="font-size: 13px; color: #111827; line-height: 1.4;">
-                                        <strong>"As a Student, I want to Upload Assignment, so that I can submit my work for grading."</strong>
-                                    </p>
+                        <div id="mainFlowSteps">
+                            <div class="step">
+                                <div class="step-handle">
+                                    <span>⋮⋮</span>
+                                    <span class="step-number">1.</span>
                                 </div>
+                                <input type="text" class="form-input" placeholder="Step description" value="Sistem menampilkan form upload tugas" />
+                                <button class="remove-btn">×</button>
+                            </div>
+                            <div class="step">
+                                <div class="step-handle">
+                                    <span>⋮⋮</span>
+                                    <span class="step-number">2.</span>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Step description" value="Mahasiswa memilih file tugas dari komputer" />
+                                <button class="remove-btn">×</button>
+                            </div>
+                            <div class="step">
+                                <div class="step-handle">
+                                    <span>⋮⋮</span>
+                                    <span class="step-number">3.</span>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Step description" value="Sistem memvalidasi format dan ukuran file" />
+                                <button class="remove-btn">×</button>
+                            </div>
+                            <div class="step">
+                                <div class="step-handle">
+                                    <span>⋮⋮</span>
+                                    <span class="step-number">4.</span>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Step description" value="Mahasiswa mengklik tombol 'Submit'" />
+                                <button class="remove-btn">×</button>
+                            </div>
+                            <div class="step">
+                                <div class="step-handle">
+                                    <span>⋮⋮</span>
+                                    <span class="step-number">5.</span>
+                                </div>
+                                <input type="text" class="form-input" placeholder="Step description" value="Sistem menyimpan file dan menampilkan konfirmasi sukses" />
+                                <button class="remove-btn">×</button>
                             </div>
                         </div>
+
+                        <button id="addMainStepBtn" class="add-btn">
+                            <span style="font-size: 16px;">+</span> Add Step
+                        </button>
                     </div>
-                </div>
-            </div>
-            
-            <!-- User Story Tab Content -->
-            <div id="user-story-tab" class="tab-content">
-                <div class="conversion-info">
-                    <h4>Auto-Conversion to Use Case</h4>
-                    <p>When you fill out this User Story form, the Use Case form will be automatically populated with the corresponding data.</p>
-                </div>
-                
-                <div style="max-width: 680px; margin: 0 auto;">
-                    <!-- Form Card -->
-                    <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px;">
+
+                    <!-- Alternative Flow -->
+                    <div class="form-group">
+                        <label class="form-label">Alternative Flow(s)</label>
                         
-                        <!-- As a (Actor) Field -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                                As a (Actor) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input 
-                                id="userStoryActor"
-                                type="text" 
-                                placeholder="e.g., student, admin, customer"
-                                style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; box-sizing: border-box;"
-                            >
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Specify the type of user or role</p>
-                        </div>
+                        <div id="alternativeFlows">
+                            <div class="alt-flow">
+                                <input type="text" class="form-input" placeholder="Alternative flow title/condition" value="File tidak valid" style="margin-bottom: 12px;" />
+                                
+                                <div class="alt-steps">
+                                    <div class="alt-step">
+                                        <span class="step-number">1.</span>
+                                        <input type="text" class="form-input" placeholder="Alternative step description" value="Sistem mendeteksi format file tidak sesuai" />
+                                        <button class="remove-btn">×</button>
+                                    </div>
+                                    <div class="alt-step">
+                                        <span class="step-number">2.</span>
+                                        <input type="text" class="form-input" placeholder="Alternative step description" value="Sistem menampilkan pesan error format tidak didukung" />
+                                        <button class="remove-btn">×</button>
+                                    </div>
+                                    <div class="alt-step">
+                                        <span class="step-number">3.</span>
+                                        <input type="text" class="form-input" placeholder="Alternative step description" value="Mahasiswa memilih file lain yang sesuai" />
+                                        <button class="remove-btn">×</button>
+                                    </div>
+                                    <div class="alt-step">
+                                        <span class="step-number">4.</span>
+                                        <input type="text" class="form-input" placeholder="Alternative step description" value="Kembali ke step 2 Main Flow" />
+                                        <button class="remove-btn">×</button>
+                                    </div>
+                                </div>
 
-                        <!-- I want (Goal / Feature) Field -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                                I want (Goal / Feature) <span style="color: #ef4444;">*</span>
-                            </label>
-                            <input 
-                                id="userStoryGoal"
-                                type="text" 
-                                placeholder="brief feature, e.g., upload assignment"
-                                style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; box-sizing: border-box;"
-                            >
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Describe the desired functionality or action</p>
-                        </div>
+                                <button class="add-alt-step add-btn" style="margin-bottom: 12px;">
+                                    <span style="font-size: 16px;">+</span> Add Step
+                                </button>
 
-                        <!-- So that (Reason / Benefit) Field -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                                So that (Reason / Benefit)
-                            </label>
-                            <textarea 
-                                id="userStoryReason"
-                                placeholder="value/benefit, e.g., submit tasks online" 
-                                rows="4"
-                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
-                            ></textarea>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Explain the value or benefit to the user (optional but recommended)</p>
-                        </div>
-
-                        <!-- Precondition(s) Field -->
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                                Precondition(s)
-                            </label>
-                            <textarea 
-                                id="userStoryPreconditions"
-                                placeholder="Enter any conditions that must be true before this story can be executed" 
-                                rows="4"
-                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
-                            ></textarea>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">Conditions that must hold before this story</p>
-                        </div>
-
-                        <!-- Trigger(s) Field -->
-                        <div style="margin-bottom: 32px;">
-                            <label style="display: block; font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 8px;">
-                                Trigger(s)
-                            </label>
-                            <textarea 
-                                id="userStoryTriggers"
-                                placeholder="Describe what initiates or starts this user story" 
-                                rows="4"
-                                style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; color: #111827; background-color: #ffffff; resize: vertical; font-family: inherit; line-height: 1.4; box-sizing: border-box;"
-                            ></textarea>
-                            <p style="margin: 4px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.4;">What starts this story</p>
-                        </div>
-
-                        <!-- Example User Story Box -->
-                        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
-                            <h3 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0 0 8px 0;">Example User Story</h3>
-                            <p style="font-size: 14px; color: #6b7280; margin: 0; font-style: italic; line-height: 1.4;">"As a student, I want to upload assignments, so that I can submit tasks online."</p>
-                        </div>
-
-                        <!-- Related Data Collapsible -->
-                        <div style="margin-bottom: 0;">
-                            <button 
-                                type="button" 
-                                onclick="toggleRelatedData()" 
-                                style="display: flex; align-items: center; gap: 8px; background: none; border: none; color: #6b7280; font-size: 14px; font-weight: 500; cursor: pointer; padding: 0; font-family: inherit;"
-                            >
-                                <svg id="chevron" style="width: 16px; height: 16px; transition: transform 0.2s ease;" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                                Related Data
-                            </button>
-                            <div id="relatedData" style="display: none; margin-top: 12px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px; background-color: #ffffff;">
-                                <p style="color: #6b7280; font-size: 14px; margin: 0; line-height: 1.4;">Additional data and relationships for this user story will be displayed here.</p>
+                                <button class="remove-alt-flow" style="color: #ef4444; font-size: 12px; background: none; border: none; cursor: pointer;">Remove Alternative Flow</button>
                             </div>
                         </div>
 
+                        <button id="addAltFlowBtn" class="add-btn">
+                            <span style="font-size: 16px;">+</span> Add Alternative Flow
+                        </button>
+                    </div>
+
+                    <!-- Postconditions -->
+                    <div class="form-group">
+                        <label class="form-label">Postcondition(s)</label>
+                        <textarea id="postconditions" class="form-textarea" placeholder="Conditions that will be true after successful completion">1. File tugas berhasil tersimpan di database
+2. Status tugas berubah menjadi "Submitted"
+3. Notifikasi dikirim ke dosen terkait
+4. Riwayat upload tercatat di sistem</textarea>
                     </div>
 
                     <!-- Action Buttons -->
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 32px;">
-                        <button 
-                            id="saveUserStoryBtn"
-                            type="button"
-                            style="height: 40px; padding: 0 20px; background-color: #374151; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
-                        >
-                            Save
-                        </button>
-                        <button 
-                            id="saveGenerateUseCaseBtn"
-                            type="button"
-                            style="height: 40px; padding: 0 20px; background-color: #374151; color: #ffffff; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
-                        >
-                            Save + Generate Use Case
-                        </button>
-                        <button 
-                            type="button"
-                            style="height: 40px; padding: 0 20px; background-color: #ffffff; color: #6b7280; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; display: flex; align-items: center; justify-content: center;"
-                        >
-                            Cancel
-                        </button>
+                    <div class="btn-group">
+                        <button id="saveBtn" class="btn btn-primary">Save Use Case</button>
+                        <button id="saveGenerateBtn" class="btn btn-secondary">Save + Generate User Story</button>
+                        <button id="previewBtn" class="btn btn-outline">Preview Use Case Diagram</button>
+                        <button class="btn btn-outline">Back</button>
                     </div>
 
-                    <!-- Help Text -->
-                    <p style="text-align: center; margin-top: 12px; font-size: 12px; color: #9ca3af; line-height: 1.4; max-width: 500px; margin-left: auto; margin-right: auto;">
-                        Selecting "Save + Generate Use Case" will pre-fill the Use Case form with data from this story
-                    </p>
+                    <!-- Preview Section -->
+                    <div id="useCasePreview" class="preview-container" style="display: none;">
+                        <div class="preview-title">Generated User Story</div>
+                        <div id="generatedUserStory" class="user-story-preview">
+                            <!-- Generated user story will appear here -->
+                        </div>
+                        <div class="preview-title">Use Case Diagram Preview</div>
+                        <div id="useCaseDiagram" class="diagram-container">
+                            <!-- Diagram will be generated here -->
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </main>
 
-        <!-- Footer -->
-        <footer style="background-color: #ffffff; border-top: 1px solid #e5e7eb; padding: 16px 24px; margin-top: 48px;">
-            <div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-                <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-                <div style="display: flex; align-items: center; gap: 24px;">
-                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
-                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
-                    <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+                <!-- Right Column - Tutorial -->
+                <div class="card-sidebar">
+                    <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 16px;">Tutorial & Example</h3>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 8px;">Mapping Guidance</h4>
+                        <p style="font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 12px;">When generating a User Story, fields will map as follows:</p>
+                        <ul style="font-size: 12px; color: #6b7280; line-height: 1.4;">
+                            <li style="margin-bottom: 4px;">• Actor → "As a [Actor]"</li>
+                            <li style="margin-bottom: 4px;">• Title → "I want [Title]"</li>
+                            <li style="margin-bottom: 4px;">• Description → "So that [Description]"</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 500; color: #111827; margin-bottom: 12px;">Example</h4>
+                        <div style="background-color: #f9fafb; border-radius: 6px; padding: 16px;">
+                            <p style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">If actor = "Student" and title = "Upload Assignment":</p>
+                            <div id="exampleStory" style="background-color: #ffffff; border-radius: 4px; padding: 12px; border: 1px solid #e5e7eb;">
+                                <p style="font-size: 13px; color: #111827; line-height: 1.4;">
+                                    <strong>"As a Student, I want to Upload Tugas, so that Mahasiswa dapat mengunggah file tugas mereka ke sistem untuk dinilai oleh dosen."</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </footer>
-    </div>
+        </div>
+        
+        <!-- User Story Tab Content -->
+        <div id="user-story-tab" class="tab-content">
+            <div class="conversion-info">
+                <h4>Auto-Conversion to Use Case</h4>
+                <p>When you fill out this User Story form, the Use Case form will be automatically populated with the corresponding data.</p>
+            </div>
+            
+            <div style="max-width: 680px; margin: 0 auto;">
+                <!-- Form Card -->
+                <div class="card">
+                    
+                    <!-- As a (Actor) Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            As a (Actor) <span class="required">*</span>
+                        </label>
+                        <input 
+                            id="userStoryActor"
+                            type="text" 
+                            class="form-input"
+                            placeholder="e.g., student, admin, customer"
+                            value="Student"
+                        >
+                        <p class="help-text">Specify the type of user or role</p>
+                    </div>
+
+                    <!-- I want (Goal / Feature) Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            I want (Goal / Feature) <span class="required">*</span>
+                        </label>
+                        <input 
+                            id="userStoryGoal"
+                            type="text" 
+                            class="form-input"
+                            placeholder="brief feature, e.g., upload assignment"
+                            value="Upload Tugas"
+                        >
+                        <p class="help-text">Describe the desired functionality or action</p>
+                    </div>
+
+                    <!-- So that (Reason / Benefit) Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            So that (Reason / Benefit)
+                        </label>
+                        <textarea 
+                            id="userStoryReason"
+                            class="form-textarea"
+                            placeholder="value/benefit, e.g., submit tasks online"
+                        >Mahasiswa dapat mengunggah file tugas mereka ke sistem untuk dinilai oleh dosen</textarea>
+                        <p class="help-text">Explain the value or benefit to the user (optional but recommended)</p>
+                    </div>
+
+                    <!-- Precondition(s) Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Precondition(s)
+                        </label>
+                        <textarea 
+                            id="userStoryPreconditions"
+                            class="form-textarea"
+                            placeholder="Enter any conditions that must be true before this story can be executed"
+                        >1. Mahasiswa sudah login ke sistem
+2. Tugas sudah tersedia dan deadline belum lewat
+3. File tugas sudah disiapkan dalam format yang sesuai
+4. Koneksi internet stabil</textarea>
+                        <p class="help-text">Conditions that must hold before this story</p>
+                    </div>
+
+                    <!-- Trigger(s) Field -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            Trigger(s)
+                        </label>
+                        <textarea 
+                            id="userStoryTriggers"
+                            class="form-textarea"
+                            placeholder="Describe what initiates or starts this user story"
+                        >Mahasiswa memilih menu "Upload Tugas" dari dashboard utama</textarea>
+                        <p class="help-text">What starts this story</p>
+                    </div>
+
+                    <!-- Example User Story Box -->
+                    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
+                        <h3 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0 0 8px 0;">Example User Story</h3>
+                        <p style="font-size: 14px; color: #6b7280; margin: 0; font-style: italic; line-height: 1.4;">"As a student, I want to upload assignments, so that I can submit tasks online."</p>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div id="userStoryPreview" class="preview-container" style="display: none;">
+                        <div class="preview-title">Generated Use Case</div>
+                        <div id="generatedUseCase" class="use-case-preview">
+                            <!-- Generated use case will appear here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group" style="justify-content: center; margin-top: 32px;">
+                    <button 
+                        id="saveUserStoryBtn"
+                        class="btn btn-secondary"
+                    >
+                        Save
+                    </button>
+                    <button 
+                        id="saveGenerateUseCaseBtn"
+                        class="btn btn-secondary"
+                    >
+                        Save + Generate Use Case
+                    </button>
+                    <button 
+                        class="btn btn-outline"
+                    >
+                        Cancel
+                    </button>
+                </div>
+
+                <!-- Help Text -->
+                <p style="text-align: center; margin-top: 12px; font-size: 12px; color: #9ca3af; line-height: 1.4; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    Selecting "Save + Generate Use Case" will pre-fill the Use Case form with data from this story
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         class UnifiedFormManager {
             constructor() {
-                this.selectedActors = new Set();
+                this.selectedActors = new Set(['Student']);
                 this.init();
             }
 
@@ -446,6 +996,16 @@
                 this.bindUserStoryEvents();
                 this.bindSyncEvents();
                 this.updateExample();
+                this.initializeActorSelection();
+            }
+
+            // Initialize actor selection
+            initializeActorSelection() {
+                document.querySelectorAll('.actor-tag').forEach(tag => {
+                    if (this.selectedActors.has(tag.dataset.actor)) {
+                        tag.classList.add('selected');
+                    }
+                });
             }
 
             // Tab Management
@@ -454,15 +1014,6 @@
                 tabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const tabId = tab.dataset.tab;
-                        this.switchTab(tabId);
-                    });
-                });
-
-                const navLinks = document.querySelectorAll('.tab-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const tabId = link.dataset.tab;
                         this.switchTab(tabId);
                     });
                 });
@@ -503,8 +1054,8 @@
                 });
 
                 document.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('remove-step')) {
-                        this.removeMainStep(e.target.closest('.main-step'));
+                    if (e.target.classList.contains('remove-btn') && e.target.closest('.step')) {
+                        this.removeMainStep(e.target.closest('.step'));
                     }
                 });
 
@@ -517,7 +1068,7 @@
                     if (e.target.classList.contains('add-alt-step')) {
                         this.addAlternativeStep(e.target.closest('.alt-flow'));
                     }
-                    if (e.target.classList.contains('remove-alt-step')) {
+                    if (e.target.classList.contains('remove-btn') && e.target.closest('.alt-step')) {
                         this.removeAlternativeStep(e.target.closest('.alt-step'));
                     }
                     if (e.target.classList.contains('remove-alt-flow')) {
@@ -615,8 +1166,7 @@
                     // Clear previous selection
                     this.selectedActors.clear();
                     document.querySelectorAll('.actor-tag').forEach(tag => {
-                        tag.style.backgroundColor = '#f3f4f6';
-                        tag.style.color = '#374151';
+                        tag.classList.remove('selected');
                     });
                     
                     // Add the actor from user story
@@ -625,15 +1175,13 @@
                     // Try to find and select the matching actor tag
                     const matchingTag = document.querySelector(`.actor-tag[data-actor="${actor}"]`);
                     if (matchingTag) {
-                        matchingTag.style.backgroundColor = '#2563eb';
-                        matchingTag.style.color = '#ffffff';
+                        matchingTag.classList.add('selected');
                     } else {
                         // If no matching tag, create a custom one
                         this.addCustomActor(actor);
                         const newTag = document.querySelector(`.actor-tag[data-actor="${actor}"]`);
                         if (newTag) {
-                            newTag.style.backgroundColor = '#2563eb';
-                            newTag.style.color = '#ffffff';
+                            newTag.classList.add('selected');
                         }
                     }
                 }
@@ -651,23 +1199,20 @@
                 const actor = tag.dataset.actor;
                 if (this.selectedActors.has(actor)) {
                     this.selectedActors.delete(actor);
-                    tag.style.backgroundColor = '#f3f4f6';
-                    tag.style.color = '#374151';
+                    tag.classList.remove('selected');
                 } else {
                     this.selectedActors.add(actor);
-                    tag.style.backgroundColor = '#2563eb';
-                    tag.style.color = '#ffffff';
+                    tag.classList.add('selected');
                 }
                 this.updateExample();
                 this.syncToUserStory();
             }
 
             addCustomActor(actorName) {
-                const container = document.querySelector('#actorContainer > div');
+                const container = document.getElementById('actorContainer');
                 const newTag = document.createElement('span');
                 newTag.className = 'actor-tag';
                 newTag.dataset.actor = actorName;
-                newTag.style.cssText = 'background-color: #f3f4f6; padding: 6px 12px; border-radius: 16px; font-size: 14px; color: #374151; cursor: pointer;';
                 newTag.textContent = actorName;
                 newTag.addEventListener('click', () => this.toggleActor(newTag));
                 container.appendChild(newTag);
@@ -676,18 +1221,17 @@
             // Step Management
             addMainStep() {
                 const container = document.getElementById('mainFlowSteps');
-                const stepCount = container.querySelectorAll('.main-step').length + 1;
+                const stepCount = container.querySelectorAll('.step').length + 1;
                 
                 const stepDiv = document.createElement('div');
-                stepDiv.className = 'main-step';
-                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
+                stepDiv.className = 'step';
                 stepDiv.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 4px; color: #6b7280;">
-                        <span style="cursor: move;">⋮⋮</span>
-                        <span class="step-number" style="font-weight: 500;">${stepCount}.</span>
+                    <div class="step-handle">
+                        <span>⋮⋮</span>
+                        <span class="step-number">${stepCount}.</span>
                     </div>
-                    <input type="text" placeholder="Step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                    <button class="remove-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                    <input type="text" class="form-input" placeholder="Step description" />
+                    <button class="remove-btn">×</button>
                 `;
                 container.appendChild(stepDiv);
             }
@@ -709,17 +1253,16 @@
                 const container = document.getElementById('alternativeFlows');
                 const flowDiv = document.createElement('div');
                 flowDiv.className = 'alt-flow';
-                flowDiv.style.cssText = 'margin-bottom: 24px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 6px;';
                 flowDiv.innerHTML = `
-                    <input type="text" placeholder="Alternative flow title/condition" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff; margin-bottom: 12px;" />
+                    <input type="text" class="form-input" placeholder="Alternative flow title/condition" style="margin-bottom: 12px;" />
                     <div class="alt-steps">
-                        <div class="alt-step" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">1.</span>
-                            <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                            <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                        <div class="alt-step">
+                            <span class="step-number">1.</span>
+                            <input type="text" class="form-input" placeholder="Alternative step description" />
+                            <button class="remove-btn">×</button>
                         </div>
                     </div>
-                    <button class="add-alt-step" style="display: flex; align-items: center; gap: 4px; color: #2563eb; font-size: 14px; background: none; border: none; cursor: pointer; margin-bottom: 12px;">
+                    <button class="add-alt-step add-btn" style="margin-bottom: 12px;">
                         <span style="font-size: 16px;">+</span> Add Step
                     </button>
                     <button class="remove-alt-flow" style="color: #ef4444; font-size: 12px; background: none; border: none; cursor: pointer;">Remove Alternative Flow</button>
@@ -733,11 +1276,10 @@
                 
                 const stepDiv = document.createElement('div');
                 stepDiv.className = 'alt-step';
-                stepDiv.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
                 stepDiv.innerHTML = `
-                    <span class="alt-step-number" style="font-weight: 500; color: #6b7280; min-width: 20px;">${stepCount}.</span>
-                    <input type="text" placeholder="Alternative step description" style="flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #ffffff;" />
-                    <button class="remove-alt-step" style="color: #6b7280; background: none; border: none; cursor: pointer; padding: 4px;">×</button>
+                    <span class="step-number">${stepCount}.</span>
+                    <input type="text" class="form-input" placeholder="Alternative step description" />
+                    <button class="remove-btn">×</button>
                 `;
                 stepsContainer.appendChild(stepDiv);
             }
@@ -749,7 +1291,7 @@
             }
 
             updateAltStepNumbers(flowElement) {
-                const steps = flowElement.querySelectorAll('.alt-step-number');
+                const steps = flowElement.querySelectorAll('.alt-step .step-number');
                 steps.forEach((step, index) => {
                     step.textContent = `${index + 1}.`;
                 });
@@ -758,8 +1300,8 @@
             // Example and Preview
             updateExample() {
                 const actors = Array.from(this.selectedActors);
-                const title = document.getElementById('useCaseTitle').value || 'Upload Assignment';
-                const description = document.getElementById('briefDescription').value || 'I can submit my work for grading';
+                const title = document.getElementById('useCaseTitle').value || 'Upload Tugas';
+                const description = document.getElementById('briefDescription').value || 'Mahasiswa dapat mengunggah file tugas mereka ke sistem untuk dinilai oleh dosen';
                 
                 const actor = actors.length > 0 ? actors[0] : 'Student';
                 const exampleText = `"As a ${actor}, I want to ${title}, so that ${description}."`;
@@ -775,29 +1317,244 @@
             saveUseCase() {
                 const data = this.collectUseCaseData();
                 console.log('Saving use case:', data);
-                alert('Use case saved successfully!');
+                this.showSuccessMessage('Use case saved successfully!');
             }
 
             saveAndGenerateUserStory() {
                 const data = this.collectUseCaseData();
                 console.log('Saving and generating user story:', data);
-                alert('Use case saved and user story generated!');
+                
+                // Generate user story
+                const actors = Array.from(this.selectedActors);
+                const actor = actors.length > 0 ? actors[0] : 'User';
+                const title = document.getElementById('useCaseTitle').value || 'perform action';
+                const description = document.getElementById('briefDescription').value || 'achieve my goal';
+                
+                const userStory = `"As a ${actor}, I want to ${title}, so that ${description}."`;
+                
+                // Show preview
+                document.getElementById('generatedUserStory').innerHTML = `
+                    <p style="font-size: 16px; color: #111827; line-height: 1.5; margin: 0;">
+                        <strong>${userStory}</strong>
+                    </p>
+                `;
+                
+                // Generate diagram preview
+                this.generateUseCaseDiagram();
+                
+                // Show preview section
+                document.getElementById('useCasePreview').style.display = 'block';
+                
+                this.showSuccessMessage('Use case saved and user story generated!');
             }
 
             saveUserStory() {
                 const data = this.collectUserStoryData();
                 console.log('Saving user story:', data);
-                alert('User story saved successfully!');
+                this.showSuccessMessage('User story saved successfully!');
             }
 
             saveAndGenerateUseCase() {
                 const data = this.collectUserStoryData();
                 console.log('Saving and generating use case:', data);
-                alert('User story saved and use case generated!');
+                
+                // Generate use case preview
+                const actor = document.getElementById('userStoryActor').value || 'User';
+                const goal = document.getElementById('userStoryGoal').value || 'Perform Action';
+                const reason = document.getElementById('userStoryReason').value || 'Achieve goal';
+                
+                const useCasePreview = `
+                    <h4 style="margin-top: 0; margin-bottom: 12px; color: #111827;">Use Case: ${goal}</h4>
+                    <p><strong>Actor:</strong> ${actor}</p>
+                    <p><strong>Description:</strong> ${reason}</p>
+                    <p><strong>Preconditions:</strong> ${document.getElementById('userStoryPreconditions').value || 'None specified'}</p>
+                    <p><strong>Triggers:</strong> ${document.getElementById('userStoryTriggers').value || 'User initiates the action'}</p>
+                `;
+                
+                document.getElementById('generatedUseCase').innerHTML = useCasePreview;
+                document.getElementById('userStoryPreview').style.display = 'block';
+                
+                this.showSuccessMessage('User story saved and use case generated!');
             }
 
             previewDiagram() {
-                alert('Preview diagram feature coming soon!');
+                this.generateUseCaseDiagram();
+                document.getElementById('useCasePreview').style.display = 'block';
+                this.showSuccessMessage('Use case diagram generated!');
+            }
+
+            generateUseCaseDiagram() {
+                const actors = Array.from(this.selectedActors);
+                const title = document.getElementById('useCaseTitle').value || 'Use Case';
+                const mainSteps = this.getMainFlowSteps();
+                const altFlows = this.getAlternativeFlows();
+                
+                // Clear previous diagram
+                const diagramContainer = document.getElementById('useCaseDiagram');
+                diagramContainer.innerHTML = '';
+                
+                // Create main diagram container
+                const diagramDiv = document.createElement('div');
+                diagramDiv.className = 'uml-diagram-container';
+                
+                // Create system boundary
+                const systemBoundary = document.createElement('div');
+                systemBoundary.className = 'system-boundary';
+                
+                // Add system label
+                const systemLabel = document.createElement('div');
+                systemLabel.className = 'system-label';
+                systemLabel.textContent = 'System Boundary';
+                systemBoundary.appendChild(systemLabel);
+                
+                // Create actors container
+                const actorsContainer = document.createElement('div');
+                actorsContainer.className = 'actors-container';
+                
+                // Create use cases container
+                const useCasesContainer = document.createElement('div');
+                useCasesContainer.className = 'use-cases-container';
+                
+                // Add main use cases based on main flow steps
+                mainSteps.forEach((step, index) => {
+                    if (step.trim()) {
+                        const useCase = document.createElement('div');
+                        useCase.className = 'use-case';
+                        useCase.innerHTML = `<div class="use-case-text">${step}</div>`;
+                        useCase.dataset.stepIndex = index;
+                        useCasesContainer.appendChild(useCase);
+                    }
+                });
+                
+                // Add alternative use cases if any
+                if (altFlows.length > 0) {
+                    altFlows.forEach(flow => {
+                        if (flow.title && flow.title.trim()) {
+                            const altUseCase = document.createElement('div');
+                            altUseCase.className = 'use-case';
+                            altUseCase.style.borderColor = '#f59e0b';
+                            altUseCase.style.backgroundColor = '#fffbeb';
+                            altUseCase.innerHTML = `<div class="use-case-text">${flow.title}</div>`;
+                            useCasesContainer.appendChild(altUseCase);
+                        }
+                    });
+                }
+                
+                // Add actors with connections to all use cases
+                actors.forEach((actor, actorIndex) => {
+                    const actorDiv = document.createElement('div');
+                    actorDiv.className = 'actor';
+                    
+                    // Create stick figure
+                    const stickFigure = document.createElement('div');
+                    stickFigure.className = 'stick-figure';
+                    stickFigure.innerHTML = `
+                        <div class="stick-head"></div>
+                        <div class="stick-body"></div>
+                        <div class="stick-arms"></div>
+                        <div class="stick-legs"></div>
+                    `;
+                    
+                    // Create actor label
+                    const actorLabel = document.createElement('div');
+                    actorLabel.className = 'actor-name';
+                    actorLabel.textContent = actor;
+                    
+                    actorDiv.appendChild(stickFigure);
+                    actorDiv.appendChild(actorLabel);
+                    actorsContainer.appendChild(actorDiv);
+                    
+                    // Create connection lines to each use case
+                    const useCases = useCasesContainer.querySelectorAll('.use-case');
+                    useCases.forEach((useCase, useCaseIndex) => {
+                        const connectionLine = document.createElement('div');
+                        connectionLine.className = 'connection-line';
+                        
+                        // Calculate positions for connection lines
+                        const actorCount = actors.length;
+                        const actorWidth = 120; // Approximate width per actor
+                        const totalActorWidth = actorCount * actorWidth;
+                        const startX = (diagramContainer.offsetWidth - totalActorWidth) / 2 + (actorIndex * actorWidth) + 60;
+                        
+                        // Calculate use case position
+                        const useCaseCount = useCases.length;
+                        const useCaseHeight = 100; // Approximate height per use case
+                        const totalUseCaseHeight = useCaseCount * useCaseHeight;
+                        const startY = 180 + (useCaseIndex * useCaseHeight) + 40;
+                        
+                        // Calculate line length and angle
+                        const lineLength = Math.sqrt(Math.pow(startX - 400, 2) + Math.pow(180 - startY, 2));
+                        const angle = Math.atan2(startY - 180, startX - 400) * (180 / Math.PI);
+                        
+                        connectionLine.style.width = `${lineLength}px`;
+                        connectionLine.style.top = '180px';
+                        connectionLine.style.left = `${startX}px`;
+                        connectionLine.style.transform = `rotate(${angle}deg)`;
+                        connectionLine.style.transformOrigin = '0 0';
+                        
+                        diagramDiv.appendChild(connectionLine);
+                    });
+                });
+                
+                // Assemble the diagram
+                diagramDiv.appendChild(actorsContainer);
+                systemBoundary.appendChild(useCasesContainer);
+                diagramDiv.appendChild(systemBoundary);
+                
+                // Add main flow steps as documentation
+                if (mainSteps.length > 0) {
+                    const stepsContainer = document.createElement('div');
+                    stepsContainer.style.marginTop = '30px';
+                    stepsContainer.style.background = 'white';
+                    stepsContainer.style.padding = '20px';
+                    stepsContainer.style.borderRadius = '8px';
+                    stepsContainer.style.border = '1px solid #e5e7eb';
+                    
+                    const stepsTitle = document.createElement('h4');
+                    stepsTitle.style.color = '#111827';
+                    stepsTitle.style.marginBottom = '15px';
+                    stepsTitle.textContent = 'Main Flow Steps:';
+                    
+                    const stepsList = document.createElement('ol');
+                    stepsList.style.textAlign = 'left';
+                    stepsList.style.maxWidth = '500px';
+                    stepsList.style.margin = '0 auto';
+                    
+                    mainSteps.forEach((step, index) => {
+                        if (step.trim()) {
+                            const stepItem = document.createElement('li');
+                            stepItem.style.marginBottom = '8px';
+                            stepItem.style.color = '#374151';
+                            stepItem.textContent = step;
+                            stepsList.appendChild(stepItem);
+                        }
+                    });
+                    
+                    stepsContainer.appendChild(stepsTitle);
+                    stepsContainer.appendChild(stepsList);
+                    diagramDiv.appendChild(stepsContainer);
+                }
+                
+                // Add the diagram to the container
+                diagramContainer.appendChild(diagramDiv);
+            }
+
+            showSuccessMessage(message) {
+                // Create success message element
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success-message';
+                successDiv.textContent = message;
+                successDiv.style.position = 'fixed';
+                successDiv.style.top = '20px';
+                successDiv.style.right = '20px';
+                successDiv.style.zIndex = '1000';
+                
+                document.body.appendChild(successDiv);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    successDiv.remove();
+                }, 3000);
             }
 
             collectUseCaseData() {
@@ -824,14 +1581,15 @@
             }
 
             getMainFlowSteps() {
-                const steps = document.querySelectorAll('#mainFlowSteps .main-step input');
+                const steps = document.querySelectorAll('#mainFlowSteps .step input');
                 return Array.from(steps).map(input => input.value).filter(value => value.trim());
             }
 
             getAlternativeFlows() {
                 const flows = document.querySelectorAll('.alt-flow');
                 return Array.from(flows).map(flow => {
-                    const title = flow.querySelector('input[type="text"]').value;
+                    const titleInput = flow.querySelector('input[type="text"]');
+                    const title = titleInput ? titleInput.value : '';
                     const steps = Array.from(flow.querySelectorAll('.alt-step input'))
                         .map(input => input.value).filter(value => value.trim());
                     return { title, steps };
@@ -839,67 +1597,9 @@
             }
         }
 
-        // Toggle Related Data Section
-        function toggleRelatedData() {
-            const relatedData = document.getElementById('relatedData');
-            const chevron = document.getElementById('chevron');
-            
-            if (relatedData.style.display === 'none' || !relatedData.style.display) {
-                relatedData.style.display = 'block';
-                chevron.style.transform = 'rotate(180deg)';
-            } else {
-                relatedData.style.display = 'none';
-                chevron.style.transform = 'rotate(0deg)';
-            }
-        }
-
         // Initialize the form when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new UnifiedFormManager();
-            
-            // Add Focus States
-            document.querySelectorAll('input, textarea').forEach(element => {
-                element.addEventListener('focus', function() {
-                    this.style.borderColor = '#2563eb';
-                    this.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.1)';
-                });
-                
-                element.addEventListener('blur', function() {
-                    this.style.borderColor = '#d1d5db';
-                    this.style.boxShadow = 'none';
-                });
-            });
-
-            // Add Button Hover Effects
-            document.querySelectorAll('button').forEach(button => {
-                const originalBg = getComputedStyle(button).backgroundColor;
-                
-                if (originalBg === 'rgb(55, 65, 81)' || originalBg === 'rgb(17, 24, 39)') {
-                    button.addEventListener('mouseenter', () => {
-                        button.style.backgroundColor = '#1f2937';
-                    });
-                    button.addEventListener('mouseleave', () => {
-                        button.style.backgroundColor = originalBg;
-                    });
-                } else if (originalBg === 'rgb(255, 255, 255)') {
-                    button.addEventListener('mouseenter', () => {
-                        button.style.backgroundColor = '#f9fafb';
-                    });
-                    button.addEventListener('mouseleave', () => {
-                        button.style.backgroundColor = '#ffffff';
-                    });
-                }
-            });
-
-            // Add Navigation Hover Effects
-            document.querySelectorAll('nav a').forEach(link => {
-                link.addEventListener('mouseenter', () => {
-                    link.style.color = '#374151';
-                });
-                link.addEventListener('mouseleave', () => {
-                    link.style.color = '#6b7280';
-                });
-            });
         });
     </script>
 </body>
