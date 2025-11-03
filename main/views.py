@@ -1,55 +1,59 @@
-<<<<<<< HEAD
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
-from django.shortcuts import redirect
+from django.contrib import messages
 
 
 def home(request):
+    if 'user_id' not in request.session:
+        return redirect('main:login')
+    user_id = request.session['user_id']
+    pengguna = get_object_or_404(Pengguna, id_user=user_id)
     projects = Project.objects.all()  # ambil semua project
     return render(request, 'main/home.html', {'projects': projects})
-=======
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 
 def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('username')  
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
+        try:
+            pengguna = Pengguna.objects.get(email_user=email)
+            if pengguna.check_password(password):
+                request.session['user_id'] = pengguna.id_user
+                session_id = 'S' + str(Session.objects.count() + 1).zfill(4)
+                Session.objects.create(
+                    id_session=session_id,
+                    pengguna=pengguna,
+                    login_time=timezone.now(),
+                    is_active=True
+                )
             
-            next_url = request.GET.get('next', 'home')
-            return redirect(next_url)
-        else:
-            messages.error(request, 'Invalid username or password.')
+                messages.success(request, 'Login successful!')
+                return redirect('main:home')
+            else:
+                messages.error(request, 'Invalid email or password')
+        except Pengguna.DoesNotExist:
+            messages.error(request, 'Invalid email or password')
     
     return render(request, 'main/login.html')
 
 def logout_view(request):
-    logout(request)
-    messages.success(request, 'You have been logged out successfully.')
-    return redirect('login')
+    if 'user_id' in request.session:
+        user_id = request.session['user_id']
+        
+        # Update session menjadi tidak aktif
+        Session.objects.filter(
+            pengguna__id_user=user_id,
+            is_active=True
+        ).update(
+            logout_time=timezone.now(),
+            is_active=False
+        )
+        del request.session['user_id']
+    
+    messages.success(request, 'You have been logged out')
+    return redirect('main:login')
 
-@login_required(login_url='login')
-def dashboard_view(request):
-    context = {
-        'user': request.user,
-    }
-    return render(request, 'main/home.html', context)
-
-def home(request):
-    return render(request, 'main/home.html')
-
->>>>>>> 0c221df (Fix typo)
 def user_story(request):
     return render(request, 'main/user_story.html')
 
