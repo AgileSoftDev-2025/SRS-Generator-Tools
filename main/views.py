@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
 from django.contrib import messages
-
+from django.http import JsonResponse
 
 def home(request):
     if 'user_id' not in request.session:
@@ -71,6 +71,26 @@ def use_case_spec(request):
 
 def activity_diagram(request):
     return render(request, 'main/activity_diagram.html')
+
+def import_sql(request):   
+    return render(request, 'main/import_sql.html')
+
+def parse_sql(request):
+    if request.method == "POST" and request.FILES.get('file'):
+        sql_file = request.FILES['file']
+        sql_content = sql_file.read().decode('utf-8', errors='ignore')
+
+        try:
+            from .parsers.sql_parser import parse_sql_file
+            result = parse_sql_file(sql_content)
+            return JsonResponse({"status": "success", "data": result})
+        except Exception as e:
+            import traceback
+            print("🔥 SQL Parse Error:", traceback.format_exc())  # tampilkan di console
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    return JsonResponse({"status": "error", "message": "No file uploaded"})
+
 
 def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')
