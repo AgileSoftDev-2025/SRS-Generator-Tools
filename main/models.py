@@ -9,7 +9,7 @@ class Pengguna(models.Model):
     email_user = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=255)
 
-    def set_password(self, raw_password):
+    def set_password(self, raw_password):  
         """Hash password sebelum disimpan"""
         self.password = make_password(raw_password)
     
@@ -37,7 +37,7 @@ class Session(models.Model):
     id_session = models.CharField(max_length=5, primary_key=True)
     pengguna = models.ForeignKey(Pengguna, on_delete=models.CASCADE, related_name='sessions')
     login_time = models.DateTimeField()
-    logout_time = models.DateTimeField()
+    logout_time = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=False)
 
 # Tabel GUI
