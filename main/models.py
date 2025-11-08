@@ -1,11 +1,12 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
 
 # Tabel Pengguna
 class Pengguna(models.Model):
     id_user = models.CharField(max_length=5, primary_key=True)
     nama_user = models.CharField(max_length=100)
-    email_user = models.CharField(max_length=100)
+    email_user = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=255)
 
     def set_password(self, raw_password):
