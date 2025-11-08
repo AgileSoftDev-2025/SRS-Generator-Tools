@@ -1,55 +1,13 @@
-<<<<<<< HEAD
 from django.shortcuts import render
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
 from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 def home(request):
-    projects = Project.objects.all()  # ambil semua project
+    projects = Project.objects.all() 
     return render(request, 'main/home.html', {'projects': projects})
-=======
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        
-        if user is not None:
-            login(request, user)
-            messages.success(request, f'Welcome back, {user.username}!')
-            
-            next_url = request.GET.get('next', 'home')
-            return redirect(next_url)
-        else:
-            messages.error(request, 'Invalid username or password.')
-    
-    return render(request, 'main/login.html')
-
-def logout_view(request):
-    logout(request)
-    messages.success(request, 'You have been logged out successfully.')
-    return redirect('login')
-
-@login_required(login_url='login')
-def dashboard_view(request):
-    context = {
-        'user': request.user,
-    }
-    return render(request, 'main/home.html', context)
-
-def home(request):
-    return render(request, 'main/home.html')
-
->>>>>>> 0c221df (Fix typo)
 def user_story(request):
     return render(request, 'main/user_story.html')
 
@@ -107,9 +65,10 @@ def project_new(request):
 
     return render(request, 'main/home.html') 
 
-def project_detail(request, id):
+def project_detail(request, id_project):
     # Ambil data project berdasarkan id
     project = get_object_or_404(Project, id_project=id_project)
     
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
+
