@@ -3,6 +3,7 @@
 from django.db import migrations, models
 from django.contrib.auth.hashers import make_password
 
+
 def add_dummy_data(apps, schema_editor):
     Pengguna = apps.get_model('main', 'Pengguna')
     
@@ -12,6 +13,7 @@ def add_dummy_data(apps, schema_editor):
         email_user='kelompok1@gmail.com',
         password=make_password('kelompok1')
     )
+
 
 class Migration(migrations.Migration):
 
@@ -25,6 +27,7 @@ class Migration(migrations.Migration):
             name='password',
             field=models.CharField(default='pbkdf2_sha256$xxxxx', max_length=255),
             preserve_default=False,
-        )
+        ),
         migrations.RunPython(add_dummy_data),
     ]
+    
