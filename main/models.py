@@ -6,6 +6,15 @@ class Pengguna(models.Model):
     id_user = models.CharField(max_length=5, primary_key=True)
     nama_user = models.CharField(max_length=100)
     email_user = models.CharField(max_length=100)
+    password = models.CharField(max_length=255)
+
+    def set_password(self, raw_password):
+        """Hash password sebelum disimpan"""
+        self.password = make_password(raw_password)
+    
+    def check_password(self, raw_password):
+        """Cek apakah password benar"""
+        return check_password(raw_password, self.password)
 
     def __str__(self):
         return self.nama_user
