@@ -122,18 +122,18 @@
                 <label class="form-label">Priority</label>
                 <select class="form-select" id="priority">
                   <option>Pilih Prioritas</option>
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
+                  <option>Must Have</option>
+                  <option>Should Have</option>
+                  <option>Could Have</option>
+                  <option>Won't Have</option>
                 </select>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Status</label>
                 <select class="form-select" id="status">
                   <option>Pilih Status</option>
-                  <option>Draft</option>
-                  <option>In Progress</option>
-                  <option>Completed</option>
+                  <option>Active</option>
+                  <option>Inactive</option>
                 </select>
               </div>
             </div>
@@ -145,23 +145,53 @@
               <label class="form-label">Post-Condition</label>
               <textarea class="form-control" id="postcondition" rows="2"></textarea>
             </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Basic Path (Actor Actions)</label>
-                <textarea class="form-control" id="basicPath" rows="3"></textarea>
+            <div class="mb-3">
+              <label class="form-label">Basic Path</label>
+              <div id="basicPathContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">System Responses</label>
-                <textarea class="form-control" id="systemResponse" rows="3"></textarea>
-              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
             </div>
             <div class="mb-3">
               <label class="form-label">Alternative Path</label>
-              <textarea class="form-control" id="alternative" rows="2"></textarea>
+              <div id="alternativePathContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
             </div>
             <div class="mb-3">
               <label class="form-label">Exception</label>
-              <textarea class="form-control" id="exception" rows="2"></textarea>
+              <div id="exceptionContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
             </div>
           </div>
           <div class="modal-footer">
@@ -200,6 +230,25 @@
 
     nextBtn.addEventListener("click", () => {
       window.location.href = "use_case_spec.html";
+    });
+
+    const addRowBtn = document.getElementById("addBasicPathRow");
+    const container = document.getElementById("basicPathContainer", "alternativePathContainer", "exceptionContainer");
+
+    addRowBtn.addEventListener("click", () => {
+      const newRow = document.createElement("div");
+      newRow.classList.add("row", "mb-3");
+      newRow.innerHTML = `
+        <div class="col-md-6">
+          <label class="form-label">Actor Actions</label>
+          <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">System Actions</label>
+          <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+        </div>
+      `;
+      container.appendChild(newRow);
     });
   </script>
 </body>
