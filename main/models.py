@@ -77,6 +77,55 @@ class UseCaseSpecification(models.Model):
     input_precondition = models.TextField()
     input_postcondition = models.TextField()
 
+# Tabel ImportedTable
+class ImportedTable(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+# Tabel ImportedColumn
+class ImportedColumn(models.Model):
+    table = models.ForeignKey(ImportedTable, on_delete=models.CASCADE, related_name='columns')
+    name = models.CharField(max_length=255)
+    data_type = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.table.name}.{self.name}"
+
+# tabel ImportedRelationship
+class ImportedRelationship(models.Model):
+    table = models.ForeignKey(ImportedTable, on_delete=models.CASCADE, related_name='foreign_keys')
+    column_name = models.CharField(max_length=255)
+    ref_table = models.ForeignKey(ImportedTable, on_delete=models.CASCADE, related_name='referenced_by')
+    ref_column_name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"{self.table.name}.{self.column_name} → {self.ref_table.name}.{self.ref_column_name}"
+
+# main/models.py
+from django.db import models
+
+# tabel saved SQL Table
+class SqlTable(models.Model):
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+# tabel saved SQL Column
+class SqlColumn(models.Model):
+    id = models.AutoField(primary_key=True)
+    table = models.ForeignKey(SqlTable, on_delete=models.CASCADE, related_name='columns')
+    name = models.CharField(max_length=100)
+    datatype = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f"{self.name} ({self.datatype})"
+
+
 # Tabel Sequence
 class Sequence(models.Model):
     id_sequence = models.CharField(max_length=5, primary_key=True)

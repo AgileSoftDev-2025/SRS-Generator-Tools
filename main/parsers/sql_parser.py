@@ -29,19 +29,23 @@ def parse_sql_file(sql_content):
         # Split tiap baris kolom
         for line in columns_block.split(","):
             line = line.strip()
+            
+            # Baris filter Anda sudah benar, ia akan melewati FOREIGN KEY, PRIMARY KEY, dll.
             if not line or line.upper().startswith(("PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "KEY", "CONSTRAINT")):
                 continue
 
-            col_match = re.match(r'[`"]?(\w+)[`"]?\s+([A-Z0-9\(\)]+)', line, re.I)
+            # Ambil SEMUA sisa baris
+            col_match = re.match(r'[`"]?(\w+)[`"]?\s+(.*)', line, re.I)
+            
             if col_match:
                 columns.append({
                     "name": col_match.group(1),
-                    "type": col_match.group(2)
+                    "type": col_match.group(2) 
                 })
 
         tables[table_name] = columns
 
-        # Cari foreign keys
+        # Cari foreign keys 
         fk_matches = re.findall(
             r'FOREIGN KEY\s*\([`"]?(\w+)[`"]?\)\s*REFERENCES\s+[`"]?(\w+)[`"]?\s*\([`"]?(\w+)[`"]?\)',
             stmt_clean,

@@ -3,6 +3,10 @@ from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserSto
 from django.utils import timezone
 from django.contrib import messages
 from django.http import JsonResponse
+from .parsers.sql_parser import parse_sql_file
+from .utils import save_parsed_sql_to_db
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def home(request):
     if 'user_id' not in request.session:
@@ -72,7 +76,16 @@ def use_case_spec(request):
 def activity_diagram(request):
     return render(request, 'main/activity_diagram.html')
 
-def import_sql(request):   
+def import_sql(request):
+    if request.method == 'POST':
+        file = request.FILES.get('sql_file')
+        if not file:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+        
+        parsed_data = parse_sql_file(file)
+        # nanti kita bisa tambahkan logika untuk save ke DB di sini
+        return JsonResponse({'message': 'File parsed successfully', 'data': parsed_data})
+    
     return render(request, 'main/import_sql.html')
 
 def parse_sql(request):
@@ -91,6 +104,25 @@ def parse_sql(request):
 
     return JsonResponse({"status": "error", "message": "No file uploaded"})
 
+def save_parsed_sql(request):
+    if request.method == "POST":
+        try:
+            body = json.loads(request.body)
+            parsed_data = body.get("data")
+
+            if not parsed_data:
+                return JsonResponse({"status": "error", "message": "No data received"})
+
+            # Panggil fungsi utilitas penyimpanan
+            save_parsed_sql_to_db(parsed_data)
+
+            return JsonResponse({"status": "success", "message": "Data SQL berhasil disimpan ke database"})
+        except Exception as e:
+            import traceback
+            print("🔥 Save SQL Error:", traceback.format_exc())
+            return JsonResponse({"status": "error", "message": str(e)})
+
+    return JsonResponse({"status": "error", "message": "Invalid request method"})
 
 def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')

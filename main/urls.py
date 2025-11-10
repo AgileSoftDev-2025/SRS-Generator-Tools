@@ -15,6 +15,7 @@ urlpatterns = [
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'),
     path('import-sql/', views.import_sql, name='import_sql'),
     path('parse-sql/', views.parse_sql, name='parse_sql'),
+    path('save-parsed-sql/', views.save_parsed_sql, name='save_parsed_sql'),
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
     path('class-diagram/', views.class_diagram, name='class_diagram'),
     path('generate-srs/', views.generate_srs, name='generate_srs'),
