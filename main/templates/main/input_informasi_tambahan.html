@@ -175,7 +175,7 @@
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addAlternativePathRow">+ Tambah Baris</button>
             </div>
             <div class="mb-3">
               <label class="form-label">Exception</label>
@@ -191,7 +191,7 @@
                   </div>
                 </div>
               </div>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addExceptionRow">+ Tambah Baris</button>
             </div>
           </div>
           <div class="modal-footer">
@@ -205,51 +205,81 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    const saveBtn = document.getElementById("saveFeature");
-    const nextBtn = document.getElementById("nextBtn");
+  const saveBtn = document.getElementById("saveFeature");
+  const nextBtn = document.getElementById("nextBtn");
 
-    let featureData = {};
+  // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
+  function addRow(containerId) {
+    const container = document.getElementById(containerId);
+    const newRow = document.createElement("div");
+    newRow.classList.add("row", "mb-3");
+    newRow.innerHTML = `
+      <div class="col-md-6">
+        <label class="form-label">Actor Actions</label>
+        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">System Actions</label>
+        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+      </div>
+    `;
+    container.appendChild(newRow);
+  }
 
-    saveBtn.addEventListener("click", () => {
-      featureData = {
-        featureName: "Login",
-        summary: document.getElementById("summary").value,
-        priority: document.getElementById("priority").value,
-        status: document.getElementById("status").value,
-        precondition: document.getElementById("precondition").value,
-        postcondition: document.getElementById("postcondition").value,
-        basicPath: document.getElementById("basicPath").value,
-        systemResponse: document.getElementById("systemResponse").value,
-        alternative: document.getElementById("alternative").value,
-        exception: document.getElementById("exception").value,
-      };
+  // === TOMBOL TAMBAH UNTUK SETIAP BAGIAN ===
+  document
+    .getElementById("addBasicPathRow")
+    .addEventListener("click", () => addRow("basicPathContainer"));
 
-      localStorage.setItem("useCaseData", JSON.stringify(featureData));
-      alert("Feature saved successfully!");
+  document
+    .getElementById("addAlternativePathRow")
+    .addEventListener("click", () => addRow("alternativePathContainer"));
+
+  document
+    .getElementById("addExceptionRow")
+    .addEventListener("click", () => addRow("exceptionContainer"));
+
+  // === FUNGSI MENGAMBIL DATA PATH ===
+  function getPathData(containerId) {
+    const container = document.getElementById(containerId);
+    const rows = container.querySelectorAll(".row");
+    let paths = [];
+
+    rows.forEach((row) => {
+      const actor = row.querySelector(".col-md-6:nth-child(1) textarea").value;
+      const system = row.querySelector(".col-md-6:nth-child(2) textarea").value;
+      paths.push({ actor, system });
     });
 
-    nextBtn.addEventListener("click", () => {
-      window.location.href = "use_case_spec.html";
-    });
+    return paths;
+  }
 
-    const addRowBtn = document.getElementById("addBasicPathRow");
-    const container = document.getElementById("basicPathContainer", "alternativePathContainer", "exceptionContainer");
+  // === SIMPAN DATA KE LOCALSTORAGE ===
+  saveBtn.addEventListener("click", () => {
+    const featureData = {
+      featureName: "Login",
+      summary: document.getElementById("summary").value,
+      priority: document.getElementById("priority").value,
+      status: document.getElementById("status").value,
+      precondition: document.getElementById("precondition").value,
+      postcondition: document.getElementById("postcondition").value,
+      basicPath: getPathData("basicPathContainer"),
+      alternativePath: getPathData("alternativePathContainer"),
+      exceptionPath: getPathData("exceptionContainer"),
+    };
 
-    addRowBtn.addEventListener("click", () => {
-      const newRow = document.createElement("div");
-      newRow.classList.add("row", "mb-3");
-      newRow.innerHTML = `
-        <div class="col-md-6">
-          <label class="form-label">Actor Actions</label>
-          <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">System Actions</label>
-          <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-        </div>
-      `;
-      container.appendChild(newRow);
-    });
-  </script>
+    localStorage.setItem("useCaseData", JSON.stringify(featureData));
+    alert("Feature saved successfully!");
+    
+    const modalEl = document.getElementById("modalFeature1");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+
+  });
+
+  nextBtn.addEventListener("click", () => {
+    window.location.href = "use_case_spec.html";
+  });
+</script>
 </body>
 </html>
