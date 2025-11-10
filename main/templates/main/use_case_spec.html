@@ -170,42 +170,53 @@
     </div>
 
     <script>
-      const popup = document.getElementById("popup");
-      const overlay = document.getElementById("overlay");
-      const nextBtn = document.getElementById("nextBtn");
-      const table = document.getElementById("useCaseTable");
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("overlay");
+    const nextBtn = document.getElementById("nextBtn");
+    const table = document.getElementById("useCaseTable");
 
-      // Ambil data dari localStorage
-      const data = JSON.parse(localStorage.getItem("useCaseData"));
-
-      // Kalau ada data hasil input sebelumnya, tampilkan ke tabel
+    const data = JSON.parse(localStorage.getItem("useCaseData"));
+    function renderPathRows(paths) {
+      if (!paths || paths.length === 0) return "<em>None</em>";
+      
+      let html = `
+      <table style="width:100%; border:1px solid #ddd; border-collapse:collapse;">
+        <tr>
+          <th style="width:5%; border:1px solid #ddd;">No.</th>
+          <th style="width:47%; border:1px solid #ddd;">Actor Actions</th>
+          <th style="width:48%; border:1px solid #ddd;">System Actions</th>
+          </tr>
+          `;
+      paths.forEach((p, index) => {
+        html += `
+        <tr>
+          <td style="border:1px solid #ddd; text-align:center; vertical-align:top;">${index + 1}</td>
+          <td style="border:1px solid #ddd; vertical-align:top;">${p.actor || "-"}</td>
+          <td style="border:1px solid #ddd; vertical-align:top;">${p.system || "-"}</td>
+          </tr>
+        `;
+      });
+      
+      html += "</table>";
+    return html;
+  }
+        
       if (data) {
         table.innerHTML = `
-          <tr><td>Feature Name</td><td>${data.featureName || '-'}</td></tr>
-          <tr><td>Actor(s)</td><td>${data.actors || '-'}</td></tr>
-          <tr><td>Summary Description</td><td>${data.summary || '-'}</td></tr>
-          <tr><td>Priority</td><td><strong>${data.priority || '-'}</strong></td></tr>
-          <tr><td>Status</td><td><strong>${data.status || '-'}</strong></td></tr>
-          <tr><td>Pre-Condition</td><td>${data.precondition || '-'}</td></tr>
-          <tr><td>Post-Condition</td><td>${data.postcondition || '-'}</td></tr>
-          <tr>
-            <td>Basic Path</td>
-            <td>
-              <div class="highlight">${(data.basicPath || '').replace(/\n/g, '<br>')}</div>
-            </td>
-          </tr>
-          <tr>
-            <td>Alternative Path</td>
-            <td>
-              <div class="highlight">${(data.alternative || '').replace(/\n/g, '<br>')}</div>
-            </td>
-          </tr>
-          <tr><td>Exceptions</td><td>${data.exception || 'None'}</td></tr>
+        <tr><td>Feature Name</td><td>${data.featureName || '-'}</td></tr>
+        <tr><td>Summary Description</td><td>${data.summary || '-'}</td></tr>
+        <tr><td>Priority</td><td><strong>${data.priority || '-'}</strong></td></tr>
+        <tr><td>Status</td><td><strong>${data.status || '-'}</strong></td></tr>
+        <tr><td>Pre-Condition</td><td>${data.precondition || '-'}</td></tr>
+        <tr><td>Post-Condition</td><td>${data.postcondition || '-'}</td></tr>
+        <tr><td>Basic Path</td><td>${renderPathRows(data.basicPath)}</td></tr>
+        <tr><td>Alternative Path</td><td>${renderPathRows(data.alternativePath)}</td></tr>
+        <tr><td>Exception</td><td>${renderPathRows(data.exceptionPath)}</td></tr>
         `;
       } else {
         table.innerHTML = `<tr><td colspan="2">No data found. Please go back and fill out the form first.</td></tr>`;
       }
-
+      
       nextBtn.addEventListener("click", () => {
         popup.classList.add("active");
         overlay.classList.add("active");
