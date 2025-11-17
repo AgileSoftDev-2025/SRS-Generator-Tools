@@ -433,6 +433,16 @@
             background: #fef2f2;
         }
         
+        .optional-label {
+            font-weight: normal;
+            color: #6b7280;
+        }
+        
+        .required-label {
+            font-weight: normal;
+            color: #ef4444;
+        }
+        
         @keyframes pulse {
             0% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -511,9 +521,11 @@
                 });
                 
                 document.getElementById('nextBtn').addEventListener('click', () => {
-                    this.saveData();
-                    alert('Data saved successfully! Moving to next page...');
-                    // In a real app, you would navigate to the next page here
+                    if (this.validateForm()) {
+                        this.saveData();
+                        alert('Data saved successfully! Moving to next page...');
+                        // In a real app, you would navigate to the next page here
+                    }
                 });
             }
             
@@ -550,6 +562,14 @@
                 if (actor) {
                     actor.features.push({ what: '', why: '' });
                     this.renderActors();
+                    
+                    // Focus on the new feature's what input
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll(`#actor-${actorId} .feature-input`);
+                        if (inputs.length > 0) {
+                            inputs[inputs.length - 2].focus(); // Focus on what input of the new feature
+                        }
+                    }, 100);
                 }
             }
             
@@ -573,6 +593,26 @@
                 if (actor && actor.features[featureIndex]) {
                     actor.features[featureIndex][field] = value;
                 }
+            }
+            
+            validateForm() {
+                // Check if all actors have names
+                for (const actor of this.actors) {
+                    if (!actor.name.trim()) {
+                        alert(`Please enter a name for Actor #${this.actors.indexOf(actor) + 1}`);
+                        return false;
+                    }
+                    
+                    // Check if all features have "what" filled
+                    for (const feature of actor.features) {
+                        if (!feature.what.trim()) {
+                            alert(`Please fill in the "What" field for all features of ${actor.name || `Actor #${this.actors.indexOf(actor) + 1}`}`);
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
             }
             
             renderActors() {
@@ -602,7 +642,7 @@
                     </div>
                     
                     <div>
-                        <div class="form-label">Actor Name</div>
+                        <div class="form-label">Actor Name <span class="required-label">(required)</span></div>
                         <input 
                             type="text" 
                             class="actor-name-input" 
@@ -641,8 +681,8 @@
                     <table class="features-table">
                         <thead>
                             <tr>
-                                <th style="width: 45%;">What</th>
-                                <th style="width: 45%;">Why</th>
+                                <th style="width: 45%;">What <span class="required-label">(required)</span></th>
+                                <th style="width: 45%;">Why <span class="optional-label">(optional)</span></th>
                                 <th style="width: 10%;"></th>
                             </tr>
                         </thead>
@@ -653,16 +693,17 @@
                                         <input 
                                             type="text" 
                                             class="feature-input" 
-                                            placeholder="Describe feature or action"
+                                            placeholder="${index === 0 ? 'As a Admin, I want to process customer orders' : 'Describe feature or action'}"
                                             value="${feature.what}"
                                             oninput="manager.updateFeature(${actor.id}, ${index}, 'what', this.value)"
+                                            required
                                         >
                                     </td>
                                     <td>
                                         <input 
                                             type="text" 
                                             class="feature-input" 
-                                            placeholder="Explain reason or goal"
+                                            placeholder="${index === 0 ? 'so that to fulfill purchase requests' : 'Explain reason or goal (optional)'}"
                                             value="${feature.why}"
                                             oninput="manager.updateFeature(${actor.id}, ${index}, 'why', this.value)"
                                         >
@@ -680,11 +721,14 @@
             }
             
             saveData() {
+                // Format data for output
+                const formattedData = this.formatDataForOutput();
+                
                 // In a real application, you would send this data to a server
-                console.log('Saving actors data:', this.actors);
+                console.log('Saving actors data:', formattedData);
                 
                 // Store in localStorage for demo purposes
-                localStorage.setItem('actorsAndFeatures', JSON.stringify(this.actors));
+                localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
                 
                 // You could also send to a Django backend:
                 // fetch('/api/save-actors/', {
@@ -693,15 +737,47 @@
                 //         'Content-Type': 'application/json',
                 //         'X-CSRFToken': getCSRFToken() // Django CSRF token
                 //     },
-                //     body: JSON.stringify({ actors: this.actors })
+                //     body: JSON.stringify({ actors: formattedData })
                 // });
+            }
+            
+            formatDataForOutput() {
+                // Format the data for output, making sure "why" is optional
+                return this.actors.map(actor => {
+                    return {
+                        name: actor.name,
+                        features: actor.features.map(feature => {
+                            // Only include "why" if it has a value
+                            const formattedFeature = { what: feature.what };
+                            if (feature.why && feature.why.trim() !== '') {
+                                formattedFeature.why = feature.why;
+                            }
+                            return formattedFeature;
+                        })
+                    };
+                });
             }
             
             loadData() {
                 // Load data from localStorage for demo purposes
                 const savedData = localStorage.getItem('actorsAndFeatures');
                 if (savedData) {
-                    this.actors = JSON.parse(savedData);
+                    const parsedData = JSON.parse(savedData);
+                    
+                    // Reconstruct the actors array with the loaded data
+                    this.actors = parsedData.map((actorData, index) => {
+                        return {
+                            id: index + 1,
+                            name: actorData.name,
+                            features: actorData.features.map(feature => {
+                                return {
+                                    what: feature.what,
+                                    why: feature.why || '' // Ensure why is always present, even if empty
+                                };
+                            })
+                        };
+                    });
+                    
                     if (this.actors.length > 0) {
                         this.nextActorId = Math.max(...this.actors.map(a => a.id)) + 1;
                     }
