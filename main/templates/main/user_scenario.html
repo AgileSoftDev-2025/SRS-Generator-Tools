@@ -1,11 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>User Story</title>
+  <meta charset="UTF-8">
+  <title>User Story Scenario Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      padding: 30px;
+    }
+    .container {
+      background: white;
+      width: 850px;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h3 {
+      margin-top: 25px;
+    }
+    label {
+      font-weight: 600;
+    }
+    select, input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .scenario-section {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .scenario-item {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .scenario-item span {
+      width: 30px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .scenario-item select {
+      width: 130px;
+    }
+    textarea {
+      height: 200px;
+      resize: none;
+    }
+    .btn {
+      background-color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+      margin-top: 15px;
+      width: auto;
+      padding: 10px 20px;
+    }
+    .btn:hover {
+      background-color: #d5d5d5;
+    }
+    .add-more {
+      color: #555;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .add-more:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+
+<div class="container">
+  <h3>Select User Story</h3>
+  <select id="userStory">
+    <option value="">-- Choose User Story --</option>
+    <option value="As a user, I want to login">As a user, I want to login</option>
+    <option value="As an admin, I want to manage users">As an admin, I want to manage users</option>
+  </select>
+
+  <!-- Positive Scenario -->
+  <div class="scenario-section">
+    <div class="section-title">Positive Scenario</div>
+    <div id="positiveContainer">
+      <div class="scenario-item">
+        <span>1</span>
+        <select class="typeSelect positiveType">
+          <option value="">Select type</option>
+          <option value="Given">Given</option>
+          <option value="When">When</option>
+          <option value="Then">Then</option>
+          <option value="And">And</option>
+        </select>
+        <input type="text" class="conditionInput positiveCondition" placeholder="Describe condition...">
+      </div>
+    </div>
+    <div class="add-more" id="addPositive">+ ADD MORE</div>
+  </div>
+
+  <!-- Negative Scenario -->
+  <div class="scenario-section">
+    <div class="section-title">Negative Scenario</div>
+    <div id="negativeContainer">
+      <div class="scenario-item">
+        <span>1</span>
+        <select class="typeSelect negativeType">
+          <option value="">Select type</option>
+          <option value="Given">Given</option>
+          <option value="When">When</option>
+          <option value="Then">Then</option>
+          <option value="And">And</option>
+        </select>
+        <input type="text" class="conditionInput negativeCondition" placeholder="Describe condition...">
+      </div>
+    </div>
+    <div class="add-more" id="addNegative">+ ADD MORE</div>
+  </div>
+
+  <button class="btn" id="generateBtn">Generate User Story Scenario</button>
+
+  <h3>Result</h3>
+  <textarea id="resultArea" readonly></textarea>
+</div>
+
+<script>
+  // Add row to Positive Scenario
+  document.getElementById('addPositive').addEventListener('click', () => {
+    const container = document.getElementById('positiveContainer');
+    const index = container.children.length + 1;
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('scenario-item');
+    newDiv.innerHTML = `
+      <span>${index}</span>
+      <select class="typeSelect positiveType">
+        <option value="">Select type</option>
+        <option value="Given">Given</option>
+        <option value="When">When</option>
+        <option value="Then">Then</option>
+        <option value="And">And</option>
+      </select>
+      <input type="text" class="conditionInput positiveCondition" placeholder="Describe condition...">
+    `;
+    container.appendChild(newDiv);
+  });
+
+  // Add row to Negative Scenario
+  document.getElementById('addNegative').addEventListener('click', () => {
+    const container = document.getElementById('negativeContainer');
+    const index = container.children.length + 1;
+    const newDiv = document.createElement('div');
+    newDiv.classList.add('scenario-item');
+    newDiv.innerHTML = `
+      <span>${index}</span>
+      <select class="typeSelect negativeType">
+        <option value="">Select type</option>
+        <option value="Given">Given</option>
+        <option value="When">When</option>
+        <option value="Then">Then</option>
+        <option value="And">And</option>
+      </select>
+      <input type="text" class="conditionInput negativeCondition" placeholder="Describe condition...">
+    `;
+    container.appendChild(newDiv);
+  });
+
+  // Generate Output
+  document.getElementById('generateBtn').addEventListener('click', () => {
+    const userStory = document.getElementById('userStory').value;
+    let output = `User Story: ${userStory}\n\nPositive Scenario:\n`;
+
+    // Positive
+    document.querySelectorAll('.positiveType').forEach((type, i) => {
+      const condition = document.querySelectorAll('.positiveCondition')[i].value;
+      if (type.value && condition) output += `${type.value} ${condition}\n`;
+    });
+
+    output += `\nNegative Scenario:\n`;
+    // Negative
+    document.querySelectorAll('.negativeType').forEach((type, i) => {
+      const condition = document.querySelectorAll('.negativeCondition')[i].value;
+      if (type.value && condition) output += `${type.value} ${condition}\n`;
+    });
+
+    document.getElementById('resultArea').value = output;
+  });
+</script>
+
 </body>
 </html>

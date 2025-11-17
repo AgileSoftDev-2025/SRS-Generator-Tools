@@ -1,0 +1,282 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Import SQL Database - One UML</title>
+    <link rel="stylesheet" href="{% static 'main/css/global.css' %}" />
+    <style>
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      #resultContainer {
+        margin-top: 2rem;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.875rem;
+        color: #374151;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="width: 100%; max-width: 42rem">
+        <!-- Header Section -->
+        <div style="text-align: center; margin-bottom: 2rem">
+          <h1
+            style="
+              font-size: 1.875rem;
+              font-weight: 600;
+              color: var(--text-primary);
+              margin-bottom: 0.5rem;
+            "
+          >
+            Import SQL Database
+          </h1>
+          <p
+            style="
+              font-size: 0.9375rem;
+              color: var(--text-secondary);
+              line-height: 1.5;
+            "
+          >
+            Upload your .sql file to automatically detect tables, entities, and
+            attributes.
+          </p>
+        </div>
+
+        <!-- Upload Card -->
+        <div
+          style="
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          "
+        >
+          <!-- Upload Area -->
+          <div
+            id="dropArea"
+            style="
+              border: 2px dashed #d1d5db;
+              border-radius: 0.5rem;
+              padding: 3rem 2rem;
+              background-color: #fafafa;
+              transition: all 0.2s ease;
+              cursor: pointer;
+            "
+          >
+            <!-- Upload Icon -->
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                margin-bottom: 1.25rem;
+              "
+            >
+              <svg
+                style="width: 3.5rem; height: 3.5rem; color: #9ca3af"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+            </div>
+
+            <!-- Upload Text -->
+            <div style="margin-bottom: 0.75rem; text-align: center">
+              <p
+                style="
+                  font-size: 0.9375rem;
+                  color: var(--text-primary);
+                  font-weight: 500;
+                  margin-bottom: 0.375rem;
+                "
+              >
+                Drag and drop your .sql file here
+              </p>
+              <p style="font-size: 0.875rem; color: var(--text-secondary)">
+                or click to select a file from your device
+              </p>
+            </div>
+
+            <!-- File Info -->
+            <p
+              style="
+                text-align: center;
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-top: 1rem;
+              "
+            >
+              Supported format: .sql (max size: 10MB)
+            </p>
+
+            <!-- Hidden File Input -->
+            <input
+              type="file"
+              accept=".sql"
+              style="display: none"
+              id="fileInput"
+            />
+          </div>
+
+          <!-- Result Container -->
+          <div id="resultContainer">
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem">
+              Parsed SQL Result
+            </h3>
+            <pre id="resultOutput"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const dropArea = document.getElementById("dropArea");
+      const fileInput = document.getElementById("fileInput");
+      const resultContainer = document.getElementById("resultContainer");
+      const resultOutput = document.getElementById("resultOutput");
+
+      // Make the entire drop area clickable
+      dropArea.addEventListener("click", () => {
+        fileInput.click();
+      });
+
+      // Handle file selection
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          handleFile(file);
+        }
+      });
+
+      // Prevent default drag behaviors
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      // Highlight drop area when dragging over it
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+
+      function highlight(e) {
+        dropArea.style.borderColor = "#2563eb";
+        dropArea.style.backgroundColor = "#eff6ff";
+      }
+
+      function unhighlight(e) {
+        dropArea.style.borderColor = "#d1d5db";
+        dropArea.style.backgroundColor = "#fafafa";
+      }
+
+      // Handle dropped files
+      dropArea.addEventListener("drop", handleDrop, false);
+
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      }
+
+      // Core Upload Logic (Integrated)
+      function handleFile(file) {
+        if (!file.name.endsWith(".sql")) {
+          alert("Please upload a .sql file only!");
+          fileInput.value = "";
+          return;
+        }
+
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+          alert("File size must be less than 10MB!");
+          fileInput.value = "";
+          return;
+        }
+
+        console.log("Uploading:", file.name);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/parse-sql/", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              resultContainer.style.display = "block";
+              resultOutput.textContent = JSON.stringify(data.data, null, 2);
+            } else {
+              alert("Error: " + data.message);
+              resultContainer.style.display = "none";
+            }
+          })
+          .catch((err) => {
+            console.error("Error:", err);
+            alert("Failed to parse SQL file.");
+            resultContainer.style.display = "none";
+          });
+      }
+
+      // Helper function ambil CSRF token
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+  </body>
+</html>

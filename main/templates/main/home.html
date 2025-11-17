@@ -1,103 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>One UML</title>
-  </head>
-  <body
-    style="margin: 0; font-family: Arial, sans-serif; background-color: #f9f9f9"
-  >
-    <!-- Navbar -->
-    <nav
-      style="
-        display: flex;
-        justify-content: flex-end;
-        padding: 15px 30px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      "
-    >
-      <a
-        href="#"
-        style="
-          margin-right: 20px;
-          text-decoration: none;
-          color: #333;
-          font-weight: bold;
-        "
-        >Home</a
-      >
-      <a href="#" style="margin-right: 20px; text-decoration: none; color: #333"
-        >Saved Data</a
-      >
-      <a href="#" style="text-decoration: none; color: #333">Help</a>
-    </nav>
+{% extends 'main/base.html' %}
 
-    <!-- Main Content -->
-    <div style="max-width: 1200px; margin: 40px auto; padding: 0 20px">
-      <h1 style="text-align: center; margin-bottom: 40px; color: #333">
-        One UML
-      </h1>
+{% block title %}Home - OneUML{% endblock %}
 
-      <div
-        style="
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 30px;
-        "
-      >
-        <!-- Card 1 -->
-        <div
-          style="
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-          "
-        >
-          <div style="font-size: 40px; margin-bottom: 15px">📄</div>
-          <h3 style="margin-bottom: 10px">Input User Story</h3>
-          <p style="color: #666; font-size: 14px">
-            Create and define user stories for your project
-          </p>
-        </div>
+{% block content %}
+<div class="home-wrapper" style="max-width:1100px; margin:40px auto; padding:0 20px;">
 
-        <!-- Card 2 -->
-        <div
-          style="
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-          "
-        >
-          <div style="font-size: 40px; margin-bottom: 15px">📝</div>
-          <h3 style="margin-bottom: 10px">Input Use Case</h3>
-          <p style="color: #666; font-size: 14px">
-            Define use cases and system interactions
-          </p>
-        </div>
+  <!-- Header -->
+  <header style="text-align:center; margin-bottom:40px;">
+    <h1 style="font-size:48px; margin:0 0 10px; font-weight:700;">ONEUML</h1>
+    <p style="margin:0; color:#555;">
+      Generate UML Diagram & Software Requirements Specification (SRS) secara otomatis, cepat, dan terstruktur.
+    </p>
+  </header>
 
-        <!-- Card 3 -->
-        <div
-          style="
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-          "
-        >
-          <div style="font-size: 40px; margin-bottom: 15px">▶️</div>
-          <h3 style="margin-bottom: 10px">Generate Scenario</h3>
-        </div>
+  <section style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+
+    <!-- Project List -->
+    <div style="flex:1 1 420px;">
+      <div style="background:#fff; padding:20px; border-radius:10px; 
+                  box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+        <h2 style="margin:0 0 10px;">Your Projects</h2>
+        <p style="margin:0 0 14px; color:#666;">Project yang kamu buat akan muncul di sini.</p>
+
+        {% if projects %}
+          <ul style="padding-left:0; margin:0; list-style:none;">
+            {% for p in projects %}
+              <li style="margin-bottom:12px; padding:12px; background:#f9f9f9;
+                         border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <strong>{{ p.nama_project }}</strong>
+                  {% if p.deskripsi %}
+                    <span style="color:#666;"> — {{ p.deskripsi|truncatechars:80 }}</span>
+                  {% endif %}
+                </div>
+                <a href="{% url 'main:use_case' p.id_project %}"
+                   style="padding:6px 12px; background:#1e3a8a; color:#fff; 
+                          border-radius:6px; text-decoration:none; font-size:13px;">
+                  Open
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div style="color:#888; margin-top:10px;">Belum ada project.</div>
+        {% endif %}
       </div>
     </div>
-  </body>
-</html>
+
+    <!-- Add Project Form -->
+    <div style="width:360px;">
+      <form method="post" action="{% url 'main:project_new' %}"
+            style="background:#fff; padding:20px; border-radius:10px; 
+                   box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+        {% csrf_token %}
+        <h3 style="margin:0 0 12px;">+ Add New Project</h3>
+
+        <label for="id_name" style="display:block; margin-bottom:6px; font-size:13px;">Project Name</label>
+        <input type="text" id="id_name" name="name" placeholder="Nama project" required
+               style="width:100%; padding:10px; border:1px solid #e3e6ea; 
+                      border-radius:6px; margin-bottom:12px;">
+
+        <label for="id_description" style="display:block; margin-bottom:6px; font-size:13px;">Short Description</label>
+        <textarea id="id_description" name="description" rows="3"
+                  placeholder="Deskripsi singkat (optional)"
+                  style="width:100%; padding:10px; border:1px solid #e3e6ea; 
+                         border-radius:6px; margin-bottom:14px;"></textarea>
+
+        <button type="submit"
+                style="width:100%; padding:10px; background:#1e3a8a; color:#fff; 
+                       border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+          Create Project
+        </button>
+      </form>
+    </div>
+
+  </section>
+</div>
+{% endblock %}
