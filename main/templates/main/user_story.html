@@ -348,11 +348,13 @@ function loadUseCasesFromPreviousPage() {
         actors.forEach(actor => {
             if (actor.name && actor.name.trim() !== '') {
                 actor.features.forEach(feature => {
-                    if (feature.what && feature.what.trim() !== '' && feature.why && feature.why.trim() !== '') {
+                    // PERUBAHAN PENTING: Hanya memeriksa apakah "what" diisi
+                    // "why" sekarang opsional
+                    if (feature.what && feature.what.trim() !== '') {
                         useCases.push({
                             actor: actor.name,
                             feature: feature.what,
-                            purpose: feature.why
+                            purpose: feature.why || '' // Jika why kosong, gunakan string kosong
                         });
                         hasValidData = true;
                     }
@@ -397,7 +399,7 @@ function populateUseCaseTable() {
             <tr>
                 <td>${useCase.actor}</td>
                 <td>${useCase.feature}</td>
-                <td>${useCase.purpose}</td>
+                <td>${useCase.purpose || '<em style="color: #6b7280;">(optional - not specified)</em>'}</td>
             </tr>
         `;
     });
@@ -428,11 +430,21 @@ function populateUserStories() {
     let storiesHTML = `<ul class="user-story-list">`;
     
     useCases.forEach(useCase => {
+        // PERUBAHAN: Format user story berdasarkan apakah "why" diisi atau tidak
+        let storyText;
+        if (useCase.purpose && useCase.purpose.trim() !== '') {
+            // Format lengkap dengan "why"
+            storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.`;
+        } else {
+            // Format hanya dengan "what"
+            storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}.`;
+        }
+        
         storiesHTML += `
             <li class="user-story-item">
                 <span class="success-check">✔</span>
                 <div>
-                    <strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.
+                    ${storyText}
                 </div>
             </li>
         `;
@@ -666,7 +678,7 @@ document.getElementById('downloadText').addEventListener('click', function() {
     useCases.forEach((useCase, index) => {
         textContent += `${index + 1}. Actor: ${useCase.actor}\n`;
         textContent += `   Feature: ${useCase.feature}\n`;
-        textContent += `   Purpose: ${useCase.purpose}\n\n`;
+        textContent += `   Purpose: ${useCase.purpose || '(not specified)'}\n\n`;
     });
     
     // Create download link
@@ -690,7 +702,12 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
     // Generate user stories content for download
     let storiesContent = "USER STORIES\n============\n\n";
     useCases.forEach((useCase, index) => {
-        storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.\n\n`;
+        // Format user story berdasarkan apakah "why" diisi
+        if (useCase.purpose && useCase.purpose.trim() !== '') {
+            storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.\n\n`;
+        } else {
+            storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}.\n\n`;
+        }
     });
     
     // Create download link
