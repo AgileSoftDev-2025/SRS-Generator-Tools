@@ -1,3 +1,5 @@
+from django.shortcuts import get_object_or_404, redirect
+from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
@@ -6,6 +8,11 @@ from django.http import JsonResponse
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
+import base64
+import requests
+import urllib.parse
+from django.shortcuts import render
+from django.http import HttpResponse, JsonResponse
 import json
 
 def home(request):
@@ -184,7 +191,49 @@ def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')
 
 def class_diagram(request):
-    return render(request, 'main/class_diagram.html')
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Invalid method"})
+
+    body = json.loads(request.body)
+    data = body.get("data")
+
+    if not data:
+        return JsonResponse({"status": "error", "message": "No data provided"})
+
+    tables = data.get("tables", [])
+
+    # ----------- Generate UML Code ----------- #
+    uml = ["@startuml"]
+    for table in tables:
+        name = table["name"]
+        uml.append(f"class {name} {{")
+        for col in table["columns"]:
+            uml.append(f"  {col['name']}: {col['type']}")
+        uml.append("}")
+    for table in tables:
+        for fk in table.get("foreign_keys", []):
+            uml.append(f"{table['name']} --> {fk['references']}")
+    uml.append("@enduml")
+
+    plantuml_code = "\n".join(uml)
+    encoded = urllib.parse.quote(plantuml_code)
+
+    # ----------- Request PNG from PlantUML server ----------- #
+    plantuml_png_url = f"http://www.plantuml.com/plantuml/png/{encoded}"
+    response = requests.get(plantuml_png_url)
+
+    if response.status_code != 200:
+        return JsonResponse({"status": "error", "message": "Failed to generate image"})
+
+    # Convert PNG bytes -> base64 string
+    png_bytes = response.content
+    png_base64 = base64.b64encode(png_bytes).decode('utf-8')
+
+    # ----------- Send to Template ----------- #
+    return render(request, "main/class_diagram.html", {
+        "uml_image": png_base64,
+        "uml_code": plantuml_code
+    })
 
 def generate_srs(request):
     return render(request, 'main/generate_srs.html')
@@ -220,8 +269,5 @@ def project_new(request):
     return render(request, 'main/home.html') 
 
 def project_detail(request, id):
-    # Ambil data project berdasarkan id
-    project = get_object_or_404(Project, id_project=id_project)
-    
-    # Kirim data ke template HTML
+    project = get_object_or_404(Project, id_project=id)
     return render(request, 'main/project_detail.html', {'project': project})
