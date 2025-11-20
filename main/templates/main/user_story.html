@@ -1,11 +1,778 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>User Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Generate Use Case Diagram</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+        
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+        }
+        
+        footer {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            margin-top: 2rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        .diagram-container {
+            border: 1px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #f9fafb;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .diagram-image {
+            max-width: 100%;
+            max-height: 350px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .empty-state {
+            color: #6b7280;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            color: #111827;
+            font-weight: 600;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .info-text {
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+            font-size: 14px;
+        }
+        
+        .use-case-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .use-case-table th, .use-case-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .use-case-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .use-case-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .user-story-section {
+            margin-top: 30px;
+        }
+        
+        .user-story-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-story-title {
+            font-size: 20px;
+            color: #111827;
+            font-weight: 600;
+        }
+        
+        .user-story-list {
+            list-style-type: none;
+        }
+        
+        .user-story-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .success-check {
+            color: #10b981;
+            margin-top: 3px;
+            font-weight: bold;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+    </style>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+<header>
+    <div class="logo">
+        <div class="logo-icon">
+            <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+        </div>
+        <span class="logo-text">One UML</span>
+    </div>
+</header>
+
+<main>
+    <div style="margin-bottom: 32px;">
+        <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Generate Use Case Diagram & User Story</h1>
+        <p style="color: #6b7280; font-size: 14px;">Review your system logic and generated diagram before proceeding to the next design stage.</p>
+    </div>
+    
+    <div class="info-text">
+        <p><strong>Note:</strong> Diagram Use Case dan User Story dihasilkan secara otomatis berdasarkan data yang telah Anda input sebelumnya.</p>
+    </div>
+    
+    <!-- Use Case Diagram Section -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Use Case Diagram</div>
+            <div class="action-buttons">
+                <button class="btn" id="regenerateDiagram">
+                    ↻ Regenerate Diagram
+                </button>
+                <button class="btn btn-outline" id="downloadDiagram">
+                    ↓ Download SVG
+                </button>
+            </div>
+        </div>
+        
+        <div class="diagram-container" id="diagramContainer">
+            <div class="empty-state">
+                <i>📊</i>
+                <p>Use Case Diagram will appear here</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Use Case Details Section -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Use Case Details</div>
+            <div class="action-buttons">
+                <button class="btn" id="regenerateText">
+                    ↻ Regenerate Text
+                </button>
+                <button class="btn btn-outline" id="downloadText">
+                    ↓ Download TXT
+                </button>
+            </div>
+        </div>
+        
+        <div id="useCaseTableContainer">
+            <!-- Tabel use case akan ditampilkan di sini -->
+        </div>
+        
+        <!-- User Story Section -->
+        <div class="user-story-section">
+            <div class="user-story-header">
+                <div class="user-story-title">User Story</div>
+                <div class="action-buttons">
+                    <button class="btn btn-outline" id="downloadUserStory">
+                        ↓ Download TXT
+                    </button>
+                </div>
+            </div>
+            
+            <div id="userStoryContainer">
+                <!-- User story akan ditampilkan di sini -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="navigation">
+        <button class="btn btn-outline" id="backButton">
+            ← Back
+        </button>
+        <button class="btn" id="nextButton">
+            Next →
+        </button>
+    </div>
+</main>
+
+<footer>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+        <div style="display: flex; gap: 24px;">
+            <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+            <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+            <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Data use case
+let useCases = [];
+
+// Fungsi untuk mengambil data dari halaman sebelumnya
+function loadUseCasesFromPreviousPage() {
+    const savedData = localStorage.getItem('actorsAndFeatures');
+    if (savedData) {
+        const actors = JSON.parse(savedData);
+        
+        // Konversi data aktor ke format use case
+        useCases = [];
+        let hasValidData = false;
+        
+        actors.forEach(actor => {
+            if (actor.name && actor.name.trim() !== '') {
+                actor.features.forEach(feature => {
+                    // PERUBAHAN PENTING: Hanya memeriksa apakah "what" diisi
+                    // "why" sekarang opsional
+                    if (feature.what && feature.what.trim() !== '') {
+                        useCases.push({
+                            actor: actor.name,
+                            feature: feature.what,
+                            purpose: feature.why || '' // Jika why kosong, gunakan string kosong
+                        });
+                        hasValidData = true;
+                    }
+                });
+            }
+        });
+        
+        return hasValidData;
+    }
+    return false;
+}
+
+// Fungsi untuk menampilkan tabel use case
+function populateUseCaseTable() {
+    const container = document.getElementById('useCaseTableContainer');
+    
+    if (useCases.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i>📋</i>
+                <p>No use case data available.</p>
+                <p>Please go back and define actors and features first.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let tableHTML = `
+        <table class="use-case-table">
+            <thead>
+                <tr>
+                    <th>Actor</th>
+                    <th>Feature</th>
+                    <th>Purpose</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    useCases.forEach(useCase => {
+        tableHTML += `
+            <tr>
+                <td>${useCase.actor}</td>
+                <td>${useCase.feature}</td>
+                <td>${useCase.purpose || '<em style="color: #6b7280;">(optional - not specified)</em>'}</td>
+            </tr>
+        `;
+    });
+    
+    tableHTML += `
+            </tbody>
+        </table>
+    `;
+    
+    container.innerHTML = tableHTML;
+}
+
+// Fungsi untuk menampilkan user story
+function populateUserStories() {
+    const container = document.getElementById('userStoryContainer');
+    
+    if (useCases.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i>📝</i>
+                <p>No user stories available.</p>
+                <p>Please go back and define actors and features first.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let storiesHTML = `<ul class="user-story-list">`;
+    
+    useCases.forEach(useCase => {
+        // PERUBAHAN: Format user story berdasarkan apakah "why" diisi atau tidak
+        let storyText;
+        if (useCase.purpose && useCase.purpose.trim() !== '') {
+            // Format lengkap dengan "why"
+            storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.`;
+        } else {
+            // Format hanya dengan "what"
+            storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}.`;
+        }
+        
+        storiesHTML += `
+            <li class="user-story-item">
+                <span class="success-check">✔</span>
+                <div>
+                    ${storyText}
+                </div>
+            </li>
+        `;
+    });
+    
+    storiesHTML += `</ul>`;
+    container.innerHTML = storiesHTML;
+}
+
+// PlantUML Encoding Function yang BENAR dengan header ~1
+function encodePlantUML(text) {
+    // PlantUML menggunakan encoding DEFLATE + base64 dengan format khusus
+    // Kita akan menggunakan pako.js untuk kompresi DEFLATE
+    
+    if (typeof pako !== 'undefined') {
+        try {
+            // Kompresi menggunakan DEFLATE
+            const deflated = pako.deflate(text, { level: 9 });
+            
+            // Encode ke base64 dengan format PlantUML
+            const encoded = encode64(deflated);
+            
+            // TAMBAHKAN HEADER ~1 untuk HUFFMAN encoding
+            return '~1' + encoded;
+            
+        } catch (e) {
+            console.warn('pako deflate failed, using fallback method', e);
+        }
+    }
+    
+    // Fallback: gunakan base64 sederhana dengan header ~1
+    const bytes = new TextEncoder().encode(text);
+    let base64 = btoa(String.fromCharCode(...bytes));
+    base64 = base64.replace(/\+/g, '-').replace(/\//g, '_');
+    return '~1' + base64;
+}
+
+// Encode base64 versi PlantUML
+function encode64(data) {
+    const tbl = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
+    let res = "";
+    for (let i = 0; i < data.length; i += 3) {
+        if (i + 2 === data.length) {
+            res += append3bytes(data[i], data[i + 1], 0, tbl).substring(0, 3);
+        } else if (i + 1 === data.length) {
+            res += append3bytes(data[i], 0, 0, tbl).substring(0, 2);
+        } else {
+            res += append3bytes(data[i], data[i + 1], data[i + 2], tbl);
+        }
+    }
+    return res;
+}
+
+function append3bytes(b1, b2, b3, tbl) {
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+    const c4 = b3 & 0x3F;
+    return tbl[c1] + tbl[c2] + tbl[c3] + tbl[c4];
+}
+
+// Generate PlantUML URL
+function generatePlantUMLUrl(plantUMLCode) {
+    const encoded = encodePlantUML(plantUMLCode);
+    return `https://www.plantuml.com/plantuml/svg/${encoded}`;
+}
+
+// Fungsi untuk menghasilkan diagram PlantUML
+function generatePlantUMLDiagram() {
+    const container = document.getElementById('diagramContainer');
+    const regenerateBtn = document.getElementById('regenerateDiagram');
+    const originalText = regenerateBtn.innerHTML;
+    
+    // Show loading state
+    regenerateBtn.innerHTML = '<span class="loading-spinner"></span> Generating...';
+    regenerateBtn.disabled = true;
+    
+    if (useCases.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i>📊</i>
+                <p>No diagram data available.</p>
+                <p>Please go back and define actors and features first.</p>
+            </div>
+        `;
+        regenerateBtn.innerHTML = originalText;
+        regenerateBtn.disabled = false;
+        return;
+    }
+    
+    try {
+        // Membuat kode PlantUML berdasarkan data use case
+        let plantUMLCode = `@startuml\nleft to right direction\nskinparam monochrome true\nskinparam shadowing false\nskinparam usecase {\n  BackgroundColor #F8F9FA\n  BorderColor #6B7280\n}\ntitle Use Case Diagram\n\n`;
+        
+        // Menambahkan aktor
+        const actors = [...new Set(useCases.map(uc => uc.actor))];
+        actors.forEach(actor => {
+            const actorId = actor.replace(/\s+/g, '');
+            plantUMLCode += `actor "${actor}" as ${actorId}\n`;
+        });
+        
+        // Menambahkan use case
+        useCases.forEach((useCase, index) => {
+            const useCaseId = `UC${index + 1}`;
+            plantUMLCode += `usecase "${useCase.feature}" as ${useCaseId}\n`;
+        });
+        
+        // Menambahkan hubungan
+        useCases.forEach((useCase, index) => {
+            const actorId = useCase.actor.replace(/\s+/g, '');
+            const useCaseId = `UC${index + 1}`;
+            plantUMLCode += `${actorId} --> ${useCaseId}\n`;
+        });
+        
+        plantUMLCode += `@enduml`;
+        
+        console.log('PlantUML Code:', plantUMLCode);
+        
+        // Generate URL for PlantUML
+        const plantUMLUrl = generatePlantUMLUrl(plantUMLCode);
+        
+        console.log('PlantUML URL:', plantUMLUrl);
+        
+        // Menampilkan diagram
+        container.innerHTML = `
+            <img src="${plantUMLUrl}" alt="Use Case Diagram" class="diagram-image" 
+                 onerror="handleImageError(this)" 
+                 onload="handleImageLoad(this)">
+            <div style="text-align: center; margin-top: 10px; color: #6b7280; font-size: 12px;">
+                Use Case Diagram generated with PlantUML
+            </div>
+            <div style="text-align: center; margin-top: 5px;">
+                <small>If diagram doesn't load, <a href="${plantUMLUrl}" target="_blank">click here to view</a></small>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error('Error generating PlantUML diagram:', error);
+        showTextualRepresentation();
+    } finally {
+        // Restore button state
+        regenerateBtn.innerHTML = originalText;
+        regenerateBtn.disabled = false;
+    }
+}
+
+// Fallback: Show textual representation
+function showTextualRepresentation() {
+    const container = document.getElementById('diagramContainer');
+    
+    // Get unique actors
+    const actors = [...new Set(useCases.map(uc => uc.actor))];
+    
+    let diagramHTML = `
+        <div style="text-align: center; padding: 20px;">
+            <div style="margin-bottom: 20px;">
+                <h3>Use Case Diagram Preview</h3>
+                <p style="color: #6b7280;">Diagram representation based on your data</p>
+            </div>
+    `;
+    
+    // Show actors
+    diagramHTML += `<div style="margin-bottom: 20px;"><strong>Actors:</strong> ${actors.join(', ')}</div>`;
+    
+    // Show use cases
+    diagramHTML += `<div style="margin-bottom: 20px;">`;
+    diagramHTML += `<strong>Use Cases:</strong><br>`;
+    useCases.forEach((useCase, index) => {
+        diagramHTML += `${index + 1}. ${useCase.feature} (${useCase.actor})<br>`;
+    });
+    diagramHTML += `</div>`;
+    
+    diagramHTML += `
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <p><strong>Note:</strong> PlantUML service is currently unavailable.</p>
+                <p>This is a textual representation of your use case diagram.</p>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = diagramHTML;
+}
+
+// Handle image loading success
+function handleImageLoad(img) {
+    console.log('Diagram loaded successfully');
+}
+
+// Handle image loading errors
+function handleImageError(img) {
+    console.error('Failed to load diagram image');
+    showTextualRepresentation();
+}
+
+// Event listener untuk tombol regenerate diagram
+document.getElementById('regenerateDiagram').addEventListener('click', function() {
+    generatePlantUMLDiagram();
+});
+
+// Event listener untuk tombol regenerate text
+document.getElementById('regenerateText').addEventListener('click', function() {
+    const hasData = loadUseCasesFromPreviousPage();
+    if (hasData) {
+        populateUseCaseTable();
+        populateUserStories();
+        generatePlantUMLDiagram();
+        alert('Use Case details and User Stories regenerated successfully!');
+    } else {
+        alert('No valid data found. Please go back and define actors and features first.');
+    }
+});
+
+// Event listener untuk tombol download
+document.getElementById('downloadDiagram').addEventListener('click', function() {
+    if (useCases.length === 0) {
+        alert('No diagram available to download. Please generate a diagram first.');
+        return;
+    }
+    alert('Diagram akan diunduh dalam format SVG');
+    // Di sini akan ada kode untuk mengunduh diagram SVG
+});
+
+document.getElementById('downloadText').addEventListener('click', function() {
+    if (useCases.length === 0) {
+        alert('No use case details available to download.');
+        return;
+    }
+    
+    // Generate text content for download
+    let textContent = "USE CASE DETAILS\n================\n\n";
+    useCases.forEach((useCase, index) => {
+        textContent += `${index + 1}. Actor: ${useCase.actor}\n`;
+        textContent += `   Feature: ${useCase.feature}\n`;
+        textContent += `   Purpose: ${useCase.purpose || '(not specified)'}\n\n`;
+    });
+    
+    // Create download link
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'use_case_details.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById('downloadUserStory').addEventListener('click', function() {
+    if (useCases.length === 0) {
+        alert('No user stories available to download.');
+        return;
+    }
+    
+    // Generate user stories content for download
+    let storiesContent = "USER STORIES\n============\n\n";
+    useCases.forEach((useCase, index) => {
+        // Format user story berdasarkan apakah "why" diisi
+        if (useCase.purpose && useCase.purpose.trim() !== '') {
+            storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.\n\n`;
+        } else {
+            storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}.\n\n`;
+        }
+    });
+    
+    // Create download link
+    const blob = new Blob([storiesContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'user_stories.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+
+// PERUBAHAN PENTING: Event listener untuk tombol navigasi
+document.getElementById('backButton').addEventListener('click', function() {
+    // Kembali ke halaman use_case_diagram
+    window.location.href = 'use_case_diagram.html';
+});
+
+document.getElementById('nextButton').addEventListener('click', function() {
+    if (useCases.length === 0) {
+        alert('Please generate use cases first before proceeding.');
+        return;
+    }
+    // Beralih ke halaman input_informasi_tambahan
+    window.location.href = 'input_informasi_tambahan.html';
+});
+
+// Inisialisasi halaman
+document.addEventListener('DOMContentLoaded', function() {
+    // Muat data dari halaman sebelumnya
+    const hasData = loadUseCasesFromPreviousPage();
+    
+    if (hasData) {
+        // Isi tabel dan user story
+        populateUseCaseTable();
+        populateUserStories();
+        
+        // Generate diagram setelah semua data siap
+        setTimeout(() => {
+            generatePlantUMLDiagram();
+        }, 500);
+    } else {
+        // Tampilkan state kosong
+        populateUseCaseTable();
+        populateUserStories();
+        
+        const diagramContainer = document.getElementById('diagramContainer');
+        diagramContainer.innerHTML = `
+            <div class="empty-state">
+                <i>📊</i>
+                <p>No diagram data available.</p>
+                <p>Please go back and define actors and features first.</p>
+                <button class="btn" onclick="window.location.href='use_case_diagram.html'" style="margin-top: 10px;">
+                    Go to Define Actors
+                </button>
+            </div>
+        `;
+    }
+});
+</script>
+
+<!-- Tambahkan library pako.js untuk kompresi DEFLATE -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
 </body>
 </html>

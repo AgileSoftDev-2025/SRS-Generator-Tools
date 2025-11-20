@@ -2,10 +2,802 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Define Actors and Features</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header & Footer */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-secondary {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #2563eb;
+            font-size: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 0;
+            transition: color 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            color: #1d4ed8;
+        }
+        
+        .remove-btn {
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .remove-btn:hover {
+            background-color: #f3f4f6;
+            color: #ef4444;
+        }
+        
+        /* Actor Section Styles */
+        .actor-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .actor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .actor-number {
+            background: #3b82f6;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+        
+        .actor-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        
+        .actor-name-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 8px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .actor-name-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .example-text {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .features-section {
+            margin-top: 20px;
+        }
+        
+        .features-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 16px;
+        }
+        
+        .features-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+        
+        .features-table th {
+            text-align: left;
+            padding: 12px 16px;
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .features-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .feature-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .feature-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .add-feature-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 1px dashed #d1d5db;
+            color: #6b7280;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+        
+        .add-feature-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .no-features {
+            text-align: center;
+            color: #9ca3af;
+            font-style: italic;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .add-actor-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #475569;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0 auto 30px;
+        }
+        
+        .add-actor-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .save-indicator {
+            color: #059669;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            background: #059669;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .next-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .next-btn:hover {
+            background: #2563eb;
+        }
+        
+        .delete-feature-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-feature-btn:hover {
+            background: #fef2f2;
+        }
+        
+        .delete-actor-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            margin-left: auto;
+        }
+        
+        .delete-actor-btn:hover {
+            background: #fef2f2;
+        }
+        
+        .optional-label {
+            font-weight: normal;
+            color: #6b7280;
+        }
+        
+        .required-label {
+            font-weight: normal;
+            color: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="card">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Define Actors and Features</h1>
+                <p style="color: #6b7280; font-size: 14px;">List all system actors and describe their roles and goals.</p>
+            </div>
+            
+            <div id="actorsContainer">
+                <!-- Actors will be dynamically added here -->
+            </div>
+            
+            <button id="addActorBtn" class="add-actor-btn">
+                <span style="font-size: 16px;">+</span>
+                Add Actor
+            </button>
+            
+            <div class="footer-actions">
+                <div class="save-indicator">
+                    <div class="save-dot"></div>
+                    <span>All changes saved.</span>
+                </div>
+                <button id="nextBtn" class="btn btn-primary">Next</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        class ActorsAndFeaturesManager {
+            constructor() {
+                this.actors = [];
+                this.nextActorId = 1;
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.addActor(); // Add first actor by default
+            }
+            
+            bindEvents() {
+                document.getElementById('addActorBtn').addEventListener('click', () => {
+                    this.addActor();
+                });
+                
+                document.getElementById('nextBtn').addEventListener('click', () => {
+                    if (this.validateForm()) {
+                        this.saveData();
+                        // Navigate to user story page
+                        window.location.href = 'user_story.html';
+                    }
+                });
+            }
+            
+            addActor() {
+                const actorId = this.nextActorId++;
+                const actor = {
+                    id: actorId,
+                    name: '',
+                    features: []
+                };
+                
+                this.actors.push(actor);
+                this.renderActors();
+                
+                // Focus on the new actor's name input
+                setTimeout(() => {
+                    const input = document.querySelector(`#actor-${actorId} .actor-name-input`);
+                    if (input) input.focus();
+                }, 100);
+            }
+            
+            deleteActor(actorId) {
+                if (this.actors.length <= 1) {
+                    alert('You must have at least one actor.');
+                    return;
+                }
+                
+                this.actors = this.actors.filter(actor => actor.id !== actorId);
+                this.renderActors();
+            }
+            
+            addFeature(actorId) {
+                const actor = this.actors.find(a => a.id === actorId);
+                if (actor) {
+                    actor.features.push({ what: '', why: '' });
+                    this.renderActors();
+                    
+                    // Focus on the new feature's what input
+                    setTimeout(() => {
+                        const inputs = document.querySelectorAll(`#actor-${actorId} .feature-input`);
+                        if (inputs.length > 0) {
+                            inputs[inputs.length - 2].focus(); // Focus on what input of the new feature
+                        }
+                    }, 100);
+                }
+            }
+            
+            deleteFeature(actorId, featureIndex) {
+                const actor = this.actors.find(a => a.id === actorId);
+                if (actor) {
+                    actor.features.splice(featureIndex, 1);
+                    this.renderActors();
+                }
+            }
+            
+            updateActorName(actorId, name) {
+                const actor = this.actors.find(a => a.id === actorId);
+                if (actor) {
+                    actor.name = name;
+                }
+            }
+            
+            updateFeature(actorId, featureIndex, field, value) {
+                const actor = this.actors.find(a => a.id === actorId);
+                if (actor && actor.features[featureIndex]) {
+                    actor.features[featureIndex][field] = value;
+                }
+            }
+            
+            validateForm() {
+                // Check if all actors have names
+                for (const actor of this.actors) {
+                    if (!actor.name.trim()) {
+                        alert(`Please enter a name for Actor #${this.actors.indexOf(actor) + 1}`);
+                        return false;
+                    }
+                    
+                    // Check if all features have "what" filled
+                    for (const feature of actor.features) {
+                        if (!feature.what.trim()) {
+                            alert(`Please fill in the "What" field for all features of ${actor.name || `Actor #${this.actors.indexOf(actor) + 1}`}`);
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            }
+            
+            renderActors() {
+                const container = document.getElementById('actorsContainer');
+                container.innerHTML = '';
+                
+                this.actors.forEach((actor, index) => {
+                    const actorElement = this.createActorElement(actor, index + 1);
+                    container.appendChild(actorElement);
+                });
+            }
+            
+            createActorElement(actor, actorNumber) {
+                const actorDiv = document.createElement('div');
+                actorDiv.className = 'actor-section';
+                actorDiv.id = `actor-${actor.id}`;
+                
+                actorDiv.innerHTML = `
+                    <div class="actor-header">
+                        <div class="actor-number">${actorNumber}</div>
+                        <div class="actor-title">Actor #${actorNumber}</div>
+                        ${this.actors.length > 1 ? 
+                            `<button class="delete-actor-btn" onclick="manager.deleteActor(${actor.id})">
+                                × Delete Actor
+                            </button>` : ''
+                        }
+                    </div>
+                    
+                    <div>
+                        <div class="form-label">Actor Name <span class="required-label">(required)</span></div>
+                        <input 
+                            type="text" 
+                            class="actor-name-input" 
+                            placeholder="Enter actor name"
+                            value="${actor.name}"
+                            oninput="manager.updateActorName(${actor.id}, this.value)"
+                        >
+                        <div class="example-text">
+                            Example: System Administrator, Customer, Vendor.
+                        </div>
+                    </div>
+                    
+                    <div class="features-section">
+                        <div class="features-title">Features performed by this actor</div>
+                        ${this.createFeaturesTable(actor)}
+                        <button class="add-feature-btn" onclick="manager.addFeature(${actor.id})">
+                            <span style="font-size: 16px;">+</span>
+                            Add Feature
+                        </button>
+                    </div>
+                `;
+                
+                return actorDiv;
+            }
+            
+            createFeaturesTable(actor) {
+                if (actor.features.length === 0) {
+                    return `
+                        <div class="no-features">
+                            No features added yet. Click + Add Feature to start.
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <table class="features-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45%;">What <span class="required-label">(required)</span></th>
+                                <th style="width: 45%;">Why <span class="optional-label">(optional)</span></th>
+                                <th style="width: 10%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${actor.features.map((feature, index) => `
+                                <tr>
+                                    <td>
+                                        <input 
+                                            type="text" 
+                                            class="feature-input" 
+                                            placeholder="${index === 0 ? 'As a Admin, I want to process customer orders' : 'Describe feature or action'}"
+                                            value="${feature.what}"
+                                            oninput="manager.updateFeature(${actor.id}, ${index}, 'what', this.value)"
+                                            required
+                                        >
+                                    </td>
+                                    <td>
+                                        <input 
+                                            type="text" 
+                                            class="feature-input" 
+                                            placeholder="${index === 0 ? 'so that to fulfill purchase requests' : 'Explain reason or goal (optional)'}"
+                                            value="${feature.why}"
+                                            oninput="manager.updateFeature(${actor.id}, ${index}, 'why', this.value)"
+                                        >
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button class="delete-feature-btn" onclick="manager.deleteFeature(${actor.id}, ${index})">
+                                            ×
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+            
+            saveData() {
+                // Format data for output
+                const formattedData = this.formatDataForOutput();
+                
+                // In a real application, you would send this data to a server
+                console.log('Saving actors data:', formattedData);
+                
+                // Store in localStorage for demo purposes
+                localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
+                
+                // You could also send to a Django backend:
+                // fetch('/api/save-actors/', {
+                //     method: 'POST',
+                //     headers: {
+                //         'Content-Type': 'application/json',
+                //         'X-CSRFToken': getCSRFToken() // Django CSRF token
+                //     },
+                //     body: JSON.stringify({ actors: formattedData })
+                // });
+            }
+            
+            formatDataForOutput() {
+                // Format the data for output, making sure "why" is optional
+                return this.actors.map(actor => {
+                    return {
+                        name: actor.name,
+                        features: actor.features.map(feature => {
+                            // Only include "why" if it has a value
+                            const formattedFeature = { what: feature.what };
+                            if (feature.why && feature.why.trim() !== '') {
+                                formattedFeature.why = feature.why;
+                            }
+                            return formattedFeature;
+                        })
+                    };
+                });
+            }
+            
+            loadData() {
+                // Load data from localStorage for demo purposes
+                const savedData = localStorage.getItem('actorsAndFeatures');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    
+                    // Reconstruct the actors array with the loaded data
+                    this.actors = parsedData.map((actorData, index) => {
+                        return {
+                            id: index + 1,
+                            name: actorData.name,
+                            features: actorData.features.map(feature => {
+                                return {
+                                    what: feature.what,
+                                    why: feature.why || '' // Ensure why is always present, even if empty
+                                };
+                            })
+                        };
+                    });
+                    
+                    if (this.actors.length > 0) {
+                        this.nextActorId = Math.max(...this.actors.map(a => a.id)) + 1;
+                    }
+                    this.renderActors();
+                }
+            }
+        }
+
+        // Initialize the manager when the page loads
+        const manager = new ActorsAndFeaturesManager();
+
+        // Load any saved data
+        window.addEventListener('load', () => {
+            manager.loadData();
+        });
+
+        // Auto-save when leaving the page
+        window.addEventListener('beforeunload', () => {
+            manager.saveData();
+        });
+    </script>
 </body>
 </html>
