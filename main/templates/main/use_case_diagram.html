@@ -523,8 +523,8 @@
                 document.getElementById('nextBtn').addEventListener('click', () => {
                     if (this.validateForm()) {
                         this.saveData();
-                        alert('Data saved successfully! Moving to next page...');
-                        // In a real app, you would navigate to the next page here
+                        // Navigate to user story page
+                        window.location.href = 'user_story.html';
                     }
                 });
             }
