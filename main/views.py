@@ -222,7 +222,7 @@ def class_diagram(request):
     uml = ["@startuml"]
     for table in tables:
         name = table["name"]
-        uml.append(f"class {name} {}")
+        uml.append(f"class {name} {{")
         for col in table["columns"]:
             uml.append(f"  {col['name']}: {col['type']}")
         uml.append("}")
