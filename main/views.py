@@ -295,7 +295,6 @@ def project_new(request):
     return render(request, 'main/home.html') 
 
 def project_detail(request, id):
-<<<<<<< HEAD
     # Ambil data project berdasarkan id
     project = get_object_or_404(Project, id_project=id_project)
     
@@ -380,7 +379,3 @@ def create_plantuml_from_usecase(data):
             except Exception as e:
                 return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
-=======
-    project = get_object_or_404(Project, id_project=id)
-    return render(request, 'main/project_detail.html', {'project': project})
->>>>>>> 2ab3973d5103e4c02d340eb16351a1724383b4b3

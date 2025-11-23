@@ -222,7 +222,7 @@ class ClassDiagram(models.Model):
 
 # Tabel ActivityDiagram
 class ActivityDiagram(models.Model):
-    use_case = models.OneToOneField(Usecase, on_delete=models.CASCADE, related_name='activity_diagram')
+    use_case = models.OneToOneField(UseCaseSpecification, on_delete=models.CASCADE, related_name='activity_diagram')
     plantuml_code = models.TextField()
     diagram_image_url = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
