@@ -7,6 +7,7 @@ from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .forms import RegisterForm
 
 def home(request):
     if 'user_id' not in request.session:
@@ -40,6 +41,26 @@ def login_view(request):
             messages.error(request, 'Invalid email or password')
     
     return render(request, 'main/login.html')
+
+def register_view(request):
+    if 'user_id' in request.session:
+        return redirect('main:home')
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            pengguna = form.save()
+            messages.success(request, 'Registration successful! Please log in.')
+            return redirect('main:login')
+        else:
+            messages.error(request, 'Registration failed. Please correct the errors below.')
+    else:
+        form = RegisterForm()
+    context = {
+        'form': form,
+        'title': 'Create Account'
+    }
+    return render(request, 'main/register.html', {'form': form})
+
 
 def logout_view(request):
     if 'user_id' in request.session:
@@ -130,6 +151,11 @@ def save_use_case_spec(request, feature_id):
 
 
 def activity_diagram(request):
+    use_case_data = request.session.get('use_case_data', None)
+    context = {
+        'page title': 'Generated Activity Diagram',
+        'use_case_data': json.dumps('use_case_data') if use_case_data else 'null'
+    }
     return render(request, 'main/activity_diagram.html')
 
 def import_sql(request):
@@ -225,3 +251,82 @@ def project_detail(request, id):
     
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
+
+def generate_plantuml(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            plantuml_code = create_plantuml_from_usecase(data)
+            return JsonResponse({"status": "success", "plantuml": plantuml_code})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+def create_plantuml_from_usecase(data):
+    plantuml = "@startuml\n"
+    plantuml += f"title Activity Diagram - {data.get('featureName', 'Use Case')}\n\n"
+    plantuml += "start\n"
+    precondition = data.get('precondition', '').strip()
+    if precondition:
+        plantuml += f":Precondition: {precondition};\n"
+    plantuml += "\n"
+
+    # Basic Path
+    basic_path = data.get('basicPath', [])
+    if basic_path:
+        plantuml += 'partition "Basic Path" {\n'
+        for step in basic_path:
+            actor_action = step.get('actor', '').strip()
+            system_response = step.get('system', '').strip()
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_response};\n"
+        plantuml += "}\n\n"
+
+    # Alternative Path
+    alternative_path = data.get('alternativePath', [])
+    has_alternative = any(step.get('actor', '').strip() or step.get('system', '').strip() for step in alternative_path)
+    if has_alternative:
+        plantuml += 'partition "Alternative Path" {\n'
+        for step in alternative_path:
+            actor_action = step.get('actor', '').strip()
+            system_response = step.get('system', '').strip()
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_response};\n"
+        plantuml += "}\n\n"
+
+    # Exception Path
+    exception_path = data.get('exceptionPath', [])
+    has_exception = any(step.get('actor', '').strip() or step.get('system', '').strip() for step in exception_path)
+    if has_exception:
+        plantuml += 'partition "Exception Path" {\n'
+        for step in exception_path:
+            actor_action = step.get('actor', '').strip()
+            system_response = step.get('system', '').strip()
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_response};\n"
+        plantuml += "}\n\n"
+
+    postcondition = data.get('postcondition', '').strip()
+    if postcondition:
+        plantuml += f":Postcondition: {postcondition};\n"
+    plantuml += "stop\n"
+    plantuml += "@enduml"
+    return plantuml
+
+    def download_plantuml(request):
+        if request.method == "POST":
+            try:
+                data = json.loads(request.body)
+                plantuml_code = data.get('plantuml', '')
+                response = HttpResponse(plantuml_code, content_type='text/plain')
+                response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
+                return response
+            except Exception as e:
+                return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)

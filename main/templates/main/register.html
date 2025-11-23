@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .register-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .register-header p {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: #adb5bd;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a5568;
+            box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: #6c757d;
+        }
+
+        .toggle-password:hover {
+            color: #1a1a1a;
+        }
+
+        .error-message {
+            background-color: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .error-message ul, .success-message ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .error-message li, .success-message li {
+            margin-bottom: 5px;
+        }
+
+        .error-message li:last-child, .success-message li:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #2d3748;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .login-link a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .field-error {
+            border-color: #dc3545 !important;
+        }
+
+        .field-error-text {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">
+            <h1>Create Account</h1>
+            <p>Join SRS Generator to get started</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'success' %}
+                    <div class="success-message">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="error-message">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="error-message">
+                <ul>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'main:register' %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="nama_user">Full Name</label>
+                {{ form.nama_user }}
+                {% if form.nama_user.errors %}
+                    {% for error in form.nama_user.errors %}
+                        <div class="field-error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email_user">Email</label>
+                {{ form.email_user }}
+                {% if form.email_user.errors %}
+                    {% for error in form.email_user.errors %}
+                        <div class="field-error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="password-wrapper">
+                    {{ form.password }}
+                    <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                        <svg id="eye-icon-password" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div class="field-error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password">Confirm Password</label>
+                <div class="password-wrapper">
+                    {{ form.confirm_password }}
+                    <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">
+                        <svg id="eye-icon-confirm_password" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
+                </div>
+                {% if form.confirm_password.errors %}
+                    {% for error in form.confirm_password.errors %}
+                        <div class="field-error-text">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">Create Account</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'main:login' %}">Sign in</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById('eye-icon-' + fieldId);
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                field.type = 'password';
+                icon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

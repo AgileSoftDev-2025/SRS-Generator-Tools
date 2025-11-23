@@ -24,4 +24,6 @@ urlpatterns = [
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     path('project/new/', views.project_new, name='project_new'),
     path('project/<id_project>/', views.project_detail, name='project_detail'),
+    path('api/generate-plantuml/', views.generate_plantuml, name='generate_plantuml'),
+    path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
 ]

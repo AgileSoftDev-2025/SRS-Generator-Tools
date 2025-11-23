@@ -145,10 +145,15 @@ class ClassDiagram(models.Model):
 
 # Tabel ActivityDiagram
 class ActivityDiagram(models.Model):
-    id_activity = models.CharField(max_length=5, primary_key=True)
-    scenario = models.ForeignKey(UserStoryScenario, on_delete=models.CASCADE, related_name='activities')
-    script_activity = models.TextField()
-    nama_usecase = models.TextField()
-    main_flow = models.TextField()
-    alternative_flow = models.TextField()
-    hasil_activity = models.ImageField(upload_to='activities/')
+    use_case = models.OneToOneField(UseCase, on_delete=models.CASCADE, related_name='activity_diagram')
+    plantuml_code = models.TextField()
+    diagram_image_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Activity Diagram"
+        verbose_name_plural = "Activity Diagrams"
+    
+    def __str__(self):
+        return f"Activity Diagram for {self.use_case.feature_name}"
