@@ -96,12 +96,20 @@
       </div>
     </div>
 
-    <!-- Bottom Buttons -->
+   <!-- Bottom Buttons -->
     <div class="bottom-buttons">
-      <button class="btn btn-light-gray px-4 py-2">← Back</button>
+      <button class="btn btn-light-gray px-4 py-2" id="backBtn">← Back</button>
       <button class="btn btn-dark px-4 py-2" id="nextBtn">Next →</button>
     </div>
-  </div>
+    <script>
+    document.getElementById("backBtn").addEventListener("click", function() {
+      window.location.href = "user_story.html";
+    });
+    document.getElementById("nextBtn").addEventListener("click", function() {
+      window.location.href = "use_case_spec.html";
+      });
+    </script>
+
 
   <!-- Modal Feature 1 -->
   <div class="modal fade" id="modalFeature1" tabindex="-1" aria-hidden="true">

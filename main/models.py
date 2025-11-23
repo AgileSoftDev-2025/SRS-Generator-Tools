@@ -72,10 +72,80 @@ class UserStoryScenario(models.Model):
 # Tabel UseCaseSpecification
 class UseCaseSpecification(models.Model):
     id_usecasespecification = models.CharField(max_length=5, primary_key=True)
-    usecase = models.ForeignKey(Usecase, on_delete=models.CASCADE, related_name='specifications')
+
+    # relasi ke Usecase (punya kamu sebelumnya)
+    usecase = models.ForeignKey(
+        Usecase, 
+        on_delete=models.CASCADE, 
+        related_name='specifications'
+    )
+
+    # gambar hasil
     hasil_usecasespecification = models.ImageField(upload_to='usecase_specs/')
-    input_precondition = models.TextField()
-    input_postcondition = models.TextField()
+
+    # Summary Description
+    summary_description = models.CharField(max_length=500)
+
+    # Priority
+    PRIORITY_CHOICES = [
+        ('Must Have', 'Must Have'),
+        ('Should Have', 'Should Have'),
+        ('Could Have', 'Could Have'),
+        ("Won't Have", "Won't Have"),
+    ]
+    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES)
+
+    # Status
+    STATUS_CHOICES = [
+        ('active', 'active'),
+        ('inactive', 'inactive')
+    ]
+    status = models.CharField(max_length=250, choices=STATUS_CHOICES)
+
+    # Pre & Post Condition
+    input_precondition = models.CharField(max_length=500)
+    input_postcondition = models.CharField(max_length=500)
+
+    def __str__(self):
+        return self.id_usecasespecification
+class BasicPath(models.Model):
+    usecase_spec = models.ForeignKey(
+        UseCaseSpecification,
+        on_delete=models.CASCADE,
+        related_name='basic_paths'
+    )
+    step_number = models.IntegerField()
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"Basic Step {self.step_number}"
+
+
+class AlternativePath(models.Model):
+    usecase_spec = models.ForeignKey(
+        UseCaseSpecification,
+        on_delete=models.CASCADE,
+        related_name='alternative_paths'
+    )
+    related_basic_step = models.IntegerField()
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"Alternative tied to Step {self.related_basic_step}"
+
+
+class ExceptionPath(models.Model):
+    usecase_spec = models.ForeignKey(
+        UseCaseSpecification,
+        on_delete=models.CASCADE,
+        related_name='exception_paths'
+    )
+    related_basic_step = models.IntegerField()
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        return f"Exception tied to Step {self.related_basic_step}"
+
 
 # Tabel ImportedTable
 class ImportedTable(models.Model):
@@ -105,6 +175,13 @@ class ImportedRelationship(models.Model):
 
 # main/models.py
 from django.db import models
+
+class Feature(models.Model):
+    nama = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.nama
+
 
 # tabel saved SQL Table
 class SqlTable(models.Model):

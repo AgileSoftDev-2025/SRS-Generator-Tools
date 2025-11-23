@@ -1,11 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>User Story</title>
+    <title>Class Diagram</title>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+
+<div style="max-width:900px; margin:2rem auto;">
+
+    <h1 style="font-size:1.8rem; font-weight:600;">
+        Hasil Generate Class Diagram
+    </h1>
+
+    <!-- Display UML Image -->
+    <img 
+        src="data:image/png;base64,{{ uml_image }}" 
+        alt="Generated UML" 
+        style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:1rem 0;"
+    />
+
+    <h2 style="margin-top:2rem;">PlantUML Code</h2>
+    <pre style="
+        background:#f3f4f6;
+        padding:1rem;
+        border-radius:6px;
+        border:1px solid #e5e7eb;
+        white-space:pre-wrap;
+    ">{{ uml_code }}</pre>
+
+</div>
+
 </body>
 </html>

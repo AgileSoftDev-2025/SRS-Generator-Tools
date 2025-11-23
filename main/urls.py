@@ -17,6 +17,7 @@ urlpatterns = [
     path('use_case_spec/', views.use_case_spec, name='use_case_spec'),
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'),
     path('import-sql/', views.import_sql, name='import_sql'),
+    path('import-sql/class_diagram.html', views.class_diagram, name='class_diagram'),
     path('parse-sql/', views.parse_sql, name='parse_sql'),
     path('save-parsed-sql/', views.save_parsed_sql, name='save_parsed_sql'),
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
