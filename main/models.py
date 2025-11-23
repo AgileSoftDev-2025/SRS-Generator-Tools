@@ -225,7 +225,7 @@ class ActivityDiagram(models.Model):
     use_case = models.OneToOneField(UseCaseSpecification, on_delete=models.CASCADE, related_name='activity_diagram')
     plantuml_code = models.TextField()
     diagram_image_url = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -233,4 +233,4 @@ class ActivityDiagram(models.Model):
         verbose_name_plural = "Activity Diagrams"
     
     def __str__(self):
-        return f"Activity Diagram for {self.use_case.feature_name}"
+        return f"Activity Diagram for {self.use_case_spec.id_usecasespecification}"
