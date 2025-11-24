@@ -89,6 +89,20 @@ def logout_view(request):
 def user_story(request):
     return render(request, 'main/user_story.html')
 
+def save_userstory(request):
+    if request.method == "POST":
+        actor = request.POST.get("input_sebagai")
+        fitur = request.POST.get("input_fitur")
+        gui_id = request.POST.get("gui_id")
+
+        userstory = UserStory(
+            input_sebagai=actor,
+            input_fitur=fitur,
+            gui_id=gui_id
+        )
+        userstory.save()
+        return redirect("halaman_sukses")
+    
 def use_case(request):
     return render(request, 'main/use_case.html')
 
@@ -295,9 +309,8 @@ def project_new(request):
     return render(request, 'main/home.html') 
 
 def project_detail(request, id):
-<<<<<<< HEAD
     # Ambil data project berdasarkan id
-    project = get_object_or_404(Project, id_project=id_project)
+    project = get_object_or_404(Project, id_project=project)
     
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
@@ -380,7 +393,3 @@ def create_plantuml_from_usecase(data):
             except Exception as e:
                 return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
-=======
-    project = get_object_or_404(Project, id_project=id)
-    return render(request, 'main/project_detail.html', {'project': project})
->>>>>>> 2ab3973d5103e4c02d340eb16351a1724383b4b3

@@ -54,7 +54,7 @@ class Usecase(models.Model):
 
 # Tabel UserStory
 class UserStory(models.Model):
-    id_userstory = models.CharField(max_length=5, primary_key=True)
+    id_userstory = models.AutoField(primary_key=True)
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='userstories')
     input_sebagai = models.CharField(max_length=100)
     input_fitur = models.CharField(max_length=100)
@@ -108,6 +108,7 @@ class UseCaseSpecification(models.Model):
 
     def __str__(self):
         return self.id_usecasespecification
+    
 class BasicPath(models.Model):
     usecase_spec = models.ForeignKey(
         UseCaseSpecification,
