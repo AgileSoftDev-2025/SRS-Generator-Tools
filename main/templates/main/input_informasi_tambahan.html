@@ -121,14 +121,35 @@
         </div>
         <form id="formFeature1">
           <div class="modal-body">
+
+            <!-- Summary -->
             <div class="mb-3">
               <label class="form-label">Summary Description</label>
-              <textarea class="form-control" id="summary" rows="2"></textarea>
+              <small class="text-muted d-block mb-1">Jelaskan tujuan umum dari use case dalam 1–2 kalimat.</small>
+              <textarea class="form-control" id="summary" rows="2"
+                placeholder="Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard."></textarea>
             </div>
-            <div class="row mb-3">
-              <div class="col-md-6">
+
+            <!-- Priority & Status (side by side) -->
+            <div class="row">
+              <!-- Priority -->
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Priority</label>
-                <select class="form-select" id="priority">
+                <a class="text-decoration-none d-block mb-1 small" data-bs-toggle="collapse" href="#priority_help" role="button">
+                  📌 Panduan Prioritas
+                </a>
+
+                <div class="collapse" id="priority_help">
+                  <div class="alert alert-secondary p-2 small mt-1">
+                    <b>Keterangan Prioritas:</b><br>
+                    • <b>Must Have</b> → Fitur wajib ada, tanpa fitur ini sistem tidak dapat berjalan.<br>
+                    • <b>Should Have</b> → Fitur penting, tapi sistem masih bisa berjalan tanpa fitur ini.<br>
+                    • <b>Could Have</b> → Fitur tambahan jika ada waktu / budget.<br>
+                    • <b>Won't Have</b> → Fitur yang tidak akan dikerjakan saat ini.
+                  </div>
+                </div>
+
+                <select class="form-select mt-2" id="priority">
                   <option>Pilih Prioritas</option>
                   <option>Must Have</option>
                   <option>Should Have</option>
@@ -136,77 +157,119 @@
                   <option>Won't Have</option>
                 </select>
               </div>
-              <div class="col-md-6">
+
+              <!-- Status -->
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Status</label>
-                <select class="form-select" id="status">
+                <a class="text-decoration-none d-block small mb-1" data-bs-toggle="collapse" href="#status_help" role="button">
+                  📌 Panduan Status
+                </a>
+
+                <div class="collapse" id="status_help">
+                  <div class="alert alert-secondary p-2 small mt-1">
+                    <b>Keterangan Status:</b><br>
+                    • <b>Active</b> → Use case masih digunakan dan diterapkan.<br>
+                    • <b>Inactive</b> → Use case sudah tidak digunakan / digantikan.
+                  </div>
+                </div>
+
+                <select class="form-select mt-2" id="status">
                   <option>Pilih Status</option>
                   <option>Active</option>
                   <option>Inactive</option>
                 </select>
               </div>
             </div>
+
+            <!-- Pre & Post -->
             <div class="mb-3">
               <label class="form-label">Pre-Condition</label>
-              <textarea class="form-control" id="precondition" rows="2"></textarea>
+              <small class="text-muted d-block mb-1">Syarat sebelum use case bisa dimulai.</small>
+              <textarea class="form-control" id="precondition" rows="2"
+                placeholder="Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem."></textarea>
             </div>
+
             <div class="mb-3">
               <label class="form-label">Post-Condition</label>
-              <textarea class="form-control" id="postcondition" rows="2"></textarea>
+              <small class="text-muted d-block mb-1">Hasil akhir setelah use case berjalan berhasil.</small>
+              <textarea class="form-control" id="postcondition" rows="2"
+                placeholder="Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama."></textarea>
             </div>
+
+            <!-- Basic Path -->
             <div class="mb-3">
               <label class="form-label">Basic Path</label>
+              <small class="text-muted d-block mb-1">Urutan langkah standar tanpa error dari aktor dan sistem.</small>
+
               <div id="basicPathContainer">
                 <div class="row mb-3">
                   <div class="col-md-6">
                     <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memasukkan email dan password."></textarea>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard."></textarea>
                   </div>
                 </div>
               </div>
               <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
             </div>
+
+            <!-- Alternative Path -->
             <div class="mb-3">
               <label class="form-label">Alternative Path</label>
+              <small class="text-muted d-block mb-1">Variasi alur selain Basic Path tetapi tetap berhasil.</small>
+
               <div id="alternativePathContainer">
                 <div class="row mb-3">
                   <div class="col-md-6">
                     <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memilih login menggunakan Google."></textarea>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis."></textarea>
                   </div>
                 </div>
               </div>
               <button type="button" class="btn btn-outline-secondary btn-sm" id="addAlternativePathRow">+ Tambah Baris</button>
             </div>
+
+            <!-- Exception -->
             <div class="mb-3">
               <label class="form-label">Exception</label>
+              <small class="text-muted d-block mb-1">Alur untuk kondisi gagal agar pengalaman pengguna tetap aman.</small>
+
               <div id="exceptionContainer">
                 <div class="row mb-3">
                   <div class="col-md-6">
                     <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memasukkan password yang salah."></textarea>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi."></textarea>
                   </div>
                 </div>
               </div>
               <button type="button" class="btn btn-outline-secondary btn-sm" id="addExceptionRow">+ Tambah Baris</button>
             </div>
+
           </div>
+
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-dark" id="saveFeature">Save</button>
           </div>
         </form>
+
       </div>
     </div>
   </div>
@@ -261,6 +324,26 @@
 
     return paths;
   }
+
+  document.getElementById("summary").placeholder =
+  "Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard.";
+  document.getElementById("precondition").placeholder =
+  "Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem.";
+  document.getElementById("postcondition").placeholder =
+  "Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama.";
+  document.querySelector("#basicPathContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memasukkan email dan password.";
+  document.querySelector("#basicPathContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard.";
+  document.querySelector("#alternativePathContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memilih login menggunakan Google.";
+  document.querySelector("#alternativePathContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis.";
+  document.querySelector("#exceptionContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memasukkan password yang salah.";
+  document.querySelector("#exceptionContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi.";
+
 
   // === SIMPAN DATA KE LOCALSTORAGE ===
   saveBtn.addEventListener("click", () => {

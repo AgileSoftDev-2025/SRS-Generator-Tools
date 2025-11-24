@@ -13,7 +13,7 @@ import urllib.parse
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
-from .forms import RegisterForm
+from .forms import RegisterForm 
 
 def home(request):
     if 'user_id' not in request.session:
@@ -88,6 +88,20 @@ def logout_view(request):
 def user_story(request):
     return render(request, 'main/user_story.html')
 
+def save_userstory(request):
+    if request.method == "POST":
+        actor = request.POST.get("input_sebagai")
+        fitur = request.POST.get("input_fitur")
+        gui_id = request.POST.get("gui_id")
+
+        userstory = UserStory(
+            input_sebagai=actor,
+            input_fitur=fitur,
+            gui_id=gui_id
+        )
+        userstory.save()
+        return redirect("halaman_sukses")
+    
 def use_case(request):
     return render(request, 'main/use_case.html')
 
@@ -286,7 +300,7 @@ def project_new(request):
 
 def project_detail(request, id):
     # Ambil data project berdasarkan id
-    project = get_object_or_404(Project, id_project=id_project)
+    project = get_object_or_404(Project, id_project=project)
     
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
@@ -346,9 +360,9 @@ def create_plantuml_from_usecase(data):
             system_action = step.get('system', '').strip()  
             
             if actor_action:
-                plantuml += f"  :{actor_action};\n"
+                plantuml += f"    :{actor_action};\n"
             if system_action:
-                plantuml += f"  :{system_action};\n"
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
     
     # Alternative Path
@@ -363,9 +377,9 @@ def create_plantuml_from_usecase(data):
             system_action = step.get('system', '').strip()  
             
             if actor_action:
-                plantuml += f"  :{actor_action};\n"
+                plantuml += f"    :{actor_action};\n"
             if system_action:
-                plantuml += f"  :{system_action};\n"
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
     
     # Exception Path
@@ -380,9 +394,9 @@ def create_plantuml_from_usecase(data):
             system_action = step.get('system', '').strip()  
             
             if actor_action:
-                plantuml += f"  :{actor_action};\n"
+                plantuml += f"    :{actor_action};\n"
             if system_action:
-                plantuml += f"  :{system_action};\n"
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
     
     # Post-condition
@@ -396,46 +410,14 @@ def create_plantuml_from_usecase(data):
     
     return plantuml
 
-def generate_plantuml(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            plantuml_code = create_plantuml_from_usecase(data)
-            
-            return JsonResponse({
-                'status': 'success',
-                'plantuml_code': plantuml_code
-            })
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=400)
-    
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method'
-    }, status=405)
-
 def download_plantuml(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            data = json.loads(request.body)
-            plantuml_code = data.get('plantuml_code', '')
-            
-            response = HttpResponse(plantuml_code, content_type='text/plain')
-            response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
-            return response
+                data = json.loads(request.body)
+                plantuml_code = data.get('plantuml', '')
+                response = HttpResponse(plantuml_code, content_type='text/plain')
+                response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
+                return response
         except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': str(e)
-            }, status=400)
-    
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request method'
-    }, status=405)
-
-def input_gui(request):
-    return render(request, 'main/input_gui.html')
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
