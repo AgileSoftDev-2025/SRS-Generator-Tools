@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
 from django.contrib import messages
-from django.http import JsonResponse
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
@@ -170,15 +169,6 @@ def save_use_case_spec(request, feature_id):
         # Jika bukan POST, redirect ke halaman input
         return redirect("input_informasi_tambahan")
 
-
-def activity_diagram(request):
-    use_case_data = request.session.get('use_case_data', None)
-    context = {
-        'page title': 'Generated Activity Diagram',
-        'use_case_data': json.dumps('use_case_data') if use_case_data else 'null'
-    }
-    return render(request, 'main/activity_diagram.html')
-
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
@@ -315,71 +305,109 @@ def project_detail(request, id):
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
 
-def generate_plantuml(request):
-    if request.method == "POST":
+def save_use_case(request):
+    if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            plantuml_code = create_plantuml_from_usecase(data)
-            return JsonResponse({"status": "success", "plantuml": plantuml_code})
+            # Simpan ke session
+            request.session['use_case_data'] = data
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Use case data saved successfully'
+            })
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
-    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=405)
+
+def activity_diagram(request):
+    """
+    Halaman untuk menampilkan dan generate activity diagram
+    """
+    use_case_data = request.session.get('use_case_data', None)
+    
+    context = {
+        'page_title': 'Generated Activity Diagram',
+        'use_case_data': json.dumps(use_case_data) if use_case_data else 'null'
+    }
+    return render(request, 'main/activity_diagram.html', context)
 
 def create_plantuml_from_usecase(data):
     plantuml = "@startuml\n"
     plantuml += f"title Activity Diagram - {data.get('featureName', 'Use Case')}\n\n"
+    
+    # Start event
     plantuml += "start\n"
+    
+    # Pre-condition
     precondition = data.get('precondition', '').strip()
     if precondition:
-        plantuml += f":Precondition: {precondition};\n"
+        plantuml += f":{precondition};\n"
     plantuml += "\n"
-
+    
     # Basic Path
     basic_path = data.get('basicPath', [])
     if basic_path:
-        plantuml += 'partition "Basic Path" {\n'
+        plantuml += 'partition "Basic Flow" {\n'
         for step in basic_path:
             actor_action = step.get('actor', '').strip()
-            system_response = step.get('system', '').strip()
+            system_action = step.get('system', '').strip()  
+            
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_response:
-                plantuml += f"    :{system_response};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
-
+    
     # Alternative Path
     alternative_path = data.get('alternativePath', [])
-    has_alternative = any(step.get('actor', '').strip() or step.get('system', '').strip() for step in alternative_path)
+    has_alternative = any(step.get('actor', '').strip() or step.get('system', '').strip() 
+                         for step in alternative_path)
+    
     if has_alternative:
-        plantuml += 'partition "Alternative Path" {\n'
+        plantuml += 'partition "Alternative Flow" {\n'
         for step in alternative_path:
             actor_action = step.get('actor', '').strip()
-            system_response = step.get('system', '').strip()
+            system_action = step.get('system', '').strip()  
+            
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_response:
-                plantuml += f"    :{system_response};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
-
+    
     # Exception Path
     exception_path = data.get('exceptionPath', [])
-    has_exception = any(step.get('actor', '').strip() or step.get('system', '').strip() for step in exception_path)
+    has_exception = any(step.get('actor', '').strip() or step.get('system', '').strip() 
+                       for step in exception_path)
+    
     if has_exception:
-        plantuml += 'partition "Exception Path" {\n'
+        plantuml += 'partition "Exception Flow" {\n'
         for step in exception_path:
             actor_action = step.get('actor', '').strip()
-            system_response = step.get('system', '').strip()
+            system_action = step.get('system', '').strip()  
+            
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_response:
-                plantuml += f"    :{system_response};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
         plantuml += "}\n\n"
-
+    
+    # Post-condition
     postcondition = data.get('postcondition', '').strip()
     if postcondition:
-        plantuml += f":Postcondition: {postcondition};\n"
+        plantuml += f":{postcondition};\n"
+    
+    # End event
     plantuml += "stop\n"
     plantuml += "@enduml"
+    
     return plantuml
 
 def download_plantuml(request):

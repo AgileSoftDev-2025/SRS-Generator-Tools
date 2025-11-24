@@ -442,12 +442,12 @@
 
     // Navigation buttons
     document.getElementById('backBtn').addEventListener('click', function() {
-      window.history.back();
+      window.location.href = "{% url 'main:input_informasi_tambahan' %}";
     });
 
     document.getElementById('nextBtn').addEventListener('click', function() {
       // Navigate to next page
-      alert('Proceeding to next step...');
+      window.location.href = "{% url 'main:input_gui' %}";
     });
   </script>
   
