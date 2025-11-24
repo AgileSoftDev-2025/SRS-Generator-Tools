@@ -14,7 +14,7 @@ import urllib.parse
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
-from .forms import RegisterForm
+from .forms import RegisterForm 
 
 def home(request):
     if 'user_id' not in request.session:
@@ -343,7 +343,7 @@ def create_plantuml_from_usecase(data):
             system_response = step.get('system', '').strip()
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_action:
+            if system_response:
                 plantuml += f"    :{system_response};\n"
         plantuml += "}\n\n"
 
@@ -357,7 +357,7 @@ def create_plantuml_from_usecase(data):
             system_response = step.get('system', '').strip()
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_action:
+            if system_response:
                 plantuml += f"    :{system_response};\n"
         plantuml += "}\n\n"
 
@@ -371,7 +371,7 @@ def create_plantuml_from_usecase(data):
             system_response = step.get('system', '').strip()
             if actor_action:
                 plantuml += f"    :{actor_action};\n"
-            if system_action:
+            if system_response:
                 plantuml += f"    :{system_response};\n"
         plantuml += "}\n\n"
 
@@ -382,14 +382,14 @@ def create_plantuml_from_usecase(data):
     plantuml += "@enduml"
     return plantuml
 
-    def download_plantuml(request):
-        if request.method == "POST":
-            try:
+def download_plantuml(request):
+    if request.method == "POST":
+        try:
                 data = json.loads(request.body)
                 plantuml_code = data.get('plantuml', '')
                 response = HttpResponse(plantuml_code, content_type='text/plain')
                 response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
                 return response
-            except Exception as e:
-                return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
