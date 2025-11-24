@@ -93,14 +93,14 @@ class UseCaseSpecification(models.Model):
         ('Could Have', 'Could Have'),
         ("Won't Have", "Won't Have"),
     ]
-    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES)
+    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES, default='Must Have')
 
     # Status
     STATUS_CHOICES = [
         ('active', 'active'),
         ('inactive', 'inactive')
     ]
-    status = models.CharField(max_length=250, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=250, choices=STATUS_CHOICES, default='active')
 
     # Pre & Post Condition
     input_precondition = models.CharField(max_length=500)
