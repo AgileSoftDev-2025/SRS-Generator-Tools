@@ -3,18 +3,12 @@ from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserSto
 from django.utils import timezone
 from django.shortcuts import redirect
 from django.shortcuts import render, redirect, get_object_or_404
-
-
-def home(request):
-    projects = Project.objects.all() 
-    return render(request, 'main/home.html', {'projects': projects})
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
-from django.utils import timezone
 from django.contrib import messages
 from django.http import JsonResponse
 
 def home(request):
+    projects = Project.objects.all() 
+    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
     user_id = request.session['user_id']
@@ -81,6 +75,9 @@ def use_case_spec(request):
 
 def activity_diagram(request):
     return render(request, 'main/activity_diagram.html')
+
+def input_gui(request):
+    return render(request, 'main/input_gui.html')
 
 def import_sql(request):   
     return render(request, 'main/import_sql.html')

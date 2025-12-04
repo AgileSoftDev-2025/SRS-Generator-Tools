@@ -1,0 +1,348 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Home - OneUML{% endblock %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INPUT GUI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #fafafa;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .page-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .page-number {
+            background: #e0e0e0;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .page-name-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-name-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            background: #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            overflow: visible;
+            white-space: nowrap;
+            text-overflow: clip;
+        }
+
+        .page-name-input:focus {
+            outline: 2px solid #6b46c1;
+            background: #f5f5f5;
+        }
+
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-btn svg {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn.collapsed svg {
+            transform: rotate(-90deg);
+        }
+
+        .page-content {
+            max-height: 500px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .page-content.collapsed {
+            max-height: 0;
+        }
+
+        .element-label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .element-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .element-name {
+            flex: 1;
+            padding: 14px 16px;
+            border: none;
+            background: #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            overflow: visible;
+            white-space: nowrap;
+            text-overflow: clip;
+        }
+
+        .element-name:focus {
+            outline: 2px solid #6b46c1;
+            background: #f5f5f5;
+        }
+
+        .type-select {
+            width: 180px;
+            padding: 14px 16px;
+            border: none;
+            background: #e8e8e8;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23333' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        .type-select:focus {
+            outline: 2px solid #6b46c1;
+            background-color: #f5f5f5;
+        }
+
+        .add-element-btn, .add-page-btn {
+            width: 100%;
+            padding: 14px;
+            background: #e8e8e8;
+            border: none;
+            border-radius: 8px;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .add-element-btn:hover, .add-page-btn:hover {
+            background: #d8d8d8;
+        }
+
+        .add-page-btn {
+            margin-bottom: 60px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 40px;
+        }
+
+        .nav-btn {
+            padding: 12px 32px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #d0d0d0;
+        }
+
+        .star-icon {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>INPUT GUI</h1>
+        <p class="subtitle">Input Page</p>
+
+        <div class="page-card">
+            <div class="page-header">
+                <div class="page-number">1</div>
+                <div class="page-name-container">
+                    <input type="text" class="page-name-input" placeholder="Fill page name here..." />
+                    <button class="toggle-btn" onclick="togglePage(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <label class="element-label">Input Element</label>
+                <div class="element-row">
+                    <input type="text" class="element-name" placeholder="Element name..." />
+                    <select class="type-select">
+                        <option>Type</option>
+                        <option>Text</option>
+                        <option>Number</option>
+                        <option>Email</option>
+                        <option>Password</option>
+                        <option>Date</option>
+                        <option>Checkbox</option>
+                        <option>Radio</option>
+                        <option>Textarea</option>
+                    </select>
+                </div>
+
+                <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+            </div>
+        </div>
+
+        <button class="add-page-btn" id="addPageBtn" onclick="addPage(); return false;">+ ADD MORE PAGE</button>
+
+        <div class="navigation">
+            <button class="nav-btn">&lt; BACK</button>
+            <button class="nav-btn">NEXT &gt;</button>
+        </div>
+    </div>
+
+    <script>
+        function togglePage(btn) {
+            const card = btn.closest('.page-card');
+            const content = card.querySelector('.page-content');
+            btn.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function addElement(btn) {
+            const content = btn.closest('.page-content');
+            const newElement = document.createElement('div');
+            newElement.className = 'element-row';
+            newElement.innerHTML = `
+                <input type="text" class="element-name" placeholder="Element name..." />
+                <select class="type-select">
+                    <option>Type</option>
+                    <option>Text</option>
+                    <option>Number</option>
+                    <option>Email</option>
+                    <option>Password</option>
+                    <option>Date</option>
+                    <option>Checkbox</option>
+                    <option>Radio</option>
+                    <option>Textarea</option>
+                </select>
+            `;
+            content.insertBefore(newElement, btn);
+        }
+
+        function addPage() {
+            const container = document.querySelector('.container');
+            const addPageBtn = document.getElementById('addPageBtn');
+            const pageCards = document.querySelectorAll('.page-card');
+            const pageNumber = pageCards.length + 1;
+            
+            const newCard = document.createElement('div');
+            newCard.className = 'page-card';
+            newCard.innerHTML = `
+                <div class="page-header">
+                    <div class="page-number">${pageNumber}</div>
+                    <div class="page-name-container">
+                        <input type="text" class="page-name-input" placeholder="Fill page name here..." />
+                        <button class="toggle-btn" onclick="togglePage(this)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="page-content">
+                    <label class="element-label">Input Element</label>
+                    <div class="element-row">
+                        <input type="text" class="element-name" placeholder="Element name..." />
+                        <select class="type-select">
+                            <option>Type</option>
+                            <option>Text</option>
+                            <option>Number</option>
+                            <option>Email</option>
+                            <option>Password</option>
+                            <option>Date</option>
+                            <option>Checkbox</option>
+                            <option>Radio</option>
+                            <option>Textarea</option>
+                        </select>
+                    </div>
+                    <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+                </div>
+            `;
+            
+            container.insertBefore(newCard, addPageBtn);
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

@@ -21,4 +21,5 @@ urlpatterns = [
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     path('project/new/', views.project_new, name='project_new'),
     path('project/<id_project>/', views.project_detail, name='project_detail'),
+    path('input_gui/', views.input_gui, name='input_gui'),
 ]

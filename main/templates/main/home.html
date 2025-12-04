@@ -1,74 +1,67 @@
 {% extends 'main/base.html' %}
-
 {% block title %}Home - OneUML{% endblock %}
 
 {% block content %}
-<div class="home-wrapper" style="max-width:1100px; margin:40px auto; padding:0 20px;">
+<div class="flex flex-col items-center min-h-screen bg-gray-50 py-12 px-4">
 
   <!-- Header -->
-  <header style="text-align:center; margin-bottom:40px;">
-    <h1 style="font-size:48px; margin:0 0 10px; font-weight:700;">ONEUML</h1>
-    <p style="margin:0; color:#555;">
+  <header class="text-center mb-10">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2">ONEUML</h1>
+    <p class="text-gray-600 max-w-xl mx-auto">
       Generate UML Diagram & Software Requirements Specification (SRS) secara otomatis, cepat, dan terstruktur.
     </p>
   </header>
 
-  <section style="display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;">
+  <!-- Content Section -->
+  <section class="flex flex-col md:flex-row gap-8 w-full max-w-5xl">
 
     <!-- Project List -->
-    <div style="flex:1 1 420px;">
-      <div style="background:#fff; padding:20px; border-radius:10px; 
-                  box-shadow:0 2px 10px rgba(0,0,0,0.06);">
-        <h2 style="margin:0 0 10px;">Your Projects</h2>
-        <p style="margin:0 0 14px; color:#666;">Project yang kamu buat akan muncul di sini.</p>
+    <div class="flex-1 bg-white shadow-md rounded-2xl p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Your Projects</h2>
+      <p class="text-gray-500 text-sm mb-4">Project yang kamu buat akan muncul di sini.</p>
 
-        {% if projects %}
-          <ul style="padding-left:0; margin:0; list-style:none;">
-            {% for p in projects %}
-              <li style="margin-bottom:12px; padding:12px; background:#f9f9f9;
-                         border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                  <strong>{{ p.nama_project }}</strong>
-                  {% if p.deskripsi %}
-                    <span style="color:#666;"> — {{ p.deskripsi|truncatechars:80 }}</span>
-                  {% endif %}
-                </div>
-                <a href="{% url 'main:use_case' p.id_project %}"
-                   style="padding:6px 12px; background:#1e3a8a; color:#fff; 
-                          border-radius:6px; text-decoration:none; font-size:13px;">
-                  Open
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div style="color:#888; margin-top:10px;">Belum ada project.</div>
-        {% endif %}
-      </div>
+      {% if projects %}
+      <ul class="space-y-3">
+        {% for p in projects %}
+        <li class="flex justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <div>
+            <strong class="text-gray-800">{{ p.nama_project }}</strong>
+            {% if p.deskripsi %}
+              <span class="text-gray-500"> — {{ p.deskripsi|truncatechars:80 }}</span>
+            {% endif %}
+          </div>
+          <a href="{% url 'main:use_case' p.id_project %}" 
+             class="bg-blue-700 hover:bg-blue-800 text-white text-sm px-4 py-2 rounded-lg transition">
+             Open
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="text-gray-400 text-sm mt-3">Belum ada project.</div>
+      {% endif %}
     </div>
 
     <!-- Add Project Form -->
-    <div style="width:360px;">
-      <form method="post" action="{% url 'main:project_new' %}"
-            style="background:#fff; padding:20px; border-radius:10px; 
-                   box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+    <div class="w-full md:w-[360px] bg-white shadow-md rounded-2xl p-6">
+      <h3 class="text-lg font-semibold mb-4">+ Add New Project</h3>
+      <form method="post" action="{% url 'main:project_new' %}" class="space-y-4">
         {% csrf_token %}
-        <h3 style="margin:0 0 12px;">+ Add New Project</h3>
+        <div>
+          <label for="id_name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+          <input type="text" id="id_name" name="name" placeholder="Nama project" required
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
 
-        <label for="id_name" style="display:block; margin-bottom:6px; font-size:13px;">Project Name</label>
-        <input type="text" id="id_name" name="name" placeholder="Nama project" required
-               style="width:100%; padding:10px; border:1px solid #e3e6ea; 
-                      border-radius:6px; margin-bottom:12px;">
-
-        <label for="id_description" style="display:block; margin-bottom:6px; font-size:13px;">Short Description</label>
-        <textarea id="id_description" name="description" rows="3"
-                  placeholder="Deskripsi singkat (optional)"
-                  style="width:100%; padding:10px; border:1px solid #e3e6ea; 
-                         border-radius:6px; margin-bottom:14px;"></textarea>
+        <div>
+          <label for="id_description" class="block text-sm font-medium text-gray-700 mb-1">Short Description</label>
+          <textarea id="id_description" name="description" rows="3"
+                    placeholder="Deskripsi singkat (optional)"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+        </div>
 
         <button type="submit"
-                style="width:100%; padding:10px; background:#1e3a8a; color:#fff; 
-                       border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                class="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 rounded-lg transition">
           Create Project
         </button>
       </form>
