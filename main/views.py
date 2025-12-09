@@ -1,8 +1,9 @@
-from django.shortcuts import get_object_or_404, redirect
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
+from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
@@ -16,6 +17,8 @@ import json
 from .forms import RegisterForm 
 
 def home(request):
+    projects = Project.objects.all() 
+    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
     user_id = request.session['user_id']
@@ -169,6 +172,8 @@ def save_use_case_spec(request, feature_id):
         # Jika bukan POST, redirect ke halaman input
         return redirect("input_informasi_tambahan")
 
+def input_gui(request):
+    return render(request, 'main/input_gui.html')
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
@@ -298,7 +303,7 @@ def project_new(request):
 
     return render(request, 'main/home.html') 
 
-def project_detail(request, id):
+def project_detail(request, id_project):
     # Ambil data project berdasarkan id
     project = get_object_or_404(Project, id_project=project)
     
@@ -421,3 +426,6 @@ def download_plantuml(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+def user_scenario(request):
+    return render(request, 'input_gui/user_scenario.html')
+

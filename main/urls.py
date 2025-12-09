@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 app_name = 'main' 
@@ -10,7 +10,7 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('user-story/', views.user_story, name='user_story'),
     path('use-case/', views.use_case, name='use_case'),
-    path('scenario/', views.user_scenario, name='user_scenario'),
+    path('user_scenario/', views.user_scenario, name='user_scenario'),
     path('use-case-diagram/', views.use_case_diagram, name='use_case_diagram'),
     path('input_informasi_tambahan/', views.input_informasi_tambahan, name='input_informasi_tambahan'),
     # path('input_informasi_tambahan/use_case_spec.html', views.use_case_spec, name='use_case_spec'),
@@ -28,6 +28,7 @@ urlpatterns = [
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     path('project/new/', views.project_new, name='project_new'),
     path('project/<id_project>/', views.project_detail, name='project_detail'),
+    path('input_gui/', views.input_gui, name='input_gui'),
     # path('api/generate-plantuml/', views.generate_plantuml, name='generate_plantuml'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
 ]
