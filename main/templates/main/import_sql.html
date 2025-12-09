@@ -173,6 +173,47 @@
             <button id="saveBtn">💾 Save to Database</button>
           </div>
         </div>
+
+        <!-- Navigation Buttons -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 0 1rem;
+          "
+        >
+          <!-- Back button -->
+          <a
+            href="{% url 'main:user_scenario' %}"
+            style="
+              padding: 0.75rem 1.5rem;
+              background-color: #e5e7eb;
+              color: #111827;
+              border-radius: 0.5rem;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            ← Back
+          </a>
+
+          <!-- Next button -->
+          <a
+            id="nextBtn"
+            style="
+              padding: 0.75rem 1.5rem;
+              background-color: #2563eb;
+              color: white;
+              border-radius: 0.5rem;
+              text-decoration: none;
+              font-weight: 500;
+              cursor: pointer;
+            "
+          >
+            Next →
+          </a>
+        </div>
       </div>
     </div>
 
@@ -299,13 +340,29 @@
           for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === name + "=") {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
               break;
             }
           }
         }
         return cookieValue;
       }
+
+      // Next button logic
+      document.getElementById("nextBtn").addEventListener("click", function () {
+        fetch("/api/get-latest-userstory/", { method: "GET" })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              const id = data.userstory_id;
+              window.location.href = `/sequence/${id}/generate/`;
+            } else {
+              alert("User Story belum tersedia!");
+            }
+          });
+      });
     </script>
   </body>
 </html>

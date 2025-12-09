@@ -24,6 +24,7 @@ urlpatterns = [
     path('parse-sql/', views.parse_sql, name='parse_sql'),
     path('save-parsed-sql/', views.save_parsed_sql, name='save_parsed_sql'),
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
+    path('sequence/<int:userstory_id>/generate/', views.generate_sequence_diagram, name='generate_sequence_diagram'),
     path('class-diagram/', views.class_diagram, name='class_diagram'),
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     path('project/new/', views.project_new, name='project_new'),
@@ -31,4 +32,6 @@ urlpatterns = [
     path('input_gui/', views.input_gui, name='input_gui'),
     # path('api/generate-plantuml/', views.generate_plantuml, name='generate_plantuml'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
+    path("api/get-latest-userstory/", views.get_latest_userstory, name="get_latest_userstory"),
+    path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),
 ]

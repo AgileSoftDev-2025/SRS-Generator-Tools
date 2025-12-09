@@ -52,5 +52,28 @@
 
   </div>
 
+    <!-- Footer Navigation -->
+  <div style="padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; border-top: 1px solid #e5e7eb;">
+    
+    <!-- Back Button -->
+    <a href="{% url 'main:user_scenario' %}"
+      style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; background-color: #ffffff; color: #2563eb; border: 2px solid #2563eb; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none;">
+      <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Back
+    </a>
+
+    <!-- Next Button -->
+    <a href="{% url 'main:class_diagram' %}"
+      style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; background-color: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-decoration: none;">
+      Next
+      <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+      </svg>
+    </a>
+
+  </div>
+
 </body>
 </html>
