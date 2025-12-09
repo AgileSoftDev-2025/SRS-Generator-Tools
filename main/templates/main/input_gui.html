@@ -1,0 +1,13 @@
+{% extends 'main/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Input GUI</h2>
+    <p>Halaman untuk input GUI akan ditampilkan di sini.</p>
+    
+    <div class="mt-4">
+        <a href="{% url 'main:activity_diagram' %}" class="btn btn-secondary">← Back</a>
+        <a href="{% url 'main:home' %}" class="btn btn-primary">Next →</a>
+    </div>
+</div>
+{% endblock %}
