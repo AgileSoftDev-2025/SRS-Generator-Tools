@@ -158,7 +158,17 @@
             <h1>Login</h1>
         </div>
 
-        <form method="POST" action="#">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'main:login' %}">
+            {% csrf_token %}   
+             
             <div class="form-group">
                 <label for="username">Email</label>
                 <input 

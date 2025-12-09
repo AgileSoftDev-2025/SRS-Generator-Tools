@@ -28,6 +28,22 @@
         font-size: 0.875rem;
         color: #374151;
       }
+      #saveBtn {
+        display: none;
+        margin-top: 1rem;
+        background-color: #2563eb;
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      #saveBtn:hover {
+        background-color: #1d4ed8;
+      }
     </style>
   </head>
   <body>
@@ -154,6 +170,7 @@
               Parsed SQL Result
             </h3>
             <pre id="resultOutput"></pre>
+            <button id="saveBtn">💾 Save to Database</button>
           </div>
         </div>
       </div>
@@ -164,6 +181,9 @@
       const fileInput = document.getElementById("fileInput");
       const resultContainer = document.getElementById("resultContainer");
       const resultOutput = document.getElementById("resultOutput");
+      const saveBtn = document.getElementById("saveBtn");
+
+      let parsedSQLData = null; // temporary cache
 
       // Make the entire drop area clickable
       dropArea.addEventListener("click", () => {
@@ -173,9 +193,7 @@
       // Handle file selection
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
-        if (file) {
-          handleFile(file);
-        }
+        if (file) handleFile(file);
       });
 
       // Prevent default drag behaviors
@@ -183,7 +201,6 @@
         dropArea.addEventListener(eventName, preventDefaults, false);
         document.body.addEventListener(eventName, preventDefaults, false);
       });
-
       function preventDefaults(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -193,48 +210,37 @@
       ["dragenter", "dragover"].forEach((eventName) => {
         dropArea.addEventListener(eventName, highlight, false);
       });
-
       ["dragleave", "drop"].forEach((eventName) => {
         dropArea.addEventListener(eventName, unhighlight, false);
       });
-
-      function highlight(e) {
+      function highlight() {
         dropArea.style.borderColor = "#2563eb";
         dropArea.style.backgroundColor = "#eff6ff";
       }
-
-      function unhighlight(e) {
+      function unhighlight() {
         dropArea.style.borderColor = "#d1d5db";
         dropArea.style.backgroundColor = "#fafafa";
       }
 
       // Handle dropped files
       dropArea.addEventListener("drop", handleDrop, false);
-
       function handleDrop(e) {
         const dt = e.dataTransfer;
         const files = dt.files;
-        if (files.length > 0) {
-          handleFile(files[0]);
-        }
+        if (files.length > 0) handleFile(files[0]);
       }
 
-      // Core Upload Logic (Integrated)
+      // Upload logic
       function handleFile(file) {
         if (!file.name.endsWith(".sql")) {
           alert("Please upload a .sql file only!");
-          fileInput.value = "";
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          alert("File size must be < 10MB!");
           return;
         }
 
-        const maxSize = 10 * 1024 * 1024;
-        if (file.size > maxSize) {
-          alert("File size must be less than 10MB!");
-          fileInput.value = "";
-          return;
-        }
-
-        console.log("Uploading:", file.name);
         const formData = new FormData();
         formData.append("file", file);
 
@@ -248,21 +254,44 @@
           .then((res) => res.json())
           .then((data) => {
             if (data.status === "success") {
+              parsedSQLData = data.data; // simpan hasil parsing
               resultContainer.style.display = "block";
               resultOutput.textContent = JSON.stringify(data.data, null, 2);
+              saveBtn.style.display = "inline-block";
             } else {
               alert("Error: " + data.message);
-              resultContainer.style.display = "none";
             }
           })
-          .catch((err) => {
-            console.error("Error:", err);
-            alert("Failed to parse SQL file.");
-            resultContainer.style.display = "none";
-          });
+          .catch(() => alert("Failed to parse SQL file."));
       }
 
-      // Helper function ambil CSRF token
+      // SAVE BUTTON LOGIC
+      saveBtn.addEventListener("click", () => {
+        if (!parsedSQLData) {
+          alert("No data to save.");
+          return;
+        }
+
+        fetch("/save-parsed-sql/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({ data: parsedSQLData }),
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            if (response.status === "success") {
+              alert("✅ Data berhasil disimpan ke database!");
+            } else {
+              alert("❌ Gagal menyimpan data: " + response.message);
+            }
+          })
+          .catch(() => alert("Terjadi kesalahan saat menyimpan data."));
+      });
+
+      // Helper ambil CSRF token
       function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
