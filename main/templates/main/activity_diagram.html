@@ -2,10 +2,607 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Activity Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/plantuml-encoder@1.4.0/dist/plantuml-encoder.min.js"></script>
+    <style>
+        /* Global Styles - Sesuai Template One UML */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header & Footer - Sesuai Template */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles - Sesuai Template */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Buttons - Sesuai Template */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        /* Footer Actions - Sesuai Template */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* Diagram Container */
+        .diagram-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .diagram-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .control-btn.active {
+            background: #111827;
+            color: white;
+            border-color: #111827;
+        }
+        
+        .diagram-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .feature-info {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .feature-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .feature-summary {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .plantuml-code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .code-toggle {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .code-toggle:hover {
+            color: #2563eb;
+        }
+    </style>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+    <!-- Header - Sesuai Template One UML -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="card">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Activity Diagram</h1>
+                <p style="color: #6b7280; font-size: 14px;">Generated from Use Case Specification</p>
+            </div>
+
+            <!-- Feature Information -->
+            <div id="featureInfo" class="feature-info">
+                <div class="feature-name" id="featureName">Loading feature data...</div>
+                <div class="feature-summary" id="featureSummary"></div>
+            </div>
+
+            <!-- Diagram Controls -->
+            <div class="diagram-controls">
+                <button class="control-btn active" onclick="showDiagram('basic')">Basic Path</button>
+                <button class="control-btn" onclick="showDiagram('alternative')">Alternative Path</button>
+                <button class="control-btn" onclick="showDiagram('exception')">Exception Handling</button>
+                <button class="control-btn" onclick="showDiagram('complete')">Complete Flow</button>
+            </div>
+
+            <!-- Diagram Container -->
+            <div class="diagram-container">
+                <div id="diagramContent">
+                    <div class="diagram-placeholder">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                        <h3>Activity Diagram</h3>
+                        <p>Select a diagram type to view the activity flow</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PlantUML Code (Hidden by default) -->
+            <button class="code-toggle" onclick="toggleCode()">Show PlantUML Code</button>
+            <pre id="plantumlCode" class="plantuml-code"></pre>
+
+            <!-- Footer Actions - Sesuai Template One UML -->
+            <div class="footer-actions">
+                <div>
+                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="exportDiagram()">Export Diagram</button>
+                    <button class="btn btn-primary" onclick="generateDocument()">Generate Document</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer - Sesuai Template One UML -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data dari Use Case Specification
+        let useCaseData = null;
+
+        // Load data dari localStorage
+        function loadUseCaseData() {
+            const savedData = localStorage.getItem('useCaseData');
+            if (savedData) {
+                useCaseData = JSON.parse(savedData);
+                updateFeatureInfo();
+                generateAllDiagrams();
+                showDiagram('basic');
+            } else {
+                document.getElementById('featureName').textContent = 'No use case data found';
+                document.getElementById('featureSummary').textContent = 'Please go back and create a use case specification first.';
+            }
+        }
+
+        // Update feature information
+        function updateFeatureInfo() {
+            if (!useCaseData) return;
+            
+            document.getElementById('featureName').textContent = useCaseData.featureName;
+            document.getElementById('featureSummary').textContent = useCaseData.summary;
+        }
+
+        // Generate PlantUML code untuk berbagai tipe diagram
+        function generateAllDiagrams() {
+            if (!useCaseData) return;
+            
+            // Basic Path Diagram
+            window.basicDiagram = generateBasicPathDiagram();
+            
+            // Alternative Path Diagram
+            window.alternativeDiagram = generateAlternativePathDiagram();
+            
+            // Exception Diagram
+            window.exceptionDiagram = generateExceptionDiagram();
+            
+            // Complete Flow Diagram
+            window.completeDiagram = generateCompleteDiagram();
+        }
+
+        // Generate Basic Path Diagram
+        function generateBasicPathDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title ${useCaseData.featureName} - Basic Path
+
+start
+
+:User accesses login page;
+:System displays login form;
+
+repeat
+  :User enters credentials;
+  :System validates input;
+  
+  if (Credentials valid?) then (yes)
+    :System authenticates user;
+    :Create user session;
+    :Log login activity;
+    :Redirect to dashboard;
+    stop
+  else (no)
+    :Display error message;
+  endif
+  
+repeat while (Retry available?) is (yes)
+->no;
+
+:System locks account;
+:Display account locked message;
+stop
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Alternative Path Diagram
+        function generateAlternativePathDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title ${useCaseData.featureName} - Alternative Paths
+
+start
+
+if (User selects "Remember Me"?) then (yes)
+  :Login with remember me;
+  :Create persistent cookie;
+  :Auto-login on next visit;
+  stop
+else (no)
+  if (User clicks "Forgot Password"?) then (yes)
+    :Navigate to password reset;
+    :Enter registered email;
+    :Send reset link;
+    :User clicks reset link;
+    :Enter new password;
+    :System validates password;
+    :Update password in database;
+    :Display success message;
+    stop
+  else (no)
+    :Proceed with normal login;
+    stop
+  endif
+endif
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Exception Diagram
+        function generateExceptionDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title ${useCaseData.featureName} - Exception Handling
+
+start
+
+:User attempts login;
+
+if (Network available?) then (yes)
+  if (Account locked?) then (yes)
+    #pink:Display "Account locked" message;
+    :Suggest contact admin;
+    stop
+  else (no)
+    if (Invalid credentials?) then (yes)
+      #pink:Display "Invalid credentials" message;
+      :Increment failed attempts;
+      if (Max attempts reached?) then (yes)
+        :Lock account;
+        :Notify administrator;
+      else (no)
+        :Allow retry;
+      endif
+    else (no)
+      if (Session expired?) then (yes)
+        #pink:Redirect to login page;
+        :Display session expired message;
+      else (no)
+        :Proceed with successful login;
+      endif
+    endif
+  endif
+else (no)
+  #pink:Display "Network error" message;
+  :Offer retry option;
+endif
+
+stop
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Complete Flow Diagram
+        function generateCompleteDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title ${useCaseData.featureName} - Complete Flow
+
+start
+
+:Access Login Page;
+
+if (Remember Me active?) then (yes)
+  :Auto-login with cookie;
+  -> Success;
+  stop
+endif
+
+:Enter Credentials;
+
+if (Input valid?) then (yes)
+  if (Credentials correct?) then (yes)
+    if (Account active?) then (yes)
+      :Authenticate User;
+      :Create Session;
+      if (Remember Me selected?) then (yes)
+        :Set Persistent Cookie;
+      endif
+      :Log Activity;
+      :Redirect to Dashboard;
+      stop
+    else (no)
+      #pink:Display "Account inactive";
+      stop
+    endif
+  else (no)
+    #pink:Display "Invalid credentials";
+    :Increment failed attempts;
+    if (Max attempts reached?) then (yes)
+      :Lock Account;
+      :Notify Admin;
+    endif
+    stop
+  endif
+else (no)
+  #pink:Display "Invalid input format";
+  stop
+endif
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Tampilkan diagram yang dipilih
+        function showDiagram(type) {
+            // Update active button
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            let plantUmlCode = '';
+            let diagramTitle = '';
+
+            switch(type) {
+                case 'basic':
+                    plantUmlCode = window.basicDiagram;
+                    diagramTitle = 'Basic Path';
+                    break;
+                case 'alternative':
+                    plantUmlCode = window.alternativeDiagram;
+                    diagramTitle = 'Alternative Paths';
+                    break;
+                case 'exception':
+                    plantUmlCode = window.exceptionDiagram;
+                    diagramTitle = 'Exception Handling';
+                    break;
+                case 'complete':
+                    plantUmlCode = window.completeDiagram;
+                    diagramTitle = 'Complete Flow';
+                    break;
+            }
+
+            // Encode untuk PlantUML
+            const encoded = plantumlEncoder.encode(plantUmlCode);
+            const plantUmlUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
+
+            // Tampilkan diagram
+            document.getElementById('diagramContent').innerHTML = `
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <h3 style="color: #111827;">${diagramTitle}</h3>
+                </div>
+                <img src="${plantUmlUrl}" alt="Activity Diagram" style="max-width: 100%; height: auto;">
+            `;
+
+            // Update code display
+            document.getElementById('plantumlCode').textContent = plantUmlCode;
+        }
+
+        // Toggle code visibility
+        function toggleCode() {
+            const codeElement = document.getElementById('plantumlCode');
+            const toggleButton = document.querySelector('.code-toggle');
+            
+            if (codeElement.style.display === 'none' || codeElement.style.display === '') {
+                codeElement.style.display = 'block';
+                toggleButton.textContent = 'Hide PlantUML Code';
+            } else {
+                codeElement.style.display = 'none';
+                toggleButton.textContent = 'Show PlantUML Code';
+            }
+        }
+
+        // Navigasi kembali
+        function goBack() {
+            window.location.href = 'additional_info.html';
+        }
+
+        // Export diagram
+        function exportDiagram() {
+            alert('Export functionality would be implemented here. Diagram can be exported as PNG, SVG, or PDF.');
+        }
+
+        // Generate document
+        function generateDocument() {
+            alert('Document generation would create a comprehensive use case document including the activity diagrams.');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUseCaseData();
+        });
+    </script>
 </body>
 </html>

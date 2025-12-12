@@ -1,205 +1,822 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>User Story Scenario Generator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      padding: 30px;
-    }
-    .container {
-      background: white;
-      width: 850px;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h3 {
-      margin-top: 25px;
-    }
-    label {
-      font-weight: 600;
-    }
-    select, input, textarea, button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      outline: none;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    .scenario-section {
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 8px;
-      background: #fafafa;
-    }
-    .section-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .scenario-item {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-      align-items: center;
-    }
-    .scenario-item span {
-      width: 30px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .scenario-item select {
-      width: 130px;
-    }
-    textarea {
-      height: 200px;
-      resize: none;
-    }
-    .btn {
-      background-color: #e0e0e0;
-      border: none;
-      cursor: pointer;
-      margin-top: 15px;
-      width: auto;
-      padding: 10px 20px;
-    }
-    .btn:hover {
-      background-color: #d5d5d5;
-    }
-    .add-more {
-      color: #555;
-      cursor: pointer;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .add-more:hover {
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - User Story Scenario Generator</title>
+    <style>
+        /* Global Styles - Sesuai Template One UML */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header & Footer - Sesuai Template */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles - Sesuai Template */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Form Styles - Sesuai Template */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        textarea.form-input {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        /* Buttons - Sesuai Template */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-secondary {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        .btn-success {
+            background-color: #059669;
+            color: #ffffff;
+        }
+        
+        .btn-success:hover {
+            background-color: #047857;
+        }
+        
+        .add-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #2563eb;
+            font-size: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 0;
+            transition: color 0.2s ease;
+        }
+        
+        .add-btn:hover {
+            color: #1d4ed8;
+        }
+        
+        /* Scenario Section Styles */
+        .scenario-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+        
+        .scenario-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+        
+        .scenario-number {
+            background: #3b82f6;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+        
+        .scenario-type {
+            width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .scenario-condition {
+            flex: 1;
+        }
+        
+        .remove-btn {
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+            margin-top: 8px;
+        }
+        
+        .remove-btn:hover {
+            background-color: #f3f4f6;
+            color: #ef4444;
+        }
+        
+        /* Footer Actions - Sesuai Template */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .save-indicator {
+            color: #059669;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            background: #059669;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .result-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 32px 0;
+        }
+        
+        .next-section {
+            background: #f0f9ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 24px;
+            border: 1px solid #e0f2fe;
+            text-align: center;
+        }
+        
+        .next-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+        
+        .next-description {
+            font-size: 14px;
+            color: #0c4a6e;
+            margin-bottom: 16px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Header - Sesuai Template One UML -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+        </div>
+    </header>
 
-<div class="container">
-  <h3>Select User Story</h3>
-  <select id="userStory">
-    <option value="">-- Choose User Story --</option>
-    <option value="As a user, I want to login">As a user, I want to login</option>
-    <option value="As an admin, I want to manage users">As an admin, I want to manage users</option>
-  </select>
+    <!-- Main Content -->
+    <main>
+        <div class="card">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">User Story Scenario Generator</h1>
+                <p style="color: #6b7280; font-size: 14px;">Define scenarios for your user stories using Given-When-Then format</p>
+            </div>
 
-  <!-- Positive Scenario -->
-  <div class="scenario-section">
-    <div class="section-title">Positive Scenario</div>
-    <div id="positiveContainer">
-      <div class="scenario-item">
-        <span>1</span>
-        <select class="typeSelect positiveType">
-          <option value="">Select type</option>
-          <option value="Given">Given</option>
-          <option value="When">When</option>
-          <option value="Then">Then</option>
-          <option value="And">And</option>
-        </select>
-        <input type="text" class="conditionInput positiveCondition" placeholder="Describe condition...">
-      </div>
-    </div>
-    <div class="add-more" id="addPositive">+ ADD MORE</div>
-  </div>
+            <!-- User Story Selection -->
+            <div class="form-group">
+                <label class="form-label">Select User Story</label>
+                <select class="form-select" id="userStory">
+                    <option value="">-- Choose User Story --</option>
+                    <option value="As a user, I want to login to the system">As a user, I want to login to the system</option>
+                    <option value="As an admin, I want to manage user accounts">As an admin, I want to manage user accounts</option>
+                    <option value="As a customer, I want to browse products">As a customer, I want to browse products</option>
+                    <option value="As a user, I want to reset my password">As a user, I want to reset my password</option>
+                </select>
+                <div class="help-text">Select a user story or enter a custom one below</div>
+            </div>
 
-  <!-- Negative Scenario -->
-  <div class="scenario-section">
-    <div class="section-title">Negative Scenario</div>
-    <div id="negativeContainer">
-      <div class="scenario-item">
-        <span>1</span>
-        <select class="typeSelect negativeType">
-          <option value="">Select type</option>
-          <option value="Given">Given</option>
-          <option value="When">When</option>
-          <option value="Then">Then</option>
-          <option value="And">And</option>
-        </select>
-        <input type="text" class="conditionInput negativeCondition" placeholder="Describe condition...">
-      </div>
-    </div>
-    <div class="add-more" id="addNegative">+ ADD MORE</div>
-  </div>
+            <!-- Custom User Story Input -->
+            <div class="form-group">
+                <label class="form-label">Or Enter Custom User Story</label>
+                <input type="text" class="form-input" id="customUserStory" placeholder="Example: As a user, I want to update my profile information">
+            </div>
 
-  <button class="btn" id="generateBtn">Generate User Story Scenario</button>
+            <!-- Positive Scenario -->
+            <div class="scenario-section">
+                <div class="section-title">✅ Positive Scenario</div>
+                <div class="help-text" style="margin-bottom: 16px;">Define the happy path scenario where everything works as expected</div>
+                
+                <div id="positiveContainer">
+                    <div class="scenario-item">
+                        <div class="scenario-number">1</div>
+                        <select class="form-select scenario-type positiveType">
+                            <option value="">Select type</option>
+                            <option value="Given">Given</option>
+                            <option value="When">When</option>
+                            <option value="Then">Then</option>
+                            <option value="And">And</option>
+                        </select>
+                        <input type="text" class="form-input scenario-condition positiveCondition" placeholder="Describe condition...">
+                        <button class="remove-btn" onclick="removeScenarioItem(this)">×</button>
+                    </div>
+                </div>
+                <button class="add-btn" id="addPositive">
+                    <span style="font-size: 16px;">+</span>
+                    Add Step
+                </button>
+            </div>
 
-  <h3>Result</h3>
-  <textarea id="resultArea" readonly></textarea>
-</div>
+            <!-- Negative Scenario -->
+            <div class="scenario-section">
+                <div class="section-title">❌ Negative Scenario</div>
+                <div class="help-text" style="margin-bottom: 16px;">Define scenarios where things go wrong or exceptional cases</div>
+                
+                <div id="negativeContainer">
+                    <div class="scenario-item">
+                        <div class="scenario-number">1</div>
+                        <select class="form-select scenario-type negativeType">
+                            <option value="">Select type</option>
+                            <option value="Given">Given</option>
+                            <option value="When">When</option>
+                            <option value="Then">Then</option>
+                            <option value="And">And</option>
+                        </select>
+                        <input type="text" class="form-input scenario-condition negativeCondition" placeholder="Describe condition...">
+                        <button class="remove-btn" onclick="removeScenarioItem(this)">×</button>
+                    </div>
+                </div>
+                <button class="add-btn" id="addNegative">
+                    <span style="font-size: 16px;">+</span>
+                    Add Step
+                </button>
+            </div>
 
-<script>
-  // Add row to Positive Scenario
-  document.getElementById('addPositive').addEventListener('click', () => {
-    const container = document.getElementById('positiveContainer');
-    const index = container.children.length + 1;
-    const newDiv = document.createElement('div');
-    newDiv.classList.add('scenario-item');
-    newDiv.innerHTML = `
-      <span>${index}</span>
-      <select class="typeSelect positiveType">
-        <option value="">Select type</option>
-        <option value="Given">Given</option>
-        <option value="When">When</option>
-        <option value="Then">Then</option>
-        <option value="And">And</option>
-      </select>
-      <input type="text" class="conditionInput positiveCondition" placeholder="Describe condition...">
-    `;
-    container.appendChild(newDiv);
-  });
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" id="generateBtn" style="padding: 12px 32px;">
+                    Generate User Story Scenario
+                </button>
+            </div>
 
-  // Add row to Negative Scenario
-  document.getElementById('addNegative').addEventListener('click', () => {
-    const container = document.getElementById('negativeContainer');
-    const index = container.children.length + 1;
-    const newDiv = document.createElement('div');
-    newDiv.classList.add('scenario-item');
-    newDiv.innerHTML = `
-      <span>${index}</span>
-      <select class="typeSelect negativeType">
-        <option value="">Select type</option>
-        <option value="Given">Given</option>
-        <option value="When">When</option>
-        <option value="Then">Then</option>
-        <option value="And">And</option>
-      </select>
-      <input type="text" class="conditionInput negativeCondition" placeholder="Describe condition...">
-    `;
-    container.appendChild(newDiv);
-  });
+            <!-- Result Section -->
+            <div class="result-section">
+                <div class="result-title">Generated Scenario</div>
+                <textarea class="form-input" id="resultArea" readonly style="height: 200px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; font-size: 13px;"></textarea>
+                <div class="help-text">You can copy this scenario and use it in your testing documentation</div>
+            </div>
 
-  // Generate Output
-  document.getElementById('generateBtn').addEventListener('click', () => {
-    const userStory = document.getElementById('userStory').value;
-    let output = `User Story: ${userStory}\n\nPositive Scenario:\n`;
+            <!-- Next Section -->
+            <div class="next-section">
+                <div class="next-title">🚀 Ready for the Next Step?</div>
+                <div class="next-description">Continue to define the database structure and SQL queries for your application</div>
+                <button class="btn btn-success" id="nextBtn" style="padding: 12px 32px;">
+                    Next: Input SQL →
+                </button>
+            </div>
 
-    // Positive
-    document.querySelectorAll('.positiveType').forEach((type, i) => {
-      const condition = document.querySelectorAll('.positiveCondition')[i].value;
-      if (type.value && condition) output += `${type.value} ${condition}\n`;
-    });
+            <!-- Footer Actions - Sesuai Template One UML -->
+            <div class="footer-actions">
+                <div class="save-indicator">
+                    <div class="save-dot"></div>
+                    <span>All changes saved automatically</span>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
+                    <button class="btn btn-outline" onclick="exportScenario()">Export Scenario</button>
+                </div>
+            </div>
+        </div>
+    </main>
 
-    output += `\nNegative Scenario:\n`;
-    // Negative
-    document.querySelectorAll('.negativeType').forEach((type, i) => {
-      const condition = document.querySelectorAll('.negativeCondition')[i].value;
-      if (type.value && condition) output += `${type.value} ${condition}\n`;
-    });
+    <!-- Footer - Sesuai Template One UML -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
 
-    document.getElementById('resultArea').value = output;
-  });
-</script>
+    <script>
+        // Load saved data if available
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedData();
+            
+            // Add event listeners
+            document.getElementById('addPositive').addEventListener('click', () => addScenario('positive'));
+            document.getElementById('addNegative').addEventListener('click', () => addScenario('negative'));
+            document.getElementById('generateBtn').addEventListener('click', generateOutput);
+            document.getElementById('nextBtn').addEventListener('click', goToSqlInput);
+            
+            // Auto-save when inputs change
+            document.getElementById('userStory').addEventListener('change', saveData);
+            document.getElementById('customUserStory').addEventListener('input', saveData);
+            
+            // Load example data for demonstration
+            loadExampleData();
+        });
 
+        // Add new scenario item
+        function addScenario(type) {
+            const container = document.getElementById(type + 'Container');
+            const index = container.children.length + 1;
+            const newItem = document.createElement('div');
+            newItem.classList.add('scenario-item');
+            newItem.innerHTML = `
+                <div class="scenario-number">${index}</div>
+                <select class="form-select scenario-type ${type}Type">
+                    <option value="">Select type</option>
+                    <option value="Given">Given</option>
+                    <option value="When">When</option>
+                    <option value="Then">Then</option>
+                    <option value="And">And</option>
+                </select>
+                <input type="text" class="form-input scenario-condition ${type}Condition" placeholder="Describe condition...">
+                <button class="remove-btn" onclick="removeScenarioItem(this)">×</button>
+            `;
+            container.appendChild(newItem);
+            
+            // Add event listener for auto-save
+            newItem.querySelector('select').addEventListener('change', saveData);
+            newItem.querySelector('input').addEventListener('input', saveData);
+            
+            saveData();
+        }
+
+        // Remove scenario item
+        function removeScenarioItem(button) {
+            const item = button.closest('.scenario-item');
+            const container = item.parentElement;
+            
+            if (container.children.length > 1) {
+                item.remove();
+                // Update numbers
+                updateScenarioNumbers(container);
+                saveData();
+            }
+        }
+
+        // Update scenario numbers
+        function updateScenarioNumbers(container) {
+            const items = container.querySelectorAll('.scenario-item');
+            items.forEach((item, index) => {
+                item.querySelector('.scenario-number').textContent = index + 1;
+            });
+        }
+
+        // Generate output
+        function generateOutput() {
+            let userStory = document.getElementById('userStory').value;
+            const customStory = document.getElementById('customUserStory').value;
+            
+            // Use custom story if provided
+            if (customStory.trim()) {
+                userStory = customStory;
+            }
+            
+            if (!userStory) {
+                alert('Please select or enter a user story');
+                return;
+            }
+            
+            let output = `USER STORY:\n${userStory}\n\n`;
+            
+            // Positive Scenario
+            output += `POSITIVE SCENARIO:\n`;
+            const positiveItems = document.querySelectorAll('#positiveContainer .scenario-item');
+            let hasPositiveContent = false;
+            
+            positiveItems.forEach((item) => {
+                const type = item.querySelector('.positiveType').value;
+                const condition = item.querySelector('.positiveCondition').value;
+                if (type && condition) {
+                    output += `${type} ${condition}\n`;
+                    hasPositiveContent = true;
+                }
+            });
+            
+            if (!hasPositiveContent) {
+                output += `No positive scenario steps defined.\n`;
+            }
+            
+            // Negative Scenario
+            output += `\nNEGATIVE SCENARIO:\n`;
+            const negativeItems = document.querySelectorAll('#negativeContainer .scenario-item');
+            let hasNegativeContent = false;
+            
+            negativeItems.forEach((item) => {
+                const type = item.querySelector('.negativeType').value;
+                const condition = item.querySelector('.negativeCondition').value;
+                if (type && condition) {
+                    output += `${type} ${condition}\n`;
+                    hasNegativeContent = true;
+                }
+            });
+            
+            if (!hasNegativeContent) {
+                output += `No negative scenario steps defined.\n`;
+            }
+            
+            document.getElementById('resultArea').value = output;
+            saveData();
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            const data = {
+                userStory: document.getElementById('userStory').value,
+                customUserStory: document.getElementById('customUserStory').value,
+                positiveScenario: getScenarioData('positive'),
+                negativeScenario: getScenarioData('negative'),
+                generatedOutput: document.getElementById('resultArea').value
+            };
+            
+            localStorage.setItem('userStoryScenario', JSON.stringify(data));
+        }
+
+        // Get scenario data
+        function getScenarioData(type) {
+            const items = document.querySelectorAll(`#${type}Container .scenario-item`);
+            const scenarioData = [];
+            
+            items.forEach((item) => {
+                const typeValue = item.querySelector(`.${type}Type`).value;
+                const condition = item.querySelector(`.${type}Condition`).value;
+                scenarioData.push({ type: typeValue, condition: condition });
+            });
+            
+            return scenarioData;
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            const savedData = localStorage.getItem('userStoryScenario');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                document.getElementById('userStory').value = data.userStory || '';
+                document.getElementById('customUserStory').value = data.customUserStory || '';
+                document.getElementById('resultArea').value = data.generatedOutput || '';
+                
+                // Load positive scenario
+                if (data.positiveScenario) {
+                    loadScenarioData('positive', data.positiveScenario);
+                }
+                
+                // Load negative scenario
+                if (data.negativeScenario) {
+                    loadScenarioData('negative', data.negativeScenario);
+                }
+            }
+        }
+
+        // Load scenario data
+        function loadScenarioData(type, scenarioData) {
+            const container = document.getElementById(type + 'Container');
+            container.innerHTML = '';
+            
+            scenarioData.forEach((step, index) => {
+                if (index === 0) {
+                    // Update first item
+                    const firstItem = container.querySelector('.scenario-item') || createFirstItem(type);
+                    firstItem.querySelector(`.${type}Type`).value = step.type;
+                    firstItem.querySelector(`.${type}Condition`).value = step.condition;
+                } else {
+                    // Add additional items
+                    addScenario(type);
+                    const items = container.querySelectorAll('.scenario-item');
+                    const lastItem = items[items.length - 1];
+                    lastItem.querySelector(`.${type}Type`).value = step.type;
+                    lastItem.querySelector(`.${type}Condition`).value = step.condition;
+                }
+            });
+            
+            updateScenarioNumbers(container);
+        }
+
+        // Create first item if doesn't exist
+        function createFirstItem(type) {
+            const container = document.getElementById(type + 'Container');
+            const firstItem = document.createElement('div');
+            firstItem.classList.add('scenario-item');
+            firstItem.innerHTML = `
+                <div class="scenario-number">1</div>
+                <select class="form-select scenario-type ${type}Type">
+                    <option value="">Select type</option>
+                    <option value="Given">Given</option>
+                    <option value="When">When</option>
+                    <option value="Then">Then</option>
+                    <option value="And">And</option>
+                </select>
+                <input type="text" class="form-input scenario-condition ${type}Condition" placeholder="Describe condition...">
+                <button class="remove-btn" onclick="removeScenarioItem(this)">×</button>
+            `;
+            container.appendChild(firstItem);
+            return firstItem;
+        }
+
+        // Load example data for demonstration
+        function loadExampleData() {
+            const savedData = localStorage.getItem('userStoryScenario');
+            if (!savedData) {
+                // Set example user story
+                document.getElementById('userStory').value = 'As a user, I want to login to the system';
+                
+                // Add example positive scenario steps
+                setTimeout(() => {
+                    const positiveExamples = [
+                        { type: 'Given', condition: 'I am on the login page' },
+                        { type: 'When', condition: 'I enter valid username and password' },
+                        { type: 'And', condition: 'I click the login button' },
+                        { type: 'Then', condition: 'I should be redirected to the dashboard' }
+                    ];
+                    
+                    positiveExamples.forEach((example, index) => {
+                        if (index === 0) {
+                            document.querySelector('.positiveType').value = example.type;
+                            document.querySelector('.positiveCondition').value = example.condition;
+                        } else {
+                            addScenario('positive');
+                            const items = document.querySelectorAll('#positiveContainer .scenario-item');
+                            const lastItem = items[items.length - 1];
+                            lastItem.querySelector('.positiveType').value = example.type;
+                            lastItem.querySelector('.positiveCondition').value = example.condition;
+                        }
+                    });
+                    
+                    // Add example negative scenario steps
+                    const negativeExamples = [
+                        { type: 'Given', condition: 'I am on the login page' },
+                        { type: 'When', condition: 'I enter invalid credentials' },
+                        { type: 'Then', condition: 'I should see an error message' },
+                        { type: 'And', condition: 'I should remain on the login page' }
+                    ];
+                    
+                    negativeExamples.forEach((example, index) => {
+                        if (index === 0) {
+                            document.querySelector('.negativeType').value = example.type;
+                            document.querySelector('.negativeCondition').value = example.condition;
+                        } else {
+                            addScenario('negative');
+                            const items = document.querySelectorAll('#negativeContainer .scenario-item');
+                            const lastItem = items[items.length - 1];
+                            lastItem.querySelector('.negativeType').value = example.type;
+                            lastItem.querySelector('.negativeCondition').value = example.condition;
+                        }
+                    });
+                    
+                    generateOutput();
+                }, 100);
+            }
+        }
+
+        // Navigation
+        function goBack() {
+            window.location.href = 'activity_diagram.html';
+        }
+
+        // Go to SQL Input page
+        function goToSqlInput() {
+            // Save current data first
+            saveData();
+            
+            // Check if user story is defined
+            const userStory = document.getElementById('userStory').value || document.getElementById('customUserStory').value;
+            if (!userStory) {
+                alert('Please define a user story before proceeding to SQL input');
+                return;
+            }
+            
+            // Navigate to SQL input page
+            window.location.href = 'sql_input.html';
+        }
+
+        // Export scenario
+        function exportScenario() {
+            const output = document.getElementById('resultArea').value;
+            if (!output) {
+                alert('Please generate a scenario first');
+                return;
+            }
+            
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user_story_scenario.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+    </script>
 </body>
 </html>

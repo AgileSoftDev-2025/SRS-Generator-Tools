@@ -2,10 +2,1014 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Story</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - SRS Document Generator</title>
+    <style>
+        /* Global Styles - Sesuai Template One UML */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header & Footer - Sesuai Template */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles - Sesuai Template */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Buttons - Sesuai Template */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-secondary {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        .btn-success {
+            background-color: #059669;
+            color: #ffffff;
+        }
+        
+        .btn-success:hover {
+            background-color: #047857;
+        }
+        
+        /* SRS Document Styles */
+        .srs-preview {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 40px;
+            margin: 20px 0;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+        }
+        
+        .srs-header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 20px;
+        }
+        
+        .srs-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        
+        .srs-subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .srs-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .srs-section {
+            margin-bottom: 30px;
+        }
+        
+        .srs-section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        
+        .srs-subsection {
+            margin-bottom: 20px;
+        }
+        
+        .srs-subsection-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .srs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .srs-table th,
+        .srs-table td {
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .srs-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .srs-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .srs-list li {
+            margin-bottom: 8px;
+        }
+        
+        .diagram-mini {
+            text-align: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .diagram-mini img {
+            max-width: 300px;
+            height: auto;
+            border: 1px solid #d1d5db;
+        }
+        
+        .diagram-mini-caption {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        /* Controls */
+        .controls-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .controls-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+        
+        .format-options {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .format-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .format-option input {
+            margin: 0;
+        }
+        
+        .format-option label {
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+        }
+        
+        /* Footer Actions - Sesuai Template */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .save-indicator {
+            color: #059669;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            background: #059669;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .project-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-group {
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Halo! Django</h1>
-    <p>Kalau kamu bisa lihat tulisan ini, berarti template sudah terbaca dengan benar.</p>
+    <!-- Header - Sesuai Template One UML -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="card">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">SRS Document Generator</h1>
+                <p style="color: #6b7280; font-size: 14px;">Generate comprehensive Software Requirements Specification document from your UML diagrams</p>
+            </div>
+
+            <!-- Project Information -->
+            <div class="controls-section">
+                <div class="controls-title">📋 Project Information</div>
+                <div class="project-info">
+                    <div class="info-group">
+                        <div class="info-label">Project Name</div>
+                        <div class="info-value" id="projectName">User Management System</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Version</div>
+                        <div class="info-value" id="projectVersion">1.0</div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Date Generated</div>
+                        <div class="info-value" id="generationDate"></div>
+                    </div>
+                    <div class="info-group">
+                        <div class="info-label">Document Status</div>
+                        <div class="info-value" id="documentStatus">Draft</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="controls-section">
+                <div class="controls-title">⚙️ Export Options</div>
+                <div class="format-options">
+                    <div class="format-option">
+                        <input type="checkbox" id="includeClassDiagrams" checked>
+                        <label for="includeClassDiagrams">Include Class Diagrams</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="checkbox" id="includeSequenceDiagrams" checked>
+                        <label for="includeSequenceDiagrams">Include Sequence Diagrams</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="checkbox" id="includeUseCases" checked>
+                        <label for="includeUseCases">Include Use Case Specifications</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="checkbox" id="includeUserStories" checked>
+                        <label for="includeUserStories">Include User Stories</label>
+                    </div>
+                </div>
+                
+                <div class="format-options">
+                    <div class="format-option">
+                        <input type="radio" id="formatDocx" name="format" value="docx" checked>
+                        <label for="formatDocx">Microsoft Word (.docx)</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="radio" id="formatPdf" name="format" value="pdf">
+                        <label for="formatPdf">PDF Document (.pdf)</label>
+                    </div>
+                    <div class="format-option">
+                        <input type="radio" id="formatHtml" name="format" value="html">
+                        <label for="formatHtml">HTML Web Page (.html)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SRS Document Preview -->
+            <div class="controls-section">
+                <div class="controls-title">📄 Document Preview</div>
+                <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
+                    Preview of your SRS document. Scroll to review all sections.
+                </p>
+            </div>
+
+            <div class="srs-preview" id="srsPreview">
+                <!-- SRS content will be generated here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="refreshPreview()">
+                    🔄 Refresh Preview
+                </button>
+                <button class="btn btn-outline" onclick="customizeDocument()">
+                    🎨 Customize Template
+                </button>
+                <button class="btn btn-success" onclick="generateSRSDocument()">
+                    📦 Generate SRS Document
+                </button>
+            </div>
+
+            <!-- Completion Section -->
+            <div class="controls-section" style="background: #f0f9ff; border-color: #e0f2fe;">
+                <div class="controls-title" style="color: #0369a1;">🎉 Project Documentation Complete!</div>
+                <p style="color: #0c4a6e; margin-bottom: 16px; font-size: 14px;">
+                    Your comprehensive Software Requirements Specification document is ready. This document includes all UML diagrams, 
+                    use cases, user stories, and technical specifications needed for your development team.
+                </p>
+                <div class="button-group">
+                    <button class="btn btn-outline" onclick="viewProjectDashboard()">
+                        📊 Project Dashboard
+                    </button>
+                    <button class="btn btn-primary" onclick="startNewProject()">
+                        🚀 Start New Project
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Actions - Sesuai Template One UML -->
+            <div class="footer-actions">
+                <div class="save-indicator">
+                    <div class="save-dot"></div>
+                    <span id="saveStatus">Ready to generate SRS document</span>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
+                    <button class="btn btn-outline" onclick="saveProject()">Save Project</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer - Sesuai Template One UML -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let projectData = {};
+        let srsContent = '';
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+            loadProjectData();
+            generateSRSPreview();
+        });
+
+        // Initialize page
+        function initializePage() {
+            // Set current date
+            const now = new Date();
+            document.getElementById('generationDate').textContent = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Load project data from localStorage
+        function loadProjectData() {
+            // Load data from various sources
+            const userStoryData = localStorage.getItem('userStoryScenario');
+            const sqlData = localStorage.getItem('sqlData');
+            const useCaseData = localStorage.getItem('useCaseData');
+
+            projectData = {
+                userStories: userStoryData ? JSON.parse(userStoryData) : getExampleUserStories(),
+                database: sqlData ? JSON.parse(sqlData) : getExampleDatabase(),
+                useCases: useCaseData ? JSON.parse(useCaseData) : getExampleUseCases(),
+                projectInfo: {
+                    name: "User Management System",
+                    version: "1.0",
+                    description: "A comprehensive user management system with authentication, authorization, and profile management features.",
+                    stakeholders: ["Project Manager", "Development Team", "Quality Assurance", "End Users"]
+                }
+            };
+
+            updateProjectInfo();
+        }
+
+        // Update project information display
+        function updateProjectInfo() {
+            document.getElementById('projectName').textContent = projectData.projectInfo.name;
+            document.getElementById('projectVersion').textContent = projectData.projectInfo.version;
+        }
+
+        // Generate SRS preview
+        function generateSRSPreview() {
+            const preview = document.getElementById('srsPreview');
+            preview.innerHTML = generateSRSContent();
+            document.getElementById('saveStatus').textContent = 'SRS preview generated';
+        }
+
+        // Generate complete SRS content
+        function generateSRSContent() {
+            return `
+                <div class="srs-header">
+                    <div class="srs-title">SOFTWARE REQUIREMENTS SPECIFICATION</div>
+                    <div class="srs-subtitle">For ${projectData.projectInfo.name}</div>
+                    <div class="srs-meta">
+                        <div>Version: ${projectData.projectInfo.version}</div>
+                        <div>Date: ${new Date().toLocaleDateString()}</div>
+                        <div>Status: Draft</div>
+                    </div>
+                </div>
+
+                ${generateTableOfContents()}
+                ${generateIntroduction()}
+                ${generateOverallDescription()}
+                ${generateSystemFeatures()}
+                ${generateExternalInterfaceRequirements()}
+                ${generateNonFunctionalRequirements()}
+                ${generateAppendices()}
+            `;
+        }
+
+        // Generate Table of Contents
+        function generateTableOfContents() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">TABLE OF CONTENTS</div>
+                    <div class="srs-list">
+                        <li>1. Introduction</li>
+                        <li>2. Overall Description</li>
+                        <li>3. System Features</li>
+                        <li>4. External Interface Requirements</li>
+                        <li>5. Non-Functional Requirements</li>
+                        <li>6. Appendices</li>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Introduction section
+        function generateIntroduction() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">1. INTRODUCTION</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">1.1 Purpose</div>
+                        <p>This document describes the software requirements specification for the ${projectData.projectInfo.name}. 
+                        It is intended for developers, testers, project managers, and stakeholders involved in the project.</p>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">1.2 Project Scope</div>
+                        <p>The ${projectData.projectInfo.name} will provide the following capabilities:</p>
+                        <ul class="srs-list">
+                            <li>User registration and authentication</li>
+                            <li>Profile management</li>
+                            <li>Role-based access control</li>
+                            <li>Password reset functionality</li>
+                            <li>User activity logging</li>
+                        </ul>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">1.3 Definitions, Acronyms, and Abbreviations</div>
+                        <table class="srs-table">
+                            <tr>
+                                <th>Term</th>
+                                <th>Definition</th>
+                            </tr>
+                            <tr>
+                                <td>SRS</td>
+                                <td>Software Requirements Specification</td>
+                            </tr>
+                            <tr>
+                                <td>UML</td>
+                                <td>Unified Modeling Language</td>
+                            </tr>
+                            <tr>
+                                <td>API</td>
+                                <td>Application Programming Interface</td>
+                            </tr>
+                            <tr>
+                                <td>UI</td>
+                                <td>User Interface</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Overall Description section
+        function generateOverallDescription() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">2. OVERALL DESCRIPTION</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">2.1 Product Perspective</div>
+                        <p>The system is a standalone web application that interacts with a database backend and provides 
+                        RESTful API endpoints for future integrations.</p>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">2.2 User Characteristics</div>
+                        <table class="srs-table">
+                            <tr>
+                                <th>User Type</th>
+                                <th>Description</th>
+                                <th>Technical Proficiency</th>
+                            </tr>
+                            <tr>
+                                <td>End User</td>
+                                <td>Regular users who need to access the system</td>
+                                <td>Basic computer literacy</td>
+                            </tr>
+                            <tr>
+                                <td>Administrator</td>
+                                <td>Users with system management privileges</td>
+                                <td>Advanced technical skills</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">2.3 Design and Implementation Constraints</div>
+                        <ul class="srs-list">
+                            <li>Must use responsive web design</li>
+                            <li>Must support modern web browsers (Chrome, Firefox, Safari, Edge)</li>
+                            <li>Must implement secure authentication mechanisms</li>
+                            <li>Must comply with data protection regulations</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate System Features section
+        function generateSystemFeatures() {
+            const userStories = projectData.userStories;
+            
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">3. SYSTEM FEATURES</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">3.1 User Authentication</div>
+                        <p><strong>Description:</strong> Users must be able to authenticate into the system using credentials.</p>
+                        <p><strong>Priority:</strong> High</p>
+                        
+                        <div class="srs-subsection-title" style="font-size: 14px; margin-top: 15px;">User Stories:</div>
+                        <ul class="srs-list">
+                            ${userStories.generatedOutput ? userStories.generatedOutput.split('\n').map(line => 
+                                `<li>${line}</li>`).join('') : '<li>As a user, I want to login to the system</li>'}
+                        </ul>
+
+                        <div class="diagram-mini">
+                            <div style="background: #e5e7eb; padding: 40px; border-radius: 4px; color: #6b7280; font-style: italic;">
+                                [Sequence Diagram: User Login Flow]
+                            </div>
+                            <div class="diagram-mini-caption">Figure 1: User Authentication Sequence</div>
+                        </div>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">3.2 User Management</div>
+                        <p><strong>Description:</strong> Administrators can manage user accounts and permissions.</p>
+                        <p><strong>Priority:</strong> Medium</p>
+
+                        <div class="diagram-mini">
+                            <div style="background: #e5e7eb; padding: 60px; border-radius: 4px; color: #6b7280; font-style: italic;">
+                                [Class Diagram: User Entity Relationships]
+                            </div>
+                            <div class="diagram-mini-caption">Figure 2: Database Schema</div>
+                        </div>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">3.3 Database Schema</div>
+                        <table class="srs-table">
+                            <tr>
+                                <th>Table</th>
+                                <th>Description</th>
+                                <th>Key Fields</th>
+                            </tr>
+                            ${projectData.database.tables ? projectData.database.tables.map(table => `
+                                <tr>
+                                    <td>${table.name}</td>
+                                    <td>Stores ${table.name.replace('_', ' ')} data</td>
+                                    <td>${table.columns.filter(col => col.primary_key).map(col => col.name).join(', ')}</td>
+                                </tr>
+                            `).join('') : `
+                                <tr>
+                                    <td>users</td>
+                                    <td>Stores user account information</td>
+                                    <td>id, username</td>
+                                </tr>
+                            `}
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate External Interface Requirements
+        function generateExternalInterfaceRequirements() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">4. EXTERNAL INTERFACE REQUIREMENTS</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">4.1 User Interfaces</div>
+                        <p>The system shall provide a web-based user interface with the following characteristics:</p>
+                        <ul class="srs-list">
+                            <li>Responsive design supporting desktop and mobile devices</li>
+                            <li>Intuitive navigation and user experience</li>
+                            <li>Consistent branding and visual design</li>
+                            <li>Accessibility compliance (WCAG 2.1 AA)</li>
+                        </ul>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">4.2 Hardware Interfaces</div>
+                        <p>No specific hardware interfaces are required beyond standard web server infrastructure.</p>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">4.3 Software Interfaces</div>
+                        <table class="srs-table">
+                            <tr>
+                                <th>Component</th>
+                                <th>Interface Type</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>Database</td>
+                                <td>MySQL/PostgreSQL</td>
+                                <td>Primary data storage</td>
+                            </tr>
+                            <tr>
+                                <td>Web Server</td>
+                                <td>HTTP/HTTPS</td>
+                                <td>Client communication</td>
+                            </tr>
+                            <tr>
+                                <td>Authentication Service</td>
+                                <td>JWT/REST API</td>
+                                <td>User authentication</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Non-Functional Requirements
+        function generateNonFunctionalRequirements() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">5. NON-FUNCTIONAL REQUIREMENTS</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">5.1 Performance Requirements</div>
+                        <ul class="srs-list">
+                            <li>System must support 1000 concurrent users</li>
+                            <li>Page load times under 3 seconds</li>
+                            <li>API response times under 500ms</li>
+                            <li>99.5% uptime availability</li>
+                        </ul>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">5.2 Security Requirements</div>
+                        <ul class="srs-list">
+                            <li>Password encryption using bcrypt</li>
+                            <li>HTTPS for all communications</li>
+                            <li>SQL injection prevention</li>
+                            <li>Cross-site scripting (XSS) protection</li>
+                            <li>Session timeout after 30 minutes of inactivity</li>
+                        </ul>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">5.3 Software Quality Attributes</div>
+                        <ul class="srs-list">
+                            <li><strong>Maintainability:</strong> Code must be well-documented and follow coding standards</li>
+                            <li><strong>Scalability:</strong> Architecture must support horizontal scaling</li>
+                            <li><strong>Usability:</strong> Intuitive interface with comprehensive user documentation</li>
+                            <li><strong>Reliability:</strong> System must handle errors gracefully and provide meaningful feedback</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate Appendices
+        function generateAppendices() {
+            return `
+                <div class="srs-section">
+                    <div class="srs-section-title">6. APPENDICES</div>
+                    
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">Appendix A: UML Diagrams</div>
+                        <p>Complete UML diagrams are included in the electronic version of this document:</p>
+                        <ul class="srs-list">
+                            <li>Class Diagrams - Database schema and entity relationships</li>
+                            <li>Sequence Diagrams - Key system interactions and workflows</li>
+                            <li>Use Case Diagrams - System functionality from user perspective</li>
+                            <li>Activity Diagrams - Business process flows</li>
+                        </ul>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">Appendix B: Data Dictionary</div>
+                        <p>Complete database schema with field definitions, data types, and constraints.</p>
+                    </div>
+
+                    <div class="srs-subsection">
+                        <div class="srs-subsection-title">Appendix C: API Documentation</div>
+                        <p>REST API endpoints, request/response formats, and authentication requirements.</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #111827; text-align: center;">
+                    <p><strong>END OF DOCUMENT</strong></p>
+                    <p style="color: #6b7280; font-size: 12px;">Generated by One UML SRS Document Generator</p>
+                </div>
+            `;
+        }
+
+        // Generate SRS Document
+        function generateSRSDocument() {
+            document.getElementById('saveStatus').textContent = 'Generating SRS document...';
+            
+            // Simulate document generation
+            setTimeout(() => {
+                const format = document.querySelector('input[name="format"]:checked').value;
+                alert(`SRS document generated successfully in ${format.toUpperCase()} format! Download will start automatically.`);
+                document.getElementById('saveStatus').textContent = 'SRS document generated and downloaded';
+                
+                // In a real implementation, this would trigger file download
+                // triggerDownload(format);
+            }, 2000);
+        }
+
+        // Refresh preview
+        function refreshPreview() {
+            document.getElementById('srsPreview').innerHTML = '<div style="text-align: center; padding: 40px;"><div class="loading" style="margin: 0 auto 20px;"></div><p>Refreshing preview...</p></div>';
+            
+            setTimeout(() => {
+                generateSRSPreview();
+            }, 1000);
+        }
+
+        // Customize document
+        function customizeDocument() {
+            alert('Opening document customization options...');
+            // In real implementation, this would open a customization modal
+        }
+
+        // Navigation functions
+        function goBack() {
+            window.location.href = 'sequence_diagram.html';
+        }
+
+        function viewProjectDashboard() {
+            alert('Opening project dashboard...');
+        }
+
+        function startNewProject() {
+            if (confirm('Are you sure you want to start a new project? All current data will be lost.')) {
+                localStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+
+        function saveProject() {
+            document.getElementById('saveStatus').textContent = 'Project saved successfully';
+        }
+
+        // Example data fallbacks
+        function getExampleUserStories() {
+            return {
+                generatedOutput: "USER STORY:\nAs a user, I want to login to the system\n\nPOSITIVE SCENARIO:\nGiven I am on the login page\nWhen I enter valid username and password\nAnd I click the login button\nThen I should be redirected to the dashboard\n\nNEGATIVE SCENARIO:\nGiven I am on the login page\nWhen I enter invalid credentials\nThen I should see an error message\nAnd I should remain on the login page"
+            };
+        }
+
+        function getExampleDatabase() {
+            return {
+                tables: [
+                    {
+                        name: "users",
+                        columns: [
+                            { name: "id", type: "INT", primary_key: true },
+                            { name: "username", type: "VARCHAR(255)", unique: true },
+                            { name: "email", type: "VARCHAR(255)" },
+                            { name: "password", type: "VARCHAR(255)" },
+                            { name: "created_at", type: "TIMESTAMP" }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        function getExampleUseCases() {
+            return {
+                featureName: "Login",
+                summary: "User authentication system",
+                priority: "Must Have",
+                status: "Active"
+            };
+        }
+    </script>
 </body>
 </html>

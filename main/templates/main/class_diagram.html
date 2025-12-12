@@ -1,34 +1,792 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Class Diagram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Class Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/plantuml-encoder@1.4.0/dist/plantuml-encoder.min.js"></script>
+    <style>
+        /* Global Styles - Sesuai Template One UML */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header & Footer - Sesuai Template */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Card Styles - Sesuai Template */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Buttons - Sesuai Template */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-secondary {
+            background-color: #374151;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .btn-outline {
+            background-color: #ffffff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            color: #374151;
+        }
+        
+        .btn-success {
+            background-color: #059669;
+            color: #ffffff;
+        }
+        
+        .btn-success:hover {
+            background-color: #047857;
+        }
+        
+        /* Diagram Container */
+        .diagram-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            text-align: center;
+        }
+        
+        .diagram-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .control-btn:hover {
+            background: #f9fafb;
+        }
+        
+        .control-btn.active {
+            background: #111827;
+            color: white;
+            border-color: #111827;
+        }
+        
+        .diagram-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .diagram-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        /* Code Display */
+        .code-section {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 24px;
+            margin-top: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .code-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+        
+        .plantuml-code {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .code-toggle {
+            background: none;
+            border: none;
+            color: #3b82f6;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .code-toggle:hover {
+            color: #2563eb;
+        }
+        
+        /* Footer Actions - Sesuai Template */
+        .footer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .save-indicator {
+            color: #059669;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-dot {
+            width: 8px;
+            height: 8px;
+            background: #059669;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header - Sesuai Template One UML -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+        </div>
+    </header>
 
-<div style="max-width:900px; margin:2rem auto;">
+    <!-- Main Content -->
+    <main>
+        <div class="card">
+            <div style="margin-bottom: 32px;">
+                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Class Diagram</h1>
+                <p style="color: #6b7280; font-size: 14px;">Generated from your SQL database structure</p>
+            </div>
 
-    <h1 style="font-size:1.8rem; font-weight:600;">
-        Hasil Generate Class Diagram
-    </h1>
+            <!-- Database Info -->
+            <div id="databaseInfo" class="code-section">
+                <div class="code-title">📊 Database Structure</div>
+                <div id="databaseContent" class="plantuml-code" style="background: #f8fafc; color: #374151; font-size: 13px;">
+                    Loading database information...
+                </div>
+            </div>
 
-    <!-- Display UML Image -->
-    <img 
-        src="data:image/png;base64,{{ uml_image }}" 
-        alt="Generated UML" 
-        style="max-width:100%; border:1px solid #ddd; border-radius:6px; margin:1rem 0;"
-    />
+            <!-- Diagram Controls -->
+            <div class="diagram-controls">
+                <button class="control-btn active" onclick="showDiagram('basic')">Basic Diagram</button>
+                <button class="control-btn" onclick="showDiagram('detailed')">Detailed Diagram</button>
+                <button class="control-btn" onclick="showDiagram('withMethods')">With Methods</button>
+                <button class="control-btn" onclick="showDiagram('complete')">Complete View</button>
+            </div>
 
-    <h2 style="margin-top:2rem;">PlantUML Code</h2>
-    <pre style="
-        background:#f3f4f6;
-        padding:1rem;
-        border-radius:6px;
-        border:1px solid #e5e7eb;
-        white-space:pre-wrap;
-    ">{{ uml_code }}</pre>
+            <!-- Diagram Container -->
+            <div class="diagram-container">
+                <div id="diagramContent">
+                    <div class="diagram-placeholder">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📐</div>
+                        <h3>Class Diagram</h3>
+                        <p>Generating diagram from your SQL data...</p>
+                        <div class="loading" style="margin: 20px auto;"></div>
+                    </div>
+                </div>
+            </div>
 
-</div>
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-outline" onclick="regenerateDiagram()">
+                    🔄 Regenerate Diagram
+                </button>
+                <button class="btn btn-outline" onclick="toggleCode()" id="codeToggle">
+                    Show PlantUML Code
+                </button>
+                <button class="btn btn-success" onclick="exportDiagram()">
+                    💾 Export Diagram
+                </button>
+            </div>
 
+            <!-- PlantUML Code Section -->
+            <div class="code-section" id="codeSection" style="display: none;">
+                <div class="code-title">PlantUML Code</div>
+                <pre class="plantuml-code" id="plantumlCode"></pre>
+            </div>
+
+            <!-- Next Section -->
+            <div class="code-section" style="background: #f0f9ff; border-color: #e0f2fe;">
+                <div class="code-title" style="color: #0369a1;">🚀 Next Steps</div>
+                <p style="color: #0c4a6e; margin-bottom: 16px; font-size: 14px;">
+                    Your class diagram has been generated successfully. You can now proceed to generate sequence diagrams or export your complete UML documentation.
+                </p>
+                <button class="btn btn-primary" onclick="goToNextStep()">
+                    Next: Generate Sequence Diagrams →
+                </button>
+            </div>
+
+            <!-- Footer Actions - Sesuai Template One UML -->
+            <div class="footer-actions">
+                <div class="save-indicator">
+                    <div class="save-dot"></div>
+                    <span id="saveStatus">Diagram generated successfully</span>
+                </div>
+                <div>
+                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
+                    <button class="btn btn-outline" onclick="saveDiagram()">Save Diagram</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer - Sesuai Template One UML -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global variables
+        let sqlData = null;
+        let currentDiagramType = 'basic';
+        let plantUmlCodes = {};
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSQLData();
+            generateAllDiagrams();
+        });
+
+        // Load SQL data from localStorage
+        function loadSQLData() {
+            const savedData = localStorage.getItem('sqlData');
+            if (savedData) {
+                sqlData = JSON.parse(savedData);
+                displayDatabaseInfo();
+            } else {
+                // Fallback to example data
+                sqlData = getExampleData();
+                displayDatabaseInfo();
+                document.getElementById('saveStatus').textContent = 'Using example data - No SQL file uploaded';
+            }
+        }
+
+        // Display database information
+        function displayDatabaseInfo() {
+            if (!sqlData) return;
+            
+            let info = 'Tables found:\n\n';
+            sqlData.tables.forEach(table => {
+                info += `📁 ${table.name}\n`;
+                table.columns.forEach(column => {
+                    const pk = column.primary_key ? ' 🔑' : '';
+                    const fk = column.foreign_key ? ' 🔗' : '';
+                    const unique = column.unique ? ' ⭐' : '';
+                    info += `   ${column.name} : ${column.type}${pk}${fk}${unique}\n`;
+                });
+                info += '\n';
+            });
+            
+            if (sqlData.relationships && sqlData.relationships.length > 0) {
+                info += 'Relationships:\n';
+                sqlData.relationships.forEach(rel => {
+                    info += `   ${rel.from_table}.${rel.from_column} → ${rel.to_table}.${rel.to_column}\n`;
+                });
+            }
+            
+            document.getElementById('databaseContent').textContent = info;
+        }
+
+        // Generate all diagram types
+        function generateAllDiagrams() {
+            if (!sqlData) return;
+            
+            // Basic Diagram
+            plantUmlCodes.basic = generateBasicDiagram();
+            
+            // Detailed Diagram
+            plantUmlCodes.detailed = generateDetailedDiagram();
+            
+            // Diagram with Methods
+            plantUmlCodes.withMethods = generateDiagramWithMethods();
+            
+            // Complete Diagram
+            plantUmlCodes.complete = generateCompleteDiagram();
+            
+            // Show the basic diagram by default
+            setTimeout(() => {
+                showDiagram('basic');
+            }, 500);
+        }
+
+        // Generate Basic Diagram
+        function generateBasicDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title Class Diagram - Basic View
+
+' Entities
+${sqlData.tables.map(table => `
+class ${table.name} {
+${table.columns.filter(col => col.primary_key).map(col => `  + ${col.name} : ${col.type}`).join('\\n')}
+}
+`).join('')}
+
+' Relationships
+${sqlData.relationships ? sqlData.relationships.map(rel => `
+${rel.from_table} }o--|| ${rel.to_table}
+`).join('') : ''}
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Detailed Diagram
+        function generateDetailedDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title Class Diagram - Detailed View
+
+' Entities with all attributes
+${sqlData.tables.map(table => `
+class ${table.name} {
+${table.columns.map(col => {
+    const pk = col.primary_key ? ' 🔑' : '';
+    const fk = col.foreign_key ? ' 🔗' : '';
+    const unique = col.unique ? ' ⭐' : '';
+    return `  + ${col.name} : ${col.type}${pk}${fk}${unique}`;
+}).join('\\n')}
+}
+`).join('')}
+
+' Relationships with labels
+${sqlData.relationships ? sqlData.relationships.map(rel => `
+${rel.from_table} }o--|| ${rel.to_table} : ${rel.from_column} → ${rel.to_column}
+`).join('') : ''}
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Diagram with Methods
+        function generateDiagramWithMethods() {
+            let plantUmlCode = `@startuml
+!theme plain
+title Class Diagram - With Methods
+
+${sqlData.tables.map(table => `
+class ${table.name} {
+${table.columns.map(col => {
+    const pk = col.primary_key ? ' 🔑' : '';
+    const fk = col.foreign_key ? ' 🔗' : '';
+    return `  + ${col.name} : ${col.type}${pk}${fk}`;
+}).join('\\n')}
+  --
+  + create() : void
+  + read() : ${table.name}
+  + update() : void
+  + delete() : void
+}
+`).join('')}
+
+' Relationships
+${sqlData.relationships ? sqlData.relationships.map(rel => `
+${rel.from_table} }o--|| ${rel.to_table}
+`).join('') : ''}
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Generate Complete Diagram
+        function generateCompleteDiagram() {
+            let plantUmlCode = `@startuml
+!theme plain
+title Class Diagram - Complete Database Schema
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' Entities with full details
+${sqlData.tables.map(table => `
+class ${table.name} <<Entity>> {
+${table.columns.map(col => {
+    const pk = col.primary_key ? ' <<PK>>' : '';
+    const fk = col.foreign_key ? ' <<FK>>' : '';
+    const unique = col.unique ? ' <<Unique>>' : '';
+    return `  + ${col.name} : ${col.type}${pk}${fk}${unique}`;
+}).join('\\n')}
+  --
+  + insert() : boolean
+  + select() : ResultSet
+  + update() : boolean
+  + delete() : boolean
+}
+`).join('')}
+
+' Detailed Relationships
+${sqlData.relationships ? sqlData.relationships.map(rel => `
+${rel.from_table} }o--|| ${rel.to_table} : "foreign key"
+`).join('') : ''}
+
+note top of ${sqlData.tables[0]?.name || 'users'}
+  Primary entity in the system
+  Manages core business logic
+end note
+
+@enduml`;
+
+            return plantUmlCode;
+        }
+
+        // Show selected diagram
+        function showDiagram(type) {
+            currentDiagramType = type;
+            
+            // Update active button
+            document.querySelectorAll('.control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            const plantUmlCode = plantUmlCodes[type];
+            if (!plantUmlCode) return;
+
+            // Encode for PlantUML
+            const encoded = plantumlEncoder.encode(plantUmlCode);
+            const plantUmlUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
+
+            // Show loading
+            document.getElementById('diagramContent').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <div class="loading" style="margin: 0 auto 20px;"></div>
+                    <p>Generating diagram...</p>
+                </div>
+            `;
+
+            // Load diagram
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('diagramContent').innerHTML = `
+                    <div style="text-align: center;">
+                        <h3 style="color: #111827; margin-bottom: 16px;">${getDiagramTitle(type)}</h3>
+                        <img src="${plantUmlUrl}" alt="Class Diagram" class="diagram-image" 
+                             onerror="handleDiagramError()">
+                    </div>
+                `;
+            };
+            img.onerror = function() {
+                handleDiagramError();
+            };
+            img.src = plantUmlUrl;
+
+            // Update code display
+            document.getElementById('plantumlCode').textContent = plantUmlCode;
+            
+            // Update status
+            document.getElementById('saveStatus').textContent = `${getDiagramTitle(type)} generated`;
+        }
+
+        // Get diagram title
+        function getDiagramTitle(type) {
+            const titles = {
+                'basic': 'Basic Class Diagram',
+                'detailed': 'Detailed Class Diagram',
+                'withMethods': 'Class Diagram with Methods',
+                'complete': 'Complete Database Schema'
+            };
+            return titles[type] || 'Class Diagram';
+        }
+
+        // Handle diagram generation error
+        function handleDiagramError() {
+            document.getElementById('diagramContent').innerHTML = `
+                <div class="diagram-placeholder">
+                    <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
+                    <h3>Error Generating Diagram</h3>
+                    <p>Unable to generate the diagram. Please try again.</p>
+                    <button class="btn btn-outline" onclick="showDiagram('${currentDiagramType}')" style="margin-top: 16px;">
+                        Retry
+                    </button>
+                </div>
+            `;
+        }
+
+        // Toggle code visibility
+        function toggleCode() {
+            const codeSection = document.getElementById('codeSection');
+            const toggleButton = document.getElementById('codeToggle');
+            
+            if (codeSection.style.display === 'none') {
+                codeSection.style.display = 'block';
+                toggleButton.textContent = 'Hide PlantUML Code';
+            } else {
+                codeSection.style.display = 'none';
+                toggleButton.textContent = 'Show PlantUML Code';
+            }
+        }
+
+        // Regenerate diagram
+        function regenerateDiagram() {
+            generateAllDiagrams();
+            showDiagram(currentDiagramType);
+            document.getElementById('saveStatus').textContent = 'Diagram regenerated';
+        }
+
+        // Export diagram
+        function exportDiagram() {
+            const diagramType = getDiagramTitle(currentDiagramType);
+            alert(`Exporting ${diagramType} as PNG and SVG files...`);
+            // In real implementation, this would trigger file download
+        }
+
+        // Save diagram
+        function saveDiagram() {
+            document.getElementById('saveStatus').textContent = 'Diagram saved to project';
+            // In real implementation, this would save to backend
+        }
+
+        // Navigation
+        function goBack() {
+            window.location.href = 'sql_input.html';
+        }
+
+        function goToNextStep() {
+            window.location.href = 'sequence_diagram.html';
+        }
+
+        // Example data fallback
+        function getExampleData() {
+            return {
+                tables: [
+                    {
+                        name: "users",
+                        columns: [
+                            { name: "id", type: "INT", primary_key: true },
+                            { name: "username", type: "VARCHAR(255)", unique: true },
+                            { name: "email", type: "VARCHAR(255)" },
+                            { name: "password", type: "VARCHAR(255)" },
+                            { name: "created_at", type: "TIMESTAMP" }
+                        ]
+                    },
+                    {
+                        name: "products",
+                        columns: [
+                            { name: "id", type: "INT", primary_key: true },
+                            { name: "name", type: "VARCHAR(255)" },
+                            { name: "price", type: "DECIMAL(10,2)" },
+                            { name: "description", type: "TEXT" },
+                            { name: "user_id", type: "INT", foreign_key: true }
+                        ]
+                    },
+                    {
+                        name: "orders",
+                        columns: [
+                            { name: "id", type: "INT", primary_key: true },
+                            { name: "user_id", type: "INT", foreign_key: true },
+                            { name: "product_id", type: "INT", foreign_key: true },
+                            { name: "quantity", type: "INT" },
+                            { name: "total_price", type: "DECIMAL(10,2)" },
+                            { name: "order_date", type: "TIMESTAMP" }
+                        ]
+                    }
+                ],
+                relationships: [
+                    {
+                        from_table: "products",
+                        from_column: "user_id",
+                        to_table: "users",
+                        to_column: "id"
+                    },
+                    {
+                        from_table: "orders",
+                        from_column: "user_id",
+                        to_table: "users",
+                        to_column: "id"
+                    },
+                    {
+                        from_table: "orders",
+                        from_column: "product_id",
+                        to_table: "products",
+                        to_column: "id"
+                    }
+                ]
+            };
+        }
+    </script>
 </body>
 </html>
