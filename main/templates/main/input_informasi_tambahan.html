@@ -86,15 +86,7 @@
     <p>Select a feature to review or add its Use Case Specification.</p>
 
     <!-- Feature Grid -->
-    <div class="row mt-4 g-4">
-      <!-- Fitur contoh -->
-      <div class="col-md-4">
-        <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature1">
-          <h5>Login</h5>
-          <p>Allow user to sign into the system.</p>
-        </div>
-      </div>
-    </div>
+    <div class="row mt-4 g-4" id="featureGrid"></div>
 
    <!-- Bottom Buttons -->
     <div class="bottom-buttons">
@@ -278,7 +270,104 @@
   <script>
   const saveBtn = document.getElementById("saveFeature");
   const nextBtn = document.getElementById("nextBtn");
+  const featureGrid = document.getElementById("featureGrid");
+  const featureList = JSON.parse(localStorage.getItem("featureList")) || [];
 
+  // Generate card dan modal untuk setiap fitur
+const formTemplate = `
+  <form class="usecase-form">
+    <div class="modal-body">
+      <!-- Summary -->
+      <div class="mb-3">
+        <label class="form-label">Summary Description</label>
+        <textarea class="form-control summary" rows="2"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Priority</label>
+          <select class="form-select priority">
+            <option>Must Have</option>
+            <option>Should Have</option>
+            <option>Could Have</option>
+            <option>Won't Have</option>
+          </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Status</label>
+          <select class="form-select status">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Pre-Condition</label>
+        <textarea class="form-control precondition" rows="2"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Post-Condition</label>
+        <textarea class="form-control postcondition" rows="2"></textarea>
+      </div>
+
+      <div class="mb-3 paths" data-type="basic">
+        <label class="form-label">Basic Path</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+
+      <div class="mb-3 paths" data-type="alternative">
+        <label class="form-label">Alternative Path</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+
+      <div class="mb-3 paths" data-type="exception">
+        <label class="form-label">Exception</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-dark saveFeature">Save</button>
+    </div>
+  </form>
+`;
+
+
+featureList.forEach((feature, index) => {
+  const modalId = `modalFeature${index}`;
+
+  // CARD FITUR
+  featureGrid.innerHTML += `
+    <div class="col-md-4">
+      <div class="feature-card" data-bs-toggle="modal" data-bs-target="#${modalId}">
+        <h5>${feature}</h5>
+      </div>
+    </div>
+  `;
+
+  // MODAL DINAMIS + TEMPLATE
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="modal fade" id="${modalId}" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Use Case Specification: ${feature}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          ${formTemplate}
+        </div>
+      </div>
+    </div>
+  `);
+});
+  
   // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
   function addRow(containerId) {
     const container = document.getElementById(containerId);
