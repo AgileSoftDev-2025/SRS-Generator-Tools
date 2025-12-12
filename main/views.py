@@ -427,5 +427,5 @@ def download_plantuml(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 def user_scenario(request):
-    return render(request, 'input_gui/user_scenario.html')
+    return render(request, 'main/user_scenario.html')
 
