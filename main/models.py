@@ -54,7 +54,7 @@ class Usecase(models.Model):
 
 # Tabel UserStory
 class UserStory(models.Model):
-    id_userstory = models.CharField(max_length=5, primary_key=True)
+    id_userstory = models.AutoField(primary_key=True)
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='userstories')
     input_sebagai = models.CharField(max_length=100)
     input_fitur = models.CharField(max_length=100)
@@ -93,14 +93,14 @@ class UseCaseSpecification(models.Model):
         ('Could Have', 'Could Have'),
         ("Won't Have", "Won't Have"),
     ]
-    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES)
+    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES, default='Must Have')
 
     # Status
     STATUS_CHOICES = [
         ('active', 'active'),
         ('inactive', 'inactive')
     ]
-    status = models.CharField(max_length=250, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=250, choices=STATUS_CHOICES, default='active')
 
     # Pre & Post Condition
     input_precondition = models.CharField(max_length=500)
@@ -108,6 +108,7 @@ class UseCaseSpecification(models.Model):
 
     def __str__(self):
         return self.id_usecasespecification
+    
 class BasicPath(models.Model):
     usecase_spec = models.ForeignKey(
         UseCaseSpecification,
@@ -222,10 +223,54 @@ class ClassDiagram(models.Model):
 
 # Tabel ActivityDiagram
 class ActivityDiagram(models.Model):
-    id_activity = models.CharField(max_length=5, primary_key=True)
-    scenario = models.ForeignKey(UserStoryScenario, on_delete=models.CASCADE, related_name='activities')
-    script_activity = models.TextField()
-    nama_usecase = models.TextField()
-    main_flow = models.TextField()
-    alternative_flow = models.TextField()
-    hasil_activity = models.ImageField(upload_to='activities/')
+    use_case_spec = models.OneToOneField(UseCaseSpecification, on_delete=models.CASCADE, related_name='activity_diagram', null=True, blank=True)
+    plantuml_code = models.TextField(blank=True, default='')
+    diagram_image_url = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Activity Diagram"
+        verbose_name_plural = "Activity Diagrams"
+    
+    def __str__(self):
+        if self.use_case_spec:
+            return f"Activity Diagram for {self.use_case_spec.id_usecasespecification}"
+        return "Activity Diagram (No Use Case)"
+    
+class Page(models.Model):
+    gui = models.ForeignKey(
+        GUI, 
+        on_delete=models.CASCADE, 
+        related_name='pages'
+    )
+    name = models.CharField(max_length=255)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} (Page {self.order})"
+
+
+class InputElement(models.Model):
+    INPUT_TYPES = [
+        ("text", "Text"),
+        ("number", "Number"),
+        ("email", "Email"),
+        ("password", "Password"),
+        ("date", "Date"),
+        ("checkbox", "Checkbox"),
+        ("radio", "Radio"),
+        ("textarea", "Textarea"),
+    ]
+
+    page = models.ForeignKey(
+        Page,
+        on_delete=models.CASCADE,
+        related_name='elements'
+    )
+    name = models.CharField(max_length=255)
+    input_type = models.CharField(max_length=50, choices=INPUT_TYPES)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} [{self.input_type}]"

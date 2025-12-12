@@ -1,10 +1,10 @@
-from django.shortcuts import get_object_or_404, redirect
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
+from django.shortcuts import redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
@@ -14,8 +14,11 @@ import urllib.parse
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 import json
+from .forms import RegisterForm 
 
 def home(request):
+    projects = Project.objects.all() 
+    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
     user_id = request.session['user_id']
@@ -48,6 +51,26 @@ def login_view(request):
     
     return render(request, 'main/login.html')
 
+def register_view(request):
+    if 'user_id' in request.session:
+        return redirect('main:home')
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            pengguna = form.save()
+            messages.success(request, 'Registration successful! Please log in.')
+            return redirect('main:login')
+        else:
+            messages.error(request, 'Registration failed. Please correct the errors below.')
+    else:
+        form = RegisterForm()
+    context = {
+        'form': form,
+        'title': 'Create Account'
+    }
+    return render(request, 'main/register.html', {'form': form})
+
+
 def logout_view(request):
     if 'user_id' in request.session:
         user_id = request.session['user_id']
@@ -68,6 +91,20 @@ def logout_view(request):
 def user_story(request):
     return render(request, 'main/user_story.html')
 
+def save_userstory(request):
+    if request.method == "POST":
+        actor = request.POST.get("input_sebagai")
+        fitur = request.POST.get("input_fitur")
+        gui_id = request.POST.get("gui_id")
+
+        userstory = UserStory(
+            input_sebagai=actor,
+            input_fitur=fitur,
+            gui_id=gui_id
+        )
+        userstory.save()
+        return redirect("halaman_sukses")
+    
 def use_case(request):
     return render(request, 'main/use_case.html')
 
@@ -135,10 +172,8 @@ def save_use_case_spec(request, feature_id):
         # Jika bukan POST, redirect ke halaman input
         return redirect("input_informasi_tambahan")
 
-
-def activity_diagram(request):
-    return render(request, 'main/activity_diagram.html')
-
+def input_gui(request):
+    return render(request, 'main/input_gui.html')
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
@@ -268,6 +303,129 @@ def project_new(request):
 
     return render(request, 'main/home.html') 
 
-def project_detail(request, id):
-    project = get_object_or_404(Project, id_project=id)
+def project_detail(request, id_project):
+    # Ambil data project berdasarkan id
+    project = get_object_or_404(Project, id_project=project)
+    
+    # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
+
+def save_use_case(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # Simpan ke session
+            request.session['use_case_data'] = data
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Use case data saved successfully'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=400)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method'
+    }, status=405)
+
+def activity_diagram(request):
+    """
+    Halaman untuk menampilkan dan generate activity diagram
+    """
+    use_case_data = request.session.get('use_case_data', None)
+    
+    context = {
+        'page_title': 'Generated Activity Diagram',
+        'use_case_data': json.dumps(use_case_data) if use_case_data else 'null'
+    }
+    return render(request, 'main/activity_diagram.html', context)
+
+def create_plantuml_from_usecase(data):
+    plantuml = "@startuml\n"
+    plantuml += f"title Activity Diagram - {data.get('featureName', 'Use Case')}\n\n"
+    
+    # Start event
+    plantuml += "start\n"
+    
+    # Pre-condition
+    precondition = data.get('precondition', '').strip()
+    if precondition:
+        plantuml += f":{precondition};\n"
+    plantuml += "\n"
+    
+    # Basic Path
+    basic_path = data.get('basicPath', [])
+    if basic_path:
+        plantuml += 'partition "Basic Flow" {\n'
+        for step in basic_path:
+            actor_action = step.get('actor', '').strip()
+            system_action = step.get('system', '').strip()  
+            
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
+        plantuml += "}\n\n"
+    
+    # Alternative Path
+    alternative_path = data.get('alternativePath', [])
+    has_alternative = any(step.get('actor', '').strip() or step.get('system', '').strip() 
+                         for step in alternative_path)
+    
+    if has_alternative:
+        plantuml += 'partition "Alternative Flow" {\n'
+        for step in alternative_path:
+            actor_action = step.get('actor', '').strip()
+            system_action = step.get('system', '').strip()  
+            
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
+        plantuml += "}\n\n"
+    
+    # Exception Path
+    exception_path = data.get('exceptionPath', [])
+    has_exception = any(step.get('actor', '').strip() or step.get('system', '').strip() 
+                       for step in exception_path)
+    
+    if has_exception:
+        plantuml += 'partition "Exception Flow" {\n'
+        for step in exception_path:
+            actor_action = step.get('actor', '').strip()
+            system_action = step.get('system', '').strip()  
+            
+            if actor_action:
+                plantuml += f"    :{actor_action};\n"
+            if system_action:
+                plantuml += f"    :{system_action};\n"
+        plantuml += "}\n\n"
+    
+    # Post-condition
+    postcondition = data.get('postcondition', '').strip()
+    if postcondition:
+        plantuml += f":{postcondition};\n"
+    
+    # End event
+    plantuml += "stop\n"
+    plantuml += "@enduml"
+    
+    return plantuml
+
+def download_plantuml(request):
+    if request.method == "POST":
+        try:
+                data = json.loads(request.body)
+                plantuml_code = data.get('plantuml', '')
+                response = HttpResponse(plantuml_code, content_type='text/plain')
+                response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
+                return response
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+def user_scenario(request):
+    return render(request, 'main/user_scenario.html')
+

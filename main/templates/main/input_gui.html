@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INPUT GUI</title>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 30px;
+        }
+        .container {
+            background: white;
+            width: 850px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .page-card {
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .page-number {
+            background: #e0e0e0;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .page-name-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .page-name-input:focus {
+            outline: 2px solid #6b46c1;
+            background: #f5f5f5;
+        }
+
+        .page-content {
+            margin-top: 15px;
+        }
+
+        .element-label {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .element-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .element-row input, .element-row select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .element-row select {
+            width: 150px;
+            cursor: pointer;
+        }
+
+        .element-row input:focus, .element-row select:focus {
+            outline: 2px solid #6b46c1;
+            background: #f5f5f5;
+        }
+
+        .add-element-btn {
+            background-color: #e0e0e0;
+            color: black;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .add-element-btn:hover {
+            background-color: #d5d5d5;
+        }
+
+        .add-page-btn {
+            width: 100%;
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 0;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .add-page-btn:hover {
+            background-color: #333;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            padding: 12px 32px;
+            background-color: #000;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .nav-btn:hover {
+            background-color: #333;
+        }
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>INPUT GUI</h1>
+        <p class="subtitle">Input Page</p>
+
+        <div class="page-card">
+            <div class="page-header">
+                <div class="page-number">1</div>
+                <div class="page-name-container">
+                    <input type="text" class="page-name-input" placeholder="Fill page name here..." />
+                    <button class="toggle-btn" onclick="togglePage(this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="page-content">
+                <label class="element-label">Input Element</label>
+                <div class="element-row">
+                    <input type="text" class="element-name" placeholder="Element name..." />
+                    <select class="type-select">
+                        <option>Type</option>
+                        <option>Text</option>
+                        <option>Number</option>
+                        <option>Email</option>
+                        <option>Password</option>
+                        <option>Date</option>
+                        <option>Checkbox</option>
+                        <option>Radio</option>
+                        <option>Textarea</option>
+                    </select>
+                </div>
+
+                <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+            </div>
+        </div>
+
+        <button class="add-page-btn" id="addPageBtn" onclick="addPage(); return false;">+ ADD MORE PAGE</button>
+
+        <div class="navigation">
+            <a href="{% url 'main:use_case_diagram' %}" class="nav-btn">&lt; BACK</a>
+            <a href="{% url 'main:user_scenario' %}" class="nav-btn">NEXT &gt;</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePage(btn) {
+            const card = btn.closest('.page-card');
+            const content = card.querySelector('.page-content');
+            btn.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+        }
+
+        function addElement(btn) {
+            const content = btn.closest('.page-content');
+            const newElement = document.createElement('div');
+            newElement.className = 'element-row';
+            newElement.innerHTML = `
+                <input type="text" class="element-name" placeholder="Element name..." />
+                <select class="type-select">
+                    <option>Type</option>
+                    <option>Text</option>
+                    <option>Number</option>
+                    <option>Email</option>
+                    <option>Password</option>
+                    <option>Date</option>
+                    <option>Checkbox</option>
+                    <option>Radio</option>
+                    <option>Textarea</option>
+                </select>
+            `;
+            content.insertBefore(newElement, btn);
+        }
+
+        function addPage() {
+            const container = document.querySelector('.container');
+            const addPageBtn = document.getElementById('addPageBtn');
+            const pageCards = document.querySelectorAll('.page-card');
+            const pageNumber = pageCards.length + 1;
+            
+            const newCard = document.createElement('div');
+            newCard.className = 'page-card';
+            newCard.innerHTML = `
+                <div class="page-header">
+                    <div class="page-number">${pageNumber}</div>
+                    <div class="page-name-container">
+                        <input type="text" class="page-name-input" placeholder="Fill page name here..." />
+                        <button class="toggle-btn" onclick="togglePage(this)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="page-content">
+                    <label class="element-label">Input Element</label>
+                    <div class="element-row">
+                        <input type="text" class="element-name" placeholder="Element name..." />
+                        <select class="type-select">
+                            <option>Type</option>
+                            <option>Text</option>
+                            <option>Number</option>
+                            <option>Email</option>
+                            <option>Password</option>
+                            <option>Date</option>
+                            <option>Checkbox</option>
+                            <option>Radio</option>
+                            <option>Textarea</option>
+                        </select>
+                    </div>
+                    <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+                </div>
+            `;
+            
+            container.insertBefore(newCard, addPageBtn);
+        }
+    </script>
+</body>
+</html>

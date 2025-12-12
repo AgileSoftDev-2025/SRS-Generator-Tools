@@ -367,165 +367,24 @@
     </style>
 </head>
 <body>
-    <!-- Header - Sesuai Template One UML -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
-                </div>
-                <span class="logo-text">One UML</span>
-            </div>
-            <div>
-                <img src="https://via.placeholder.com/40" alt="Profile" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e5e7eb;">
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-        <div class="card">
-            <div style="margin-bottom: 32px;">
-                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Additional Information</h1>
-                <p style="color: #6b7280; font-size: 14px;">Select a feature to review or add its Use Case Specification.</p>
-            </div>
-            
-            <!-- Feature Grid -->
-            <div class="row mt-4 g-4">
-                <!-- Fitur contoh -->
-                <div class="col-md-4">
-                    <div class="feature-card" data-bs-toggle="modal" data-bs-target="#modalFeature1">
-                        <h5>Login</h5>
-                        <p>Allow user to sign into the system.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Footer Actions - Sesuai Template One UML -->
-            <div class="footer-actions">
-                <div class="save-indicator">
-                    <div class="save-dot"></div>
-                    <span>All changes saved.</span>
-                </div>
-                <div>
-                    <button class="btn btn-outline" id="backBtn">← Back</button>
-                    <button class="btn btn-primary" id="nextBtn">Next</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer - Sesuai Template One UML -->
-    <footer>
-        <div class="footer-content">
-            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Help</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Modal Feature 1 -->
-    <div class="modal fade" id="modalFeature1" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Use Case Specification: Login</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="formFeature1">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Summary Description</label>
-                            <textarea class="form-control" id="summary" rows="2"></textarea>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Priority</label>
-                                <select class="form-select" id="priority">
-                                    <option>Pilih Prioritas</option>
-                                    <option>Must Have</option>
-                                    <option>Should Have</option>
-                                    <option>Could Have</option>
-                                    <option>Won't Have</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" id="status">
-                                    <option>Pilih Status</option>
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Pre-Condition</label>
-                            <textarea class="form-control" id="precondition" rows="2"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Post-Condition</label>
-                            <textarea class="form-control" id="postcondition" rows="2"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Basic Path</label>
-                            <div id="basicPathContainer">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Actor Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">System Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Alternative Path</label>
-                            <div id="alternativePathContainer">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Actor Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">System Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="addAlternativePathRow">+ Tambah Baris</button>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Exception</label>
-                            <div id="exceptionContainer">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Actor Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">System Actions</label>
-                                        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="addExceptionRow">+ Tambah Baris</button>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-dark" id="saveFeature">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="OneUML Logo">
+      OneUML
     </div>
+    <div>
+      <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img">
+    </div>
+  </header>
+
+  <!-- Content -->
+  <div class="container mt-5">
+    <h3 class="fw-bold">Additional Information</h3>
+    <p>Select a feature to review or add its Use Case Specification.</p>
+
+    <!-- Feature Grid -->
+    <div class="row mt-4 g-4" id="featureGrid"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -606,5 +465,365 @@
             modal.hide();
         });
     </script>
+
+
+  <!-- Modal Feature 1 -->
+  <div class="modal fade" id="modalFeature1" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Use Case Specification: Login</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formFeature1">
+          <div class="modal-body">
+
+            <!-- Summary -->
+            <div class="mb-3">
+              <label class="form-label">Summary Description</label>
+              <small class="text-muted d-block mb-1">Jelaskan tujuan umum dari use case dalam 1–2 kalimat.</small>
+              <textarea class="form-control" id="summary" rows="2"
+                placeholder="Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard."></textarea>
+            </div>
+
+            <!-- Priority & Status (side by side) -->
+            <div class="row">
+              <!-- Priority -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Priority</label>
+                <a class="text-decoration-none d-block mb-1 small" data-bs-toggle="collapse" href="#priority_help" role="button">
+                  📌 Panduan Prioritas
+                </a>
+
+                <div class="collapse" id="priority_help">
+                  <div class="alert alert-secondary p-2 small mt-1">
+                    <b>Keterangan Prioritas:</b><br>
+                    • <b>Must Have</b> → Fitur wajib ada, tanpa fitur ini sistem tidak dapat berjalan.<br>
+                    • <b>Should Have</b> → Fitur penting, tapi sistem masih bisa berjalan tanpa fitur ini.<br>
+                    • <b>Could Have</b> → Fitur tambahan jika ada waktu / budget.<br>
+                    • <b>Won't Have</b> → Fitur yang tidak akan dikerjakan saat ini.
+                  </div>
+                </div>
+
+                <select class="form-select mt-2" id="priority">
+                  <option>Pilih Prioritas</option>
+                  <option>Must Have</option>
+                  <option>Should Have</option>
+                  <option>Could Have</option>
+                  <option>Won't Have</option>
+                </select>
+              </div>
+
+              <!-- Status -->
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Status</label>
+                <a class="text-decoration-none d-block small mb-1" data-bs-toggle="collapse" href="#status_help" role="button">
+                  📌 Panduan Status
+                </a>
+
+                <div class="collapse" id="status_help">
+                  <div class="alert alert-secondary p-2 small mt-1">
+                    <b>Keterangan Status:</b><br>
+                    • <b>Active</b> → Use case masih digunakan dan diterapkan.<br>
+                    • <b>Inactive</b> → Use case sudah tidak digunakan / digantikan.
+                  </div>
+                </div>
+
+                <select class="form-select mt-2" id="status">
+                  <option>Pilih Status</option>
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Pre & Post -->
+            <div class="mb-3">
+              <label class="form-label">Pre-Condition</label>
+              <small class="text-muted d-block mb-1">Syarat sebelum use case bisa dimulai.</small>
+              <textarea class="form-control" id="precondition" rows="2"
+                placeholder="Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem."></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Post-Condition</label>
+              <small class="text-muted d-block mb-1">Hasil akhir setelah use case berjalan berhasil.</small>
+              <textarea class="form-control" id="postcondition" rows="2"
+                placeholder="Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama."></textarea>
+            </div>
+
+            <!-- Basic Path -->
+            <div class="mb-3">
+              <label class="form-label">Basic Path</label>
+              <small class="text-muted d-block mb-1">Urutan langkah standar tanpa error dari aktor dan sistem.</small>
+
+              <div id="basicPathContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memasukkan email dan password."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
+            </div>
+
+            <!-- Alternative Path -->
+            <div class="mb-3">
+              <label class="form-label">Alternative Path</label>
+              <small class="text-muted d-block mb-1">Variasi alur selain Basic Path tetapi tetap berhasil.</small>
+
+              <div id="alternativePathContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memilih login menggunakan Google."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addAlternativePathRow">+ Tambah Baris</button>
+            </div>
+
+            <!-- Exception -->
+            <div class="mb-3">
+              <label class="form-label">Exception</label>
+              <small class="text-muted d-block mb-1">Alur untuk kondisi gagal agar pengalaman pengguna tetap aman.</small>
+
+              <div id="exceptionContainer">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Actor Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Pengguna memasukkan password yang salah."></textarea>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">System Actions</label>
+                    <textarea class="form-control" rows="3"
+                      placeholder="Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi."></textarea>
+                  </div>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-secondary btn-sm" id="addExceptionRow">+ Tambah Baris</button>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" id="saveFeature">Save</button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  const saveBtn = document.getElementById("saveFeature");
+  const nextBtn = document.getElementById("nextBtn");
+  const featureGrid = document.getElementById("featureGrid");
+  const featureList = JSON.parse(localStorage.getItem("featureList")) || [];
+
+  // Generate card dan modal untuk setiap fitur
+const formTemplate = `
+  <form class="usecase-form">
+    <div class="modal-body">
+      <!-- Summary -->
+      <div class="mb-3">
+        <label class="form-label">Summary Description</label>
+        <textarea class="form-control summary" rows="2"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Priority</label>
+          <select class="form-select priority">
+            <option>Must Have</option>
+            <option>Should Have</option>
+            <option>Could Have</option>
+            <option>Won't Have</option>
+          </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Status</label>
+          <select class="form-select status">
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Pre-Condition</label>
+        <textarea class="form-control precondition" rows="2"></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Post-Condition</label>
+        <textarea class="form-control postcondition" rows="2"></textarea>
+      </div>
+
+      <div class="mb-3 paths" data-type="basic">
+        <label class="form-label">Basic Path</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+
+      <div class="mb-3 paths" data-type="alternative">
+        <label class="form-label">Alternative Path</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+
+      <div class="mb-3 paths" data-type="exception">
+        <label class="form-label">Exception</label>
+        <div class="path-container"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
+      <button type="button" class="btn btn-dark saveFeature">Save</button>
+    </div>
+  </form>
+`;
+
+
+featureList.forEach((feature, index) => {
+  const modalId = `modalFeature${index}`;
+
+  // CARD FITUR
+  featureGrid.innerHTML += `
+    <div class="col-md-4">
+      <div class="feature-card" data-bs-toggle="modal" data-bs-target="#${modalId}">
+        <h5>${feature}</h5>
+      </div>
+    </div>
+  `;
+
+  // MODAL DINAMIS + TEMPLATE
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="modal fade" id="${modalId}" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Use Case Specification: ${feature}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          ${formTemplate}
+        </div>
+      </div>
+    </div>
+  `);
+});
+  
+  // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
+  function addRow(containerId) {
+    const container = document.getElementById(containerId);
+    const newRow = document.createElement("div");
+    newRow.classList.add("row", "mb-3");
+    newRow.innerHTML = `
+      <div class="col-md-6">
+        <label class="form-label">Actor Actions</label>
+        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">System Actions</label>
+        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
+      </div>
+    `;
+    container.appendChild(newRow);
+  }
+
+  // === TOMBOL TAMBAH UNTUK SETIAP BAGIAN ===
+  document
+    .getElementById("addBasicPathRow")
+    .addEventListener("click", () => addRow("basicPathContainer"));
+
+  document
+    .getElementById("addAlternativePathRow")
+    .addEventListener("click", () => addRow("alternativePathContainer"));
+
+  document
+    .getElementById("addExceptionRow")
+    .addEventListener("click", () => addRow("exceptionContainer"));
+
+  // === FUNGSI MENGAMBIL DATA PATH ===
+  function getPathData(containerId) {
+    const container = document.getElementById(containerId);
+    const rows = container.querySelectorAll(".row");
+    let paths = [];
+
+    rows.forEach((row) => {
+      const actor = row.querySelector(".col-md-6:nth-child(1) textarea").value;
+      const system = row.querySelector(".col-md-6:nth-child(2) textarea").value;
+      paths.push({ actor, system });
+    });
+
+    return paths;
+  }
+
+  document.getElementById("summary").placeholder =
+  "Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard.";
+  document.getElementById("precondition").placeholder =
+  "Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem.";
+  document.getElementById("postcondition").placeholder =
+  "Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama.";
+  document.querySelector("#basicPathContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memasukkan email dan password.";
+  document.querySelector("#basicPathContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard.";
+  document.querySelector("#alternativePathContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memilih login menggunakan Google.";
+  document.querySelector("#alternativePathContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis.";
+  document.querySelector("#exceptionContainer .col-md-6:nth-child(1) textarea").placeholder =
+  "Contoh: Pengguna memasukkan password yang salah.";
+  document.querySelector("#exceptionContainer .col-md-6:nth-child(2) textarea").placeholder =
+  "Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi.";
+
+
+  // === SIMPAN DATA KE LOCALSTORAGE ===
+  saveBtn.addEventListener("click", () => {
+    const featureData = {
+      featureName: "Login",
+      summary: document.getElementById("summary").value,
+      priority: document.getElementById("priority").value,
+      status: document.getElementById("status").value,
+      precondition: document.getElementById("precondition").value,
+      postcondition: document.getElementById("postcondition").value,
+      basicPath: getPathData("basicPathContainer"),
+      alternativePath: getPathData("alternativePathContainer"),
+      exceptionPath: getPathData("exceptionContainer"),
+    };
+
+    localStorage.setItem("useCaseData", JSON.stringify(featureData));
+    alert("Feature saved successfully!");
+    
+    const modalEl = document.getElementById("modalFeature1");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+
+  });
+
+  nextBtn.addEventListener("click", () => {
+    window.location.href = "use_case_spec.html";
+  });
+</script>
 </body>
 </html>
