@@ -57,18 +57,29 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            pengguna = form.save()
-            messages.success(request, 'Registration successful! Please log in.')
-            return redirect('main:login')
+            try:
+                pengguna = form.save()
+                messages.success(request, 'Registration successful! Please log in.')
+                return redirect('main:login')
+            except Exception as e:
+                messages.error(request, f'Registration failed: {str(e)}')
+                print(f"Error saving user: {e}")
         else:
-            messages.error(request, 'Registration failed. Please correct the errors below.')
+            print("Form errors:", form.errors)
+            for field, errors in form.errors.items():
+                for error in errors:
+                    if field == '__all__':
+                        messages.error(request, error)
+                    else:
+                        field_name = form.fields[field].label or field
+                        messages.error(request, f"{field_name}: {error}")
     else:
         form = RegisterForm()
     context = {
         'form': form,
         'title': 'Create Account'
     }
-    return render(request, 'main/register.html', {'form': form})
+    return render(request, 'main/register.html', context)
 
 
 def logout_view(request):
