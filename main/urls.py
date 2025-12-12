@@ -18,6 +18,7 @@ urlpatterns = [
     path('use_case_spec/', views.use_case_spec, name='use_case_spec'),
     path('api/save-use-case/', views.save_use_case, name='save_use_case'),
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'),
+    #path('input-gui/', views.input_gui, name='input_gui'),
     # path('input-gui/', views.input_gui, name='input_gui'),
     path('import-sql/', views.import_sql, name='import_sql'),
     # path('import-sql/class_diagram.html', views.class_diagram, name='class_diagram'),

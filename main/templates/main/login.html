@@ -135,6 +135,29 @@
             background-color: #707070;
         }
 
+        .signup-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #d0d0d0;
+        }
+
+        .signup-link p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .signup-link a {
+            font-size: 14px;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 400;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
         .footer {
             position: fixed;
             bottom: 0;
@@ -200,6 +223,10 @@
                 Login
             </button>
         </form>
+
+        <div class="signup-link">
+            <p>Don't have an account? <a href="{% url 'main:register' %}">Sign up</a></p>
+        </div>
     </div>
 
     <div class="footer">
