@@ -237,3 +237,40 @@ class ActivityDiagram(models.Model):
         if self.use_case_spec:
             return f"Activity Diagram for {self.use_case_spec.id_usecasespecification}"
         return "Activity Diagram (No Use Case)"
+    
+class Page(models.Model):
+    gui = models.ForeignKey(
+        GUI, 
+        on_delete=models.CASCADE, 
+        related_name='pages'
+    )
+    name = models.CharField(max_length=255)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} (Page {self.order})"
+
+
+class InputElement(models.Model):
+    INPUT_TYPES = [
+        ("text", "Text"),
+        ("number", "Number"),
+        ("email", "Email"),
+        ("password", "Password"),
+        ("date", "Date"),
+        ("checkbox", "Checkbox"),
+        ("radio", "Radio"),
+        ("textarea", "Textarea"),
+    ]
+
+    page = models.ForeignKey(
+        Page,
+        on_delete=models.CASCADE,
+        related_name='elements'
+    )
+    name = models.CharField(max_length=255)
+    input_type = models.CharField(max_length=50, choices=INPUT_TYPES)
+    order = models.IntegerField()
+
+    def __str__(self):
+        return f"{self.name} [{self.input_type}]"

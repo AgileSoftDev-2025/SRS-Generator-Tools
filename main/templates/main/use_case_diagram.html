@@ -503,6 +503,7 @@
     </footer>
 
     <script>
+        const nextPage = "user_story.html";
         class ActorsAndFeaturesManager {
             constructor() {
                 this.actors = [];
@@ -524,7 +525,7 @@
                     if (this.validateForm()) {
                         this.saveData();
                         // Navigate to user story page
-                        window.location.href = 'user_story.html';
+                        window.location.href = nextPage;
                     }
                 });
             }

@@ -5,7 +5,7 @@ def parse_sql_file(sql_content):
     tables = {}
     foreign_keys = []
 
-    # Split SQL statements
+    # Split statements
     statements = sqlparse.split(sql_content)
 
     for stmt in statements:
@@ -13,9 +13,9 @@ def parse_sql_file(sql_content):
         if not stmt_clean.lower().startswith("create table"):
             continue
 
-        # Match CREATE TABLE nama_tabel ( ... ) [opsi apapun]
+        # --- FIX 1: Regex CREATE TABLE yang fleksibel ---
         match = re.search(
-            r'CREATE\s+TABLE\s+[`"]?(\w+)[`"]?\s*\((.*?)\)\s*(ENGINE|;|$)',
+            r'CREATE\s+TABLE\s+[`"]?(\w+)[`"]?\s*\((.*?)\)\s*;',
             stmt_clean,
             re.S | re.I
         )
@@ -24,39 +24,45 @@ def parse_sql_file(sql_content):
 
         table_name = match.group(1)
         columns_block = match.group(2)
+
+        # --- FIX 2: Split kolom aman (tidak memecah FK) ---
+        column_lines = re.split(r',\s*(?![^()]*\))', columns_block)
+
         columns = []
 
-        # Split tiap baris kolom
-        for line in columns_block.split(","):
+        for line in column_lines:
             line = line.strip()
-            
-            # Baris filter Anda sudah benar, ia akan melewati FOREIGN KEY, PRIMARY KEY, dll.
+
+            # Skip PK/FK/constraint lines
             if not line or line.upper().startswith(("PRIMARY KEY", "FOREIGN KEY", "UNIQUE", "KEY", "CONSTRAINT")):
                 continue
 
-            # Ambil SEMUA sisa baris
+            # Ambil kolom normal
             col_match = re.match(r'[`"]?(\w+)[`"]?\s+(.*)', line, re.I)
-            
             if col_match:
+                col_name = col_match.group(1)
+                col_type = col_match.group(2)
+
                 columns.append({
-                    "name": col_match.group(1),
-                    "type": col_match.group(2) 
+                    "name": col_name,
+                    "type": col_type
                 })
 
         tables[table_name] = columns
 
-        # Cari foreign keys 
+        # --- FIX 3: Regex FOREIGN KEY yang stabil ---
         fk_matches = re.findall(
-            r'FOREIGN KEY\s*\([`"]?(\w+)[`"]?\)\s*REFERENCES\s+[`"]?(\w+)[`"]?\s*\([`"]?(\w+)[`"]?\)',
+            r'FOREIGN KEY\s*\((\w+)\)\s*REFERENCES\s+(\w+)\s*\((\w+)\)',
             stmt_clean,
             re.I
         )
-        for fk in fk_matches:
+
+        for fk_col, ref_table, ref_col in fk_matches:
             foreign_keys.append({
                 "table": table_name,
-                "column": fk[0],
-                "ref_table": fk[1],
-                "ref_column": fk[2],
+                "column": fk_col,
+                "ref_table": ref_table,
+                "ref_column": ref_col,
             })
 
     return {
