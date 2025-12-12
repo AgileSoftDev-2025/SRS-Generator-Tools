@@ -721,24 +721,22 @@
             }
             
             saveData() {
-                // Format data for output
-                const formattedData = this.formatDataForOutput();
-                
-                // In a real application, you would send this data to a server
-                console.log('Saving actors data:', formattedData);
-                
-                // Store in localStorage for demo purposes
-                localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
-                
-                // You could also send to a Django backend:
-                // fetch('/api/save-actors/', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //         'X-CSRFToken': getCSRFToken() // Django CSRF token
-                //     },
-                //     body: JSON.stringify({ actors: formattedData })
-                // });
+            // Format data untuk output
+            const formattedData = this.formatDataForOutput();
+            console.log('Saving actors data:', formattedData);
+
+            // Simpan lengkap aktor & fitur
+            localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
+
+            // 🔥 Ekstrak daftar fitur untuk halaman input informasi tambahan
+            let featureList = [];
+            formattedData.forEach(actor => {
+                actor.features.forEach(f => featureList.push(f.what));
+            });
+            localStorage.setItem('featureList', JSON.stringify(featureList));
+
+            // Debug
+            console.log('Saved featureList:', featureList);
             }
             
             formatDataForOutput() {

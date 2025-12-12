@@ -18,7 +18,7 @@ urlpatterns = [
     path('use_case_spec/', views.use_case_spec, name='use_case_spec'),
     path('api/save-use-case/', views.save_use_case, name='save_use_case'),
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'),
-    path('input-gui/', views.input_gui, name='input_gui'),
+    #path('input-gui/', views.input_gui, name='input_gui'),
     path('import-sql/', views.import_sql, name='import_sql'),
     #path('import-sql/class_diagram.html', views.class_diagram, name='class_diagram'),
     path('parse-sql/', views.parse_sql, name='parse_sql'),
@@ -28,6 +28,6 @@ urlpatterns = [
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     path('project/new/', views.project_new, name='project_new'),
     path('project/<id_project>/', views.project_detail, name='project_detail'),
-    path('api/generate-plantuml/', views.generate_plantuml, name='generate_plantuml'),
+    #path('api/generate-plantuml/', views.generate_plantuml, name='generate_plantuml'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
 ]
