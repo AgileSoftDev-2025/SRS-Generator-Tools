@@ -1,633 +1,389 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One UML - Import SQL Database</title>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Import SQL Database - One UML</title>
+    <link rel="stylesheet" href="{% static 'main/css/global.css' %}" />
     <style>
-        /* Global Styles - Sesuai Template One UML */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
-            line-height: 1.5;
-        }
-        
-        /* Header & Footer - Sesuai Template */
-        header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0 24px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background-color: #111827;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 24px;
-        }
-        
-        footer {
-            background-color: #ffffff;
-            border-top: 1px solid #e5e7eb;
-            padding: 16px 24px;
-            margin-top: 48px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .footer-links {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        
-        .footer-link {
-            font-size: 12px;
-            color: #6b7280;
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            color: #374151;
-        }
-        
-        /* Card Styles - Sesuai Template */
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
-        /* Buttons - Sesuai Template */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background-color: #111827;
-            color: #ffffff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        .btn-secondary {
-            background-color: #374151;
-            color: #ffffff;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        
-        .btn-outline {
-            background-color: #ffffff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-outline:hover {
-            background-color: #f9fafb;
-            color: #374151;
-        }
-        
-        .btn-success {
-            background-color: #059669;
-            color: #ffffff;
-        }
-        
-        .btn-success:hover {
-            background-color: #047857;
-        }
-        
-        /* Upload Area Styles */
-        .upload-area {
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            padding: 48px 32px;
-            background-color: #fafafa;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .upload-area:hover {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-        }
-        
-        .upload-area.dragover {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-        }
-        
-        .upload-icon {
-            width: 64px;
-            height: 64px;
-            color: #9ca3af;
-            margin: 0 auto 16px;
-        }
-        
-        .upload-text {
-            margin-bottom: 12px;
-        }
-        
-        .upload-title {
-            font-size: 16px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-        
-        .upload-subtitle {
-            font-size: 14px;
-            color: #6b7280;
-        }
-        
-        .upload-info {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 16px;
-        }
-        
-        /* Result Container */
-        .result-container {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 24px;
-            margin-top: 24px;
-            border: 1px solid #e2e8f0;
-            display: none;
-        }
-        
-        .result-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 16px;
-        }
-        
-        .result-output {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 16px;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            overflow-x: auto;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        /* Footer Actions - Sesuai Template */
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .save-indicator {
-            color: #059669;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .save-dot {
-            width: 8px;
-            height: 8px;
-            background: #059669;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        
-        .help-text {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      #resultContainer {
+        margin-top: 2rem;
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 0.875rem;
+        color: #374151;
+      }
+      #saveBtn {
+        display: none;
+        margin-top: 1rem;
+        background-color: #2563eb;
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      #saveBtn:hover {
+        background-color: #1d4ed8;
+      }
     </style>
-</head>
-<body>
-    <!-- Header - Sesuai Template One UML -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
-                </div>
-                <span class="logo-text">One UML</span>
-            </div>
+  </head>
+  <body>
+    <div
+      style="
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="width: 100%; max-width: 42rem">
+        <!-- Header Section -->
+        <div style="text-align: center; margin-bottom: 2rem">
+          <h1
+            style="
+              font-size: 1.875rem;
+              font-weight: 600;
+              color: var(--text-primary);
+              margin-bottom: 0.5rem;
+            "
+          >
+            Import SQL Database
+          </h1>
+          <p
+            style="
+              font-size: 0.9375rem;
+              color: var(--text-secondary);
+              line-height: 1.5;
+            "
+          >
+            Upload your .sql file to automatically detect tables, entities, and
+            attributes.
+          </p>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main>
-        <div class="card">
-            <div style="margin-bottom: 32px;">
-                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Import SQL Database</h1>
-                <p style="color: #6b7280; font-size: 14px;">Upload your .sql file to automatically detect tables, entities, and attributes.</p>
+
+        <!-- Upload Card -->
+        <div
+          style="
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          "
+        >
+          <!-- Upload Area -->
+          <div
+            id="dropArea"
+            style="
+              border: 2px dashed #d1d5db;
+              border-radius: 0.5rem;
+              padding: 3rem 2rem;
+              background-color: #fafafa;
+              transition: all 0.2s ease;
+              cursor: pointer;
+            "
+          >
+            <!-- Upload Icon -->
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                margin-bottom: 1.25rem;
+              "
+            >
+              <svg
+                style="width: 3.5rem; height: 3.5rem; color: #9ca3af"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
             </div>
 
-            <!-- Upload Area -->
-            <div class="upload-area" id="dropArea">
-                <div class="upload-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-                              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                    </svg>
-                </div>
-                
-                <div class="upload-text">
-                    <div class="upload-title">Drag and drop your .sql file here</div>
-                    <div class="upload-subtitle">or click to select a file from your device</div>
-                </div>
-                
-                <div class="upload-info">
-                    Supported format: .sql (max size: 10MB)
-                </div>
 
-                <!-- Hidden File Input -->
-                <input type="file" accept=".sql" style="display: none" id="fileInput" />
+            <!-- Upload Text -->
+            <div style="margin-bottom: 0.75rem; text-align: center">
+              <p
+                style="
+                  font-size: 0.9375rem;
+                  color: var(--text-primary);
+                  font-weight: 500;
+                  margin-bottom: 0.375rem;
+                "
+              >
+                Drag and drop your .sql file here
+              </p>
+              <p style="font-size: 0.875rem; color: var(--text-secondary)">
+                or click to select a file from your device
+              </p>
             </div>
 
-            <!-- Result Container -->
-            <div class="result-container" id="resultContainer">
-                <div class="result-title">Parsed SQL Result</div>
-                <pre class="result-output" id="resultOutput"></pre>
-                <div class="button-group">
-                    <button class="btn btn-success" id="saveBtn" style="display: none;">
-                        💾 Save to Database
-                    </button>
-                    <button class="btn btn-primary" id="nextBtn" style="display: none;">
-                        Next: Generate Class Diagram →
-                    </button>
-                </div>
-            </div>
 
-            <!-- Footer Actions - Sesuai Template One UML -->
-            <div class="footer-actions">
-                <div class="save-indicator">
-                    <div class="save-dot"></div>
-                    <span>Ready to upload SQL file</span>
-                </div>
-                <div>
-                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
-                </div>
-            </div>
+            <!-- File Info -->
+            <p
+              style="
+                text-align: center;
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-top: 1rem;
+              "
+            >
+              Supported format: .sql (max size: 10MB)
+            </p>
+
+
+            <!-- Hidden File Input -->
+            <input
+              type="file"
+              accept=".sql"
+              style="display: none"
+              id="fileInput"
+            />
+          </div>
+
+
+          <!-- Result Container -->
+          <div id="resultContainer">
+            <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem">
+              Parsed SQL Result
+            </h3>
+            <pre id="resultOutput"></pre>
+            <button id="saveBtn">💾 Save to Database</button>
+          </div>
         </div>
-    </main>
 
-    <!-- Footer - Sesuai Template One UML -->
-    <footer>
-        <div class="footer-content">
-            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Help</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-            </div>
+
+        <!-- Navigation Buttons -->
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            padding: 0 1rem;
+          "
+        >
+          <!-- Back button -->
+          <a
+            href="{% url 'main:user_scenario' %}"
+            style="
+              padding: 0.75rem 1.5rem;
+              background-color: #e5e7eb;
+              color: #111827;
+              border-radius: 0.5rem;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            ← Back
+          </a>
+
+
+          <!-- Next button -->
+          <a
+            id="nextBtn"
+            style="
+              padding: 0.75rem 1.5rem;
+              background-color: #2563eb;
+              color: white;
+              border-radius: 0.5rem;
+              text-decoration: none;
+              font-weight: 500;
+              cursor: pointer;
+            "
+          >
+            Next →
+          </a>
         </div>
-    </footer>
+      </div>
+    </div>
+
 
     <script>
-        // Elements
-        const dropArea = document.getElementById("dropArea");
-        const fileInput = document.getElementById("fileInput");
-        const resultContainer = document.getElementById("resultContainer");
-        const resultOutput = document.getElementById("resultOutput");
-        const saveBtn = document.getElementById("saveBtn");
-        const nextBtn = document.getElementById("nextBtn");
+      const dropArea = document.getElementById("dropArea");
+      const fileInput = document.getElementById("fileInput");
+      const resultContainer = document.getElementById("resultContainer");
+      const resultOutput = document.getElementById("resultOutput");
+      const saveBtn = document.getElementById("saveBtn");
 
-        let parsedSQLData = null;
 
-        // Initialize event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            // Make the entire drop area clickable
-            dropArea.addEventListener("click", () => {
-                fileInput.click();
-            });
+      let parsedSQLData = null; // temporary cache
 
-            // Handle file selection
-            fileInput.addEventListener("change", (e) => {
-                const file = e.target.files[0];
-                if (file) handleFile(file);
-            });
 
-            // Drag and drop event handlers
-            setupDragAndDrop();
+      // Make the entire drop area clickable
+      dropArea.addEventListener("click", () => {
+        fileInput.click();
+      });
 
-            // Save button event
-            saveBtn.addEventListener("click", saveToDatabase);
 
-            // Next button event
-            nextBtn.addEventListener("click", goToNextStep);
-        });
+      // Handle file selection
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file);
+      });
 
-        // Setup drag and drop functionality
-        function setupDragAndDrop() {
-            // Prevent default drag behaviors
-            ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-                dropArea.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
 
-            function preventDefaults(e) {
-                e.preventDefault();
-                e.stopPropagation();
+      // Prevent default drag behaviors
+      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+      });
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+
+      // Highlight drop area when dragging over it
+      ["dragenter", "dragover"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, highlight, false);
+      });
+      ["dragleave", "drop"].forEach((eventName) => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+      });
+      function highlight() {
+        dropArea.style.borderColor = "#2563eb";
+        dropArea.style.backgroundColor = "#eff6ff";
+      }
+      function unhighlight() {
+        dropArea.style.borderColor = "#d1d5db";
+        dropArea.style.backgroundColor = "#fafafa";
+      }
+
+
+      // Handle dropped files
+      dropArea.addEventListener("drop", handleDrop, false);
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) handleFile(files[0]);
+      }
+
+
+      // Upload logic
+      function handleFile(file) {
+        if (!file.name.endsWith(".sql")) {
+          alert("Please upload a .sql file only!");
+          return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+          alert("File size must be < 10MB!");
+          return;
+        }
+
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+
+        fetch("/parse-sql/", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status === "success") {
+              parsedSQLData = data.data; // simpan hasil parsing
+              resultContainer.style.display = "block";
+              resultOutput.textContent = JSON.stringify(data.data, null, 2);
+              saveBtn.style.display = "inline-block";
+            } else {
+              alert("Error: " + data.message);
             }
+          })
+          .catch(() => alert("Failed to parse SQL file."));
+      }
 
-            // Highlight drop area when dragging over it
-            ["dragenter", "dragover"].forEach((eventName) => {
-                dropArea.addEventListener(eventName, highlight, false);
-            });
-            
-            ["dragleave", "drop"].forEach((eventName) => {
-                dropArea.addEventListener(eventName, unhighlight, false);
-            });
 
-            function highlight() {
-                dropArea.classList.add("dragover");
+      // SAVE BUTTON LOGIC
+      saveBtn.addEventListener("click", () => {
+        if (!parsedSQLData) {
+          alert("No data to save.");
+          return;
+        }
+
+
+        fetch("/save-parsed-sql/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({ data: parsedSQLData }),
+        })
+          .then((res) => res.json())
+          .then((response) => {
+            if (response.status === "success") {
+              alert("✅ Data berhasil disimpan ke database!");
+            } else {
+              alert("❌ Gagal menyimpan data: " + response.message);
             }
+          })
+          .catch(() => alert("Terjadi kesalahan saat menyimpan data."));
+      });
 
-            function unhighlight() {
-                dropArea.classList.remove("dragover");
+
+      // Helper ambil CSRF token
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
             }
+          }
+        }
+        return cookieValue;
+      }
 
-            // Handle dropped files
-            dropArea.addEventListener("drop", handleDrop, false);
 
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                if (files.length > 0) handleFile(files[0]);
+      // Next button logic
+      document.getElementById("nextBtn").addEventListener("click", function () {
+        fetch("/api/get-latest-userstory/", { method: "GET" })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.status === "success") {
+              const id = data.userstory_id;
+              window.location.href = `/sequence/${id}/generate/`;
+            } else {
+              alert("User Story belum tersedia!");
             }
-        }
-
-        // Handle file processing
-        function handleFile(file) {
-            // Validate file
-            if (!file.name.endsWith(".sql")) {
-                alert("Please upload a .sql file only!");
-                return;
-            }
-            
-            if (file.size > 10 * 1024 * 1024) {
-                alert("File size must be less than 10MB!");
-                return;
-            }
-
-            // Show loading state
-            showLoadingState();
-
-            // Simulate file parsing (replace with actual API call)
-            simulateFileParsing(file);
-        }
-
-        // Show loading state
-        function showLoadingState() {
-            resultContainer.style.display = 'block';
-            resultOutput.textContent = "Parsing SQL file... Please wait.";
-            saveBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        }
-
-        // Simulate file parsing (replace with actual API call)
-        function simulateFileParsing(file) {
-            setTimeout(() => {
-                // This is a simulation - replace with actual fetch call to your backend
-                const mockData = {
-                    status: "success",
-                    data: {
-                        tables: [
-                            {
-                                name: "users",
-                                columns: [
-                                    { name: "id", type: "INT", primary_key: true },
-                                    { name: "username", type: "VARCHAR(255)", unique: true },
-                                    { name: "email", type: "VARCHAR(255)" },
-                                    { name: "password", type: "VARCHAR(255)" },
-                                    { name: "created_at", type: "TIMESTAMP" }
-                                ]
-                            },
-                            {
-                                name: "products",
-                                columns: [
-                                    { name: "id", type: "INT", primary_key: true },
-                                    { name: "name", type: "VARCHAR(255)" },
-                                    { name: "price", type: "DECIMAL(10,2)" },
-                                    { name: "description", type: "TEXT" },
-                                    { name: "user_id", type: "INT", foreign_key: true }
-                                ]
-                            }
-                        ],
-                        relationships: [
-                            {
-                                from_table: "products",
-                                from_column: "user_id",
-                                to_table: "users",
-                                to_column: "id"
-                            }
-                        ]
-                    }
-                };
-
-                if (mockData.status === "success") {
-                    parsedSQLData = mockData.data;
-                    displayParsedResult(mockData.data);
-                } else {
-                    alert("Error parsing SQL file");
-                }
-            }, 2000);
-        }
-
-        // Display parsed result
-        function displayParsedResult(data) {
-            resultOutput.textContent = JSON.stringify(data, null, 2);
-            saveBtn.style.display = 'inline-block';
-            nextBtn.style.display = 'inline-block';
-            
-            // Update save indicator
-            document.querySelector('.save-indicator span').textContent = 'SQL file parsed successfully';
-        }
-
-        // Save to database
-        function saveToDatabase() {
-            if (!parsedSQLData) {
-                alert("No data to save.");
-                return;
-            }
-
-            // Show saving state
-            saveBtn.textContent = "Saving...";
-            saveBtn.disabled = true;
-
-            // Simulate API call (replace with actual fetch)
-            setTimeout(() => {
-                // Simulate successful save
-                alert("✅ Data berhasil disimpan ke database!");
-                saveBtn.textContent = "💾 Save to Database";
-                saveBtn.disabled = false;
-                
-                // Update save indicator
-                document.querySelector('.save-indicator span').textContent = 'Data saved to database';
-            }, 1500);
-        }
-
-        // Navigation functions
-        function goBack() {
-            window.location.href = 'user_story_scenario.html';
-        }
-
-        function goToNextStep() {
-            if (!parsedSQLData) {
-                alert("Please upload and parse an SQL file first");
-                return;
-            }
-            
-            // Save data to localStorage for the next page
-            localStorage.setItem('sqlData', JSON.stringify(parsedSQLData));
-            
-            // Navigate to class diagram page
-            window.location.href = 'class_diagram.html';
-        }
-
-        // CSRF token helper function (for Django)
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-
-        // Actual API call functions (uncomment and use when backend is ready)
-        /*
-        function uploadFileToServer(file) {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            fetch("/parse-sql/", {
-                method: "POST",
-                body: formData,
-                headers: {
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-            })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status === "success") {
-                    parsedSQLData = data.data;
-                    displayParsedResult(data.data);
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(() => alert("Failed to parse SQL file."));
-        }
-
-        function saveToServer() {
-            if (!parsedSQLData) {
-                alert("No data to save.");
-                return;
-            }
-
-            fetch("/save-parsed-sql/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify({ data: parsedSQLData }),
-            })
-            .then((res) => res.json())
-            .then((response) => {
-                if (response.status === "success") {
-                    alert("✅ Data berhasil disimpan ke database!");
-                } else {
-                    alert("❌ Gagal menyimpan data: " + response.message);
-                }
-            })
-            .catch(() => alert("Terjadi kesalahan saat menyimpan data."));
-        }
-        */
+          });
+      });
     </script>
-</body>
+  </body>
 </html>
