@@ -1,3 +1,4 @@
+import os
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
@@ -128,33 +129,7 @@ def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
 
 def input_informasi_tambahan(request):
-    # Contoh data dummy untuk fitur
-    features = [
-        {
-            'id': 1,
-            'name': 'Login System',
-            'description': 'Allows users to log in securely.',
-            'priority': 'High',
-            'status': 'Active'
-        },
-        {
-            'id': 2,
-            'name': 'User Registration',
-            'description': 'Enables new users to sign up.',
-            'priority': 'Medium',
-            'status': 'Active'
-        },
-        {
-            'id': 3,
-            'name': 'Password Reset',
-            'description': 'Lets users reset their forgotten passwords.',
-            'priority': 'Low',
-            'status': 'Inactive'
-        }
-    ]
-
-    context = {'features': features}
-    return render(request, 'main/input_informasi_tambahan.html', context)
+    return render(request, 'main/input_informasi_tambahan.html')
 
 def use_case_spec(request):
     return render(request, 'main/use_case_spec.html')

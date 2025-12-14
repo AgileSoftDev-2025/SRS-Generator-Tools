@@ -17,7 +17,7 @@ urlpatterns = [
     # Main Flow - SESUAI URUTAN APLIKASI
     path('use-case-diagram/', views.use_case_diagram, name='use_case_diagram'),  # Step 1
     path('user-story/', views.user_story, name='user_story'),                    # Step 2
-    path('input-informasi-tambahan/', views.input_informasi_tambahan, name='input_informasi_tambahan'),  # Step 3 - 🔥 DIPERBAIKI: gunakan HYPHEN
+    path('input-informasi-tambahan/', views.input_informasi_tambahan, name='input_informasi_tambahan'), # Step 3 - 🔥 DIPERBAIKI: gunakan HYPHEN
     path('use-case-spec/', views.use_case_spec, name='use_case_spec'),          # Step 4
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'), # Step 5
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
