@@ -52,13 +52,14 @@ def login_view(request):
     return render(request, 'main/login.html')
 
 def register_view(request):
-    if 'user_id' in request.session:
-        return redirect('main:home')
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             try:
                 pengguna = form.save()
+                if 'user_id' in request.session:
+                    del request.session['user_id']
+                request.session.flush()
                 messages.success(request, 'Registration successful! Please log in.')
                 return redirect('main:login')
             except Exception as e:
