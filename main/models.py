@@ -239,19 +239,18 @@ class ActivityDiagram(models.Model):
         return "Activity Diagram (No Use Case)"
     
 class Page(models.Model):
-    gui = models.ForeignKey(
-        GUI, 
-        on_delete=models.CASCADE, 
-        related_name='pages'
-    )
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='pages')
     name = models.CharField(max_length=255)
-    order = models.IntegerField()
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('gui', 'order')
 
     def __str__(self):
         return f"{self.name} (Page {self.order})"
 
 
-class InputElement(models.Model):
+class Element(models.Model):
     INPUT_TYPES = [
         ("text", "Text"),
         ("number", "Number"),
@@ -263,14 +262,14 @@ class InputElement(models.Model):
         ("textarea", "Textarea"),
     ]
 
-    page = models.ForeignKey(
-        Page,
-        on_delete=models.CASCADE,
-        related_name='elements'
-    )
+    page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name='elements')
     name = models.CharField(max_length=255)
-    input_type = models.CharField(max_length=50, choices=INPUT_TYPES)
-    order = models.IntegerField()
+    input_type = models.CharField(max_length=20, choices=INPUT_TYPES)
+    order = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('page', 'order')
 
     def __str__(self):
         return f"{self.name} [{self.input_type}]"
+

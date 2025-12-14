@@ -144,18 +144,40 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
-                ('order', models.IntegerField()),
+                ('order', models.PositiveIntegerField()),
                 ('gui', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pages', to='main.gui')),
             ],
+            options={
+                'unique_together': {('gui', 'order')},
+            },
         ),
         migrations.CreateModel(
-            name='InputElement',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255)),
-                ('input_type', models.CharField(choices=[('text', 'Text'), ('number', 'Number'), ('email', 'Email'), ('password', 'Password'), ('date', 'Date'), ('checkbox', 'Checkbox'), ('radio', 'Radio'), ('textarea', 'Textarea')], max_length=50)),
-                ('order', models.IntegerField()),
-                ('page', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='elements', to='main.page')),
-            ],
-        ),
-    ]
+    name='Element',
+    fields=[
+        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+        ('name', models.CharField(max_length=255)),
+        ('input_type', models.CharField(
+            choices=[
+                ('text', 'Text'), 
+                ('number', 'Number'), 
+                ('email', 'Email'), 
+                ('password', 'Password'), 
+                ('date', 'Date'), 
+                ('checkbox', 'Checkbox'), 
+                ('radio', 'Radio'), 
+                ('textarea', 'Textarea')
+            ], 
+            max_length=20
+        )),
+        ('order', models.PositiveIntegerField()),
+        ('page', models.ForeignKey(
+            on_delete=django.db.models.deletion.CASCADE, 
+            related_name='elements', 
+            to='main.page'
+        )),
+    ],
+    options={
+        'unique_together': {('page', 'order')},
+    },
+),
+]
