@@ -2,8 +2,7 @@ from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
-from django.shortcuts import redirect
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
@@ -12,9 +11,12 @@ import base64
 import requests
 import urllib.parse
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponse
 import json
 from .forms import RegisterForm 
+from main.generators.sequence_generator import generate_sequence_plantuml
+import subprocess
+from django.conf import settings
 
 def home(request):
     projects = Project.objects.all() 
@@ -33,6 +35,7 @@ def login_view(request):
         try:
             pengguna = Pengguna.objects.get(email_user=email)
             if pengguna.check_password(password):
+                request.session.flush()
                 request.session['user_id'] = pengguna.id_user
                 session_id = 'S' + str(Session.objects.count() + 1).zfill(4)
                 Session.objects.create(
@@ -52,13 +55,14 @@ def login_view(request):
     return render(request, 'main/login.html')
 
 def register_view(request):
-    if 'user_id' in request.session:
-        return redirect('main:home')
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             try:
                 pengguna = form.save()
+                if 'user_id' in request.session:
+                    del request.session['user_id']
+                request.session.flush()
                 messages.success(request, 'Registration successful! Please log in.')
                 return redirect('main:login')
             except Exception as e:
@@ -185,6 +189,21 @@ def save_use_case_spec(request, feature_id):
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
+
+def get_latest_userstory(request):
+    try:
+        us = UserStory.objects.latest("id_userstory")
+        return JsonResponse({
+            "status": "success",
+            "userstory_id": us.id_userstory
+        })
+    except:
+        return JsonResponse({
+            "status": "error",
+            "message": "No User Story found"
+        })
+
+
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
@@ -235,6 +254,20 @@ def save_parsed_sql(request):
 
 def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')
+
+def generate_sequence_diagram(request, userstory_id):
+
+    plantuml_code = generate_sequence_plantuml(userstory_id)
+
+    file_path = os.path.join(settings.MEDIA_ROOT, f"sequence_{userstory_id}.puml")
+    with open(file_path, "w") as f:
+        f.write(plantuml_code)
+
+    subprocess.run(["plantuml", file_path])
+
+    png_path = file_path.replace(".puml", ".png")
+    with open(png_path, "rb") as img:
+        return HttpResponse(img.read(), content_type="image/png")
 
 def class_diagram(request):
     if request.method != "POST":
@@ -437,6 +470,6 @@ def download_plantuml(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+    
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
-
