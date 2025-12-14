@@ -722,10 +722,10 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
     URL.revokeObjectURL(url);
 });
 
-// PERUBAHAN PENTING: Event listener untuk tombol navigasi
+// 🔥 PERUBAHAN PENTING: Event listener untuk tombol navigasi - DIPERBAIKI!
 document.getElementById('backButton').addEventListener('click', function() {
-    // Kembali ke halaman use_case_diagram
-    window.location.href = 'use_case_diagram.html';
+    // Kembali ke halaman use_case_diagram dengan URL Django yang benar
+    window.location.href = '/use-case-diagram/';  // 🔥 PERUBAHAN: Dari 'use_case_diagram.html' ke '/use-case-diagram/'
 });
 
 document.getElementById('nextButton').addEventListener('click', function() {
@@ -733,9 +733,14 @@ document.getElementById('nextButton').addEventListener('click', function() {
         alert('Please generate use cases first before proceeding.');
         return;
     }
-    // Beralih ke halaman input_informasi_tambahan
-    window.location.href = 'input_informasi_tambahan.html';
+    // Beralih ke halaman input_informasi_tambahan dengan URL Django yang benar
+    window.location.href = '/input-informasi-tambahan/';  // 🔥 PERUBAHAN: Dari 'input_informasi_tambahan.html' ke '/input-informasi-tambahan/'
 });
+
+// 🔥 PERUBAHAN: Tambahkan fungsi untuk handle tombol "Go to Define Actors" di state kosong
+function goToDefineActors() {
+    window.location.href = '/use-case-diagram/';
+}
 
 // Inisialisasi halaman
 document.addEventListener('DOMContentLoaded', function() {
@@ -762,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i>📊</i>
                 <p>No diagram data available.</p>
                 <p>Please go back and define actors and features first.</p>
-                <button class="btn" onclick="window.location.href='use_case_diagram.html'" style="margin-top: 10px;">
+                <button class="btn" onclick="goToDefineActors()" style="margin-top: 10px;">
                     Go to Define Actors
                 </button>
             </div>

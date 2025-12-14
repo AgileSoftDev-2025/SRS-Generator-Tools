@@ -503,7 +503,9 @@
     </footer>
 
     <script>
-        const nextPage = "user_story.html";
+        // 🔥 PERUBAHAN PENTING: Ganti "user_story.html" dengan URL Django yang benar
+        const nextPage = "/user-story/";  // Ini harus sesuai dengan URL di urls.py
+        
         class ActorsAndFeaturesManager {
             constructor() {
                 this.actors = [];
@@ -524,7 +526,7 @@
                 document.getElementById('nextBtn').addEventListener('click', () => {
                     if (this.validateForm()) {
                         this.saveData();
-                        // Navigate to user story page
+                        // 🔥 PERUBAHAN: Navigasi ke URL Django yang benar
                         window.location.href = nextPage;
                     }
                 });
@@ -722,22 +724,22 @@
             }
             
             saveData() {
-            // Format data untuk output
-            const formattedData = this.formatDataForOutput();
-            console.log('Saving actors data:', formattedData);
+                // Format data untuk output
+                const formattedData = this.formatDataForOutput();
+                console.log('Saving actors data:', formattedData);
 
-            // Simpan lengkap aktor & fitur
-            localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
+                // Simpan lengkap aktor & fitur
+                localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
 
-            // 🔥 Ekstrak daftar fitur untuk halaman input informasi tambahan
-            let featureList = [];
-            formattedData.forEach(actor => {
-                actor.features.forEach(f => featureList.push(f.what));
-            });
-            localStorage.setItem('featureList', JSON.stringify(featureList));
+                // 🔥 Ekstrak daftar fitur untuk halaman input informasi tambahan
+                let featureList = [];
+                formattedData.forEach(actor => {
+                    actor.features.forEach(f => featureList.push(f.what));
+                });
+                localStorage.setItem('featureList', JSON.stringify(featureList));
 
-            // Debug
-            console.log('Saved featureList:', featureList);
+                // Debug
+                console.log('Saved featureList:', featureList);
             }
             
             formatDataForOutput() {
