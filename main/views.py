@@ -35,6 +35,7 @@ def login_view(request):
         try:
             pengguna = Pengguna.objects.get(email_user=email)
             if pengguna.check_password(password):
+                request.session.flush()
                 request.session['user_id'] = pengguna.id_user
                 session_id = 'S' + str(Session.objects.count() + 1).zfill(4)
                 Session.objects.create(
