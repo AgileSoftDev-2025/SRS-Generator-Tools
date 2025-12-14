@@ -21,9 +21,11 @@
         }
         
         /* Header & Footer - Sesuai Template */
-        header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
             padding: 0 24px;
         }
         
@@ -36,11 +38,12 @@
             height: 64px;
         }
         
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .logo img {
+          width: 28px;
+          height: 28px;
+          object-fit: contain;
         }
+
         
         .logo-icon {
             width: 24px;
@@ -397,36 +400,82 @@
             window.location.href = "use_case_spec.html";
         });
 
-        // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
-        function addRow(containerId) {
-            const container = document.getElementById(containerId);
-            const newRow = document.createElement("div");
-            newRow.classList.add("row", "mb-3");
-            newRow.innerHTML = `
-                <div class="col-md-6">
-                    <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-                </div>
-            `;
-            container.appendChild(newRow);
+        // ================= PATH ROW LOGIC =================
+        // Tambah baris (dropdown + textarea + nomor + batalkan)
+        function addRow(container) {
+          const row = document.createElement("div");
+          row.classList.add("row", "mb-3", "path-row");
+
+          row.innerHTML = `
+            <div class="col-md-1 d-flex align-items-center fw-bold row-number"></div>
+
+            <div class="col-md-3">
+              <select class="form-select path-type">
+                <option value="actor">Actor</option>
+                <option value="system">System</option>
+              </select>
+            </div>
+
+            <div class="col-md-7">
+              <textarea class="form-control path-desc" rows="2" placeholder="Tuliskan aksi..."></textarea>
+            </div>
+
+            <div class="col-md-1 d-flex align-items-center">
+              <button type="button" class="btn btn-outline-danger btn-sm removeRow">
+                Batalkan
+              </button>
+            </div>
+          `;
+
+          container.appendChild(row);
+          updateRowNumbers(container);
         }
 
-        // === TOMBOL TAMBAH UNTUK SETIAP BAGIAN ===
-        document
-            .getElementById("addBasicPathRow")
-            .addEventListener("click", () => addRow("basicPathContainer"));
+        // Update nomor urut
+        function updateRowNumbers(container) {
+          container.querySelectorAll(".path-row").forEach((row, index) => {
+            row.querySelector(".row-number").textContent = index + 1;
+          });
+        }
 
-        document
-            .getElementById("addAlternativePathRow")
-            .addEventListener("click", () => addRow("alternativePathContainer"));
+        // Event tombol + Tambah Baris (tetap di bawah)
+        document.getElementById("addBasicPathRow").addEventListener("click", () => {
+          addRow(document.getElementById("basicPathContainer"));
+        });
 
-        document
-            .getElementById("addExceptionRow")
-            .addEventListener("click", () => addRow("exceptionContainer"));
+        document.getElementById("addAlternativePathRow").addEventListener("click", () => {
+          addRow(document.getElementById("alternativePathContainer"));
+        });
+
+        document.getElementById("addExceptionRow").addEventListener("click", () => {
+          addRow(document.getElementById("exceptionContainer"));
+        });
+
+        // Event tombol Batalkan (hapus baris)
+        document.addEventListener("click", function (e) {
+          if (e.target.classList.contains("removeRow")) {
+            const row = e.target.closest(".path-row");
+            const container = row.parentElement;
+            row.remove();
+            updateRowNumbers(container);
+          }
+        });
+
+        // Ambil data path (untuk simpan)
+        function getPathData(containerId) {
+          const container = document.getElementById(containerId);
+          const rows = container.querySelectorAll(".path-row");
+          let result = [];
+
+          rows.forEach(row => {
+            result.push({
+              type: row.querySelector(".path-type").value,
+              description: row.querySelector(".path-desc").value
+            });
+          });
+
+          return result;
+        }
 
         // === FUNGSI MENGAMBIL DATA PATH ===
         function getPathData(containerId) {
