@@ -134,7 +134,40 @@ def input_informasi_tambahan(request):
     return render(request, 'main/input_informasi_tambahan.html')
 
 def use_case_spec(request):
-    return render(request, 'main/use_case_spec.html')
+    # Ambil user story terakhir
+    userstory = UserStory.objects.last()
+
+    if not userstory:
+        messages.error(request, "Belum ada User Story")
+        return redirect("main:user_story")
+
+    # Auto-generate Use Case
+    usecase, _ = Usecase.objects.get_or_create(
+        userstory=userstory,
+        defaults={
+            "nama_usecase": userstory.input_fitur
+        }
+    )
+
+    # Auto-generate Use Case Specification
+    spec, created = UseCaseSpecification.objects.get_or_create(
+        usecase=usecase,
+        defaults={
+            "summary_description": f"User dapat {userstory.input_fitur}",
+            "actor": userstory.input_sebagai,
+            "pre_condition": "User sudah login ke sistem",
+            "post_condition": "Proses berhasil dijalankan",
+            "priority": "High",
+            "status": "Draft"
+        }
+    )
+
+    return render(request, "main/use_case_spec.html", {
+        "userstory": userstory,
+        "usecase": usecase,
+        "spec": spec
+    })
+
 
 def save_use_case_spec(request, feature_id):
     if request.method == "POST":
