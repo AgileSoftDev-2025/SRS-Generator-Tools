@@ -243,6 +243,122 @@ def generate_sequence_diagram(request, userstory_id):
     png_path = file_path.replace(".puml", ".png")
     with open(png_path, "rb") as img:
         return HttpResponse(img.read(), content_type="image/png")
+    
+def get_sequence_features(request):
+    features = UseCaseSpecification.objects.select_related(
+        'usecase__gui'
+    ).all()
+
+    data = []
+    for f in features:
+        data.append({
+            "id": f.id_usecasespecification,
+            "title": f.summary_description,
+            "gui": f.usecase.gui.nama_atribut
+        })
+
+    return JsonResponse(data, safe=False)
+
+def generate_sequence_diagram_by_feature(request, feature_id):
+    usecase_spec = get_object_or_404(
+        UseCaseSpecification,
+        id_usecasespecification=feature_id
+    )
+
+    basic_paths = usecase_spec.basic_paths.order_by("step_number")
+    alt_paths = usecase_spec.alternative_paths.all()
+    exc_paths = usecase_spec.exception_paths.all()
+
+    gui = usecase_spec.usecase.gui
+    pages = Page.objects.filter(gui=gui).prefetch_related("elements")
+
+    tables = ImportedTable.objects.all()
+    relationships = ImportedRelationship.objects.all()
+
+    plantuml = build_sequence_plantuml(
+        usecase_spec,
+        basic_paths,
+        alt_paths,
+        exc_paths,
+        pages,
+        tables,
+        relationships
+    )
+
+    return JsonResponse({"plantuml": plantuml})
+
+def sequence_feature_list(request):
+    features = UseCaseSpecification.objects.select_related(
+        'usecase__gui'
+    )
+
+    data = []
+    for f in features:
+        data.append({
+            "id": f.id_usecasespecification,
+            "title": f.summary_description,
+            "gui": f.usecase.gui.nama_atribut,
+        })
+
+    return JsonResponse(data, safe=False)
+
+def build_sequence_plantuml(
+    usecase_spec,
+    basic_paths,
+    alt_paths,
+    exc_paths,
+    pages,
+    tables,
+    relationships
+):
+    lines = []
+    lines.append("@startuml")
+    lines.append("actor User")
+    lines.append("boundary UI")
+    lines.append("control Controller")
+    lines.append("database DB")
+    lines.append("")
+
+    lines.append(f"User -> UI : {usecase_spec.summary_description}")
+    lines.append("UI -> Controller : request")
+
+    # BASIC PATH
+    for step in basic_paths:
+        lines.append(f"Controller -> Controller : Step {step.step_number} - {step.description}")
+
+    # GUI interaction
+    for page in pages:
+        lines.append(f"Controller -> UI : Open page {page.name}")
+        for el in page.elements.all():
+            lines.append(f"User -> UI : Input {el.name} ({el.input_type})")
+
+    # SQL interaction
+    for table in tables:
+        lines.append(f"Controller -> DB : access {table.name}")
+
+    lines.append("DB --> Controller : result")
+    lines.append("Controller --> UI : response")
+
+    # ALTERNATIVE PATH
+    if alt_paths.exists():
+        lines.append("alt Alternative Flow")
+        for alt in alt_paths:
+            lines.append(
+                f"Controller -> Controller : Alt Step from {alt.related_basic_step} - {alt.description}"
+            )
+        lines.append("end")
+
+    # EXCEPTION PATH
+    if exc_paths.exists():
+        lines.append("alt Exception Flow")
+        for exc in exc_paths:
+            lines.append(
+                f"Controller -> Controller : Exception at {exc.related_basic_step} - {exc.description}"
+            )
+        lines.append("end")
+
+    lines.append("@enduml")
+    return "\n".join(lines) 
 
 def class_diagram(request):
     if request.method != "POST":
