@@ -1,39 +1,147 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Use Case Specification</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>OneUML - Use Case Specification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      background: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+    }
+
+    .header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .spec-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-top: 24px;
+    }
+  </style>
 </head>
 
-<body class="bg-light">
-<div class="container py-5">
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="fw-semibold">OneUML</div>
+    <img src="https://via.placeholder.com/40" class="rounded-circle" />
+  </header>
 
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <h4 class="fw-bold mb-3">Use Case Specification</h4>
+  <!-- CONTENT -->
+  <main class="container mt-5">
+    <h3 class="fw-bold mb-4">Use Case Specification</h3>
 
-            <p><strong>Use Case:</strong> {{ usecase.nama_usecase }}</p>
-            <p><strong>Actor:</strong> {{ spec.actor }}</p>
-            <p><strong>Summary:</strong> {{ spec.summary_description }}</p>
-            <p><strong>Pre-Condition:</strong> {{ spec.pre_condition }}</p>
-            <p><strong>Post-Condition:</strong> {{ spec.post_condition }}</p>
-            <p><strong>Priority:</strong> {{ spec.priority }}</p>
-            <p><strong>Status:</strong> {{ spec.status }}</p>
-        </div>
-    </div>
+    <div id="useCaseContainer"></div>
 
     <!-- NAVIGATION -->
-    <div class="d-flex justify-content-between">
-        <a href="/input-informasi-tambahan/" class="btn btn-outline-secondary">
-            ← Back
-        </a>
+    <div class="d-flex justify-content-between mt-5">
+      <button class="btn btn-outline-secondary"
+        onclick="location.href='/input-informasi-tambahan'">
+        ← Back
+      </button>
 
-        <a href="/activity-diagram/" class="btn btn-primary">
-            Next →
-        </a>
+      <button class="btn btn-dark"
+        onclick="location.href='/activity-diagram'">
+        Next →
+      </button>
     </div>
+  </main>
 
-</div>
+  <script>
+    const container = document.getElementById("useCaseContainer");
+
+    const featureList =
+      JSON.parse(localStorage.getItem("featureList")) || [];
+    const specs =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+
+    if (featureList.length === 0) {
+      container.innerHTML =
+        "<p class='text-muted'>Tidak ada data Use Case.</p>";
+    }
+
+    featureList.forEach((feature, index) => {
+      const id = index + 1;
+      const data = specs[id];
+
+      if (!data) return;
+
+      container.innerHTML += `
+        <div class="spec-card">
+          <h5 class="fw-bold">${feature}</h5>
+
+          <p><strong>Summary:</strong><br>${data.summary || "-"}</p>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Priority:</strong> ${data.priority}
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong> ${data.status}
+            </div>
+          </div>
+
+          <p><strong>Pre-Condition:</strong><br>
+            ${data.precondition || "-"}</p>
+
+          <p><strong>Post-Condition:</strong><br>
+            ${data.postcondition || "-"}</p>
+
+          ${renderTable("Basic Flow", data.basicPath)}
+          ${renderTable("Alternative Flow", data.alternativePath)}
+          ${renderTable("Exception Flow", data.exceptionPath)}
+        </div>
+      `;
+    });
+
+    function renderTable(title, rows = []) {
+      if (!rows || rows.length === 0) return "";
+
+      return `
+        <div class="mt-4">
+          <div class="section-title">${title}</div>
+          <table class="table table-bordered mt-2">
+            <thead>
+              <tr>
+                <th width="50%">Aksi Aktor</th>
+                <th width="50%">Respon Sistem</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr>
+                  <td>${r.actor || "-"}</td>
+                  <td>${r.system || "-"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  </script>
 </body>
 </html>
