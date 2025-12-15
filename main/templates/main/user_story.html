@@ -334,6 +334,8 @@
 <script>
 // Data use case
 let useCases = [];
+let currentPlantUMLUrl = '';
+let currentPlantUMLCode = '';
 
 // Fungsi untuk mengambil data dari halaman sebelumnya
 function loadUseCasesFromPreviousPage() {
@@ -537,40 +539,40 @@ function generatePlantUMLDiagram() {
     
     try {
         // Membuat kode PlantUML berdasarkan data use case
-        let plantUMLCode = `@startuml\nleft to right direction\nskinparam monochrome true\nskinparam shadowing false\nskinparam usecase {\n  BackgroundColor #F8F9FA\n  BorderColor #6B7280\n}\ntitle Use Case Diagram\n\n`;
+        currentPlantUMLCode = `@startuml\nleft to right direction\nskinparam monochrome true\nskinparam shadowing false\nskinparam usecase {\n  BackgroundColor #F8F9FA\n  BorderColor #6B7280\n}\ntitle Use Case Diagram\n\n`;
         
         // Menambahkan aktor
         const actors = [...new Set(useCases.map(uc => uc.actor))];
         actors.forEach(actor => {
             const actorId = actor.replace(/\s+/g, '');
-            plantUMLCode += `actor "${actor}" as ${actorId}\n`;
+            currentPlantUMLCode += `actor "${actor}" as ${actorId}\n`;
         });
         
         // Menambahkan use case
         useCases.forEach((useCase, index) => {
             const useCaseId = `UC${index + 1}`;
-            plantUMLCode += `usecase "${useCase.feature}" as ${useCaseId}\n`;
+            currentPlantUMLCode += `usecase "${useCase.feature}" as ${useCaseId}\n`;
         });
         
         // Menambahkan hubungan
         useCases.forEach((useCase, index) => {
             const actorId = useCase.actor.replace(/\s+/g, '');
             const useCaseId = `UC${index + 1}`;
-            plantUMLCode += `${actorId} --> ${useCaseId}\n`;
+            currentPlantUMLCode += `${actorId} --> ${useCaseId}\n`;
         });
         
-        plantUMLCode += `@enduml`;
+        currentPlantUMLCode += `@enduml`;
         
-        console.log('PlantUML Code:', plantUMLCode);
+        console.log('PlantUML Code:', currentPlantUMLCode);
         
         // Generate URL for PlantUML
-        const plantUMLUrl = generatePlantUMLUrl(plantUMLCode);
+        currentPlantUMLUrl = generatePlantUMLUrl(currentPlantUMLCode);
         
-        console.log('PlantUML URL:', plantUMLUrl);
+        console.log('PlantUML URL:', currentPlantUMLUrl);
         
         // Menampilkan diagram
         container.innerHTML = `
-            <img src="${plantUMLUrl}" alt="Use Case Diagram" class="diagram-image" 
+            <img src="${currentPlantUMLUrl}" alt="Use Case Diagram" class="diagram-image" 
                  onerror="handleImageError(this)" 
                  onload="handleImageLoad(this)">
         `;
@@ -582,6 +584,75 @@ function generatePlantUMLDiagram() {
         // Restore button state
         regenerateBtn.innerHTML = originalText;
         regenerateBtn.disabled = false;
+    }
+}
+
+// Fungsi untuk mengunduh diagram SVG
+async function downloadSVG() {
+    if (!currentPlantUMLUrl) {
+        alert('No diagram available to download. Please generate a diagram first.');
+        return;
+    }
+    
+    const downloadBtn = document.getElementById('downloadDiagram');
+    const originalText = downloadBtn.innerHTML;
+    
+    // Show loading state
+    downloadBtn.innerHTML = '<span class="loading-spinner"></span> Downloading...';
+    downloadBtn.disabled = true;
+    
+    try {
+        // Fetch SVG dari PlantUML server
+        const response = await fetch(currentPlantUMLUrl);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const svgText = await response.text();
+        
+        // Buat nama file dengan timestamp
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const fileName = `use_case_diagram_${timestamp}.svg`;
+        
+        // Buat blob dan download
+        const blob = new Blob([svgText], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log('Diagram downloaded successfully');
+        
+    } catch (error) {
+        console.error('Error downloading SVG:', error);
+        
+        // Fallback: Coba download sebagai gambar
+        try {
+            const img = document.querySelector('.diagram-image');
+            if (img && img.src) {
+                const a = document.createElement('a');
+                a.href = img.src;
+                a.download = `use_case_diagram_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                console.log('Downloaded as image fallback');
+            } else {
+                alert('Failed to download diagram. Please try regenerating the diagram first.');
+            }
+        } catch (fallbackError) {
+            console.error('Fallback download also failed:', fallbackError);
+            alert('Failed to download diagram. Please try again.');
+        }
+    } finally {
+        // Restore button state
+        downloadBtn.innerHTML = originalText;
+        downloadBtn.disabled = false;
     }
 }
 
@@ -638,6 +709,11 @@ document.getElementById('regenerateDiagram').addEventListener('click', function(
     generatePlantUMLDiagram();
 });
 
+// Event listener untuk tombol download diagram SVG
+document.getElementById('downloadDiagram').addEventListener('click', function() {
+    downloadSVG();
+});
+
 // Event listener untuk tombol regenerate text
 document.getElementById('regenerateText').addEventListener('click', function() {
     const hasData = loadUseCasesFromPreviousPage();
@@ -649,16 +725,6 @@ document.getElementById('regenerateText').addEventListener('click', function() {
     } else {
         alert('No valid data found. Please go back and define actors and features first.');
     }
-});
-
-// Event listener untuk tombol download
-document.getElementById('downloadDiagram').addEventListener('click', function() {
-    if (useCases.length === 0) {
-        alert('No diagram available to download. Please generate a diagram first.');
-        return;
-    }
-    alert('Diagram akan diunduh dalam format SVG');
-    // Di sini akan ada kode untuk mengunduh diagram SVG
 });
 
 document.getElementById('downloadText').addEventListener('click', function() {
