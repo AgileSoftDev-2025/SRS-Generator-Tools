@@ -75,223 +75,237 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    const API_BASE = "http://localhost:3000";
-    const featureGrid = document.getElementById("featureGrid");
+  const featureGrid = document.getElementById("featureGrid");
 
-    // =============================
-    // LOAD FEATURE DARI SQLITE
-    // =============================
-    fetch(`${API_BASE}/features`)
-      .then(res => res.json())
-      .then(features => {
-        features.forEach(feature => createFeature(feature));
+  // =============================
+  // LOAD FEATURE DARI LOCALSTORAGE
+  // =============================
+  document.addEventListener("DOMContentLoaded", () => {
+    const featureList =
+      JSON.parse(localStorage.getItem("featureList")) || [];
+
+    console.log("Feature dari localStorage:", featureList);
+
+    if (featureList.length === 0) {
+      featureGrid.innerHTML = `
+        <div class="text-muted">
+          Tidak ada fitur dari tahap sebelumnya.
+        </div>`;
+      return;
+    }
+
+    featureList.forEach((name, index) => {
+      createFeature({
+        id: index + 1,
+        name: name,
       });
+    });
+  });
 
-    // =============================
-    // TEMPLATE MODAL (SAMA UNTUK SEMUA)
-    // =============================
-    function modalTemplate(feature) {
-      return `
-      <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content">
+  // =============================
+  // TEMPLATE MODAL
+  // =============================
+  function modalTemplate(feature) {
+    return `
+    <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
 
-            <div class="modal-header">
-              <h5 class="modal-title">
-                Use Case Specification: ${feature.name}
-              </h5>
-              <button class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-              <input type="hidden" class="feature-id" value="${feature.id}" />
-
-              <div class="mb-3">
-                <label class="form-label">Summary</label>
-                <textarea class="form-control summary" rows="2"></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Priority</label>
-                  <select class="form-select priority">
-                    <option>Must Have</option>
-                    <option>Should Have</option>
-                    <option>Could Have</option>
-                    <option>Won't Have</option>
-                  </select>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label class="form-label">Status</label>
-                  <select class="form-select status">
-                    <option>Active</option>
-                    <option>Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Pre-Condition</label>
-                <textarea class="form-control precondition" rows="2"></textarea>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Post-Condition</label>
-                <textarea class="form-control postcondition" rows="2"></textarea>
-              </div>
-
-              ${pathSection("Basic Path", "basic")}
-              ${pathSection("Alternative Path", "alternative")}
-              ${pathSection("Exception", "exception")}
-            </div>
-
-            <div class="modal-footer">
-              <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                Cancel
-              </button>
-              <button class="btn btn-dark save-btn">
-                Save
-              </button>
-            </div>
-
+          <div class="modal-header">
+            <h5 class="modal-title">
+              Use Case Specification: ${feature.name}
+            </h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
+
+          <div class="modal-body">
+            <input type="hidden" class="feature-id" value="${feature.id}" />
+
+            <div class="mb-3">
+              <label class="form-label">Summary</label>
+              <textarea class="form-control summary" rows="2"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Priority</label>
+                <select class="form-select priority">
+                  <option>Must Have</option>
+                  <option>Should Have</option>
+                  <option>Could Have</option>
+                  <option>Won't Have</option>
+                </select>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select status">
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Pre-Condition</label>
+              <textarea class="form-control precondition" rows="2"></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Post-Condition</label>
+              <textarea class="form-control postcondition" rows="2"></textarea>
+            </div>
+
+            ${pathSection("Basic Path", "basic")}
+            ${pathSection("Alternative Path", "alternative")}
+            ${pathSection("Exception", "exception")}
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-dark save-btn">
+              Save
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function pathSection(title, type) {
+    return `
+    <div class="mb-3">
+      <label class="form-label">${title}</label>
+      <div class="path-container" data-type="${type}"></div>
+      <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
+        + Tambah Baris
+      </button>
+    </div>`;
+  }
+
+  // =============================
+  // CREATE CARD + MODAL
+  // =============================
+  function createFeature(feature) {
+    featureGrid.innerHTML += `
+      <div class="col-md-4">
+        <div class="feature-card"
+             data-bs-toggle="modal"
+             data-bs-target="#modalFeature${feature.id}"
+             onclick="loadUseCase(${feature.id})">
+          <h5>${feature.name}</h5>
         </div>
       </div>`;
-    }
 
-    function pathSection(title, type) {
-      return `
-      <div class="mb-3">
-        <label class="form-label">${title}</label>
-        <div class="path-container" data-type="${type}"></div>
-        <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
-          + Tambah Baris
-        </button>
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      modalTemplate(feature)
+    );
+  }
+
+  // =============================
+  // LOAD USE CASE DARI LOCALSTORAGE
+  // =============================
+  function loadUseCase(featureId) {
+    const allData =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+
+    const data = allData[featureId];
+    if (!data) return;
+
+    const modal = document.getElementById(
+      `modalFeature${featureId}`
+    );
+
+    modal.querySelector(".summary").value = data.summary || "";
+    modal.querySelector(".priority").value = data.priority || "Must Have";
+    modal.querySelector(".status").value = data.status || "Active";
+    modal.querySelector(".precondition").value = data.precondition || "";
+    modal.querySelector(".postcondition").value = data.postcondition || "";
+
+    fillPath(modal, "basic", data.basicPath);
+    fillPath(modal, "alternative", data.alternativePath);
+    fillPath(modal, "exception", data.exceptionPath);
+  }
+
+  function fillPath(modal, type, paths = []) {
+    const container = modal.querySelector(
+      `.path-container[data-type="${type}"]`
+    );
+    container.innerHTML = "";
+    paths.forEach(p =>
+      addPathRow(container, p.actor, p.system)
+    );
+  }
+
+  // =============================
+  // ADD PATH
+  // =============================
+  function addPathRow(container, actor = "", system = "") {
+    const div = document.createElement("div");
+    div.className = "row path-row";
+    div.innerHTML = `
+      <div class="col-md-6">
+        <textarea class="form-control actor" rows="2"
+          placeholder="Aksi Aktor">${actor}</textarea>
+      </div>
+      <div class="col-md-6">
+        <textarea class="form-control system" rows="2"
+          placeholder="Aksi Sistem">${system}</textarea>
       </div>`;
+    container.appendChild(div);
+  }
+
+  document.addEventListener("click", e => {
+    if (e.target.classList.contains("add-path")) {
+      addPathRow(e.target.previousElementSibling);
     }
+  });
 
-    // =============================
-    // CREATE CARD + MODAL
-    // =============================
-    function createFeature(feature) {
-      featureGrid.innerHTML += `
-        <div class="col-md-4">
-          <div class="feature-card"
-               data-bs-toggle="modal"
-               data-bs-target="#modalFeature${feature.id}"
-               onclick="loadUseCase(${feature.id})">
-            <h5>${feature.name}</h5>
-          </div>
-        </div>`;
+  // =============================
+  // SAVE KE LOCALSTORAGE
+  // =============================
+  document.addEventListener("click", e => {
+    if (!e.target.classList.contains("save-btn")) return;
 
-      document.body.insertAdjacentHTML(
-        "beforeend",
-        modalTemplate(feature)
-      );
-    }
+    const modal = e.target.closest(".modal");
+    const featureId =
+      modal.querySelector(".feature-id").value;
 
-    // =============================
-    // LOAD USE CASE DARI SQLITE
-    // =============================
-    function loadUseCase(featureId) {
-      fetch(`${API_BASE}/usecase/${featureId}`)
-        .then(res => res.json())
-        .then(data => {
-          const modal = document.getElementById(`modalFeature${featureId}`);
-          if (!modal || !data) return;
+    const allData =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
 
-          modal.querySelector(".summary").value = data.summary || "";
-          modal.querySelector(".priority").value = data.priority || "Must Have";
-          modal.querySelector(".status").value = data.status || "Active";
-          modal.querySelector(".precondition").value = data.precondition || "";
-          modal.querySelector(".postcondition").value = data.postcondition || "";
+    allData[featureId] = {
+      summary: modal.querySelector(".summary").value,
+      priority: modal.querySelector(".priority").value,
+      status: modal.querySelector(".status").value,
+      precondition: modal.querySelector(".precondition").value,
+      postcondition: modal.querySelector(".postcondition").value,
+      basicPath: collectPath(modal, "basic"),
+      alternativePath: collectPath(modal, "alternative"),
+      exceptionPath: collectPath(modal, "exception"),
+    };
 
-          fillPath(modal, "basic", data.basic_path);
-          fillPath(modal, "alternative", data.alternative_path);
-          fillPath(modal, "exception", data.exception_path);
-        });
-    }
+    localStorage.setItem(
+      "useCaseSpecs",
+      JSON.stringify(allData)
+    );
 
-    function fillPath(modal, type, json) {
-      const container = modal.querySelector(
-        `.path-container[data-type="${type}"]`
-      );
-      container.innerHTML = "";
+    alert("Data berhasil disimpan ✅");
+    bootstrap.Modal.getInstance(modal).hide();
+  });
 
-      const paths = json ? JSON.parse(json) : [];
-      paths.forEach(p => addPathRow(container, p.actor, p.system));
-    }
-
-    // =============================
-    // ADD / REMOVE PATH ROW
-    // =============================
-    function addPathRow(container, actor = "", system = "") {
-      const div = document.createElement("div");
-      div.className = "row path-row";
-      div.innerHTML = `
-        <div class="col-md-6">
-          <textarea class="form-control actor" rows="2"
-            placeholder="Aksi Aktor">${actor}</textarea>
-        </div>
-        <div class="col-md-6">
-          <textarea class="form-control system" rows="2"
-            placeholder="Aksi Sistem">${system}</textarea>
-        </div>`;
-      container.appendChild(div);
-    }
-
-    document.addEventListener("click", e => {
-      if (e.target.classList.contains("add-path")) {
-        const container = e.target.previousElementSibling;
-        addPathRow(container);
-      }
-    });
-
-    // =============================
-    // SAVE KE SQLITE
-    // =============================
-    document.addEventListener("click", e => {
-      if (!e.target.classList.contains("save-btn")) return;
-
-      const modal = e.target.closest(".modal");
-      const featureId = modal.querySelector(".feature-id").value;
-
-      const payload = {
-        summary: modal.querySelector(".summary").value,
-        priority: modal.querySelector(".priority").value,
-        status: modal.querySelector(".status").value,
-        precondition: modal.querySelector(".precondition").value,
-        postcondition: modal.querySelector(".postcondition").value,
-        basicPath: collectPath(modal, "basic"),
-        alternativePath: collectPath(modal, "alternative"),
-        exceptionPath: collectPath(modal, "exception"),
-      };
-
-      fetch(`${API_BASE}/usecase/${featureId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-        .then(() => {
-          alert("Data berhasil disimpan ke database ✅");
-          bootstrap.Modal.getInstance(modal).hide();
-        });
-    });
-
-    function collectPath(modal, type) {
-      const rows = modal.querySelectorAll(
-        `.path-container[data-type="${type}"] .path-row`
-      );
-      let result = [];
-      rows.forEach(r => {
-        result.push({
-          actor: r.querySelector(".actor").value,
-          system: r.querySelector(".system").value,
-        });
-      });
-      return result;
-    }
-  </script>
+  function collectPath(modal, type) {
+    return [...modal.querySelectorAll(
+      `.path-container[data-type="${type}"] .path-row`
+    )].map(r => ({
+      actor: r.querySelector(".actor").value,
+      system: r.querySelector(".system").value,
+    }));
+  }
+</script>
 </body>
 </html>
