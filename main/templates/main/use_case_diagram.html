@@ -362,13 +362,11 @@
             border-color: #cbd5e1;
         }
         
-        .footer-actions {
+        /* 🔥 PERUBAHAN PENTING: Styling untuk tombol navigasi disamakan dengan user_story.html */
+        .navigation {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
         }
         
         .save-indicator {
@@ -387,20 +385,35 @@
             animation: pulse 2s infinite;
         }
         
-        .next-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
+        /* 🔥 PERUBAHAN: Tombol Back dan Next disamakan dengan user_story.html */
+        #backBtn {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 10px 16px;
             cursor: pointer;
-            transition: background 0.2s;
+            font-size: 14px;
+            transition: background-color 0.2s;
         }
         
-        .next-btn:hover {
-            background: #2563eb;
+        #backBtn:hover {
+            background-color: #f9fafb;
+        }
+        
+        #nextBtn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        #nextBtn:hover {
+            background-color: #1f2937;
         }
         
         .delete-feature-btn {
@@ -480,12 +493,14 @@
                 Add Actor
             </button>
             
-            <div class="footer-actions">
-                <div class="save-indicator">
-                    <div class="save-dot"></div>
-                    <span>All changes saved.</span>
-                </div>
-                <button id="nextBtn" class="btn btn-primary">Next</button>
+            <!-- 🔥 PERUBAHAN: Layout tombol navigasi disamakan dengan user_story.html -->
+            <div class="navigation">
+                <button class="btn-outline" id="backBtn">
+                    ← Back
+                </button>
+                <button class="btn-primary" id="nextBtn">
+                    Next →
+                </button>
             </div>
         </div>
     </main>
@@ -529,6 +544,13 @@
                         // 🔥 PERUBAHAN: Navigasi ke URL Django yang benar
                         window.location.href = nextPage;
                     }
+                });
+                
+                // 🔥 TAMBAHKAN: Event listener untuk tombol back
+                document.getElementById('backBtn').addEventListener('click', () => {
+                    this.saveData(); // Simpan data sebelum kembali
+                    // 🔥 PERUBAHAN: Kembali ke halaman sebelumnya (sesuaikan dengan URL yang benar)
+                    window.location.href = '/'; // Ganti dengan URL halaman sebelumnya jika ada
                 });
             }
             
