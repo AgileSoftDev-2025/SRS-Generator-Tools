@@ -63,22 +63,24 @@
     <img src="https://via.placeholder.com/40" class="rounded-circle" />
   </header>
 
-  <!-- CONTENT -->
-  <main class="container mt-5">
-    <h3 class="fw-bold">Additional Information</h3>
-    <p>Pilih fitur untuk mengisi Use Case Specification.</p>
+ <!-- NAVIGATION BUTTON -->
+  <div class="d-flex justify-content-between mt-5">
+    <button
+      class="btn btn-outline-secondary"
+      id="btnBack"
+      type="button"
+    >
+      ← Back
+    </button>
 
-    <div class="row g-4 mt-4" id="featureGrid"></div>
-    <!-- NAVIGATION BUTTON -->
-    <div class="d-flex justify-content-between mt-5">
-      <button class="btn btn-outline-secondary" id="btnBack">
-        ← Back
-      </button>
-
-      <button class="btn btn-dark" id="btnNext">
-        Next →
-      </button>
-</div>
+    <button
+      class="btn btn-dark"
+      id="btnNext"
+      type="button"
+    >
+      Next →
+    </button>
+  </div>
 
   </main>
 
@@ -325,9 +327,11 @@
     window.location.href = "http://127.0.0.1:8000/user-story";
   });
 
-  document.getElementById("btnNext").addEventListener("click", () => {
+  document.getElementById("btnNext").addEventListener("click", (e) => {
+  e.preventDefault();
     window.location.href = "http://127.0.0.1:8000/use-case-spec";
   });
+
 
 </script>
 </body>
