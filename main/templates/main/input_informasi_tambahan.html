@@ -16,275 +16,506 @@
       background: #f9fafb;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
-    .header {
-      height: 64px;
+    /* Header - SAMA DENGAN HOME PAGE */
+    header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
       padding: 0 24px;
+      flex-shrink: 0;
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
+      height: 64px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background-color: #111827;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
     }
 
-    .logo {
-      font-weight: 600;
-      font-size: 18px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
+    main {
+      flex: 1;
+      padding: 40px 0 60px;
+      width: 100%;
     }
 
     .feature-card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 24px;
-      text-align: center;
+      padding: 20px;
+      text-align: left;
       cursor: pointer;
       transition: 0.2s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .feature-card:hover {
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+    }
+
+    .feature-name {
+      font-size: 16px;
+      font-weight: normal;
+      color: #374151;
+      line-height: 1.5;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .path-row {
       margin-bottom: 12px;
     }
+
+    /* Main Footer - DIBAWAH TOMBOL BACK/NEXT */
+    .main-footer {
+      background-color: #ffffff;
+      border-top: 1px solid #e5e7eb;
+      padding: 20px 0;
+      margin-top: auto;
+      flex-shrink: 0;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .footer-link {
+      font-size: 12px;
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-link:hover {
+      color: #374151;
+    }
+
+    /* Navigation Footer - TOMBOL BACK/NEXT */
+    .nav-footer {
+      background: #ffffff;
+      padding: 20px 0;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 40px;
+    }
+
+    /* Content Container */
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    h3.fw-bold {
+      color: #111827;
+      font-size: 28px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 24px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #e5e7eb;
+      padding: 20px 24px;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .form-control, .form-select {
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn-dark {
+      background-color: #111827;
+      border-color: #111827;
+    }
+
+    .btn-dark:hover {
+      background-color: #1f2937;
+      border-color: #1f2937;
+    }
+
+    .btn-outline-secondary {
+      background-color: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 48px 20px;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content,
+      .footer-content,
+      .content-container {
+        padding: 0 16px;
+      }
+      
+      main {
+        padding: 24px 0 40px;
+      }
+      
+      h3.fw-bold {
+        font-size: 24px;
+      }
+      
+      .feature-card {
+        padding: 16px;
+      }
+      
+      .feature-name {
+        font-size: 15px;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo">OneUML</div>
-    <img src="https://via.placeholder.com/40" class="rounded-circle" />
-  </header>
 
-  <!-- CONTENT -->
-  <main class="container mt-5">
+<!-- HEADER -->
+<header>
+  <div class="header-content">
+    <div class="logo">
+      <div class="logo-icon">
+        <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+      </div>
+      <span class="logo-text">One UML</span>
+    </div>
+  </div>
+</header>
+
+<!-- CONTENT -->
+<main>
+  <div class="content-container">
     <h3 class="fw-bold">Additional Information</h3>
-    <p>Pilih fitur untuk mengisi Use Case Specification.</p>
+    <p class="subtitle">Pilih fitur untuk mengisi Use Case Specification.</p>
 
-    <div class="row g-4 mt-4" id="featureGrid"></div>
-    <!-- NAVIGATION BUTTON -->
-    <div class="d-flex justify-content-between mt-5">
-      <button class="btn btn-outline-secondary" id="btnBack">
+    <div class="row g-4 mt-2" id="featureGrid"></div>
+  </div>
+</main>
+
+<!-- NAVIGATION - TOMBOL BACK/NEXT -->
+<div class="nav-footer">
+  <div class="content-container">
+    <div class="d-flex justify-content-between">
+      <button class="btn btn-outline-secondary"
+        onclick="location.href='/user-story'">
         ← Back
       </button>
 
-      <button class="btn btn-dark" id="btnNext">
+      <button class="btn btn-dark"
+        onclick="location.href='/use-case-spec'">
         Next →
       </button>
+    </div>
+  </div>
 </div>
 
-  </main>
+<!-- FOOTER - COPYRIGHT & LINKS -->
+<div class="main-footer">
+  <div class="footer-content">
+    <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Help</a>
+      <a href="#" class="footer-link">Privacy</a>
+      <a href="#" class="footer-link">Terms</a>
+    </div>
+  </div>
+</div>
 
-  <!-- BOOTSTRAP -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- MODAL CONTAINER (PENTING) -->
+<div id="modalContainer"></div>
 
-  <script>
-  const featureGrid = document.getElementById("featureGrid");
+<!-- BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  // =============================
-  // LOAD FEATURE DARI LOCALSTORAGE
-  // =============================
-  document.addEventListener("DOMContentLoaded", () => {
-    const featureList =
-      JSON.parse(localStorage.getItem("featureList")) || [];
+<script>
+const featureGrid = document.getElementById("featureGrid");
+const modalContainer = document.getElementById("modalContainer");
 
-    console.log("Feature dari localStorage:", featureList);
+/* =============================
+   LOAD FEATURE
+============================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const featureList =
+    JSON.parse(localStorage.getItem("featureList")) || [];
 
-    if (featureList.length === 0) {
-      featureGrid.innerHTML = `
-        <div class="text-muted">
+  if (featureList.length === 0) {
+    featureGrid.innerHTML = `
+      <div class="col-12">
+        <div class="empty-state">
           Tidak ada fitur dari tahap sebelumnya.
-        </div>`;
-      return;
-    }
-
-    featureList.forEach((name, index) => {
-      createFeature({
-        id: index + 1,
-        name: name,
-      });
-    });
-  });
-
-  // =============================
-  // TEMPLATE MODAL
-  // =============================
-  function modalTemplate(feature) {
-    return `
-    <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-
-          <div class="modal-header">
-            <h5 class="modal-title">
-              Use Case Specification: ${feature.name}
-            </h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <div class="modal-body">
-            <input type="hidden" class="feature-id" value="${feature.id}" />
-
-            <div class="mb-3">
-              <label class="form-label">Summary</label>
-              <textarea class="form-control summary" rows="2"></textarea>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Priority</label>
-                <select class="form-select priority">
-                  <option>Must Have</option>
-                  <option>Should Have</option>
-                  <option>Could Have</option>
-                  <option>Won't Have</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Status</label>
-                <select class="form-select status">
-                  <option>Active</option>
-                  <option>Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Pre-Condition</label>
-              <textarea class="form-control precondition" rows="2"></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Post-Condition</label>
-              <textarea class="form-control postcondition" rows="2"></textarea>
-            </div>
-
-            ${pathSection("Basic Path", "basic")}
-            ${pathSection("Alternative Path", "alternative")}
-            ${pathSection("Exception", "exception")}
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button class="btn btn-dark save-btn">
-              Save
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>`;
-  }
-
-  function pathSection(title, type) {
-    return `
-    <div class="mb-3">
-      <label class="form-label">${title}</label>
-      <div class="path-container" data-type="${type}"></div>
-      <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
-        + Tambah Baris
-      </button>
-    </div>`;
-  }
-
-  // =============================
-  // CREATE CARD + MODAL
-  // =============================
-  function createFeature(feature) {
-    featureGrid.innerHTML += `
-      <div class="col-md-4">
-        <div class="feature-card"
-             data-bs-toggle="modal"
-             data-bs-target="#modalFeature${feature.id}"
-             onclick="loadUseCase(${feature.id})">
-          <h5>${feature.name}</h5>
         </div>
       </div>`;
-
-    document.body.insertAdjacentHTML(
-      "beforeend",
-      modalTemplate(feature)
-    );
+    return;
   }
 
-  // =============================
-  // LOAD USE CASE DARI LOCALSTORAGE
-  // =============================
-  function loadUseCase(featureId) {
-    const allData =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
-
-    const data = allData[featureId];
-    if (!data) return;
-
-    const modal = document.getElementById(
-      `modalFeature${featureId}`
-    );
-
-    modal.querySelector(".summary").value = data.summary || "";
-    modal.querySelector(".priority").value = data.priority || "Must Have";
-    modal.querySelector(".status").value = data.status || "Active";
-    modal.querySelector(".precondition").value = data.precondition || "";
-    modal.querySelector(".postcondition").value = data.postcondition || "";
-
-    fillPath(modal, "basic", data.basicPath);
-    fillPath(modal, "alternative", data.alternativePath);
-    fillPath(modal, "exception", data.exceptionPath);
-  }
-
-  function fillPath(modal, type, paths = []) {
-    const container = modal.querySelector(
-      `.path-container[data-type="${type}"]`
-    );
-    container.innerHTML = "";
-    paths.forEach(p =>
-      addPathRow(container, p.actor, p.system)
-    );
-  }
-
-  // =============================
-  // ADD PATH
-  // =============================
-  function addPathRow(container, actor = "", system = "") {
-    const div = document.createElement("div");
-    div.className = "row path-row";
-    div.innerHTML = `
-      <div class="col-md-6">
-        <textarea class="form-control actor" rows="2"
-          placeholder="Aksi Aktor">${actor}</textarea>
-      </div>
-      <div class="col-md-6">
-        <textarea class="form-control system" rows="2"
-          placeholder="Aksi Sistem">${system}</textarea>
-      </div>`;
-    container.appendChild(div);
-  }
-
-  document.addEventListener("click", e => {
-    if (e.target.classList.contains("add-path")) {
-      addPathRow(e.target.previousElementSibling);
-    }
+  featureList.forEach((name, index) => {
+    createFeature({ id: index + 1, name });
   });
+});
 
-  // =============================
-  // SAVE KE LOCALSTORAGE
-  // =============================
-  document.addEventListener("click", e => {
-    if (!e.target.classList.contains("save-btn")) return;
+/* =============================
+   TEMPLATE MODAL
+============================= */
+function modalTemplate(feature) {
+  return `
+  <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
 
+        <div class="modal-header">
+          <h5 class="modal-title">
+            Use Case Specification: ${feature.name}
+          </h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" class="feature-id" value="${feature.id}" />
+
+          <div class="mb-3">
+            <label class="form-label">Summary</label>
+            <textarea class="form-control summary" rows="2"></textarea>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Priority</label>
+              <select class="form-select priority">
+                <option>Must Have</option>
+                <option>Should Have</option>
+                <option>Could Have</option>
+                <option>Won't Have</option>
+              </select>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Status</label>
+              <select class="form-select status">
+                <option>Active</option>
+                <option>Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Pre-Condition</label>
+            <textarea class="form-control precondition" rows="2"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Post-Condition</label>
+            <textarea class="form-control postcondition" rows="2"></textarea>
+          </div>
+
+          ${pathSection("Basic Path", "basic")}
+          ${pathSection("Alternative Path", "alternative")}
+          ${pathSection("Exception", "exception")}
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cancel
+          </button>
+          <button class="btn btn-dark save-btn">
+            Save
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>`;
+}
+
+function pathSection(title, type) {
+  return `
+  <div class="mb-3">
+    <label class="form-label">${title}</label>
+    <div class="path-container" data-type="${type}"></div>
+    <button type="button" class="btn btn-sm btn-outline-secondary mt-2 add-path">
+      + Tambah Baris
+    </button>
+  </div>`;
+}
+
+/* =============================
+   CREATE FEATURE
+============================= */
+function createFeature(feature) {
+  featureGrid.insertAdjacentHTML("beforeend", `
+    <div class="col-md-4 col-sm-6 mb-4">
+      <div class="feature-card"
+        data-bs-toggle="modal"
+        data-bs-target="#modalFeature${feature.id}"
+        onclick="loadUseCase(${feature.id})">
+        <p class="feature-name">${feature.name}</p>
+      </div>
+    </div>`);
+
+  modalContainer.insertAdjacentHTML(
+    "beforeend",
+    modalTemplate(feature)
+  );
+}
+
+/* =============================
+   LOAD & SAVE
+============================= */
+function loadUseCase(featureId) {
+  const allData =
+    JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+  const data = allData[featureId];
+  if (!data) return;
+
+  const modal = document.getElementById(`modalFeature${featureId}`);
+
+  modal.querySelector(".summary").value = data.summary || "";
+  modal.querySelector(".priority").value = data.priority || "Must Have";
+  modal.querySelector(".status").value = data.status || "Active";
+  modal.querySelector(".precondition").value = data.precondition || "";
+  modal.querySelector(".postcondition").value = data.postcondition || "";
+
+  fillPath(modal, "basic", data.basicPath);
+  fillPath(modal, "alternative", data.alternativePath);
+  fillPath(modal, "exception", data.exceptionPath);
+}
+
+function fillPath(modal, type, paths = []) {
+  const container = modal.querySelector(`.path-container[data-type="${type}"]`);
+  container.innerHTML = "";
+  paths.forEach(p => addPathRow(container, p.actor, p.system));
+}
+
+function addPathRow(container, actor = "", system = "") {
+  const div = document.createElement("div");
+  div.className = "row path-row";
+  div.innerHTML = `
+    <div class="col-md-6">
+      <textarea class="form-control actor" rows="2" placeholder="Actor action">${actor}</textarea>
+    </div>
+    <div class="col-md-6">
+      <textarea class="form-control system" rows="2" placeholder="System response">${system}</textarea>
+    </div>`;
+  container.appendChild(div);
+}
+
+document.addEventListener("click", e => {
+  if (e.target.classList.contains("add-path")) {
+    addPathRow(e.target.previousElementSibling);
+  }
+
+  if (e.target.classList.contains("save-btn")) {
     const modal = e.target.closest(".modal");
-    const featureId =
-      modal.querySelector(".feature-id").value;
+    const featureId = modal.querySelector(".feature-id").value;
 
     const allData =
       JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
@@ -300,35 +531,27 @@
       exceptionPath: collectPath(modal, "exception"),
     };
 
-    localStorage.setItem(
-      "useCaseSpecs",
-      JSON.stringify(allData)
-    );
-
+    localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
+    
+    // Dapatkan instance modal Bootstrap dan sembunyikan
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+    
     alert("Data berhasil disimpan ✅");
-    bootstrap.Modal.getInstance(modal).hide();
-  });
-
-  function collectPath(modal, type) {
-    return [...modal.querySelectorAll(
-      `.path-container[data-type="${type}"] .path-row`
-    )].map(r => ({
-      actor: r.querySelector(".actor").value,
-      system: r.querySelector(".system").value,
-    }));
   }
+});
 
-  // =============================
-  // NAVIGATION (ROUTE BASED)
-  // =============================
-  document.getElementById("btnBack").addEventListener("click", () => {
-    window.location.href = "http://127.0.0.1:8000/user-story";
-  });
-
-  document.getElementById("btnNext").addEventListener("click", () => {
-    window.location.href = "http://127.0.0.1:8000/use-case-spec";
-  });
-
+function collectPath(modal, type) {
+  return [...modal.querySelectorAll(
+    `.path-container[data-type="${type}"] .path-row`
+  )].map(r => ({
+    actor: r.querySelector(".actor").value,
+    system: r.querySelector(".system").value,
+  }));
+}
 </script>
+
 </body>
 </html>
