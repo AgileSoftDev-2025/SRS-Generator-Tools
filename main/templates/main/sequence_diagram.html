@@ -1,54 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Generate Sequence Diagram</title>
-</head>
-<body style="margin: 0; padding: 0; box-sizing: border-box; background-color: #f9fafb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; color: #111827; font-size: 16px; line-height: 1.6; font-weight: 400; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; min-height: 100vh; display: flex; flex-direction: column;">
-  
-  <!-- Main Container -->
-  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; padding: 48px 24px;">
-    
-    <!-- Header Section -->
-    <div style="text-align: center; margin-bottom: 48px;">
-      <h1 style="font-size: 32px; font-weight: 600; color: #111827; margin: 0 0 12px 0; line-height: 1.3;">Generate Sequence Diagram</h1>
-      <p style="font-size: 16px; color: #6b7280; margin: 0;">This page allows you to generate a sequence diagram based on your UML sequence input.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sequence Diagram</title>
+  </head>
+
+  <body style="margin: 0; background: #f9fafb; font-family: system-ui">
+    <!-- MAIN -->
+    <div style="padding: 48px; max-width: 1100px; margin: auto">
+      <h1 style="font-size: 32px; margin-bottom: 8px">
+        Generate Sequence Diagram
+      </h1>
+      <p style="color: #6b7280; margin-bottom: 32px">
+        Select a feature to preview its sequence diagram
+      </p>
+
+      <!-- FEATURE CARDS -->
+      <div
+        id="feature-container"
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        "
+      ></div>
     </div>
 
-    <!-- Preview Area -->
-    <div style="width: 100%; max-width: 900px; background-color: #ffffff; border: 2px dashed #e5e7eb; border-radius: 8px; padding: 48px; min-height: 480px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-      
-      <!-- Question Mark Icon (SVG) -->
-      <svg style="width: 48px; height: 48px; color: #d1d5db; margin-bottom: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-dasharray="2 4" fill="none"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m.08 4h.01"/>
-      </svg>
-      
-      <!-- Preview Text -->
-      <p style="font-size: 16px; color: #9ca3af; margin: 0;">Sequence Diagram Preview</p>
+    <!-- MODAL -->
+    <div
+      id="modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          width: 800px;
+          max-width: 90%;
+          border-radius: 10px;
+          padding: 24px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          "
+        >
+          <h3 id="modal-title" style="margin: 0">Sequence Diagram</h3>
+          <button
+            onclick="closeModal()"
+            style="
+              border: none;
+              background: none;
+              font-size: 20px;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        <pre
+          id="plantuml-output"
+          style="
+            margin-top: 16px;
+            background: #111827;
+            color: #22c55e;
+            padding: 16px;
+            border-radius: 8px;
+            overflow: auto;
+          "
+        ></pre>
+      </div>
     </div>
 
-  </div>
+    <!-- SCRIPT -->
+    <script>
+      /* =====================================================
+   MODE 1: UI DUMMY (AKTIF SEKARANG)
+   ===================================================== */
+      const mockFeatures = [
+        {
+          id: 1,
+          title: "User Login",
+          plantuml: `
+@startuml
+actor User
+User -> LoginPage : input email & password
+LoginPage -> AuthController : submit
+AuthController -> UserDB : validate
+UserDB --> AuthController : success
+AuthController --> LoginPage : login success
+@enduml`,
+        },
+        {
+          id: 2,
+          title: "User Registration",
+          plantuml: `
+@startuml
+actor User
+User -> RegisterPage : input data
+RegisterPage -> UserController : submit
+UserController -> UserDB : save user
+UserDB --> UserController : success
+@enduml`,
+        },
+      ];
 
-  <!-- Footer Navigation -->
-  <div style="padding: 24px 48px; display: flex; justify-content: space-between; align-items: center; background-color: #ffffff; border-top: 1px solid #e5e7eb;">
-    
-    <!-- Back Button -->
-    <a href="{% url 'main:import_sql' %}" style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; background-color: #ffffff; color: #2563eb; border: 2px solid #2563eb; border-radius: 8px; font-size: 16px; font-weight: 500; text-decoration: none; cursor: pointer; transition: all 0.2s;">
-      <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-      </svg>
-      Back
-    </a>
+      renderCards(mockFeatures);
 
-    <!-- Next Button -->
-    <button style="display: flex; align-items: center; gap: 8px; padding: 12px 24px; background-color: #2563eb; color: #ffffff; border: none; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-      Next
-      <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-      </svg>
-    </button>
-  </div>
-</body>
+      /* =====================================================
+   MODE 2: BACKEND (UNCOMMENT JIKA SUDAH READY)
+   ===================================================== */
+
+      /*
+fetch("/api/sequence/features/")
+  .then(res => res.json())
+  .then(data => {
+    renderCards(data);
+  })
+  .catch(err => {
+    console.error("Failed to load features", err);
+  });
+*/
+
+      /* =====================================================
+   RENDER CARD FUNCTION
+   ===================================================== */
+      function renderCards(features) {
+        const container = document.getElementById("feature-container");
+        container.innerHTML = "";
+
+        features.forEach((feature) => {
+          const card = document.createElement("div");
+
+          card.style = `
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:8px;
+      padding:20px;
+      cursor:pointer;
+      transition:.2s;
+    `;
+
+          card.innerHTML = `
+      <h3 style="margin:0 0 8px;">${feature.title}</h3>
+      <p style="margin:0; color:#6b7280; font-size:14px;">
+        Click to preview sequence diagram
+      </p>
+    `;
+
+          card.onmouseenter = () =>
+            (card.style.boxShadow = "0 8px 20px rgba(0,0,0,0.08)");
+          card.onmouseleave = () => (card.style.boxShadow = "none");
+
+          card.onclick = () => openModal(feature);
+
+          container.appendChild(card);
+        });
+      }
+
+      /* =====================================================
+   MODAL HANDLER
+   ===================================================== */
+      function openModal(feature) {
+        document.getElementById("modal").style.display = "flex";
+        document.getElementById("modal-title").innerText = feature.title;
+
+        /* MODE DUMMY */
+        document.getElementById("plantuml-output").textContent =
+          feature.plantuml;
+
+        /* MODE BACKEND (UNCOMMENT NANTI) */
+        /*
+  fetch(`/api/sequence/${feature.id}/generate/`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("plantuml-output").textContent = data.plantuml;
+    });
+  */
+      }
+
+      function closeModal() {
+        document.getElementById("modal").style.display = "none";
+      }
+    </script>
+  </body>
 </html>

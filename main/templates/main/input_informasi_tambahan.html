@@ -69,6 +69,17 @@
     <p>Pilih fitur untuk mengisi Use Case Specification.</p>
 
     <div class="row g-4 mt-4" id="featureGrid"></div>
+    <!-- NAVIGATION BUTTON -->
+    <div class="d-flex justify-content-between mt-5">
+      <button class="btn btn-outline-secondary" id="btnBack">
+        ← Back
+      </button>
+
+      <button class="btn btn-dark" id="btnNext">
+        Next →
+      </button>
+</div>
+
   </main>
 
   <!-- BOOTSTRAP -->
@@ -306,6 +317,18 @@
       system: r.querySelector(".system").value,
     }));
   }
+
+  // =============================
+  // NAVIGATION
+  // =============================
+  document.getElementById("btnBack").addEventListener("click", () => {
+    window.location.href = "user_story.html";
+  });
+
+  document.getElementById("btnNext").addEventListener("click", () => {
+    window.location.href = "activity_diagram.html";
+  });
+  
 </script>
 </body>
 </html>
