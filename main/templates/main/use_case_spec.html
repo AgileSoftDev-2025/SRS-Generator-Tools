@@ -1,231 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Generated Use Case Specification</title>
-    <link rel="stylesheet" href="global.css" />
-    <style>
-      /* ===== Page Styling ===== */
-      .container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        padding: 2rem;
-      }
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>OneUML - Use Case Specification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-      .card {
-        background-color: var(--bg-white);
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-        padding: 2rem 2.5rem;
-        max-width: 720px;
-        width: 100%;
-      }
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 
-      .card h2 {
-        font-size: 1.5rem;
-        margin-bottom: 0.25rem;
-      }
+  <style>
+    body {
+      background: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, sans-serif;
+    }
 
-      .card .subtitle {
-        color: var(--text-secondary);
-        font-size: 0.95rem;
-        margin-bottom: 1.5rem;
-      }
+    .header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+    }
 
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        border-radius: 8px;
-        overflow: hidden;
-      }
+    .spec-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 32px;
+    }
 
-      table tr {
-        border-bottom: 1px solid var(--border-light);
-      }
+    .section-title {
+      font-weight: 600;
+      margin-top: 24px;
+    }
+  </style>
+</head>
 
-      table td {
-        padding: 0.75rem 1rem;
-        vertical-align: top;
-      }
+<body>
+  <!-- HEADER -->
+  <header class="header">
+    <div class="fw-semibold">OneUML</div>
+    <img src="https://via.placeholder.com/40" class="rounded-circle" />
+  </header>
 
-      table td:first-child {
-        font-weight: 500;
-        color: var(--text-secondary);
-        width: 25%;
-      }
+  <!-- CONTENT -->
+  <main class="container mt-5">
+    <h3 class="fw-bold mb-4">Use Case Specification</h3>
 
-      table td:last-child {
-        color: var(--text-primary);
-      }
+    <div id="useCaseContainer"></div>
 
-      .highlight {
-        background-color: #f3f4f6;
-        border-radius: 8px;
-        padding: 0.75rem 1rem;
-        margin: 0.5rem 0;
-      }
+    <!-- NAVIGATION -->
+    <div class="d-flex justify-content-between mt-5">
+      <button class="btn btn-outline-secondary"
+        onclick="location.href='/input-informasi-tambahan'">
+        ← Back
+      </button>
 
-      /* ===== Button Next ===== */
-      .btn-next {
-        position: fixed;
-        bottom: 32px;
-        right: 32px;
-        background-color: #000;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 0.6rem 1.4rem;
-        font-weight: 500;
-        transition: 0.3s ease;
-      }
-
-      .btn-next:hover {
-        background-color: #111827;
-        transform: scale(1.05);
-      }
-
-      /* ===== Popup ===== */
-      .popup {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        background-color: var(--bg-white);
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        padding: 2rem;
-        text-align: center;
-        width: 400px;
-        max-width: 90%;
-        opacity: 0;
-        transition: all 0.3s ease;
-        z-index: 10;
-      }
-
-      .popup.active {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 1;
-      }
-
-      .popup h3 {
-        margin-bottom: 0.5rem;
-      }
-
-      .popup p {
-        color: var(--text-secondary);
-        margin-bottom: 1rem;
-      }
-
-      .popup button {
-        background-color: #000;
-        color: white;
-        padding: 0.5rem 1.2rem;
-        border-radius: 6px;
-      }
-
-      .popup button:hover {
-        background-color: #111827;
-      }
-
-      /* ===== Overlay (background blur) ===== */
-      .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        visibility: hidden;
-        transition: 0.3s ease;
-        z-index: 5;
-      }
-
-      .overlay.active {
-        opacity: 1;
-        visibility: visible;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <div class="card" id="useCaseCard">
-        <h2>Generated Use Case Specification</h2>
-        <p class="subtitle">
-          Automatically generated specification based on your defined features and actors.
-        </p>
-
-        <table id="useCaseTable"></table>
-      </div>
+      <button class="btn btn-dark"
+        onclick="location.href='/activity-diagram'">
+        Next →
+      </button>
     </div>
+  </main>
 
-    <button class="btn-next" id="nextBtn">Next</button>
+  <script>
+    const container = document.getElementById("useCaseContainer");
 
-    <div class="overlay" id="overlay"></div>
-    <div class="popup" id="popup">
-      <h3>Use Case Generated Successfully!</h3>
-      <p>Your use case specification has been created based on the input provided.</p>
-      <button onclick="closePopup()">OK</button>
-    </div>
+    const featureList =
+      JSON.parse(localStorage.getItem("featureList")) || [];
+    const specs =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
 
-    <script>
-    const popup = document.getElementById("popup");
-    const overlay = document.getElementById("overlay");
-    const nextBtn = document.getElementById("nextBtn");
-    const table = document.getElementById("useCaseTable");
+    if (featureList.length === 0) {
+      container.innerHTML =
+        "<p class='text-muted'>Tidak ada data Use Case.</p>";
+    }
 
-    const data = JSON.parse(localStorage.getItem("useCaseData"));
-    function renderPathRows(paths) {
-      if (!paths || paths.length === 0) return "<em>None</em>";
-      
-      let html = `
-      <table style="width:100%; border:1px solid #ddd; border-collapse:collapse;">
-        <tr>
-          <th style="width:5%; border:1px solid #ddd;">No.</th>
-          <th style="width:47%; border:1px solid #ddd;">Actor Actions</th>
-          <th style="width:48%; border:1px solid #ddd;">System Actions</th>
-          </tr>
-          `;
-      paths.forEach((p, index) => {
-        html += `
-        <tr>
-          <td style="border:1px solid #ddd; text-align:center; vertical-align:top;">${index + 1}</td>
-          <td style="border:1px solid #ddd; vertical-align:top;">${p.actor || "-"}</td>
-          <td style="border:1px solid #ddd; vertical-align:top;">${p.system || "-"}</td>
-          </tr>
-        `;
-      });
-      
-      html += "</table>";
-    return html;
-  }
-        
-      if (data) {
-        table.innerHTML = `
-        <tr><td>Feature Name</td><td>${data.featureName || '-'}</td></tr>
-        <tr><td>Summary Description</td><td>${data.summary || '-'}</td></tr>
-        <tr><td>Priority</td><td><strong>${data.priority || '-'}</strong></td></tr>
-        <tr><td>Status</td><td><strong>${data.status || '-'}</strong></td></tr>
-        <tr><td>Pre-Condition</td><td>${data.precondition || '-'}</td></tr>
-        <tr><td>Post-Condition</td><td>${data.postcondition || '-'}</td></tr>
-        <tr><td>Basic Path</td><td>${renderPathRows(data.basicPath)}</td></tr>
-        <tr><td>Alternative Path</td><td>${renderPathRows(data.alternativePath)}</td></tr>
-        <tr><td>Exception</td><td>${renderPathRows(data.exceptionPath)}</td></tr>
-        `;
-      } else {
-        table.innerHTML = `<tr><td colspan="2">No data found. Please go back and fill out the form first.</td></tr>`;
-      }
-      
-      nextBtn.addEventListener("click", () => {
-        popup.classList.add("active");
-        overlay.classList.add("active");
-      });
+    featureList.forEach((feature, index) => {
+      const id = index + 1;
+      const data = specs[id];
 
-      function closePopup() {
-        popup.classList.remove("active");
-        overlay.classList.remove("active");
-      }
-    </script>
-  </body>
+      if (!data) return;
+
+      container.innerHTML += `
+        <div class="spec-card">
+          <h5 class="fw-bold">${feature}</h5>
+
+          <p><strong>Summary:</strong><br>${data.summary || "-"}</p>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <strong>Priority:</strong> ${data.priority}
+            </div>
+            <div class="col-md-6">
+              <strong>Status:</strong> ${data.status}
+            </div>
+          </div>
+
+          <p><strong>Pre-Condition:</strong><br>
+            ${data.precondition || "-"}</p>
+
+          <p><strong>Post-Condition:</strong><br>
+            ${data.postcondition || "-"}</p>
+
+          ${renderTable("Basic Flow", data.basicPath)}
+          ${renderTable("Alternative Flow", data.alternativePath)}
+          ${renderTable("Exception Flow", data.exceptionPath)}
+        </div>
+      `;
+    });
+
+    function renderTable(title, rows = []) {
+      if (!rows || rows.length === 0) return "";
+
+      return `
+        <div class="mt-4">
+          <div class="section-title">${title}</div>
+          <table class="table table-bordered mt-2">
+            <thead>
+              <tr>
+                <th width="50%">Aksi Aktor</th>
+                <th width="50%">Respon Sistem</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr>
+                  <td>${r.actor || "-"}</td>
+                  <td>${r.system || "-"}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  </script>
+</body>
 </html>
