@@ -330,15 +330,26 @@
   // =============================
   // NAVIGATION (ROUTE BASED)
   // =============================
-  document.getElementById("btnBack").addEventListener("click", () => {
-    window.location.href = "http://127.0.0.1:8000/user-story";
-  });
+  document.addEventListener("DOMContentLoaded", function () {
 
-  document.getElementById("btnNext").addEventListener("click", (e) => {
-    e.preventDefault();
-    window.location.href = "http://127.0.0.1:8000/use-case-spec";
-  });
+  const btnBack = document.getElementById("btnBack");
+  const btnNext = document.getElementById("btnNext");
 
+  if (btnBack) {
+    btnBack.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "http://127.0.0.1:8000/user-story";
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener("click", function (e) {
+      e.preventDefault();
+      window.location.href = "http://127.0.0.1:8000/use-case-spec";
+    });
+  }
+
+});
 
 </script>
 </body>
