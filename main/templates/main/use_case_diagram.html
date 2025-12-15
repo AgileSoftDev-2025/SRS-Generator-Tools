@@ -546,11 +546,11 @@
                     }
                 });
                 
-                // 🔥 TAMBAHKAN: Event listener untuk tombol back
+                // 🔥 PERUBAHAN: Event listener untuk tombol back - sekarang ke home.html dengan path yang benar
                 document.getElementById('backBtn').addEventListener('click', () => {
                     this.saveData(); // Simpan data sebelum kembali
-                    // 🔥 PERUBAHAN: Kembali ke halaman sebelumnya (sesuaikan dengan URL yang benar)
-                    window.location.href = '/'; // Ganti dengan URL halaman sebelumnya jika ada
+                    // 🔥 PERUBAHAN: Kembali ke home.html dengan path template yang benar
+                    window.location.href = '/home/'; // Menggunakan URL Django route ke home
                 });
             }
             
