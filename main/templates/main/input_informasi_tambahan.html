@@ -69,26 +69,24 @@
     <p>Pilih fitur untuk mengisi Use Case Specification.</p>
 
     <div class="row g-4 mt-4" id="featureGrid"></div>
-
-    <!-- NAVIGATION BUTTON -->
-  <div class="d-flex justify-content-between mt-5">
+    <!-- NAVIGATION BUTTON
+      <div class="d-flex justify-content-between mt-5">
     <button
       class="btn btn-outline-secondary"
-      id="btnBack"
       type="button"
+      onclick="window.location.href='http://127.0.0.1:8000/user-story/'"
     >
       ← Back
     </button>
 
     <button
       class="btn btn-dark"
-      id="btnNext"
       type="button"
+      onclick="window.location.href='http://127.0.0.1:8000/use-case-spec/'"
     >
       Next →
     </button>
-</div>
-
+  </div> -->
   </main>
 
   <!-- BOOTSTRAP -->
@@ -328,29 +326,17 @@
   }
 
   // =============================
-  // NAVIGATION (ROUTE BASED)
+  // NAVIGATION
   // =============================
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btnBack").onclick = () => {
+    window.location.href = "/user-story";
+  };
 
-  const btnBack = document.getElementById("btnBack");
-  const btnNext = document.getElementById("btnNext");
-
-  if (btnBack) {
-    btnBack.addEventListener("click", function (e) {
-      e.preventDefault();
-      window.location.href = "http://127.0.0.1:8000/user-story";
-    });
-  }
-
-  if (btnNext) {
-    btnNext.addEventListener("click", function (e) {
-      e.preventDefault();
-      window.location.href = "http://127.0.0.1:8000/use-case-spec";
-    });
-  }
-
+  document.getElementById("btnNext").onclick = () => {
+    window.location.href = "/use-case-spec";
+  };
 });
-
 </script>
 </body>
 </html>
