@@ -1,9 +1,9 @@
+import os
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
 from django.utils import timezone
-from django.shortcuts import redirect
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
@@ -12,9 +12,12 @@ import base64
 import requests
 import urllib.parse
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponse
 import json
 from .forms import RegisterForm 
+from main.generators.sequence_generator import generate_sequence_plantuml
+import subprocess
+from django.conf import settings
 
 def home(request):
     projects = Project.objects.all() 
@@ -33,6 +36,7 @@ def login_view(request):
         try:
             pengguna = Pengguna.objects.get(email_user=email)
             if pengguna.check_password(password):
+                request.session.flush()
                 request.session['user_id'] = pengguna.id_user
                 session_id = 'S' + str(Session.objects.count() + 1).zfill(4)
                 Session.objects.create(
@@ -52,13 +56,14 @@ def login_view(request):
     return render(request, 'main/login.html')
 
 def register_view(request):
-    if 'user_id' in request.session:
-        return redirect('main:home')
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
             try:
                 pengguna = form.save()
+                if 'user_id' in request.session:
+                    del request.session['user_id']
+                request.session.flush()
                 messages.success(request, 'Registration successful! Please log in.')
                 return redirect('main:login')
             except Exception as e:
@@ -126,36 +131,43 @@ def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
 
 def input_informasi_tambahan(request):
-    # Contoh data dummy untuk fitur
-    features = [
-        {
-            'id': 1,
-            'name': 'Login System',
-            'description': 'Allows users to log in securely.',
-            'priority': 'High',
-            'status': 'Active'
-        },
-        {
-            'id': 2,
-            'name': 'User Registration',
-            'description': 'Enables new users to sign up.',
-            'priority': 'Medium',
-            'status': 'Active'
-        },
-        {
-            'id': 3,
-            'name': 'Password Reset',
-            'description': 'Lets users reset their forgotten passwords.',
-            'priority': 'Low',
-            'status': 'Inactive'
-        }
-    ]
-
-    context = {'features': features}
-    return render(request, 'main/input_informasi_tambahan.html', context)
+    return render(request, 'main/input_informasi_tambahan.html')
 
 def use_case_spec(request):
-    return render(request, 'main/use_case_spec.html')
+    # Ambil user story terakhir
+    userstory = UserStory.objects.last()
+
+    if not userstory:
+        messages.error(request, "Belum ada User Story")
+        return redirect("main:user_story")
+
+    # Auto-generate Use Case
+    usecase, _ = Usecase.objects.get_or_create(
+        userstory=userstory,
+        defaults={
+            "nama_usecase": userstory.input_fitur
+        }
+    )
+
+    # Auto-generate Use Case Specification
+    spec, created = UseCaseSpecification.objects.get_or_create(
+        usecase=usecase,
+        defaults={
+            "summary_description": f"User dapat {userstory.input_fitur}",
+            "actor": userstory.input_sebagai,
+            "pre_condition": "User sudah login ke sistem",
+            "post_condition": "Proses berhasil dijalankan",
+            "priority": "High",
+            "status": "Draft"
+        }
+    )
+
+    return render(request, "main/use_case_spec.html", {
+        "userstory": userstory,
+        "usecase": usecase,
+        "spec": spec
+    })
+
 
 def save_use_case_spec(request, feature_id):
     if request.method == "POST":
@@ -185,6 +197,21 @@ def save_use_case_spec(request, feature_id):
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
+
+def get_latest_userstory(request):
+    try:
+        us = UserStory.objects.latest("id_userstory")
+        return JsonResponse({
+            "status": "success",
+            "userstory_id": us.id_userstory
+        })
+    except:
+        return JsonResponse({
+            "status": "error",
+            "message": "No User Story found"
+        })
+
+
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
@@ -235,6 +262,136 @@ def save_parsed_sql(request):
 
 def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')
+
+def generate_sequence_diagram(request, userstory_id):
+
+    plantuml_code = generate_sequence_plantuml(userstory_id)
+
+    file_path = os.path.join(settings.MEDIA_ROOT, f"sequence_{userstory_id}.puml")
+    with open(file_path, "w") as f:
+        f.write(plantuml_code)
+
+    subprocess.run(["plantuml", file_path])
+
+    png_path = file_path.replace(".puml", ".png")
+    with open(png_path, "rb") as img:
+        return HttpResponse(img.read(), content_type="image/png")
+    
+def get_sequence_features(request):
+    features = UseCaseSpecification.objects.select_related(
+        'usecase__gui'
+    ).all()
+
+    data = []
+    for f in features:
+        data.append({
+            "id": f.id_usecasespecification,
+            "title": f.summary_description,
+            "gui": f.usecase.gui.nama_atribut
+        })
+
+    return JsonResponse(data, safe=False)
+
+def generate_sequence_diagram_by_feature(request, feature_id):
+    usecase_spec = get_object_or_404(
+        UseCaseSpecification,
+        id_usecasespecification=feature_id
+    )
+
+    basic_paths = usecase_spec.basic_paths.order_by("step_number")
+    alt_paths = usecase_spec.alternative_paths.all()
+    exc_paths = usecase_spec.exception_paths.all()
+
+    gui = usecase_spec.usecase.gui
+    pages = Page.objects.filter(gui=gui).prefetch_related("elements")
+
+    tables = ImportedTable.objects.all()
+    relationships = ImportedRelationship.objects.all()
+
+    plantuml = build_sequence_plantuml(
+        usecase_spec,
+        basic_paths,
+        alt_paths,
+        exc_paths,
+        pages,
+        tables,
+        relationships
+    )
+
+    return JsonResponse({"plantuml": plantuml})
+
+def sequence_feature_list(request):
+    features = UseCaseSpecification.objects.select_related(
+        'usecase__gui'
+    )
+
+    data = []
+    for f in features:
+        data.append({
+            "id": f.id_usecasespecification,
+            "title": f.summary_description,
+            "gui": f.usecase.gui.nama_atribut,
+        })
+
+    return JsonResponse(data, safe=False)
+
+def build_sequence_plantuml(
+    usecase_spec,
+    basic_paths,
+    alt_paths,
+    exc_paths,
+    pages,
+    tables,
+    relationships
+):
+    lines = []
+    lines.append("@startuml")
+    lines.append("actor User")
+    lines.append("boundary UI")
+    lines.append("control Controller")
+    lines.append("database DB")
+    lines.append("")
+
+    lines.append(f"User -> UI : {usecase_spec.summary_description}")
+    lines.append("UI -> Controller : request")
+
+    # BASIC PATH
+    for step in basic_paths:
+        lines.append(f"Controller -> Controller : Step {step.step_number} - {step.description}")
+
+    # GUI interaction
+    for page in pages:
+        lines.append(f"Controller -> UI : Open page {page.name}")
+        for el in page.elements.all():
+            lines.append(f"User -> UI : Input {el.name} ({el.input_type})")
+
+    # SQL interaction
+    for table in tables:
+        lines.append(f"Controller -> DB : access {table.name}")
+
+    lines.append("DB --> Controller : result")
+    lines.append("Controller --> UI : response")
+
+    # ALTERNATIVE PATH
+    if alt_paths.exists():
+        lines.append("alt Alternative Flow")
+        for alt in alt_paths:
+            lines.append(
+                f"Controller -> Controller : Alt Step from {alt.related_basic_step} - {alt.description}"
+            )
+        lines.append("end")
+
+    # EXCEPTION PATH
+    if exc_paths.exists():
+        lines.append("alt Exception Flow")
+        for exc in exc_paths:
+            lines.append(
+                f"Controller -> Controller : Exception at {exc.related_basic_step} - {exc.description}"
+            )
+        lines.append("end")
+
+    lines.append("@enduml")
+    return "\n".join(lines) 
 
 def class_diagram(request):
     if request.method != "POST":
@@ -437,6 +594,6 @@ def download_plantuml(request):
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+    
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
-

@@ -1,512 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One UML - Additional Information</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        /* Global Styles - Sesuai Template One UML */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
-            line-height: 1.5;
-        }
-        
-        /* Header & Footer - Sesuai Template */
-        header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0 24px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 64px;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background-color: #111827;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 24px;
-        }
-        
-        footer {
-            background-color: #ffffff;
-            border-top: 1px solid #e5e7eb;
-            padding: 16px 24px;
-            margin-top: 48px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .footer-links {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        
-        .footer-link {
-            font-size: 12px;
-            color: #6b7280;
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            color: #374151;
-        }
-        
-        /* Card Styles - Sesuai Template */
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
-        /* Form Styles - Sesuai Template */
-        .form-group {
-            margin-bottom: 24px;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #ffffff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .help-text {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-        
-        /* Buttons - Sesuai Template */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background-color: #111827;
-            color: #ffffff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        .btn-secondary {
-            background-color: #374151;
-            color: #ffffff;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        
-        .btn-outline {
-            background-color: #ffffff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-outline:hover {
-            background-color: #f9fafb;
-            color: #374151;
-        }
-        
-        .add-btn {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #2563eb;
-            font-size: 14px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px 0;
-            transition: color 0.2s ease;
-        }
-        
-        .add-btn:hover {
-            color: #1d4ed8;
-        }
-        
-        .remove-btn {
-            color: #6b7280;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            transition: background-color 0.2s ease;
-        }
-        
-        .remove-btn:hover {
-            background-color: #f3f4f6;
-            color: #ef4444;
-        }
-        
-        /* Feature Card Styles - Diadaptasi untuk Template One UML */
-        .feature-card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            height: 100%;
-        }
-        
-        .feature-card:hover {
-            border-color: #d1d5db;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        .feature-card h5 {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #111827;
-        }
-        
-        .feature-card p {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        /* Footer Actions - Sesuai Template */
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .save-indicator {
-            color: #059669;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .save-dot {
-            width: 8px;
-            height: 8px;
-            background: #059669;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        
-        .next-btn {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .next-btn:hover {
-            background: #2563eb;
-        }
-        
-        .optional-label {
-            font-weight: normal;
-            color: #6b7280;
-        }
-        
-        .required-label {
-            font-weight: normal;
-            color: #ef4444;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        /* Modal Customizations untuk Template One UML */
-        .modal-header {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 24px;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .modal-body {
-            padding: 24px;
-        }
-        
-        .modal-footer {
-            border-top: 1px solid #e5e7eb;
-            padding: 20px 24px;
-        }
-        
-        .form-control:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .form-select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        /* Custom Bootstrap overrides */
-        .btn-close:focus {
-            box-shadow: none;
-        }
-        
-        .btn-dark {
-            background-color: #111827;
-            border-color: #111827;
-        }
-        
-        .btn-dark:hover {
-            background-color: #1f2937;
-            border-color: #1f2937;
-        }
-        
-        .btn-outline-dark {
-            color: #6b7280;
-            border-color: #d1d5db;
-        }
-        
-        .btn-outline-dark:hover {
-            background-color: #f9fafb;
-            color: #374151;
-            border-color: #d1d5db;
-        }
-        
-        .btn-outline-secondary {
-            color: #6b7280;
-            border-color: #d1d5db;
-        }
-        
-        .btn-outline-secondary:hover {
-            background-color: #f9fafb;
-            color: #374151;
-            border-color: #d1d5db;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>OneUML - Additional Information</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    body {
+      background: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+    }
+
+    .header {
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 18px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .feature-card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .path-row {
+      margin-bottom: 12px;
+    }
+  </style>
 </head>
+
 <body>
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="header">
-    <div class="logo">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="OneUML Logo">
-      OneUML
-    </div>
-    <div>
-      <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img">
-    </div>
+    <div class="logo">OneUML</div>
+    <img src="https://via.placeholder.com/40" class="rounded-circle" />
   </header>
 
-  <!-- Content -->
-  <div class="container mt-5">
+  <!-- CONTENT -->
+  <main class="container mt-5">
     <h3 class="fw-bold">Additional Information</h3>
-    <p>Select a feature to review or add its Use Case Specification.</p>
+    <p>Pilih fitur untuk mengisi Use Case Specification.</p>
 
-    <!-- Feature Grid -->
-    <div class="row mt-4 g-4" id="featureGrid"></div>
+    <div class="row g-4 mt-4" id="featureGrid"></div>
+    <!-- NAVIGATION BUTTON -->
+    <div class="d-flex justify-content-between mt-5">
+      <button class="btn btn-outline-secondary" id="btnBack">
+        ← Back
+      </button>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Navigation
-        document.getElementById("backBtn").addEventListener("click", function() {
-            window.location.href = "user_story.html";
-        });
-        
-        document.getElementById("nextBtn").addEventListener("click", function() {
-            window.location.href = "use_case_spec.html";
-        });
+      <button class="btn btn-dark" id="btnNext">
+        Next →
+      </button>
+</div>
 
-        // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
-        function addRow(containerId) {
-            const container = document.getElementById(containerId);
-            const newRow = document.createElement("div");
-            newRow.classList.add("row", "mb-3");
-            newRow.innerHTML = `
-                <div class="col-md-6">
-                    <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-                </div>
-            `;
-            container.appendChild(newRow);
-        }
+  </main>
 
-        // === TOMBOL TAMBAH UNTUK SETIAP BAGIAN ===
-        document
-            .getElementById("addBasicPathRow")
-            .addEventListener("click", () => addRow("basicPathContainer"));
+  <!-- BOOTSTRAP -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-        document
-            .getElementById("addAlternativePathRow")
-            .addEventListener("click", () => addRow("alternativePathContainer"));
+  <script>
+  const featureGrid = document.getElementById("featureGrid");
 
-        document
-            .getElementById("addExceptionRow")
-            .addEventListener("click", () => addRow("exceptionContainer"));
+  // =============================
+  // LOAD FEATURE DARI LOCALSTORAGE
+  // =============================
+  document.addEventListener("DOMContentLoaded", () => {
+    const featureList =
+      JSON.parse(localStorage.getItem("featureList")) || [];
 
-        // === FUNGSI MENGAMBIL DATA PATH ===
-        function getPathData(containerId) {
-            const container = document.getElementById(containerId);
-            const rows = container.querySelectorAll(".row");
-            let paths = [];
+    console.log("Feature dari localStorage:", featureList);
 
-            rows.forEach((row) => {
-                const actor = row.querySelector(".col-md-6:nth-child(1) textarea").value;
-                const system = row.querySelector(".col-md-6:nth-child(2) textarea").value;
-                paths.push({ actor, system });
-            });
+    if (featureList.length === 0) {
+      featureGrid.innerHTML = `
+        <div class="text-muted">
+          Tidak ada fitur dari tahap sebelumnya.
+        </div>`;
+      return;
+    }
 
-            return paths;
-        }
+    featureList.forEach((name, index) => {
+      createFeature({
+        id: index + 1,
+        name: name,
+      });
+    });
+  });
 
-        // === SIMPAN DATA KE LOCALSTORAGE ===
-        document.getElementById("saveFeature").addEventListener("click", () => {
-            const featureData = {
-                featureName: "Login",
-                summary: document.getElementById("summary").value,
-                priority: document.getElementById("priority").value,
-                status: document.getElementById("status").value,
-                precondition: document.getElementById("precondition").value,
-                postcondition: document.getElementById("postcondition").value,
-                basicPath: getPathData("basicPathContainer"),
-                alternativePath: getPathData("alternativePathContainer"),
-                exceptionPath: getPathData("exceptionContainer"),
-            };
+  // =============================
+  // TEMPLATE MODAL
+  // =============================
+  function modalTemplate(feature) {
+    return `
+    <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
 
-            localStorage.setItem("useCaseData", JSON.stringify(featureData));
-            alert("Feature saved successfully!");
-            
-            const modalEl = document.getElementById("modalFeature1");
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-        });
-    </script>
+          <div class="modal-header">
+            <h5 class="modal-title">
+              Use Case Specification: ${feature.name}
+            </h5>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
 
-
-  <!-- Modal Feature 1 -->
-  <div class="modal fade" id="modalFeature1" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Use Case Specification: Login</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form id="formFeature1">
           <div class="modal-body">
+            <input type="hidden" class="feature-id" value="${feature.id}" />
 
-            <!-- Summary -->
             <div class="mb-3">
-              <label class="form-label">Summary Description</label>
-              <small class="text-muted d-block mb-1">Jelaskan tujuan umum dari use case dalam 1–2 kalimat.</small>
-              <textarea class="form-control" id="summary" rows="2"
-                placeholder="Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard."></textarea>
+              <label class="form-label">Summary</label>
+              <textarea class="form-control summary" rows="2"></textarea>
             </div>
 
-            <!-- Priority & Status (side by side) -->
             <div class="row">
-              <!-- Priority -->
               <div class="col-md-6 mb-3">
                 <label class="form-label">Priority</label>
-                <a class="text-decoration-none d-block mb-1 small" data-bs-toggle="collapse" href="#priority_help" role="button">
-                  📌 Panduan Prioritas
-                </a>
-
-                <div class="collapse" id="priority_help">
-                  <div class="alert alert-secondary p-2 small mt-1">
-                    <b>Keterangan Prioritas:</b><br>
-                    • <b>Must Have</b> → Fitur wajib ada, tanpa fitur ini sistem tidak dapat berjalan.<br>
-                    • <b>Should Have</b> → Fitur penting, tapi sistem masih bisa berjalan tanpa fitur ini.<br>
-                    • <b>Could Have</b> → Fitur tambahan jika ada waktu / budget.<br>
-                    • <b>Won't Have</b> → Fitur yang tidak akan dikerjakan saat ini.
-                  </div>
-                </div>
-
-                <select class="form-select mt-2" id="priority">
-                  <option>Pilih Prioritas</option>
+                <select class="form-select priority">
                   <option>Must Have</option>
                   <option>Should Have</option>
                   <option>Could Have</option>
@@ -514,316 +148,187 @@
                 </select>
               </div>
 
-              <!-- Status -->
               <div class="col-md-6 mb-3">
                 <label class="form-label">Status</label>
-                <a class="text-decoration-none d-block small mb-1" data-bs-toggle="collapse" href="#status_help" role="button">
-                  📌 Panduan Status
-                </a>
-
-                <div class="collapse" id="status_help">
-                  <div class="alert alert-secondary p-2 small mt-1">
-                    <b>Keterangan Status:</b><br>
-                    • <b>Active</b> → Use case masih digunakan dan diterapkan.<br>
-                    • <b>Inactive</b> → Use case sudah tidak digunakan / digantikan.
-                  </div>
-                </div>
-
-                <select class="form-select mt-2" id="status">
-                  <option>Pilih Status</option>
+                <select class="form-select status">
                   <option>Active</option>
                   <option>Inactive</option>
                 </select>
               </div>
             </div>
 
-            <!-- Pre & Post -->
             <div class="mb-3">
               <label class="form-label">Pre-Condition</label>
-              <small class="text-muted d-block mb-1">Syarat sebelum use case bisa dimulai.</small>
-              <textarea class="form-control" id="precondition" rows="2"
-                placeholder="Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem."></textarea>
+              <textarea class="form-control precondition" rows="2"></textarea>
             </div>
 
             <div class="mb-3">
               <label class="form-label">Post-Condition</label>
-              <small class="text-muted d-block mb-1">Hasil akhir setelah use case berjalan berhasil.</small>
-              <textarea class="form-control" id="postcondition" rows="2"
-                placeholder="Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama."></textarea>
+              <textarea class="form-control postcondition" rows="2"></textarea>
             </div>
 
-            <!-- Basic Path -->
-            <div class="mb-3">
-              <label class="form-label">Basic Path</label>
-              <small class="text-muted d-block mb-1">Urutan langkah standar tanpa error dari aktor dan sistem.</small>
-
-              <div id="basicPathContainer">
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Pengguna memasukkan email dan password."></textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard."></textarea>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="addBasicPathRow">+ Tambah Baris</button>
-            </div>
-
-            <!-- Alternative Path -->
-            <div class="mb-3">
-              <label class="form-label">Alternative Path</label>
-              <small class="text-muted d-block mb-1">Variasi alur selain Basic Path tetapi tetap berhasil.</small>
-
-              <div id="alternativePathContainer">
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Pengguna memilih login menggunakan Google."></textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis."></textarea>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="addAlternativePathRow">+ Tambah Baris</button>
-            </div>
-
-            <!-- Exception -->
-            <div class="mb-3">
-              <label class="form-label">Exception</label>
-              <small class="text-muted d-block mb-1">Alur untuk kondisi gagal agar pengalaman pengguna tetap aman.</small>
-
-              <div id="exceptionContainer">
-                <div class="row mb-3">
-                  <div class="col-md-6">
-                    <label class="form-label">Actor Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Pengguna memasukkan password yang salah."></textarea>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">System Actions</label>
-                    <textarea class="form-control" rows="3"
-                      placeholder="Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi."></textarea>
-                  </div>
-                </div>
-              </div>
-              <button type="button" class="btn btn-outline-secondary btn-sm" id="addExceptionRow">+ Tambah Baris</button>
-            </div>
-
+            ${pathSection("Basic Path", "basic")}
+            ${pathSection("Alternative Path", "alternative")}
+            ${pathSection("Exception", "exception")}
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" id="saveFeature">Save</button>
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button class="btn btn-dark save-btn">
+              Save
+            </button>
           </div>
-        </form>
 
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-  const saveBtn = document.getElementById("saveFeature");
-  const nextBtn = document.getElementById("nextBtn");
-  const featureGrid = document.getElementById("featureGrid");
-  const featureList = JSON.parse(localStorage.getItem("featureList")) || [];
-
-  // Generate card dan modal untuk setiap fitur
-const formTemplate = `
-  <form class="usecase-form">
-    <div class="modal-body">
-      <!-- Summary -->
-      <div class="mb-3">
-        <label class="form-label">Summary Description</label>
-        <textarea class="form-control summary" rows="2"></textarea>
-      </div>
-
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Priority</label>
-          <select class="form-select priority">
-            <option>Must Have</option>
-            <option>Should Have</option>
-            <option>Could Have</option>
-            <option>Won't Have</option>
-          </select>
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Status</label>
-          <select class="form-select status">
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
         </div>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">Pre-Condition</label>
-        <textarea class="form-control precondition" rows="2"></textarea>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Post-Condition</label>
-        <textarea class="form-control postcondition" rows="2"></textarea>
-      </div>
-
-      <div class="mb-3 paths" data-type="basic">
-        <label class="form-label">Basic Path</label>
-        <div class="path-container"></div>
-        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
-      </div>
-
-      <div class="mb-3 paths" data-type="alternative">
-        <label class="form-label">Alternative Path</label>
-        <div class="path-container"></div>
-        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
-      </div>
-
-      <div class="mb-3 paths" data-type="exception">
-        <label class="form-label">Exception</label>
-        <div class="path-container"></div>
-        <button type="button" class="btn btn-outline-secondary btn-sm addPath">+ Tambah Baris</button>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cancel</button>
-      <button type="button" class="btn btn-dark saveFeature">Save</button>
-    </div>
-  </form>
-`;
-
-
-featureList.forEach((feature, index) => {
-  const modalId = `modalFeature${index}`;
-
-  // CARD FITUR
-  featureGrid.innerHTML += `
-    <div class="col-md-4">
-      <div class="feature-card" data-bs-toggle="modal" data-bs-target="#${modalId}">
-        <h5>${feature}</h5>
-      </div>
-    </div>
-  `;
-
-  // MODAL DINAMIS + TEMPLATE
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="modal fade" id="${modalId}" tabindex="-1">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Use Case Specification: ${feature}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          ${formTemplate}
-        </div>
-      </div>
-    </div>
-  `);
-});
-  
-  // === FUNGSI UNTUK MENAMBAHKAN BARIS ===
-  function addRow(containerId) {
-    const container = document.getElementById(containerId);
-    const newRow = document.createElement("div");
-    newRow.classList.add("row", "mb-3");
-    newRow.innerHTML = `
-      <div class="col-md-6">
-        <label class="form-label">Actor Actions</label>
-        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi aktor..."></textarea>
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">System Actions</label>
-        <textarea class="form-control" rows="3" placeholder="Tuliskan aksi sistem..."></textarea>
-      </div>
-    `;
-    container.appendChild(newRow);
+    </div>`;
   }
 
-  // === TOMBOL TAMBAH UNTUK SETIAP BAGIAN ===
-  document
-    .getElementById("addBasicPathRow")
-    .addEventListener("click", () => addRow("basicPathContainer"));
-
-  document
-    .getElementById("addAlternativePathRow")
-    .addEventListener("click", () => addRow("alternativePathContainer"));
-
-  document
-    .getElementById("addExceptionRow")
-    .addEventListener("click", () => addRow("exceptionContainer"));
-
-  // === FUNGSI MENGAMBIL DATA PATH ===
-  function getPathData(containerId) {
-    const container = document.getElementById(containerId);
-    const rows = container.querySelectorAll(".row");
-    let paths = [];
-
-    rows.forEach((row) => {
-      const actor = row.querySelector(".col-md-6:nth-child(1) textarea").value;
-      const system = row.querySelector(".col-md-6:nth-child(2) textarea").value;
-      paths.push({ actor, system });
-    });
-
-    return paths;
+  function pathSection(title, type) {
+    return `
+    <div class="mb-3">
+      <label class="form-label">${title}</label>
+      <div class="path-container" data-type="${type}"></div>
+      <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
+        + Tambah Baris
+      </button>
+    </div>`;
   }
 
-  document.getElementById("summary").placeholder =
-  "Contoh: Pengguna melakukan login menggunakan email dan password untuk mengakses dashboard.";
-  document.getElementById("precondition").placeholder =
-  "Contoh: Pengguna sudah memiliki akun yang terdaftar di sistem.";
-  document.getElementById("postcondition").placeholder =
-  "Contoh: Pengguna berhasil masuk dan diarahkan ke halaman dashboard utama.";
-  document.querySelector("#basicPathContainer .col-md-6:nth-child(1) textarea").placeholder =
-  "Contoh: Pengguna memasukkan email dan password.";
-  document.querySelector("#basicPathContainer .col-md-6:nth-child(2) textarea").placeholder =
-  "Contoh: Sistem memverifikasi kredensial dan menampilkan dashboard.";
-  document.querySelector("#alternativePathContainer .col-md-6:nth-child(1) textarea").placeholder =
-  "Contoh: Pengguna memilih login menggunakan Google.";
-  document.querySelector("#alternativePathContainer .col-md-6:nth-child(2) textarea").placeholder =
-  "Contoh: Sistem mengarahkan ke Google OAuth dan login otomatis.";
-  document.querySelector("#exceptionContainer .col-md-6:nth-child(1) textarea").placeholder =
-  "Contoh: Pengguna memasukkan password yang salah.";
-  document.querySelector("#exceptionContainer .col-md-6:nth-child(2) textarea").placeholder =
-  "Contoh: Sistem menampilkan pesan kesalahan dan meminta pengguna mencoba lagi.";
+  // =============================
+  // CREATE CARD + MODAL
+  // =============================
+  function createFeature(feature) {
+    featureGrid.innerHTML += `
+      <div class="col-md-4">
+        <div class="feature-card"
+             data-bs-toggle="modal"
+             data-bs-target="#modalFeature${feature.id}"
+             onclick="loadUseCase(${feature.id})">
+          <h5>${feature.name}</h5>
+        </div>
+      </div>`;
 
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      modalTemplate(feature)
+    );
+  }
 
-  // === SIMPAN DATA KE LOCALSTORAGE ===
-  saveBtn.addEventListener("click", () => {
-    const featureData = {
-      featureName: "Login",
-      summary: document.getElementById("summary").value,
-      priority: document.getElementById("priority").value,
-      status: document.getElementById("status").value,
-      precondition: document.getElementById("precondition").value,
-      postcondition: document.getElementById("postcondition").value,
-      basicPath: getPathData("basicPathContainer"),
-      alternativePath: getPathData("alternativePathContainer"),
-      exceptionPath: getPathData("exceptionContainer"),
+  // =============================
+  // LOAD USE CASE DARI LOCALSTORAGE
+  // =============================
+  function loadUseCase(featureId) {
+    const allData =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+
+    const data = allData[featureId];
+    if (!data) return;
+
+    const modal = document.getElementById(
+      `modalFeature${featureId}`
+    );
+
+    modal.querySelector(".summary").value = data.summary || "";
+    modal.querySelector(".priority").value = data.priority || "Must Have";
+    modal.querySelector(".status").value = data.status || "Active";
+    modal.querySelector(".precondition").value = data.precondition || "";
+    modal.querySelector(".postcondition").value = data.postcondition || "";
+
+    fillPath(modal, "basic", data.basicPath);
+    fillPath(modal, "alternative", data.alternativePath);
+    fillPath(modal, "exception", data.exceptionPath);
+  }
+
+  function fillPath(modal, type, paths = []) {
+    const container = modal.querySelector(
+      `.path-container[data-type="${type}"]`
+    );
+    container.innerHTML = "";
+    paths.forEach(p =>
+      addPathRow(container, p.actor, p.system)
+    );
+  }
+
+  // =============================
+  // ADD PATH
+  // =============================
+  function addPathRow(container, actor = "", system = "") {
+    const div = document.createElement("div");
+    div.className = "row path-row";
+    div.innerHTML = `
+      <div class="col-md-6">
+        <textarea class="form-control actor" rows="2"
+          placeholder="Aksi Aktor">${actor}</textarea>
+      </div>
+      <div class="col-md-6">
+        <textarea class="form-control system" rows="2"
+          placeholder="Aksi Sistem">${system}</textarea>
+      </div>`;
+    container.appendChild(div);
+  }
+
+  document.addEventListener("click", e => {
+    if (e.target.classList.contains("add-path")) {
+      addPathRow(e.target.previousElementSibling);
+    }
+  });
+
+  // =============================
+  // SAVE KE LOCALSTORAGE
+  // =============================
+  document.addEventListener("click", e => {
+    if (!e.target.classList.contains("save-btn")) return;
+
+    const modal = e.target.closest(".modal");
+    const featureId =
+      modal.querySelector(".feature-id").value;
+
+    const allData =
+      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+
+    allData[featureId] = {
+      summary: modal.querySelector(".summary").value,
+      priority: modal.querySelector(".priority").value,
+      status: modal.querySelector(".status").value,
+      precondition: modal.querySelector(".precondition").value,
+      postcondition: modal.querySelector(".postcondition").value,
+      basicPath: collectPath(modal, "basic"),
+      alternativePath: collectPath(modal, "alternative"),
+      exceptionPath: collectPath(modal, "exception"),
     };
 
-    localStorage.setItem("useCaseData", JSON.stringify(featureData));
-    alert("Feature saved successfully!");
-    
-    const modalEl = document.getElementById("modalFeature1");
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
+    localStorage.setItem(
+      "useCaseSpecs",
+      JSON.stringify(allData)
+    );
 
+    alert("Data berhasil disimpan ✅");
+    bootstrap.Modal.getInstance(modal).hide();
   });
 
-  nextBtn.addEventListener("click", () => {
-    window.location.href = "use_case_spec.html";
+  function collectPath(modal, type) {
+    return [...modal.querySelectorAll(
+      `.path-container[data-type="${type}"] .path-row`
+    )].map(r => ({
+      actor: r.querySelector(".actor").value,
+      system: r.querySelector(".system").value,
+    }));
+  }
+
+  // =============================
+  // NAVIGATION (ROUTE BASED)
+  // =============================
+  document.getElementById("btnBack").addEventListener("click", () => {
+    window.location.href = "http://127.0.0.1:8000/user-story";
   });
+
+  document.getElementById("btnNext").addEventListener("click", () => {
+    window.location.href = "http://127.0.0.1:8000/use-case-spec";
+  });
+
 </script>
 </body>
 </html>

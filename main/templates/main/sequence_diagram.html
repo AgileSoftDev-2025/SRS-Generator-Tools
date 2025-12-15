@@ -1,1159 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One UML - Sequence Diagram</title>
-    <script src="https://cdn.jsdelivr.net/npm/plantuml-encoder@1.4.0/dist/plantuml-encoder.min.js"></script>
-    <style>
-        /* Global Styles - Sesuai Template One UML */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f9fafb;
-            color: #111827;
-            line-height: 1.5;
-        }
-        
-        /* Header & Footer - Sesuai Template */
-        header {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0 24px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sequence Diagram</title>
+  </head>
+
+  <body style="margin: 0; background: #f9fafb; font-family: system-ui">
+    <!-- MAIN -->
+    <div style="padding: 48px; max-width: 1100px; margin: auto">
+      <h1 style="font-size: 32px; margin-bottom: 8px">
+        Generate Sequence Diagram
+      </h1>
+      <p style="color: #6b7280; margin-bottom: 32px">
+        Select a feature to preview its sequence diagram
+      </p>
+
+      <!-- FEATURE CARDS -->
+      <div
+        id="feature-container"
+        style="
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 20px;
+        "
+      ></div>
+    </div>
+
+    <!-- MODAL -->
+    <div
+      id="modal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          width: 800px;
+          max-width: 90%;
+          border-radius: 10px;
+          padding: 24px;
+        "
+      >
+        <div
+          style="
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            height: 64px;
-        }
-        
-        .logo {
-            display: flex;
             align-items: center;
-            gap: 8px;
-        }
-        
-        .logo-icon {
-            width: 24px;
-            height: 24px;
-            background-color: #111827;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 24px;
-        }
-        
-        footer {
-            background-color: #ffffff;
-            border-top: 1px solid #e5e7eb;
-            padding: 16px 24px;
-            margin-top: 48px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .footer-links {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        
-        .footer-link {
-            font-size: 12px;
-            color: #6b7280;
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            color: #374151;
-        }
-        
-        /* Card Styles - Sesuai Template */
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
-        /* Buttons - Sesuai Template */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background-color: #111827;
-            color: #ffffff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        .btn-secondary {
-            background-color: #374151;
-            color: #ffffff;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #4b5563;
-        }
-        
-        .btn-outline {
-            background-color: #ffffff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-outline:hover {
-            background-color: #f9fafb;
-            color: #374151;
-        }
-        
-        .btn-success {
-            background-color: #059669;
-            color: #ffffff;
-        }
-        
-        .btn-success:hover {
-            background-color: #047857;
-        }
-        
-        /* Diagram Container */
-        .diagram-container {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 20px;
-            margin: 20px 0;
-            overflow-x: auto;
-            text-align: center;
-        }
-        
-        .diagram-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .control-btn {
-            padding: 8px 16px;
-            border: 1px solid #d1d5db;
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .control-btn:hover {
-            background: #f9fafb;
-        }
-        
-        .control-btn.active {
+          "
+        >
+          <h3 id="modal-title" style="margin: 0">Sequence Diagram</h3>
+          <button
+            onclick="closeModal()"
+            style="
+              border: none;
+              background: none;
+              font-size: 20px;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        <pre
+          id="plantuml-output"
+          style="
+            margin-top: 16px;
             background: #111827;
-            color: white;
-            border-color: #111827;
-        }
-        
-        .diagram-image {
-            max-width: 100%;
-            height: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        
-        .diagram-placeholder {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-            border: 2px dashed #e5e7eb;
+            color: #22c55e;
+            padding: 16px;
             border-radius: 8px;
-        }
-        
-        /* Scenario Section */
-        .scenario-section {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 16px;
-        }
-        
-        .scenario-selector {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .scenario-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .scenario-card:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-        }
-        
-        .scenario-card.active {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-        
-        .scenario-name {
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .scenario-description {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.4;
-        }
-        
-        /* Code Display */
-        .code-section {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 24px;
-            margin-top: 24px;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .code-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 12px;
-        }
-        
-        .plantuml-code {
-            background: #1e293b;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 6px;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            overflow-x: auto;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .code-toggle {
-            background: none;
-            border: none;
-            color: #3b82f6;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-        
-        .code-toggle:hover {
-            color: #2563eb;
-        }
-        
-        /* Footer Actions - Sesuai Template */
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
-        .save-indicator {
-            color: #059669;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .save-dot {
-            width: 8px;
-            height: 8px;
-            background: #059669;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 12px;
-            margin: 20px 0;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        .help-text {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .participants-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin: 16px 0;
-        }
-        
-        .participant-tag {
-            background: #e0f2fe;
-            color: #0369a1;
-            padding: 6px 12px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header - Sesuai Template One UML -->
-    <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
-                </div>
-                <span class="logo-text">One UML</span>
-            </div>
-        </div>
-    </header>
+            overflow: auto;
+          "
+        ></pre>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <main>
-        <div class="card">
-            <div style="margin-bottom: 32px;">
-                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Sequence Diagram</h1>
-                <p style="color: #6b7280; font-size: 14px;">Generate sequence diagrams from your user story scenarios</p>
-            </div>
-
-            <!-- Scenario Selection -->
-            <div class="scenario-section">
-                <div class="section-title">📋 Select User Story Scenario</div>
-                <p style="color: #6b7280; font-size: 14px; margin-bottom: 16px;">
-                    Choose a scenario to generate its sequence diagram
-                </p>
-                
-                <div class="scenario-selector" id="scenarioSelector">
-                    <!-- Scenarios will be loaded dynamically -->
-                </div>
-                
-                <div id="selectedScenarioInfo" style="display: none;">
-                    <div class="section-title" style="margin-bottom: 12px;">Selected Scenario</div>
-                    <div id="scenarioDetails"></div>
-                    <div class="participants-list" id="participantsList"></div>
-                </div>
-            </div>
-
-            <!-- Diagram Controls -->
-            <div class="diagram-controls">
-                <button class="control-btn active" onclick="showDiagram('basic')">Basic Flow</button>
-                <button class="control-btn" onclick="showDiagram('detailed')">Detailed Flow</button>
-                <button class="control-btn" onclick="showDiagram('withAlt')">With Alternatives</button>
-                <button class="control-btn" onclick="showDiagram('complete')">Complete Scenario</button>
-            </div>
-
-            <!-- Diagram Container -->
-            <div class="diagram-container">
-                <div id="diagramContent">
-                    <div class="diagram-placeholder">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
-                        <h3>Sequence Diagram</h3>
-                        <p>Select a scenario to generate the sequence diagram</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="button-group">
-                <button class="btn btn-outline" onclick="regenerateDiagram()" id="regenerateBtn" disabled>
-                    🔄 Regenerate Diagram
-                </button>
-                <button class="btn btn-outline" onclick="toggleCode()" id="codeToggle">
-                    Show PlantUML Code
-                </button>
-                <button class="btn btn-success" onclick="exportDiagram()" id="exportBtn" disabled>
-                    💾 Export Diagram
-                </button>
-            </div>
-
-            <!-- PlantUML Code Section -->
-            <div class="code-section" id="codeSection" style="display: none;">
-                <div class="code-title">PlantUML Code</div>
-                <pre class="plantuml-code" id="plantumlCode"></pre>
-            </div>
-
-            <!-- Next Section -->
-            <div class="code-section" style="background: #f0f9ff; border-color: #e0f2fe;">
-                <div class="code-title" style="color: #0369a1;">🎉 Documentation Complete!</div>
-                <p style="color: #0c4a6e; margin-bottom: 16px; font-size: 14px;">
-                    You have successfully generated comprehensive UML documentation including class diagrams and sequence diagrams. 
-                    Your project documentation is now ready for development.
-                </p>
-                <div class="button-group">
-                    <button class="btn btn-outline" onclick="viewAllDiagrams()">
-                        📁 View All Diagrams
-                    </button>
-                    <button class="btn btn-primary" onclick="exportDocumentation()">
-                        📦 Export Complete Documentation
-                    </button>
-                </div>
-            </div>
-
-            <!-- Footer Actions - Sesuai Template One UML -->
-            <div class="footer-actions">
-                <div class="save-indicator">
-                    <div class="save-dot"></div>
-                    <span id="saveStatus">Select a scenario to begin</span>
-                </div>
-                <div>
-                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
-                    <button class="btn btn-outline" onclick="saveDiagram()" id="saveBtn" disabled>Save Diagram</button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer - Sesuai Template One UML -->
-    <footer>
-        <div class="footer-content">
-            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Help</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-            </div>
-        </div>
-    </footer>
-
+    <!-- SCRIPT -->
     <script>
-        // Global variables
-        let userStoryData = null;
-        let selectedScenario = null;
-        let currentDiagramType = 'basic';
-        let plantUmlCodes = {};
+      /* =====================================================
+   MODE 1: UI DUMMY (AKTIF SEKARANG)
+   ===================================================== */
+      const mockFeatures = [
+        {
+          id: 1,
+          title: "User Login",
+          plantuml: `
+@startuml
+actor User
+User -> LoginPage : input email & password
+LoginPage -> AuthController : submit
+AuthController -> UserDB : validate
+UserDB --> AuthController : success
+AuthController --> LoginPage : login success
+@enduml`,
+        },
+        {
+          id: 2,
+          title: "User Registration",
+          plantuml: `
+@startuml
+actor User
+User -> RegisterPage : input data
+RegisterPage -> UserController : submit
+UserController -> UserDB : save user
+UserDB --> UserController : success
+@enduml`,
+        },
+      ];
 
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUserStoryData();
-            setupEventListeners();
+      renderCards(mockFeatures);
+
+      /* =====================================================
+   MODE 2: BACKEND (UNCOMMENT JIKA SUDAH READY)
+   ===================================================== */
+
+      /*
+fetch("/api/sequence/features/")
+  .then(res => res.json())
+  .then(data => {
+    renderCards(data);
+  })
+  .catch(err => {
+    console.error("Failed to load features", err);
+  });
+*/
+
+      /* =====================================================
+   RENDER CARD FUNCTION
+   ===================================================== */
+      function renderCards(features) {
+        const container = document.getElementById("feature-container");
+        container.innerHTML = "";
+
+        features.forEach((feature) => {
+          const card = document.createElement("div");
+
+          card.style = `
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:8px;
+      padding:20px;
+      cursor:pointer;
+      transition:.2s;
+    `;
+
+          card.innerHTML = `
+      <h3 style="margin:0 0 8px;">${feature.title}</h3>
+      <p style="margin:0; color:#6b7280; font-size:14px;">
+        Click to preview sequence diagram
+      </p>
+    `;
+
+          card.onmouseenter = () =>
+            (card.style.boxShadow = "0 8px 20px rgba(0,0,0,0.08)");
+          card.onmouseleave = () => (card.style.boxShadow = "none");
+
+          card.onclick = () => openModal(feature);
+
+          container.appendChild(card);
         });
-
-        // Load user story data from localStorage
-        function loadUserStoryData() {
-            const savedData = localStorage.getItem('userStoryScenario');
-            if (savedData) {
-                userStoryData = JSON.parse(savedData);
-                populateScenarios();
-            } else {
-                // Fallback to example data
-                userStoryData = getExampleData();
-                populateScenarios();
-                document.getElementById('saveStatus').textContent = 'Using example data - No user story scenarios found';
-            }
-        }
-
-        // Setup event listeners
-        function setupEventListeners() {
-            // Scenario selection will be handled by populateScenarios
-        }
-
-        // Populate scenario selector
-        function populateScenarios() {
-            const selector = document.getElementById('scenarioSelector');
-            
-            if (!userStoryData) return;
-
-            const scenarios = [
-                {
-                    id: 'login_success',
-                    name: 'Login - Successful',
-                    description: 'User successfully logs into the system',
-                    type: 'positive'
-                },
-                {
-                    id: 'login_failure',
-                    name: 'Login - Failed Attempt',
-                    description: 'User enters invalid credentials',
-                    type: 'negative'
-                },
-                {
-                    id: 'password_reset',
-                    name: 'Password Reset',
-                    description: 'User requests password reset',
-                    type: 'alternative'
-                },
-                {
-                    id: 'user_registration',
-                    name: 'User Registration',
-                    description: 'New user creates an account',
-                    type: 'positive'
-                }
-            ];
-
-            selector.innerHTML = scenarios.map(scenario => `
-                <div class="scenario-card" onclick="selectScenario('${scenario.id}')" 
-                     data-scenario-id="${scenario.id}">
-                    <div class="scenario-name">${scenario.name}</div>
-                    <div class="scenario-description">${scenario.description}</div>
-                    <div style="margin-top: 8px;">
-                        <span style="font-size: 11px; padding: 2px 8px; border-radius: 12px; 
-                              background: ${scenario.type === 'positive' ? '#dcfce7' : 
-                                        scenario.type === 'negative' ? '#fef2f2' : '#f0f9ff'}; 
-                              color: ${scenario.type === 'positive' ? '#166534' : 
-                                     scenario.type === 'negative' ? '#991b1b' : '#0369a1'};">
-                            ${scenario.type.toUpperCase()}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Select scenario
-        function selectScenario(scenarioId) {
-            // Update UI
-            document.querySelectorAll('.scenario-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            document.querySelector(`[data-scenario-id="${scenarioId}"]`).classList.add('active');
-            
-            selectedScenario = scenarioId;
-            
-            // Show scenario details
-            showScenarioDetails(scenarioId);
-            
-            // Enable buttons
-            document.getElementById('regenerateBtn').disabled = false;
-            document.getElementById('exportBtn').disabled = false;
-            document.getElementById('saveBtn').disabled = false;
-            
-            // Generate diagrams
-            generateAllDiagrams();
-            showDiagram('basic');
-        }
-
-        // Show scenario details
-        function showScenarioDetails(scenarioId) {
-            const detailsContainer = document.getElementById('scenarioDetails');
-            const participantsContainer = document.getElementById('participantsList');
-            const infoContainer = document.getElementById('selectedScenarioInfo');
-            
-            const scenarios = {
-                'login_success': {
-                    title: 'Successful Login',
-                    description: 'User provides valid credentials and gains access to the system',
-                    participants: ['User', 'Login Page', 'Authentication Service', 'Database', 'Dashboard'],
-                    steps: [
-                        'User enters credentials',
-                        'System validates input',
-                        'Authentication Service verifies credentials',
-                        'Database returns user data',
-                        'System creates session',
-                        'User is redirected to dashboard'
-                    ]
-                },
-                'login_failure': {
-                    title: 'Failed Login Attempt',
-                    description: 'User enters invalid credentials and receives error message',
-                    participants: ['User', 'Login Page', 'Authentication Service', 'Database'],
-                    steps: [
-                        'User enters invalid credentials',
-                        'System validates input',
-                        'Authentication Service verifies credentials',
-                        'Database returns authentication failure',
-                        'System displays error message',
-                        'User remains on login page'
-                    ]
-                },
-                'password_reset': {
-                    title: 'Password Reset Flow',
-                    description: 'User requests and completes password reset process',
-                    participants: ['User', 'Login Page', 'Password Service', 'Email Service', 'Database'],
-                    steps: [
-                        'User clicks "Forgot Password"',
-                        'System shows reset form',
-                        'User submits email',
-                        'System sends reset link',
-                        'User clicks link and sets new password',
-                        'System updates credentials'
-                    ]
-                },
-                'user_registration': {
-                    title: 'New User Registration',
-                    description: 'New user creates an account in the system',
-                    participants: ['User', 'Registration Page', 'Validation Service', 'Database', 'Email Service'],
-                    steps: [
-                        'User fills registration form',
-                        'System validates data',
-                        'Validation Service checks uniqueness',
-                        'Database creates user record',
-                        'System sends confirmation email',
-                        'User account is activated'
-                    ]
-                }
-            };
-            
-            const scenario = scenarios[scenarioId];
-            if (scenario) {
-                detailsContainer.innerHTML = `
-                    <div style="margin-bottom: 12px;">
-                        <strong>${scenario.title}</strong>
-                    </div>
-                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 12px;">
-                        ${scenario.description}
-                    </div>
-                    <div style="font-size: 13px; color: #374151;">
-                        <strong>Key Steps:</strong><br>
-                        ${scenario.steps.map(step => `• ${step}`).join('<br>')}
-                    </div>
-                `;
-                
-                participantsContainer.innerHTML = scenario.participants.map(participant => `
-                    <div class="participant-tag">${participant}</div>
-                `).join('');
-                
-                infoContainer.style.display = 'block';
-                document.getElementById('saveStatus').textContent = `Scenario selected: ${scenario.title}`;
-            }
-        }
-
-        // Generate all diagram types for selected scenario
-        function generateAllDiagrams() {
-            if (!selectedScenario) return;
-            
-            plantUmlCodes.basic = generateBasicSequence();
-            plantUmlCodes.detailed = generateDetailedSequence();
-            plantUmlCodes.withAlt = generateSequenceWithAlternatives();
-            plantUmlCodes.complete = generateCompleteSequence();
-        }
-
-        // Generate Basic Sequence Diagram
-        function generateBasicSequence() {
-            const scenarios = {
-                'login_success': `@startuml
-!theme plain
-title Login - Successful Authentication
-
-actor User
-participant "Login Page" as UI
-participant "Auth Service" as Auth
-participant Database
-
-User -> UI: Enter credentials
-UI -> Auth: Validate credentials
-Auth -> Database: Verify user
-Database --> Auth: User data
-Auth --> UI: Authentication success
-UI -> User: Redirect to dashboard
-@enduml`,
-
-                'login_failure': `@startuml
-!theme plain
-title Login - Failed Authentication
-
-actor User
-participant "Login Page" as UI
-participant "Auth Service" as Auth
-participant Database
-
-User -> UI: Enter invalid credentials
-UI -> Auth: Validate credentials
-Auth -> Database: Verify user
-Database --> Auth: Authentication failed
-Auth --> UI: Authentication failed
-UI -> User: Show error message
-@enduml`,
-
-                'password_reset': `@startuml
-!theme plain
-title Password Reset Flow
-
-actor User
-participant "Login Page" as UI
-participant "Password Service" as Pwd
-participant "Email Service" as Email
-participant Database
-
-User -> UI: Click "Forgot Password"
-UI -> User: Show reset form
-User -> UI: Submit email
-UI -> Pwd: Request reset
-Pwd -> Database: Generate reset token
-Pwd -> Email: Send reset link
-Email -> User: Email with reset link
-@enduml`,
-
-                'user_registration': `@startuml
-!theme plain
-title User Registration
-
-actor User
-participant "Registration Page" as UI
-participant "Validation Service" as Val
-participant Database
-participant "Email Service" as Email
-
-User -> UI: Fill registration form
-UI -> Val: Validate data
-Val -> Database: Check uniqueness
-Database --> Val: Data valid
-Val --> UI: Validation success
-UI -> Database: Create user
-Database --> UI: User created
-UI -> Email: Send confirmation
-Email -> User: Confirmation email
-@enduml`
-            };
-
-            return scenarios[selectedScenario] || '';
-        }
-
-        // Generate Detailed Sequence Diagram
-        function generateDetailedSequence() {
-            const scenarios = {
-                'login_success': `@startuml
-!theme plain
-title Login - Detailed Successful Flow
-
-actor "User" as User
-participant "Web Browser" as Browser
-participant "Login Page" as UI
-participant "API Gateway" as API
-participant "Auth Service" as Auth
-participant "User Service" as UserSvc
-participant "Session DB" as SessionDB
-participant "User DB" as UserDB
-
-User -> Browser: Navigate to login
-Browser -> UI: Load login page
-User -> UI: Enter username/password
-UI -> API: POST /api/login
-API -> Auth: Authenticate user
-Auth -> UserDB: SELECT user WHERE username=?
-UserDB --> Auth: User record
-Auth -> Auth: Verify password hash
-Auth --> API: Auth success + user data
-API -> UserSvc: Get user profile
-UserSvc -> UserDB: SELECT profile
-UserDB --> UserSvc: Profile data
-UserSvc --> API: Complete user data
-API -> SessionDB: Create session
-SessionDB --> API: Session created
-API --> UI: Login success + redirect URL
-UI -> Browser: Redirect to dashboard
-Browser -> User: Show dashboard
-@enduml`,
-
-                'login_failure': `@startuml
-!theme plain
-title Login - Detailed Failed Flow
-
-actor "User" as User
-participant "Browser" as Browser
-participant "Login Page" as UI
-participant "API Gateway" as API
-participant "Auth Service" as Auth
-participant "User DB" as UserDB
-participant "Audit Log" as Audit
-
-User -> Browser: Navigate to login
-Browser -> UI: Load login page
-User -> UI: Enter wrong credentials
-UI -> API: POST /api/login
-API -> Auth: Authenticate user
-Auth -> UserDB: SELECT user WHERE username=?
-UserDB --> Auth: User record
-Auth -> Auth: Password mismatch
-Auth -> Audit: Log failed attempt
-Audit --> Auth: Log recorded
-Auth --> API: Auth failed
-API --> UI: Error: Invalid credentials
-UI -> User: Display error message
-UI -> UI: Clear password field
-@enduml`
-            };
-
-            return scenarios[selectedScenario] || generateBasicSequence();
-        }
-
-        // Generate Sequence with Alternatives
-        function generateSequenceWithAlternatives() {
-            const scenarios = {
-                'login_success': `@startuml
-!theme plain
-title Login - With Alternative Flows
-
-actor User
-participant "Login Page" as UI
-participant "Auth Service" as Auth
-participant Database
-
-User -> UI: Enter credentials
-
-alt Valid credentials
-    UI -> Auth: Validate credentials
-    Auth -> Database: Verify user
-    Database --> Auth: User data
-    Auth --> UI: Authentication success
-    UI -> User: Redirect to dashboard
-else Invalid credentials
-    UI -> Auth: Validate credentials
-    Auth -> Database: Verify user
-    Database --> Auth: Authentication failed
-    Auth --> UI: Authentication failed
-    UI -> User: Show error message
-else Account locked
-    UI -> Auth: Validate credentials
-    Auth -> Database: Check account status
-    Database --> Auth: Account locked
-    Auth --> UI: Account locked
-    UI -> User: Show locked message
-end
-
-@enduml`,
-
-                'password_reset': `@startuml
-!theme plain
-title Password Reset - Complete Flow
-
-actor User
-participant "Login Page" as UI
-participant "Password Service" as Pwd
-participant "Email Service" as Email
-participant Database
-
-User -> UI: Click "Forgot Password"
-UI -> User: Show reset form
-
-group Reset Request
-    User -> UI: Submit email
-    UI -> Pwd: Request reset
-    Pwd -> Database: Generate reset token
-    Database --> Pwd: Token generated
-    Pwd -> Email: Send reset link
-    Email -> User: Email with reset link
-end
-
-group Password Update
-    User -> UI: Click reset link
-    UI -> User: Show new password form
-    User -> UI: Enter new password
-    UI -> Pwd: Validate and update
-    Pwd -> Database: Update password
-    Database --> Pwd: Password updated
-    Pwd --> UI: Update success
-    UI -> User: Show success message
-end
-
-@enduml`
-            };
-
-            return scenarios[selectedScenario] || generateBasicSequence();
-        }
-
-        // Generate Complete Sequence Diagram
-        function generateCompleteSequence() {
-            const scenarios = {
-                'login_success': `@startuml
-!theme plain
-title Login - Complete Authentication Flow
-
-skinparam sequence {
-    ArrowColor #6366f1
-    ActorBorderColor #6366f1
-    ParticipantBorderColor #6366f1
-    LifeLineBackgroundColor #f8fafc
-}
-
-actor "End User" as User <<Person>>
-participant "Web Browser" as Browser <<Client>>
-participant "Frontend UI" as UI <<React>>
-participant "API Gateway" as Gateway <<Spring>>
-participant "Auth Service" as Auth <<Microservice>>
-participant "User Service" as UserSvc <<Microservice>>
-participant "Redis Cache" as Cache <<Cache>>
-participant "MySQL DB" as DB <<Database>>
-
-== Initialization ==
-User -> Browser: Access application URL
-Browser -> UI: Load login component
-UI --> Browser: Render login form
-
-== Authentication Process ==
-
-group "User Input Phase"
-    User -> UI: Fill login form
-    note right of User: Username: john_doe\\nPassword: ********
-    UI -> UI: Client-side validation
-    UI -> UI: Encrypt sensitive data
-end
-
-group "API Communication"
-    UI -> Gateway: HTTP POST /api/v1/auth/login
-    note right of UI: {username, encrypted_password}
-    Gateway -> Gateway: Rate limiting check
-    Gateway -> Gateway: Request validation
-end
-
-group "Authentication Logic"
-    Gateway -> Auth: authenticateUser(credentials)
-    Auth -> Cache: Check recent attempts
-    Cache --> Auth: No recent failures
-    Auth -> DB: SELECT * FROM users WHERE username = ?
-    DB --> Auth: User record with password_hash
-    Auth -> Auth: bcrypt.verify(password, hash)
-    Auth -> Auth: Generate JWT token
-    Auth -> Auth: Prepare user session
-end
-
-group "User Data Retrieval"
-    Auth -> UserSvc: getUserProfile(userId)
-    UserSvc -> DB: SELECT * FROM profiles WHERE user_id = ?
-    DB --> UserSvc: Complete profile data
-    UserSvc --> Auth: Enhanced user data
-end
-
-group "Session Management"
-    Auth -> Cache: Store session data
-    Cache --> Auth: Session stored
-    Auth -> Gateway: Return auth success
-    note right of Auth: {token, userData, permissions}
-end
-
-== Response Handling ==
-Gateway --> UI: 200 OK with auth data
-UI -> Browser: Store token in localStorage
-UI -> Browser: Redirect to /dashboard
-Browser -> User: Display dashboard interface
-
-== Post-Authentication ==
-group "Audit Logging"
-    Auth -> DB: INSERT INTO audit_logs
-    note right of Auth: Log successful login
-end
-
-@enduml`
-            };
-
-            return scenarios[selectedScenario] || generateDetailedSequence();
-        }
-
-        // Show selected diagram
-        function showDiagram(type) {
-            if (!selectedScenario) {
-                alert('Please select a scenario first');
-                return;
-            }
-
-            currentDiagramType = type;
-            
-            // Update active button
-            document.querySelectorAll('.control-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            const plantUmlCode = plantUmlCodes[type];
-            if (!plantUmlCode) return;
-
-            // Encode for PlantUML
-            const encoded = plantumlEncoder.encode(plantUmlCode);
-            const plantUmlUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
-
-            // Show loading
-            document.getElementById('diagramContent').innerHTML = `
-                <div style="text-align: center; padding: 40px;">
-                    <div class="loading" style="margin: 0 auto 20px;"></div>
-                    <p>Generating sequence diagram...</p>
-                </div>
-            `;
-
-            // Load diagram
-            const img = new Image();
-            img.onload = function() {
-                document.getElementById('diagramContent').innerHTML = `
-                    <div style="text-align: center;">
-                        <h3 style="color: #111827; margin-bottom: 16px;">${getDiagramTitle(type)}</h3>
-                        <img src="${plantUmlUrl}" alt="Sequence Diagram" class="diagram-image" 
-                             onerror="handleDiagramError()">
-                    </div>
-                `;
-            };
-            img.onerror = function() {
-                handleDiagramError();
-            };
-            img.src = plantUmlUrl;
-
-            // Update code display
-            document.getElementById('plantumlCode').textContent = plantUmlCode;
-            
-            // Update status
-            document.getElementById('saveStatus').textContent = `${getDiagramTitle(type)} generated`;
-        }
-
-        // Get diagram title
-        function getDiagramTitle(type) {
-            const titles = {
-                'basic': 'Basic Sequence Diagram',
-                'detailed': 'Detailed Sequence Diagram',
-                'withAlt': 'Sequence with Alternatives',
-                'complete': 'Complete Sequence Flow'
-            };
-            return titles[type] || 'Sequence Diagram';
-        }
-
-        // Handle diagram generation error
-        function handleDiagramError() {
-            document.getElementById('diagramContent').innerHTML = `
-                <div class="diagram-placeholder">
-                    <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                    <h3>Error Generating Diagram</h3>
-                    <p>Unable to generate the sequence diagram. Please try again.</p>
-                    <button class="btn btn-outline" onclick="showDiagram('${currentDiagramType}')" style="margin-top: 16px;">
-                        Retry
-                    </button>
-                </div>
-            `;
-        }
-
-        // Toggle code visibility
-        function toggleCode() {
-            const codeSection = document.getElementById('codeSection');
-            const toggleButton = document.getElementById('codeToggle');
-            
-            if (codeSection.style.display === 'none') {
-                codeSection.style.display = 'block';
-                toggleButton.textContent = 'Hide PlantUML Code';
-            } else {
-                codeSection.style.display = 'none';
-                toggleButton.textContent = 'Show PlantUML Code';
-            }
-        }
-
-        // Regenerate diagram
-        function regenerateDiagram() {
-            if (!selectedScenario) return;
-            generateAllDiagrams();
-            showDiagram(currentDiagramType);
-            document.getElementById('saveStatus').textContent = 'Diagram regenerated';
-        }
-
-        // Export diagram
-        function exportDiagram() {
-            const diagramType = getDiagramTitle(currentDiagramType);
-            alert(`Exporting ${diagramType} as PNG and SVG files...`);
-        }
-
-        // Save diagram
-        function saveDiagram() {
-            document.getElementById('saveStatus').textContent = 'Sequence diagram saved to project';
-        }
-
-        // Navigation
-        function goBack() {
-            window.location.href = 'class_diagram.html';
-        }
-
-        function viewAllDiagrams() {
-            alert('Opening diagram gallery...');
-        }
-
-        function exportDocumentation() {
-            alert('Exporting complete UML documentation package...');
-        }
-
-        // Example data fallback
-        function getExampleData() {
-            return {
-                userStory: "As a user, I want to login to the system",
-                customUserStory: "",
-                positiveScenario: [
-                    { type: "Given", condition: "I am on the login page" },
-                    { type: "When", condition: "I enter valid username and password" },
-                    { type: "And", condition: "I click the login button" },
-                    { type: "Then", condition: "I should be redirected to the dashboard" }
-                ],
-                negativeScenario: [
-                    { type: "Given", condition: "I am on the login page" },
-                    { type: "When", condition: "I enter invalid credentials" },
-                    { type: "Then", condition: "I should see an error message" },
-                    { type: "And", condition: "I should remain on the login page" }
-                ],
-                generatedOutput: "USER STORY:\nAs a user, I want to login to the system\n\nPOSITIVE SCENARIO:\nGiven I am on the login page\nWhen I enter valid username and password\nAnd I click the login button\nThen I should be redirected to the dashboard\n\nNEGATIVE SCENARIO:\nGiven I am on the login page\nWhen I enter invalid credentials\nThen I should see an error message\nAnd I should remain on the login page"
-            };
-        }
+      }
+
+      /* =====================================================
+   MODAL HANDLER
+   ===================================================== */
+      function openModal(feature) {
+        document.getElementById("modal").style.display = "flex";
+        document.getElementById("modal-title").innerText = feature.title;
+
+        /* MODE DUMMY */
+        document.getElementById("plantuml-output").textContent =
+          feature.plantuml;
+
+        /* MODE BACKEND (UNCOMMENT NANTI) */
+        /*
+  fetch(`/api/sequence/${feature.id}/generate/`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("plantuml-output").textContent = data.plantuml;
+    });
+  */
+      }
+
+      function closeModal() {
+        document.getElementById("modal").style.display = "none";
+      }
     </script>
-</body>
+  </body>
 </html>
