@@ -69,24 +69,18 @@
     <p>Pilih fitur untuk mengisi Use Case Specification.</p>
 
     <div class="row g-4 mt-4" id="featureGrid"></div>
-    <!-- NAVIGATION BUTTON
-      <div class="d-flex justify-content-between mt-5">
-    <button
-      class="btn btn-outline-secondary"
-      type="button"
-      onclick="window.location.href='http://127.0.0.1:8000/user-story/'"
-    >
-      ← Back
-    </button>
+    <!-- NAVIGATION BUTTON -->
+    <div class="d-flex justify-content-between mt-5">
+      <button class="btn btn-outline-secondary"
+        onclick="location.href='/user-story'">
+        ← Back
+      </button>
 
-    <button
-      class="btn btn-dark"
-      type="button"
-      onclick="window.location.href='http://127.0.0.1:8000/use-case-spec/'"
-    >
-      Next →
-    </button>
-  </div> -->
+      <button class="btn btn-dark"
+        onclick="location.href='/use-case-spec'">
+        Next →
+      </button>
+    </div>
   </main>
 
   <!-- BOOTSTRAP -->
@@ -324,19 +318,6 @@
       system: r.querySelector(".system").value,
     }));
   }
-
-  // =============================
-  // NAVIGATION
-  // =============================
-  document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("btnBack").onclick = () => {
-    window.location.href = "/user-story";
-  };
-
-  document.getElementById("btnNext").onclick = () => {
-    window.location.href = "/use-case-spec";
-  };
-});
 </script>
 </body>
 </html>
