@@ -413,38 +413,40 @@
         </div>
     </footer>
 
-    <script>
+   <script>
         class ProjectManager {
-            constructor() {
-                this.projects = JSON.parse(localStorage.getItem('oneUML_projects')) || [];
+            constructor(userEmail) {
+                this.userEmail = userEmail;
+                this.projects = JSON.parse(localStorage.getItem(`oneUML_projects_${this.userEmail}`)) || [];
                 this.init();
             }
-            
+
             init() {
                 this.bindEvents();
                 this.renderProjects();
             }
-            
+
             bindEvents() {
-                document.getElementById('addProjectForm').addEventListener('submit', (e) => {
+                const form = document.getElementById('addProjectForm');
+                form.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.createProject();
                 });
             }
-            
+
             createProject() {
                 const form = document.getElementById('addProjectForm');
                 const nameInput = form.querySelector('input[name="name"]');
                 const descInput = form.querySelector('textarea[name="description"]');
-                
+
                 const projectName = nameInput.value.trim();
                 const projectDesc = descInput.value.trim();
-                
+
                 if (!projectName) {
                     alert('Please enter a project name');
                     return;
                 }
-                
+
                 const newProject = {
                     id: Date.now().toString(),
                     name: projectName,
@@ -452,19 +454,19 @@
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString()
                 };
-                
+
                 this.projects.unshift(newProject);
                 this.saveProjects();
                 this.renderProjects();
-                
+
                 // Reset form
                 nameInput.value = '';
                 descInput.value = '';
-                
-                // Redirect to use case diagram page
+
+                // Redirect ke halaman use-case diagram
                 window.location.href = '/use-case-diagram/';
             }
-            
+
             deleteProject(projectId) {
                 if (confirm('Are you sure you want to delete this project?')) {
                     this.projects = this.projects.filter(p => p.id !== projectId);
@@ -472,14 +474,14 @@
                     this.renderProjects();
                 }
             }
-            
+
             saveProjects() {
-                localStorage.setItem('oneUML_projects', JSON.stringify(this.projects));
+                localStorage.setItem(`oneUML_projects_${this.userEmail}`, JSON.stringify(this.projects));
             }
-            
+
             renderProjects() {
                 const container = document.getElementById('projectsContainer');
-                
+
                 if (this.projects.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -488,43 +490,36 @@
                     `;
                     return;
                 }
-                
-                let projectsHTML = '';
-                
+
+                let html = '';
                 this.projects.forEach(project => {
-                    projectsHTML += `
+                    html += `
                         <div class="project-item">
                             <div class="project-info">
                                 <div class="project-name">${project.name}</div>
-                                ${project.description ? `
-                                    <div class="project-description">${project.description}</div>
-                                ` : ''}
+                                ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
                             </div>
                             <div style="display: flex; gap: 8px;">
-                                <a href="/use-case-diagram/" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">
-                                    Open
-                                </a>
-                                <button class="btn btn-outline" onclick="projectManager.deleteProject('${project.id}')" 
-                                        style="padding: 8px 12px; font-size: 13px;">
-                                    ×
-                                </button>
+                                <a href="/use-case-diagram/" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">Open</a>
+                                <button class="btn btn-outline" onclick="projectManager.deleteProject('${project.id}')" style="padding: 8px 12px; font-size: 13px;">×</button>
                             </div>
                         </div>
                     `;
                 });
-                
-                container.innerHTML = projectsHTML;
+
+                container.innerHTML = html;
             }
         }
 
-        // Initialize project manager
-        const projectManager = new ProjectManager();
+        // Ambil email user dari Django template
+        const userEmail = "{{ pengguna.email_user }}";
+        const projectManager = new ProjectManager(userEmail);
 
-        // Load existing projects on page load
         window.addEventListener('load', () => {
             projectManager.renderProjects();
         });
-    </script>
+        </script>
+
 </body>
 </html>
 

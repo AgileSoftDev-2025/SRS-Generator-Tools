@@ -18,15 +18,20 @@ from .forms import RegisterForm
 from main.generators.sequence_generator import generate_sequence_plantuml
 import subprocess
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from .models import GUI, Page, Element
 
 def home(request):
-    projects = Project.objects.all() 
-    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
+
     user_id = request.session['user_id']
     pengguna = get_object_or_404(Pengguna, id_user=user_id)
-    projects = Project.objects.all()  # ambil semua project
+
+    projects = Project.objects.filter(pengguna=pengguna)
     return render(request, 'main/home.html', {'projects': projects})
 
 def login_view(request):
@@ -442,21 +447,17 @@ def generate_srs(request):
     return render(request, 'main/generate_srs.html')
 
 def project_new(request):
+    #validatelogin
+    if 'user_id' not in request.session:
+        return redirect('main:login')
+
     if request.method == 'POST':
         name = request.POST.get('name')
         desc = request.POST.get('description')
-        
-        pengguna = Pengguna.objects.first()
-        if pengguna is None:
-            # bikin dummy user sementara biar ga error
-            pengguna = Pengguna.objects.create(
-                id_user="U001",
-                nama_user="dummyuser",
-                email_user="dummy@example.com"
-            )
 
-        # Buat ID otomatis sederhana (opsional)
-        new_id = str(Project.objects.count() + 1).zfill(5)
+        # get user yang lagi login dari session
+        user_id = request.session['user_id']
+        pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
         Project.objects.create(
             id_project=new_id,
@@ -465,11 +466,11 @@ def project_new(request):
             pengguna=pengguna,
             tanggal_project_dibuat=timezone.now(),
             tanggal_akses_terakhir=timezone.now(),
-        
         )
-        return redirect('main:home') # setelah berhasil tambah project
 
-    return render(request, 'main/home.html') 
+        return redirect('main:home')
+
+    return redirect('main:home')
 
 def project_detail(request, id_project):
     # Ambil data project berdasarkan id
@@ -597,3 +598,55 @@ def download_plantuml(request):
     
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
+
+@require_http_methods(["POST"])
+def save_gui(request, gui_id):
+    try:
+        gui = GUI.objects.get(id=gui_id)
+        data = json.loads(request.body)
+        
+        # Hapus pages lama
+        gui.pages.all().delete()
+        
+        # Buat pages baru
+        for idx, page_data in enumerate(data, start=1):
+            page = Page.objects.create(
+                gui=gui,
+                name=page_data.get('name', f'Page {idx}'),
+                order=idx
+            )
+            
+            # Buat elements untuk page ini
+            for elem_idx, elem_data in enumerate(page_data.get('elements', []), start=1):
+                if elem_data.get('name') and elem_data.get('type'):  # Cek gak kosong
+                    Element.objects.create(
+                        page=page,
+                        name=elem_data.get('name'),
+                        element_type=elem_data.get('type').lower(),
+                        order=elem_idx
+                    )
+        
+        return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
+    
+    except GUI.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+def input_gui(request, gui_id=None, project_id=None):
+    if gui_id is None:
+        # Kalau gak ada project_id, ambil project pertama (untuk testing)
+        if not project_id:
+            project = Project.objects.first()
+            if not project:
+                # Kalau belum ada project sama sekali, buat dulu
+                project = Project.objects.create(name="Default Project")
+            project_id = project.id
+        
+        # Buat GUI baru untuk project ini
+        gui = GUI.objects.create(project_id=project_id)
+        return redirect('main:input_gui_with_id', gui_id=gui.id)
+    
+    # Kalau ada gui_id, tampilkan form
+    gui = get_object_or_404(GUI, id=gui_id)
+    return render(request, 'input_gui.html', {'gui': gui})

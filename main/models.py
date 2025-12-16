@@ -242,34 +242,32 @@ class Page(models.Model):
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='pages')
     name = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
-
+    
     class Meta:
         unique_together = ('gui', 'order')
-
+        ordering = ['order']
+    
     def __str__(self):
         return f"{self.name} (Page {self.order})"
 
-
 class Element(models.Model):
     INPUT_TYPES = [
+        ("button", "Button"),
         ("text", "Text"),
         ("number", "Number"),
-        ("email", "Email"),
-        ("password", "Password"),
         ("date", "Date"),
         ("checkbox", "Checkbox"),
         ("radio", "Radio"),
         ("textarea", "Textarea"),
     ]
-
+    
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name='elements')
     name = models.CharField(max_length=255)
-    input_type = models.CharField(max_length=20, choices=INPUT_TYPES)
+    element_type = models.CharField(max_length=50, choices=INPUT_TYPES)
     order = models.PositiveIntegerField()
-
+    
     class Meta:
-        unique_together = ('page', 'order')
-
+        ordering = ['order']
+    
     def __str__(self):
-        return f"{self.name} [{self.input_type}]"
-
+        return f"{self.name} ({self.get_element_type_display()})"

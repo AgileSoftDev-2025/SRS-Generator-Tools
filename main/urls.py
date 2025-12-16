@@ -38,7 +38,9 @@ urlpatterns = [
     # Other Diagrams
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
     path('input_gui/', views.input_gui, name='input_gui'),
-    
+    path('project/<int:project_id>/input_gui/', views.input_gui, name='input_gui_for_project'),
+    path('input_gui/<int:gui_id>/', views.input_gui, name='input_gui_with_id'),
+
     # Final Output
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     
@@ -48,4 +50,5 @@ urlpatterns = [
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
     path("api/get-latest-userstory/", views.get_latest_userstory, name="get_latest_userstory"),
     path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),
+    path('api/save_gui/<int:gui_id>/', views.save_gui, name='save_gui'),
 ]
