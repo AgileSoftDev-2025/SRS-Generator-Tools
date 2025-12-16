@@ -599,54 +599,101 @@ def download_plantuml(request):
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
 
+# Di file views.py
+
 @require_http_methods(["POST"])
 def save_gui(request, gui_id):
     try:
-        gui = GUI.objects.get(id=gui_id)
+        # Ambil GUI berdasarkan ID
+        gui = get_object_or_404(GUI, pk=gui_id)
+        
+        # Ambil data JSON dari request body
         data = json.loads(request.body)
         
-        # Hapus pages lama
+        # 1. Hapus data lama (Pages & Elements) agar bersih sebelum simpan baru
+        # Ini akan otomatis menghapus Elements karena on_delete=CASCADE
         gui.pages.all().delete()
         
-        # Buat pages baru
-        for idx, page_data in enumerate(data, start=1):
+        # 2. Loop setiap Halaman (Page) dari data JSON
+        for page_idx, page_data in enumerate(data, start=1):
+            # Buat Page baru
             page = Page.objects.create(
                 gui=gui,
-                name=page_data.get('name', f'Page {idx}'),
-                order=idx
+                name=page_data.get('name', f'Page {page_idx}'),
+                order=page_idx
             )
             
-            # Buat elements untuk page ini
-            for elem_idx, elem_data in enumerate(page_data.get('elements', []), start=1):
-                if elem_data.get('name') and elem_data.get('type'):  # Cek gak kosong
+            # 3. Loop setiap Elemen di dalam Halaman tersebut
+            elements_list = page_data.get('elements', [])
+            for elem_idx, elem_data in enumerate(elements_list, start=1):
+                elem_name = elem_data.get('name')
+                elem_type = elem_data.get('type')
+                
+                # Cek agar tidak menyimpan data kosong
+                if elem_name and elem_type:
                     Element.objects.create(
                         page=page,
-                        name=elem_data.get('name'),
-                        element_type=elem_data.get('type').lower(),
+                        name=elem_name,
+                        
+                        # BAGIAN PENTING: Masukkan ke 'input_type' (sesuai models.py)
+                        input_type=elem_type.lower(),
+                        
+                        # Kita isi juga element_type biar aman (opsional)
+                        element_type=elem_type.lower(),
+                        
                         order=elem_idx
                     )
         
         return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
     
-    except GUI.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+        print(f"Error saving GUI: {e}") # Cek terminal jika masih error
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_gui(request, gui_id=None, project_id=None):
     if gui_id is None:
-        # Kalau gak ada project_id, ambil project pertama (untuk testing)
+        # --- LOGIKA PEMBUATAN PROJECT OTOMATIS (JIKA KOSONG) ---
         if not project_id:
             project = Project.objects.first()
+            
             if not project:
-                # Kalau belum ada project sama sekali, buat dulu
-                project = Project.objects.create(name="Default Project")
-            project_id = project.id
+                # 1. Cek User dulu (Project butuh Pengguna)
+                pengguna = Pengguna.objects.first()
+                if not pengguna:
+                    # Buat user dummy jika tabel Pengguna kosong
+                    pengguna = Pengguna.objects.create(
+                        id_user="U01", 
+                        nama_user="Admin Dev",
+                        email_user="admin@dev.com",
+                        password="password123"
+                    )
+
+                # 2. Buat Project (Perbaiki 'name' jadi 'nama_project' & isi field wajib lain)
+                project = Project.objects.create(
+                    id_project="P01",                # Wajib diisi manual (CharField PK)
+                    nama_project="Default Project",  # Ganti 'name' jadi 'nama_project'
+                    deskripsi="Auto generated",
+                    pengguna=pengguna                # Wajib ada usernya
+                )
+            
+            # Gunakan 'id_project' bukan 'id'
+            project_id = project.id_project 
+
+        # --- LOGIKA PEMBUATAN GUI BARU ---
+        # Generate ID GUI manual (misal: G01, G02, dst)
+        jumlah_gui = GUI.objects.count() + 1
+        new_gui_id = f"G{str(jumlah_gui).zfill(2)}" # Hasil: G01, G02...
+
+        gui = GUI.objects.create(
+            id_gui=new_gui_id,          # Wajib diisi manual
+            project_id=project_id,
+            nama_atribut="GUI Default"  # Wajib diisi (lihat models.py)
+        )
         
-        # Buat GUI baru untuk project ini
-        gui = GUI.objects.create(project_id=project_id)
-        return redirect('main:input_gui_with_id', gui_id=gui.id)
+        # Redirect menggunakan id_gui yang baru dibuat
+        return redirect('main:input_gui_with_id', gui_id=gui.id_gui)
     
-    # Kalau ada gui_id, tampilkan form
-    gui = get_object_or_404(GUI, id=gui_id)
-    return render(request, 'input_gui.html', {'gui': gui})
+    gui = get_object_or_404(GUI, pk=gui_id)
+    return render(request, 'main/input_gui.html', {'gui': gui})

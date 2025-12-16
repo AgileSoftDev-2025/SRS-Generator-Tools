@@ -260,14 +260,16 @@ class Element(models.Model):
         ("radio", "Radio"),
         ("textarea", "Textarea"),
     ]
-    
+
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name='elements')
     name = models.CharField(max_length=255)
-    element_type = models.CharField(max_length=50, choices=INPUT_TYPES)
+    input_type = models.CharField(max_length=20, choices=INPUT_TYPES)
     order = models.PositiveIntegerField()
-    
+    element_type = models.CharField(max_length=50, default="text")  # baru, bisa diisi default
+
     class Meta:
-        ordering = ['order']
-    
+        db_table = 'main_inputelement'  # pastiin nyambung sama tabel SQLite lama
+        unique_together = ('page', 'order')
+
     def __str__(self):
-        return f"{self.name} ({self.get_element_type_display()})"
+        return f"{self.name} ({self.input_type})"

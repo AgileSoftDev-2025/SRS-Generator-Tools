@@ -39,7 +39,7 @@ urlpatterns = [
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
     path('input_gui/', views.input_gui, name='input_gui'),
     path('project/<int:project_id>/input_gui/', views.input_gui, name='input_gui_for_project'),
-    path('input_gui/<int:gui_id>/', views.input_gui, name='input_gui_with_id'),
+    path('input_gui/<str:gui_id>/', views.input_gui, name='input_gui_with_id'),
 
     # Final Output
     path('generate-srs/', views.generate_srs, name='generate_srs'),
