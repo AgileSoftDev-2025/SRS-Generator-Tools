@@ -52,4 +52,6 @@ urlpatterns = [
     path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),
     path('api/save_gui/<int:gui_id>/', views.save_gui, name='save_gui'),
     path('api/save-actors/', views.save_actors_and_features, name='save_actors_and_features'),
+    path('api/generate-usecase/', views.generate_usecase_diagram, name='generate_usecase_diagram'),
+
 ]

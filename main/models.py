@@ -50,7 +50,15 @@ class GUI(models.Model):
 class Usecase(models.Model):
     id_usecase = models.AutoField(primary_key=True)
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='usecases')
+    
+    # simpan gambar
     hasil_usecase = models.ImageField(upload_to='usecases/')
+    
+    # simpan kode PlantUML
+    plantuml_code = models.TextField(null=True, blank=True) 
+
+    def __str__(self):
+        return f"Use Case - {self.gui.nama_atribut}"
 
 # Tabel UserStory
 class UserStory(models.Model):
@@ -59,6 +67,11 @@ class UserStory(models.Model):
     input_sebagai = models.CharField(max_length=100)
     input_fitur = models.CharField(max_length=100)
     input_tujuan = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        # Kalau ada tujuannya, tambahin "so that..."
+        tujuan_text = f", so that {self.input_tujuan}" if self.input_tujuan else ""
+        return f"As a {self.input_sebagai}, I want to {self.input_fitur}{tujuan_text}."
 
 # Tabel UserStoryScenario
 class UserStoryScenario(models.Model):

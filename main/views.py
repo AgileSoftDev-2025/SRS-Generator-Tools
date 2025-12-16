@@ -22,7 +22,10 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
-from .models import GUI, Page, Element
+from .models import GUI, Page, Element, Usecase
+import requests      
+import urllib.parse   
+from django.core.files.base import ContentFile  
 
 def home(request):
     if 'user_id' not in request.session:
@@ -126,23 +129,22 @@ def save_userstory(request):
         userstory.save()
         return redirect("halaman_sukses")
 
-@csrf_exempt # Tambahkan ini kalau ada error CSRF, atau pastikan fetch pake token
+@csrf_exempt
 @require_http_methods(["POST"])
 def save_actors_and_features(request):
     try:
         data = json.loads(request.body)
         
-        # Ambil GUI terakhir (sebagai penanda project mana yg lagi dikerjain)
+        # 1. Tentukan konteks GUI/Project yang mana
         current_gui = GUI.objects.last() 
-        
         if not current_gui:
             return JsonResponse({'status': 'error', 'message': 'Belum ada GUI!'}, status=400)
 
-        # 🔥 PERBAIKAN UTAMA DISINI: 🔥
-        # Hapus semua UserStory lama yang nyambung ke GUI ini sebelum simpan yang baru.
-        # Biar datanya "Fresh" dan gak duplikat.
+        # 🔥 INI KUNCINYA: Hapus data lama sebelum simpan baru 🔥
+        # Artinya: "Tolong hapus semua UserStory milik GUI ini"
         UserStory.objects.filter(gui=current_gui).delete()
 
+        # 2. Baru setelah bersih, kita simpan data yang baru masuk
         saved_count = 0
         for actor in data:
             actor_name = actor.get('name')
@@ -150,24 +152,22 @@ def save_actors_and_features(request):
             
             for feat in features:
                 feature_name = feat.get('what')
-                feature_purpose = feat.get('why')  # <-- 1. TANGKAP DATA 'WHY'
+                feature_purpose = feat.get('why') # Pastikan field ini sesuai JS kamu
                 
-                # Simpan ke database
                 UserStory.objects.create(
                     input_sebagai=actor_name,
                     input_fitur=feature_name,
-                    input_tujuan=feature_purpose,  # <-- 2. MASUKIN KE KOLOM BARU
+                    input_tujuan=feature_purpose,
                     gui=current_gui
                 )
                 saved_count += 1
 
         return JsonResponse({
             'status': 'success', 
-            'message': f'Berhasil memperbarui {saved_count} User Stories!'
+            'message': f'Berhasil update! Total {saved_count} User Stories tersimpan.'
         })
 
     except Exception as e:
-        print(f"Error: {e}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def use_case(request):
@@ -178,6 +178,82 @@ def user_scenario(request):
 
 def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
+
+@csrf_exempt
+@require_http_methods(["POST", "GET"])
+def generate_usecase_diagram(request):
+    try:
+        # 1. Ambil GUI terakhir (Project Aktif)
+        current_gui = GUI.objects.last()
+        if not current_gui:
+            return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+
+        # 2. Ambil User Stories (Bahan Bakunya)
+        stories = UserStory.objects.filter(gui=current_gui)
+        if not stories.exists():
+            return JsonResponse({'status': 'error', 'message': 'Belum ada User Story! Input dulu.'}, status=400)
+
+        # 3. --- RAKIT KODE PLANTUML ---
+        plantuml = []
+        plantuml.append("@startuml")
+        plantuml.append("left to right direction")
+        plantuml.append("skinparam packageStyle rectangle")
+        
+        defined_actors = set()
+        
+        for story in stories:
+            # Bersihin nama (ganti spasi jadi underscore)
+            actor_clean = story.input_sebagai.replace(" ", "_")
+            feature_clean = story.input_fitur
+            
+            # Definisi Actor
+            if actor_clean not in defined_actors:
+                plantuml.append(f"actor \"{story.input_sebagai}\" as {actor_clean}")
+                defined_actors.add(actor_clean)
+            
+            # Relasi
+            plantuml.append(f"{actor_clean} --> ({feature_clean})")
+            
+        plantuml.append("@enduml")
+        final_code = "\n".join(plantuml)
+
+        # 4. --- MINTA GAMBAR KE PLANTUML SERVER ---
+        encoded_code = urllib.parse.quote(final_code)
+        plantuml_url = f"http://www.plantuml.com/plantuml/png/{encoded_code}"
+        
+        response = requests.get(plantuml_url)
+        
+        if response.status_code == 200:
+            # 5. --- SIMPAN KE DATABASE ---
+            # Cari atau Buat row baru di tabel Usecase
+            diagram, created = Usecase.objects.update_or_create(
+                gui=current_gui,
+                defaults={
+                    'plantuml_code': final_code  # Simpan Resep
+                }
+            )
+
+            # Simpan File Gambar
+            file_name = f"usecase_{current_gui.id_gui}.png"
+            
+            # Hapus file lama kalau ada (biar rapi)
+            if diagram.hasil_usecase:
+                diagram.hasil_usecase.delete(save=False)
+            
+            # Simpan file baru
+            diagram.hasil_usecase.save(file_name, ContentFile(response.content), save=True)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Diagram berhasil digenerate!',
+                'image_url': diagram.hasil_usecase.url
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Gagal konek ke PlantUML'}, status=500)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_informasi_tambahan(request):
     return render(request, 'main/input_informasi_tambahan.html')
