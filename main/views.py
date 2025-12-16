@@ -150,11 +150,13 @@ def save_actors_and_features(request):
             
             for feat in features:
                 feature_name = feat.get('what')
+                feature_purpose = feat.get('why')  # <-- 1. TANGKAP DATA 'WHY'
                 
-                # Sekarang aman buat create, karena yang lama udah dihapus
+                # Simpan ke database
                 UserStory.objects.create(
                     input_sebagai=actor_name,
                     input_fitur=feature_name,
+                    input_tujuan=feature_purpose,  # <-- 2. MASUKIN KE KOLOM BARU
                     gui=current_gui
                 )
                 saved_count += 1
