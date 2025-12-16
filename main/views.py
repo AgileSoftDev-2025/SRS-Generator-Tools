@@ -125,6 +125,50 @@ def save_userstory(request):
         )
         userstory.save()
         return redirect("halaman_sukses")
+
+@csrf_exempt # Tambahkan ini kalau ada error CSRF, atau pastikan fetch pake token
+@require_http_methods(["POST"])
+def save_actors_and_features(request):
+    try:
+        # 1. Ambil data JSON yang dikirim dari JavaScript
+        data = json.loads(request.body)
+        
+        # 2. Ambil GUI terakhir biar tidak error (karena UserStory butuh GUI)
+        # Kalau kamu mau lebih spesifik, nanti di JS bisa kirim gui_id juga
+        current_gui = GUI.objects.last() 
+        
+        if not current_gui:
+            return JsonResponse({'status': 'error', 'message': 'Belum ada GUI yang dibuat! Buat project/GUI dulu.'}, status=400)
+
+        # 3. Loop data Actors
+        saved_count = 0
+        for actor in data:
+            actor_name = actor.get('name')
+            features = actor.get('features', [])
+            
+            # 4. Loop Features di dalam Actor tersebut
+            for feat in features:
+                feature_name = feat.get('what')
+                
+                # Simpan ke tabel UserStory
+                # Kita petakan: 'name' -> input_sebagai, 'what' -> input_fitur
+                UserStory.objects.create(
+                    input_sebagai=actor_name,
+                    input_fitur=feature_name,
+                    gui=current_gui # Sambungin ke GUI terakhir
+                )
+                saved_count += 1
+
+        return JsonResponse({
+            'status': 'success', 
+            'message': f'Berhasil menyimpan {saved_count} User Stories!'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Format JSON salah'}, status=400)
+    except Exception as e:
+        print(f"Error saving actors: {e}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
 def use_case(request):
     return render(request, 'main/use_case.html')
