@@ -94,8 +94,6 @@ class UseCaseSpecification(models.Model):
     # Kita ganti PK jadi AutoField biar gampang
     id = models.AutoField(primary_key=True) 
     
-    # Kita sambungin ke GUI (Project), bukan ke Usecase Diagram
-    # Kenapa? Karena Spek ini dibuat sebelum diagram jadi pun bisa.
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, null=True, blank=True)
     
     # Tambah kolom Nama Fitur (PENTING!)

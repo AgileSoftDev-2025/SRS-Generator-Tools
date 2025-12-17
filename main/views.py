@@ -313,9 +313,9 @@ def save_usecase_spec(request):
             
             # --- MULAI LOGIC SAVE ---
             current_gui = GUI.objects.last()
-            if not current_gui:
-                print("❌ GUI Tidak Ditemukan!")
-                return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+            # if not current_gui:
+            #     print("❌ GUI Tidak Ditemukan!")
+            #     return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
 
             for key, spec_data in data.items():
                 fname = spec_data.get('featureName', f"Feature {key}")
