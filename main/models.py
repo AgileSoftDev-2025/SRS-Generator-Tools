@@ -96,7 +96,7 @@ class UseCaseSpecification(models.Model):
     
     # Kita sambungin ke GUI (Project), bukan ke Usecase Diagram
     # Kenapa? Karena Spek ini dibuat sebelum diagram jadi pun bisa.
-    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='specifications')
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, null=True, blank=True)
     
     # Tambah kolom Nama Fitur (PENTING!)
     feature_name = models.CharField(max_length=255, default="Feature")
