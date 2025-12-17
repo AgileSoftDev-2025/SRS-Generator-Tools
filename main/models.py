@@ -272,3 +272,31 @@ class Element(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.input_type})"
+
+class TestScenario(models.Model):
+    SCENARIO_TYPES = [('Positive', 'Positive'), ('Negative', 'Negative')]
+    
+    # Menghubungkan ke Use Case Spec
+    use_case = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='scenarios')
+    scenario_type = models.CharField(max_length=20, choices=SCENARIO_TYPES)
+    
+    def __str__(self):
+        return f"{self.use_case.feature_name} - {self.scenario_type}"
+
+class TestStep(models.Model):
+    scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE, related_name='steps')
+    step_number = models.IntegerField()
+    
+    # Dropdown 1: Given/When/Then
+    condition = models.CharField(max_length=50) 
+    
+    # Dropdown 2: User Activity (click, input, page, custom)
+    action_type = models.CharField(max_length=50)
+    
+    # Dropdown 3: Target (Bisa Page, Element, atau Custom Text)
+    # Kita simpan ID-nya saja biar fleksibel, atau text kalau custom
+    target_id = models.CharField(max_length=100, null=True, blank=True)
+    target_text = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.condition} {self.action_type} {self.target_text}"

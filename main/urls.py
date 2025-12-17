@@ -25,9 +25,10 @@ urlpatterns = [
     path("api/sequence/<str:feature_id>/generate/", views.generate_sequence_diagram_by_feature, name="generate_sequence_diagram_by_feature"),
     path("api/sequence/features/", views.sequence_feature_list, name="sequence_feature_list"),
 
-    # Alternative/Special Features
+    # Alternative/Special Features 
     path('use-case/', views.use_case, name='use_case'),
     path('user_scenario/', views.user_scenario, name='user_scenario'),
+    path('api/save_scenarios/', views.save_scenarios_api, name='save_scenarios_api'),
     
     # SQL Import & Class Diagram
     path('import-sql/', views.import_sql, name='import_sql'),

@@ -2,593 +2,290 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Scenario</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+        /* CSS SAMA PERSIS KAYA PUNYAMU, SAYA RINGKAS BIAR RAPI */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 40px 20px; color: #1f2937; }
+        .container { background: #fff; width: 100%; max-width: 1200px; padding: 40px 48px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
+        .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
+        
+        /* CARD STYLES */
+        .user-story-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 20px; background: #fff; }
+        .user-story-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
+        .user-story-header:hover { background: #f9fafb; }
+        .story-number { width: 36px; height: 36px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; margin-right: 16px; flex-shrink: 0; }
+        .toggle-icon { width: 24px; transition: transform 0.2s; }
+        .toggle-icon.collapsed { transform: rotate(-90deg); }
+        .user-story-content { padding: 24px; border-top: 1px solid #e5e7eb; display: block; }
+        .user-story-content.collapsed { display: none; }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f5f5f5;
-    display: flex;
-    justify-content: center;
-    padding: 40px 20px;
-    color: #1f2937;
-}
-
-.container {
-    background: #ffffff;
-    width: 100%;
-    max-width: 1200px;
-    padding: 40px 48px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-h1 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 8px;
-}
-
-.subtitle {
-    font-size: 14px;
-    color: #6b7280;
-    margin-bottom: 32px;
-}
-
-/* USER STORY CARD */
-.user-story-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    background: #ffffff;
-}
-
-.user-story-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px;
-    background: #ffffff;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.15s;
-}
-
-.user-story-header:hover {
-    background: #f9fafb;
-}
-
-.user-story-title {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.story-number {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #3b82f6;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.story-text {
-    font-size: 16px;
-    font-weight: 600;
-    color: #1f2937;
-}
-
-.toggle-icon {
-    width: 24px;
-    height: 24px;
-    color: #6b7280;
-    transition: transform 0.2s;
-}
-
-.toggle-icon.collapsed {
-    transform: rotate(-90deg);
-}
-
-.user-story-content {
-    padding: 0 24px 24px 24px;
-    background: #ffffff;
-    border-radius: 0 0 8px 8px;
-}
-
-.user-story-content.collapsed {
-    display: none;
-}
-
-/* SCENARIO TYPE CARD (Positive/Negative) */
-.scenario-type-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    background: #fafafa;
-}
-
-.scenario-type-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px;
-    background: #fafafa;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.scenario-type-header:hover {
-    background: #f3f4f6;
-}
-
-.scenario-type-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.type-badge {
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.type-badge.positive {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.type-badge.negative {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.scenario-type-content {
-    padding: 16px 20px;
-    background: #fafafa;
-    border-radius: 0 0 8px 8px;
-}
-
-.scenario-type-content.collapsed {
-    display: none;
-}
-
-/* STEP ROW */
-.step-row {
-    display: grid;
-    grid-template-columns: 40px 120px 1fr 1fr;
-    gap: 12px;
-    align-items: start;
-    margin-bottom: 12px;
-    padding: 12px;
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-}
-
-.step-row.has-custom {
-    grid-template-columns: 40px 120px 1fr 1fr;
-    grid-template-rows: auto auto;
-}
-
-.custom-input-wrapper {
-    grid-column: 3 / 5;
-    margin-top: 8px;
-}
-
-.custom-input {
-    width: 100%;
-    height: 38px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 13px;
-    background: #fff;
-    color: #1f2937;
-    transition: all 0.15s;
-}
-
-.custom-input::placeholder {
-    color: #9ca3af;
-}
-
-.custom-input:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-}
-
-.step-num {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    color: #4b5563;
-    font-size: 13px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* SELECT & INPUT */
-select {
-    height: 38px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 13px;
-    background: #fff;
-    color: #1f2937;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-}
-
-/* BUTTONS */
-.add-scenario-btn {
-    margin-top: 8px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    border-radius: 6px;
-    border: 1px dashed #d1d5db;
-    background: #fff;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.15s;
-    width: 100%;
-}
-
-.add-scenario-btn:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-}
-
-/* NAVIGATION */
-.navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 32px;
-}
-
-.nav-btn {
-    padding: 0;
-    font-size: 14px;
-    font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-decoration: none;
-    background: transparent;
-    color: #3b82f6;
-}
-
-.nav-btn:hover {
-    text-decoration: underline;
-}
-
-.label-text {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-@media (max-width: 768px) {
-    .step-row {
-        grid-template-columns: 1fr;
-    }
-}
-</style>
+        .scenario-type-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 16px; background: #fafafa; }
+        .scenario-type-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .type-badge { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 10px; }
+        .type-badge.positive { background: #d1fae5; color: #065f46; }
+        .type-badge.negative { background: #fee2e2; color: #991b1b; }
+        
+        .scenario-type-content { padding: 16px 20px; }
+        .scenario-type-content.collapsed { display: none; }
+        
+        /* STEP ROW DINAMIS */
+        .step-row { display: grid; grid-template-columns: 40px 120px 1fr 1fr 40px; gap: 12px; margin-bottom: 12px; align-items: center; }
+        select, input { width: 100%; height: 38px; padding: 6px; border-radius: 6px; border: 1px solid #d1d5db; }
+        .add-scenario-btn { width: 100%; padding: 8px; border: 1px dashed #d1d5db; background: #fff; cursor: pointer; margin-top: 8px; }
+        .delete-btn { color: #dc3545; cursor: pointer; text-align: center; font-weight: bold; border:none; background:none; font-size: 18px; }
+        
+        .navigation { display: flex; justify-content: space-between; margin-top: 32px; }
+        .nav-btn { padding: 12px 24px; background: #000; color: #fff; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; }
+    </style>
 </head>
 <body>
     <div class="container">
+        {% csrf_token %}
         <h1>User Scenario</h1>
-        <p class="subtitle">Define positive and negative scenarios for each user story.</p>
+        <p class="subtitle">Define positive and negative scenarios for each User Story.</p>
 
-        <!-- User Story 1 -->
-        <div class="user-story-card">
-            <div class="user-story-header" onclick="toggleUserStory(this)">
-                <div class="user-story-title">
-                    <div class="story-number">1</div>
-                    <div class="story-text">As a customer, I want to login to my account</div>
-                </div>
-                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </div>
-            <div class="user-story-content">
-                <!-- Positive Scenario -->
-                <div class="scenario-type-card">
-                    <div class="scenario-type-header" onclick="toggleScenarioType(this)">
-                        <div class="scenario-type-title">
-                            <span class="type-badge positive">POSITIVE</span>
-                            Positive Scenario
+        {% if specs %}
+            {% for spec in specs %}
+            <div class="user-story-card" data-spec-id="{{ spec.id }}">
+                <div class="user-story-header" onclick="toggleUserStory(this)">
+                    <div style="display:flex; align-items:center;">
+                        <div class="story-number">{{ forloop.counter }}</div>
+                        <div class="story-text">
+                            <strong>{{ spec.feature_name }}</strong><br>
+                            <span style="font-size:13px; color:#666; font-weight:normal;">
+                                {{ spec.summary_description|default:"-" }}
+                            </span>
                         </div>
-                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
                     </div>
-                    <div class="scenario-type-content">
-                        <div class="step-row">
-                            <div class="step-num">1</div>
-                            <select>
-                                <option value="">Status</option>
-                                <option value="Given">Given</option>
-                                <option value="When">When</option>
-                                <option value="Then">Then</option>
-                                <option value="And">And</option>
-                            </select>
-                            <select onchange="updateTargetOptions(this)">
-                                <option value="">User Activity</option>
-                                <option value="click">I click button</option>
-                                <option value="input">I input</option>
-                                <option value="page">I'm on page</option>
-                                <option value="custom">Other / Custom</option>
-                            </select>
-                            <select disabled>
-                                <option value="">Target GUI</option>
-                            </select>
-                        </div>
-                        <button class="add-scenario-btn" onclick="addStep(this, 'positive')">+ ADD SCENARIO</button>
-                    </div>
+                    <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
 
-                <!-- Negative Scenario -->
-                <div class="scenario-type-card">
-                    <div class="scenario-type-header" onclick="toggleScenarioType(this)">
-                        <div class="scenario-type-title">
-                            <span class="type-badge negative">NEGATIVE</span>
-                            Negative Scenario
+                <div class="user-story-content"> <div class="scenario-type-card" data-type="Positive">
+                        <div class="scenario-type-header" onclick="toggleScenarioType(this)">
+                            <div><span class="type-badge positive">POSITIVE</span> Positive Scenario</div>
+                            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </div>
-                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <div class="scenario-type-content">
-                        <div class="step-row">
-                            <div class="step-num">1</div>
-                            <select>
-                                <option value="">Status</option>
-                                <option value="Given">Given</option>
-                                <option value="When">When</option>
-                                <option value="Then">Then</option>
-                                <option value="And">And</option>
-                            </select>
-                            <select onchange="updateTargetOptions(this)">
-                                <option value="">User Activity</option>
-                                <option value="click">I click button</option>
-                                <option value="input">I input</option>
-                                <option value="page">I'm on page</option>
-                                <option value="custom">Other / Custom</option>
-                            </select>
-                            <select disabled>
-                                <option value="">Target GUI</option>
-                            </select>
+                        <div class="scenario-type-content">
+                            <div class="step-container"></div> 
+                            <button class="add-scenario-btn" onclick="addStep(this)">+ ADD STEP</button>
                         </div>
-                        <button class="add-scenario-btn" onclick="addStep(this, 'negative')">+ ADD SCENARIO</button>
                     </div>
+
+                    <div class="scenario-type-card" data-type="Negative">
+                        <div class="scenario-type-header" onclick="toggleScenarioType(this)">
+                            <div><span class="type-badge negative">NEGATIVE</span> Negative Scenario</div>
+                            <svg class="toggle-icon collapsed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="scenario-type-content collapsed">
+                            <div class="step-container"></div>
+                            <button class="add-scenario-btn" onclick="addStep(this)">+ ADD STEP</button>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </div>
-
-        <!-- User Story 2 -->
-        <div class="user-story-card">
-            <div class="user-story-header" onclick="toggleUserStory(this)">
-                <div class="user-story-title">
-                    <div class="story-number">2</div>
-                    <div class="story-text">As a customer, I want to view product catalog</div>
-                </div>
-                <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+            {% endfor %}
+        {% else %}
+            <div style="text-align:center; padding:40px;">
+                <p>Belum ada Use Case. Silakan input Use Case dulu.</p>
             </div>
-            <div class="user-story-content">
-                <!-- Positive Scenario -->
-                <div class="scenario-type-card">
-                    <div class="scenario-type-header" onclick="toggleScenarioType(this)">
-                        <div class="scenario-type-title">
-                            <span class="type-badge positive">POSITIVE</span>
-                            Positive Scenario
-                        </div>
-                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <div class="scenario-type-content">
-                        <div class="step-row">
-                            <div class="step-num">1</div>
-                            <select>
-                                <option value="">Status</option>
-                                <option value="Given">Given</option>
-                                <option value="When">When</option>
-                                <option value="Then">Then</option>
-                                <option value="And">And</option>
-                            </select>
-                            <select onchange="updateTargetOptions(this)">
-                                <option value="">User Activity</option>
-                                <option value="click">I click button</option>
-                                <option value="input">I input</option>
-                                <option value="page">I'm on page</option>
-                                <option value="custom">Other / Custom</option>
-                            </select>
-                            <select disabled>
-                                <option value="">Target GUI</option>
-                            </select>
-                        </div>
-                        <button class="add-scenario-btn" onclick="addStep(this, 'positive')">+ ADD SCENARIO</button>
-                    </div>
-                </div>
+        {% endif %}
 
-                <!-- Negative Scenario -->
-                <div class="scenario-type-card">
-                    <div class="scenario-type-header" onclick="toggleScenarioType(this)">
-                        <div class="scenario-type-title">
-                            <span class="type-badge negative">NEGATIVE</span>
-                            Negative Scenario
-                        </div>
-                        <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
-                    <div class="scenario-type-content">
-                        <div class="step-row">
-                            <div class="step-num">1</div>
-                            <select>
-                                <option value="">Status</option>
-                                <option value="Given">Given</option>
-                                <option value="When">When</option>
-                                <option value="Then">Then</option>
-                                <option value="And">And</option>
-                            </select>
-                            <select onchange="updateTargetOptions(this)">
-                                <option value="">User Activity</option>
-                                <option value="click">I click button</option>
-                                <option value="input">I input</option>
-                                <option value="page">I'm on page</option>
-                                <option value="custom">Other / Custom</option>
-                            </select>
-                            <select disabled>
-                                <option value="">Target GUI</option>
-                            </select>
-                        </div>
-                        <button class="add-scenario-btn" onclick="addStep(this, 'negative')">+ ADD SCENARIO</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation -->
         <div class="navigation">
-            <a href="#" class="nav-btn">< BACK</a>
-            <a href="#" class="nav-btn">NEXT ></a>
+            <a href="#" class="nav-btn" style="background:#6c757d">&lt; BACK</a>
+            <button onclick="saveAllScenarios()" class="nav-btn">FINISH & SAVE &gt;</button>
         </div>
     </div>
 
     <script>
-        // Sample GUI data
-        const guiData = {
-            pages: [
-                { id: 1, name: 'Login Page' },
-                { id: 2, name: 'Dashboard' },
-                { id: 3, name: 'Product Catalog' },
-                { id: 4, name: 'Shopping Cart' }
-            ],
-            elements: [
-                { id: 1, name: 'Username Input', type: 'input', page: 'Login Page' },
-                { id: 2, name: 'Password Input', type: 'input', page: 'Login Page' },
-                { id: 3, name: 'Login Button', type: 'button', page: 'Login Page' },
-                { id: 4, name: 'Search Input', type: 'input', page: 'Product Catalog' },
-                { id: 5, name: 'Add to Cart Button', type: 'button', page: 'Product Catalog' }
-            ]
-        };
+        // 2. INI KUNCINYA: MENGAMBIL DATA DARI DJANGO VIEWS
+        const guiData = JSON.parse('{{ gui_data_json|escapejs }}');
+        console.log("GUI Data Loaded:", guiData);
 
         function toggleUserStory(header) {
             const content = header.nextElementSibling;
-            const icon = header.querySelector('.toggle-icon');
+            header.querySelector('.toggle-icon').classList.toggle('collapsed');
             content.classList.toggle('collapsed');
-            icon.classList.toggle('collapsed');
         }
 
         function toggleScenarioType(header) {
             const content = header.nextElementSibling;
-            const icon = header.querySelector('.toggle-icon');
+            header.querySelector('.toggle-icon').classList.toggle('collapsed');
             content.classList.toggle('collapsed');
-            icon.classList.toggle('collapsed');
         }
 
-        function updateTargetOptions(activitySelect) {
-            const stepRow = activitySelect.closest('.step-row');
-            const targetSelect = stepRow.querySelectorAll('select')[2];
-            const activity = activitySelect.value;
-
-            targetSelect.innerHTML = '<option value="">Target GUI</option>';
-            targetSelect.disabled = false;
-
-            if (activity === 'custom') {
-                targetSelect.disabled = true;
-                return;
-            }
-
-            if (activity === 'page') {
-                guiData.pages.forEach(page => {
-                    const option = document.createElement('option');
-                    option.value = page.id;
-                    option.textContent = page.name;
-                    targetSelect.appendChild(option);
-                });
-            } else if (activity === 'click') {
-                guiData.elements.filter(el => el.type === 'button').forEach(element => {
-                    const option = document.createElement('option');
-                    option.value = element.id;
-                    option.textContent = `${element.name} (${element.page})`;
-                    targetSelect.appendChild(option);
-                });
-            } else if (activity === 'input') {
-                guiData.elements.filter(el => el.type === 'input').forEach(element => {
-                    const option = document.createElement('option');
-                    option.value = element.id;
-                    option.textContent = `${element.name} (${element.page})`;
-                    targetSelect.appendChild(option);
-                });
-            }
+        function removeStep(btn) {
+            btn.parentElement.remove();
+            renumberSteps(btn.closest('.step-container'));
         }
 
-        function addStep(btn, type) {
-            const content = btn.closest('.scenario-type-content');
-            const steps = content.querySelectorAll('.step-row');
-            const stepNumber = steps.length + 1;
+        function renumberSteps(container) {
+            container.querySelectorAll('.step-num').forEach((el, index) => {
+                el.innerText = index + 1;
+            });
+        }
 
-            const newStep = document.createElement('div');
-            newStep.className = 'step-row';
-            newStep.innerHTML = `
-                <div class="step-num">${stepNumber}</div>
-                <select>
-                    <option value="">Status</option>
+        function addStep(btn) {
+            const container = btn.previousElementSibling;
+            const stepNum = container.children.length + 1;
+            
+            const row = document.createElement('div');
+            row.className = 'step-row';
+            row.innerHTML = `
+                <div class="step-num" style="text-align:center; font-weight:bold;">${stepNum}</div>
+                
+                <select class="select-condition">
                     <option value="Given">Given</option>
                     <option value="When">When</option>
                     <option value="Then">Then</option>
                     <option value="And">And</option>
                 </select>
-                <select onchange="updateTargetOptions(this)">
-                    <option value="">User Activity</option>
+                
+                <select class="select-activity" onchange="updateTargetOptions(this)">
+                    <option value="">-- Activity --</option>
                     <option value="click">I click button</option>
-                    <option value="input">I input</option>
-                    <option value="page">I'm on page</option>
+                    <option value="input">I input text</option>
+                    <option value="page">I am on page</option>
                     <option value="custom">Other / Custom</option>
                 </select>
-                <select disabled>
-                    <option value="">Target GUI</option>
+                
+                <select class="select-target" disabled>
+                    <option value="">-- Target --</option>
                 </select>
+                
+                <button class="delete-btn" onclick="removeStep(this)">×</button>
             `;
-
-            content.insertBefore(newStep, btn);
+            container.appendChild(row);
         }
+
+        // 3. LOGIC PINTAR: FILTER DROPDOWN SESUAI PILIHAN USER
+        function updateTargetOptions(activitySelect) {
+            const row = activitySelect.parentElement;
+            const targetSelect = row.querySelector('.select-target');
+            const activity = activitySelect.value;
+
+            // Reset
+            targetSelect.innerHTML = '<option value="">-- Target --</option>';
+            targetSelect.disabled = false;
+            targetSelect.style.display = 'block';
+
+            // Hapus input custom kalau ada
+            const existingInput = row.querySelector('.custom-target-input');
+            if(existingInput) existingInput.remove();
+
+            if (activity === 'custom') {
+                targetSelect.style.display = 'none';
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Type custom scenario...';
+                input.className = 'custom-target-input';
+                row.insertBefore(input, row.lastElementChild); // Insert sebelum tombol delete
+                return;
+            }
+
+            if (activity === 'page') {
+                guiData.pages.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id;
+                    opt.text = "Page: " + p.name;
+                    targetSelect.appendChild(opt);
+                });
+            } else if (activity === 'click') {
+                // Filter elemen button
+                const buttons = guiData.elements.filter(e => e.type === 'button');
+                buttons.forEach(el => {
+                    const opt = document.createElement('option');
+                    opt.value = el.id;
+                    opt.text = `Button: ${el.name} (on ${el.page})`;
+                    targetSelect.appendChild(opt);
+                });
+            } else if (activity === 'input') {
+                // Filter elemen input teks
+                const inputs = guiData.elements.filter(e => ['text', 'email', 'password', 'number', 'textarea'].includes(e.type));
+                inputs.forEach(el => {
+                    const opt = document.createElement('option');
+                    opt.value = el.id;
+                    opt.text = `Field: ${el.name} (on ${el.page})`;
+                    targetSelect.appendChild(opt);
+                });
+            }
+        }
+
+        // 4. KIRIM DATA KE BACKEND DJANGO
+        function saveAllScenarios() {
+            const payload = [];
+
+            document.querySelectorAll('.user-story-card').forEach(card => {
+                const specId = card.dataset.specId;
+                
+                card.querySelectorAll('.scenario-type-card').forEach(typeCard => {
+                    const type = typeCard.dataset.type;
+                    const steps = [];
+
+                    typeCard.querySelectorAll('.step-row').forEach(row => {
+                        const condition = row.querySelector('.select-condition').value;
+                        const activity = row.querySelector('.select-activity').value;
+                        
+                        let targetId = null;
+                        let targetText = "";
+
+                        if(activity === 'custom') {
+                            const input = row.querySelector('.custom-target-input');
+                            targetText = input ? input.value : "";
+                        } else {
+                            const targetSelect = row.querySelector('.select-target');
+                            targetId = targetSelect.value;
+                            if(targetSelect.selectedIndex > -1) {
+                                targetText = targetSelect.options[targetSelect.selectedIndex].text;
+                            }
+                        }
+
+                        if(activity) { 
+                            steps.push({
+                                condition: condition,
+                                activity: activity,
+                                target_id: targetId,
+                                target_text: targetText
+                            });
+                        }
+                    });
+
+                    if(steps.length > 0) {
+                        payload.push({
+                            spec_id: specId,
+                            type: type,
+                            steps: steps
+                        });
+                    }
+                });
+            });
+
+            console.log("Sending Payload:", payload);
+
+            fetch('/api/save_scenarios/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert("Berhasil disimpan!");
+                    // Disini bisa redirect: window.location.href = '/halaman-selanjutnya/';
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => console.error(err));
+        }
+
+        // Init: Tambahkan 1 step kosong di setiap skenario positif biar user gak bingung
+        document.addEventListener('DOMContentLoaded', () => {
+             document.querySelectorAll('.scenario-type-card[data-type="Positive"] .add-scenario-btn').forEach(btn => btn.click());
+        });
     </script>
 </body>
 </html>

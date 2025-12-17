@@ -186,6 +186,84 @@ def use_case(request):
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
 
+def user_scenario(request):
+    # 1. Ambil GUI terakhir (atau logic sesuai session kamu)
+    gui = GUI.objects.last()
+    
+    # 2. Ambil Semua Use Case Spec (ini yang jadi "User Story 1, 2, dst")
+    specs = UseCaseSpecification.objects.all()
+
+    # 3. SIAPKAN DATA GUI UNTUK JAVASCRIPT
+    # Kita harus convert QuerySet Django jadi List of Dictionaries biasa
+    gui_data = {
+        'pages': [],
+        'elements': []
+    }
+
+    if gui:
+        # Ambil Pages
+        pages = Page.objects.filter(gui=gui)
+        for p in pages:
+            gui_data['pages'].append({
+                'id': p.id,
+                'name': p.name
+            })
+        
+        # Ambil Elements
+        elements = Element.objects.filter(page__gui=gui)
+        for el in elements:
+            gui_data['elements'].append({
+                'id': el.id,
+                'name': el.name,
+                'type': el.input_type, # text, button, etc
+                'page': el.page.name   # Nama page-nya buat label
+            })
+
+    context = {
+        'specs': specs,
+        'gui_data_json': json.dumps(gui_data) # Kirim sebagai String JSON
+    }
+    return render(request, 'main/user_scenario.html', context)
+
+@csrf_exempt
+def save_scenarios_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # data format: [{ spec_id: 1, type: 'Positive', steps: [...] }, ...]
+
+            for item in data:
+                spec_id = item.get('spec_id')
+                scen_type = item.get('type') # Positive / Negative
+                steps = item.get('steps', [])
+
+                spec = UseCaseSpecification.objects.get(pk=spec_id)
+
+                # Hapus skenario lama biar gak duplikat (Clean slate)
+                TestScenario.objects.filter(use_case=spec, scenario_type=scen_type).delete()
+
+                # Buat Skenario Baru
+                scenario = TestScenario.objects.create(
+                    use_case=spec,
+                    scenario_type=scen_type
+                )
+
+                # Simpan Step-stepnya
+                for idx, step in enumerate(steps):
+                    TestStep.objects.create(
+                        scenario=scenario,
+                        step_number=idx + 1,
+                        condition=step.get('condition'),
+                        action_type=step.get('activity'),
+                        target_id=step.get('target_id'),   # ID element/page
+                        target_text=step.get('target_text') # Nama element/page/custom text
+                    )
+            
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error'}, status=400)
+
 def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
 
@@ -774,10 +852,6 @@ def download_plantuml(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     
-def user_scenario(request):
-    return render(request, 'main/user_scenario.html')
-
-# Di file views.py
 
 @require_http_methods(["POST"])
 def save_gui(request, gui_id):
