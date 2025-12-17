@@ -212,24 +212,24 @@ input:focus, select:focus, textarea:focus {
 
 /* NAVIGATION */
 .navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
 
-        .nav-btn {
-            padding: 12px 32px;
-            background-color: #000;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 14px;
-        }
+.nav-btn {
+    padding: 12px 32px;
+    background-color: #000;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+}
 
-        .nav-btn:hover {
-            background-color: #333;
-        }
+.nav-btn:hover {
+    background-color: #333;
+}
 
 .helper-text {
     font-size: 12px;
@@ -239,7 +239,8 @@ input:focus, select:focus, textarea:focus {
 </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" data-gui-id="{{ gui.id }}">
+        {% csrf_token %}
         <h1>INPUT GUI</h1>
         <p class="subtitle">List all pages and describe their input elements.</p>
 
@@ -258,14 +259,13 @@ input:focus, select:focus, textarea:focus {
                     <input type="text" placeholder="Element name..." />
                     <select>
                         <option value="">Type</option>
-                        <option>Text</option>
-                        <option>Number</option>
-                        <option>Email</option>
-                        <option>Password</option>
-                        <option>Date</option>
-                        <option>Checkbox</option>
-                        <option>Radio</option>
-                        <option>Textarea</option>
+                        <option value="button">Button</option>
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="radio">Radio</option>
+                        <option value="textarea">Textarea</option>
                     </select>
                 </div>
 
@@ -287,70 +287,126 @@ input:focus, select:focus, textarea:focus {
     </div>
 
     <script>
-        function togglePage(btn) {
-            // Tidak digunakan
-        }
+    function getCsrfToken() {
+        const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+        return tokenElement ? tokenElement.value : '';
+    }
 
-        function addElement(btn) {
-            const content = btn.parentElement;
-            const newElement = document.createElement('div');
-            newElement.className = 'element-row';
-            newElement.innerHTML = `
-                <input type="text" placeholder="Element name..." />
-                <select>
-                    <option value="">Type</option>
-                    <option>Text</option>
-                    <option>Number</option>
-                    <option>Email</option>
-                    <option>Password</option>
-                    <option>Date</option>
-                    <option>Checkbox</option>
-                    <option>Radio</option>
-                    <option>Textarea</option>
-                </select>
-            `;
-            content.insertBefore(newElement, btn);
-        }
+    function saveData(guiId) {
+        const pages = [];
+        document.querySelectorAll('.page-card').forEach((card, pIdx) => {
+            const pageName = card.querySelector('.page-name-input').value;
+            const elements = [];
+            card.querySelectorAll('.element-row').forEach((el, eIdx) => {
+                const name = el.querySelector('input').value;
+                const type = el.querySelector('select').value;
+                elements.push({ name, type });
+            });
+            pages.push({ name: pageName, elements });
+        });
 
-        function addPage() {
-            const container = document.querySelector('.container');
-            const addPageBtn = document.getElementById('addPageBtn');
-            const pageCards = document.querySelectorAll('.page-card');
-            const pageNumber = pageCards.length + 1;
-            
-            const newCard = document.createElement('div');
-            newCard.className = 'page-card';
-            newCard.innerHTML = `
-                <div class="page-header">
-                    <div class="page-number">${pageNumber}</div>
-                    <div class="page-name-container">
-                        <input type="text" class="page-name-input" placeholder="Fill page name here..." />
-                    </div>
+        fetch(`/api/save_gui/${guiId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify(pages)
+        })
+        .then(res => res.json())
+        .then(data => console.log('Saved:', data))
+        .catch(err => console.error(err));
+    }
+
+    function togglePage(btn) {
+        // Tidak digunakan
+    }
+
+    function addElement(btn) {
+        const content = btn.parentElement;
+        const newElement = document.createElement('div');
+        newElement.className = 'element-row';
+        newElement.innerHTML = `
+            <input type="text" placeholder="Element name..." />
+            <select>
+                <option value="">Type</option>
+                <option value="text">Text</option>
+                <option value="number">Number</option>
+                <option value="email">Email</option>
+                <option value="password">Password</option>
+                <option value="date">Date</option>
+                <option value="checkbox">Checkbox</option>
+                <option value="radio">Radio</option>
+                <option value="textarea">Textarea</option>
+            </select>
+        `;
+        content.insertBefore(newElement, btn);
+    }
+
+    function addPage() {
+        const container = document.querySelector('.container');
+        const addPageBtn = document.getElementById('addPageBtn');
+        const pageCards = document.querySelectorAll('.page-card');
+        const pageNumber = pageCards.length + 1;
+        
+        const newCard = document.createElement('div');
+        newCard.className = 'page-card';
+        newCard.innerHTML = `
+            <div class="page-header">
+                <div class="page-number">${pageNumber}</div>
+                <div class="page-name-container">
+                    <input type="text" class="page-name-input" placeholder="Fill page name here..." />
                 </div>
-                <div class="page-content">
-                    <label class="element-label">Input Element</label>
-                    
-                    <div class="element-row">
-                        <input type="text" placeholder="Element name..." />
-                        <select>
-                            <option value="">Type</option>
-                            <option>Text</option>
-                            <option>Number</option>
-                            <option>Email</option>
-                            <option>Password</option>
-                            <option>Date</option>
-                            <option>Checkbox</option>
-                            <option>Radio</option>
-                            <option>Textarea</option>
-                        </select>
-                    </div>
-
-                    <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+            </div>
+            <div class="page-content">
+                <label class="element-label">Input Element</label>
+                
+                <div class="element-row">
+                    <input type="text" placeholder="Element name..." />
+                    <select>
+                        <option value="">Type</option>
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="email">Email</option>
+                        <option value="password">Password</option>
+                        <option value="date">Date</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="radio">Radio</option>
+                        <option value="textarea">Textarea</option>
+                    </select>
                 </div>
-            `;
-            
-            container.insertBefore(newCard, addPageBtn);
-        }
-    </script>
+
+                <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+            </div>
+        `;
+        
+        container.insertBefore(newCard, addPageBtn);
+    }
+
+    // Event listener untuk NEXT/BACK
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.querySelector('.container');
+        const guiId = container.dataset.guiId;
+        const nextBtn = document.querySelector('.nav-btn.next');
+        const backBtn = document.querySelector('.nav-btn.back');
+
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveData(guiId);
+            setTimeout(() => {
+                window.location.href = nextBtn.href;
+            }, 500);
+        });
+
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveData(guiId);
+            setTimeout(() => {
+                window.location.href = backBtn.href;
+            }, 500);
+        });
+    });
+</script>
+
 </body>
 </html>

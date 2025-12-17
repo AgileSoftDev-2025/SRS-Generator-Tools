@@ -549,37 +549,84 @@ function addPathRow(container, actor = "", system = "") {
 }
 
 document.addEventListener("click", e => {
+  // 1. Logic Tambah Baris (Gak Berubah)
   if (e.target.classList.contains("add-path")) {
     addPathRow(e.target.previousElementSibling);
   }
 
+  // 2. Logic Tombol Save (INI YANG BARU) 🚀
   if (e.target.classList.contains("save-btn")) {
     const modal = e.target.closest(".modal");
     const featureId = modal.querySelector(".feature-id").value;
+    const saveButton = e.target;
 
-    const allData =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+    // A. Ambil Nama Fitur dari LocalStorage buat dikirim ke DB
+    // (Karena di modal cuma ada ID angka, kita butuh teks namanya)
+    const featureList = JSON.parse(localStorage.getItem("featureList")) || [];
+    // Array mulai dari 0, sedangkan featureId dari 1, jadi dikurang 1
+    const featureName = featureList[featureId - 1] || `Feature ${featureId}`;
 
-    allData[featureId] = {
-      summary: modal.querySelector(".summary").value,
-      priority: modal.querySelector(".priority").value,
-      status: modal.querySelector(".status").value,
-      precondition: modal.querySelector(".precondition").value,
-      postcondition: modal.querySelector(".postcondition").value,
-      basicPath: collectPath(modal, "basic"),
-      alternativePath: collectPath(modal, "alternative"),
-      exceptionPath: collectPath(modal, "exception"),
+    // B. Siapkan Data (Format JSON sesuai Backend)
+    const payload = {
+      [featureId]: {
+        featureName: featureName, // <--- PENTING: Kirim Nama Fitur
+        summary: modal.querySelector(".summary").value,
+        priority: modal.querySelector(".priority").value,
+        status: modal.querySelector(".status").value,
+        precondition: modal.querySelector(".precondition").value,
+        postcondition: modal.querySelector(".postcondition").value,
+        basicPath: collectPath(modal, "basic"),
+        alternativePath: collectPath(modal, "alternative"),
+        exceptionPath: collectPath(modal, "exception"),
+      }
     };
 
-    localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
-    
-    // Dapatkan instance modal Bootstrap dan sembunyikan
-    const modalInstance = bootstrap.Modal.getInstance(modal);
-    if (modalInstance) {
-      modalInstance.hide();
-    }
-    
-    alert("Data berhasil disimpan ✅");
+    // C. Ubah Tombol jadi "Loading..." biar user tau lagi proses
+    const originalText = saveButton.innerText;
+    saveButton.innerText = "Saving...";
+    saveButton.disabled = true;
+
+    // D. KIRIM KE DATABASE (Fetch API)
+    fetch('/api/save_usecase_spec/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Kalau kamu pakai csrf_exempt di views.py, baris bawah ini gak wajib.
+            // Tapi kalau nanti dihapus, harus pakai token CSRF Django.
+            // 'X-CSRFToken': getCookie('csrftoken') 
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // 1. Update juga LocalStorage (Buat cadangan di browser)
+            const allData = JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+            allData[featureId] = payload[featureId];
+            localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
+
+            // 2. Kasih tau User Sukses
+            alert("✅ Data Berhasil Disimpan ke Database!");
+
+            // 3. Tutup Modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        } else {
+            // Kalau backend nolak
+            alert("❌ Gagal Simpan: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("⚠️ Terjadi kesalahan koneksi ke server!");
+    })
+    .finally(() => {
+        // E. Balikin Tombol kayak semula (Mau sukses/gagal)
+        saveButton.innerText = originalText;
+        saveButton.disabled = false;
+    });
   }
 });
 
