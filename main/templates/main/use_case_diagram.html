@@ -518,6 +518,21 @@
     </footer>
 
     <script>
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
         // 🔥 PERUBAHAN PENTING: Ganti "user_story.html" dengan URL Django yang benar
         const nextPage = "/user-story/";  // Ini harus sesuai dengan URL di urls.py
         
@@ -746,22 +761,28 @@
             }
             
             saveData() {
-                // Format data untuk output
                 const formattedData = this.formatDataForOutput();
-                console.log('Saving actors data:', formattedData);
-
-                // Simpan lengkap aktor & fitur
+                
+                // Simpan ke localStorage buat backup (opsional)
                 localStorage.setItem('actorsAndFeatures', JSON.stringify(formattedData));
 
-                // 🔥 Ekstrak daftar fitur untuk halaman input informasi tambahan
-                let featureList = [];
-                formattedData.forEach(actor => {
-                    actor.features.forEach(f => featureList.push(f.what));
+                // --- BAGIAN INI YANG BIKIN MASUK DATABASE ---
+                fetch('/api/save-actors/', {  // <-- Pastikan URL ini ada di urls.py
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(), // Biar gak ditolak Django
+                    },
+                    body: JSON.stringify(formattedData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    // Kalau sukses baru lanjut ke next page, atau biarin tombol next yang handle
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
                 });
-                localStorage.setItem('featureList', JSON.stringify(featureList));
-
-                // Debug
-                console.log('Saved featureList:', featureList);
             }
             
             formatDataForOutput() {

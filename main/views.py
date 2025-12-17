@@ -18,15 +18,27 @@ from .forms import RegisterForm
 from main.generators.sequence_generator import generate_sequence_plantuml
 import subprocess
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from .models import GUI, Page, Element, Usecase
+import requests      
+import urllib.parse   
+from django.core.files.base import ContentFile  
+from .models import GUI, UseCaseSpecification, BasicPath, AlternativePath, ExceptionPath
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
-    projects = Project.objects.all() 
-    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
+
     user_id = request.session['user_id']
     pengguna = get_object_or_404(Pengguna, id_user=user_id)
-    projects = Project.objects.all()  # ambil semua project
+
+    projects = Project.objects.filter(pengguna=pengguna)
     return render(request, 'main/home.html', {'projects': projects})
 
 def login_view(request):
@@ -120,7 +132,46 @@ def save_userstory(request):
         )
         userstory.save()
         return redirect("halaman_sukses")
-    
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_actors_and_features(request):
+    try:
+        data = json.loads(request.body)
+        
+        # 1. Tentukan konteks GUI/Project yang mana
+        current_gui = GUI.objects.last() 
+        if not current_gui:
+            return JsonResponse({'status': 'error', 'message': 'Belum ada GUI!'}, status=400)
+
+        UserStory.objects.filter(gui=current_gui).delete()
+
+        # 2. Baru setelah bersih, kita simpan data yang baru masuk
+        saved_count = 0
+        for actor in data:
+            actor_name = actor.get('name')
+            features = actor.get('features', [])
+            
+            for feat in features:
+                feature_name = feat.get('what')
+                feature_purpose = feat.get('why') # Pastikan field ini sesuai JS kamu
+                
+                UserStory.objects.create(
+                    input_sebagai=actor_name,
+                    input_fitur=feature_name,
+                    input_tujuan=feature_purpose,
+                    gui=current_gui
+                )
+                saved_count += 1
+
+        return JsonResponse({
+            'status': 'success', 
+            'message': f'Berhasil update! Total {saved_count} User Stories tersimpan.'
+        })
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 def use_case(request):
     return render(request, 'main/use_case.html')
 
@@ -129,6 +180,82 @@ def user_scenario(request):
 
 def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
+
+@csrf_exempt
+@require_http_methods(["POST", "GET"])
+def generate_usecase_diagram(request):
+    try:
+        # 1. Ambil GUI terakhir (Project Aktif)
+        current_gui = GUI.objects.last()
+        if not current_gui:
+            return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+
+        # 2. Ambil User Stories (Bahan Bakunya)
+        stories = UserStory.objects.filter(gui=current_gui)
+        if not stories.exists():
+            return JsonResponse({'status': 'error', 'message': 'Belum ada User Story! Input dulu.'}, status=400)
+
+        # 3. --- RAKIT KODE PLANTUML ---
+        plantuml = []
+        plantuml.append("@startuml")
+        plantuml.append("left to right direction")
+        plantuml.append("skinparam packageStyle rectangle")
+        
+        defined_actors = set()
+        
+        for story in stories:
+            # Bersihin nama (ganti spasi jadi underscore)
+            actor_clean = story.input_sebagai.replace(" ", "_")
+            feature_clean = story.input_fitur
+            
+            # Definisi Actor
+            if actor_clean not in defined_actors:
+                plantuml.append(f"actor \"{story.input_sebagai}\" as {actor_clean}")
+                defined_actors.add(actor_clean)
+            
+            # Relasi
+            plantuml.append(f"{actor_clean} --> ({feature_clean})")
+            
+        plantuml.append("@enduml")
+        final_code = "\n".join(plantuml)
+
+        # 4. --- MINTA GAMBAR KE PLANTUML SERVER ---
+        encoded_code = urllib.parse.quote(final_code)
+        plantuml_url = f"http://www.plantuml.com/plantuml/png/{encoded_code}"
+        
+        response = requests.get(plantuml_url)
+        
+        if response.status_code == 200:
+            # 5. --- SIMPAN KE DATABASE ---
+            # Cari atau Buat row baru di tabel Usecase
+            diagram, created = Usecase.objects.update_or_create(
+                gui=current_gui,
+                defaults={
+                    'plantuml_code': final_code  # Simpan Resep
+                }
+            )
+
+            # Simpan File Gambar
+            file_name = f"usecase_{current_gui.id_gui}.png"
+            
+            # Hapus file lama kalau ada (biar rapi)
+            if diagram.hasil_usecase:
+                diagram.hasil_usecase.delete(save=False)
+            
+            # Simpan file baru
+            diagram.hasil_usecase.save(file_name, ContentFile(response.content), save=True)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Diagram berhasil digenerate!',
+                'image_url': diagram.hasil_usecase.url
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Gagal konek ke PlantUML'}, status=500)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_informasi_tambahan(request):
     return render(request, 'main/input_informasi_tambahan.html')
@@ -169,31 +296,72 @@ def use_case_spec(request):
     })
 
 
-def save_use_case_spec(request, feature_id):
-    if request.method == "POST":
-        # Ambil data dari form
-        summary = request.POST.get("summary")
-        priority = request.POST.get("priority")
-        status = request.POST.get("status")
-        
-        # Ambil feature terkait
-        feature = get_object_or_404(Feature, id=feature_id)
-        
-        # Simpan data ke UseCaseSpecification (buat baru atau update)
-        use_case, created = UseCaseSpecification.objects.update_or_create(
-            feature=feature,  # hubungan foreign key
-            defaults={
-                'summary': summary,
-                'priority': priority,
-                'status': status
-            }
-        )
-        
-        # Redirect kembali ke halaman input
-        return redirect("input_informasi_tambahan")
-    else:
-        # Jika bukan POST, redirect ke halaman input
-        return redirect("input_informasi_tambahan")
+@csrf_exempt
+def save_usecase_spec(request):
+    # CCTV 1: Cek apakah function dipanggil
+    print("🔥 REQUEST MASUK KE VIEW!") 
+    
+    if request.method == 'POST':
+        try:
+            # CCTV 2: Cek data mentah yang dikirim browser
+            print(f"📦 Body Mentah: {request.body}") 
+            
+            data = json.loads(request.body)
+            
+            # CCTV 3: Cek data setelah diterjemahkan jadi Python Dictionary
+            print(f"📊 Data Parsed: {data}") 
+            
+            # --- MULAI LOGIC SAVE ---
+            current_gui = GUI.objects.last()
+            if not current_gui:
+                print("❌ GUI Tidak Ditemukan!")
+                return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+
+            for key, spec_data in data.items():
+                fname = spec_data.get('featureName', f"Feature {key}")
+                print(f"💾 Menyimpan Fitur: {fname}") # CCTV 4
+                
+                # 1. Simpan Header
+                spec_obj, created = UseCaseSpecification.objects.update_or_create(
+                    gui=current_gui,
+                    feature_name=fname,
+                    defaults={
+                        'summary_description': spec_data.get('summary'),
+                        'priority': spec_data.get('priority'),
+                        'status': spec_data.get('status'),
+                        'input_precondition': spec_data.get('precondition'),
+                        'input_postcondition': spec_data.get('postcondition'),
+                    }
+                )
+
+                # 2. Hapus Lama
+                BasicPath.objects.filter(usecase_spec=spec_obj).delete()
+                AlternativePath.objects.filter(usecase_spec=spec_obj).delete()
+                ExceptionPath.objects.filter(usecase_spec=spec_obj).delete()
+
+                # 3. Simpan Baru
+                def save_paths(path_list, ModelClass):
+                    for idx, step in enumerate(path_list):
+                        ModelClass.objects.create(
+                            usecase_spec=spec_obj,
+                            step_number=idx + 1,
+                            actor_action=step.get('actor'),
+                            system_response=step.get('system')
+                        )
+
+                save_paths(spec_data.get('basicPath', []), BasicPath)
+                save_paths(spec_data.get('alternativePath', []), AlternativePath)
+                save_paths(spec_data.get('exceptionPath', []), ExceptionPath)
+
+            print("✅ SUKSES SIMPAN KE DB!") # CCTV 5
+            return JsonResponse({'status': 'success', 'message': 'Data Saved Successfully!'})
+
+        # INI PASANGANNYA 'TRY' YANG TADI HILANG 👇
+        except Exception as e:
+            print(f"❌ ERROR DI VIEW: {e}") # Ini bakal nyetak error di terminal kalau ada
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid Method'}, status=405)
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
@@ -442,21 +610,17 @@ def generate_srs(request):
     return render(request, 'main/generate_srs.html')
 
 def project_new(request):
+    #validatelogin
+    if 'user_id' not in request.session:
+        return redirect('main:login')
+
     if request.method == 'POST':
         name = request.POST.get('name')
         desc = request.POST.get('description')
-        
-        pengguna = Pengguna.objects.first()
-        if pengguna is None:
-            # bikin dummy user sementara biar ga error
-            pengguna = Pengguna.objects.create(
-                id_user="U001",
-                nama_user="dummyuser",
-                email_user="dummy@example.com"
-            )
 
-        # Buat ID otomatis sederhana (opsional)
-        new_id = str(Project.objects.count() + 1).zfill(5)
+        # get user yang lagi login dari session
+        user_id = request.session['user_id']
+        pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
         Project.objects.create(
             id_project=new_id,
@@ -465,11 +629,11 @@ def project_new(request):
             pengguna=pengguna,
             tanggal_project_dibuat=timezone.now(),
             tanggal_akses_terakhir=timezone.now(),
-        
         )
-        return redirect('main:home') # setelah berhasil tambah project
 
-    return render(request, 'main/home.html') 
+        return redirect('main:home')
+
+    return redirect('main:home')
 
 def project_detail(request, id_project):
     # Ambil data project berdasarkan id
@@ -597,3 +761,102 @@ def download_plantuml(request):
     
 def user_scenario(request):
     return render(request, 'main/user_scenario.html')
+
+# Di file views.py
+
+@require_http_methods(["POST"])
+def save_gui(request, gui_id):
+    try:
+        # Ambil GUI berdasarkan ID
+        gui = get_object_or_404(GUI, pk=gui_id)
+        
+        # Ambil data JSON dari request body
+        data = json.loads(request.body)
+        
+        # 1. Hapus data lama (Pages & Elements) agar bersih sebelum simpan baru
+        # Ini akan otomatis menghapus Elements karena on_delete=CASCADE
+        gui.pages.all().delete()
+        
+        # 2. Loop setiap Halaman (Page) dari data JSON
+        for page_idx, page_data in enumerate(data, start=1):
+            # Buat Page baru
+            page = Page.objects.create(
+                gui=gui,
+                name=page_data.get('name', f'Page {page_idx}'),
+                order=page_idx
+            )
+            
+            # 3. Loop setiap Elemen di dalam Halaman tersebut
+            elements_list = page_data.get('elements', [])
+            for elem_idx, elem_data in enumerate(elements_list, start=1):
+                elem_name = elem_data.get('name')
+                elem_type = elem_data.get('type')
+                
+                # Cek agar tidak menyimpan data kosong
+                if elem_name and elem_type:
+                    Element.objects.create(
+                        page=page,
+                        name=elem_name,
+                        
+                        # BAGIAN PENTING: Masukkan ke 'input_type' (sesuai models.py)
+                        input_type=elem_type.lower(),
+                        
+                        # Kita isi juga element_type biar aman (opsional)
+                        element_type=elem_type.lower(),
+                        
+                        order=elem_idx
+                    )
+        
+        return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
+    except Exception as e:
+        print(f"Error saving GUI: {e}") # Cek terminal jika masih error
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+def input_gui(request, gui_id=None, project_id=None):
+    if gui_id is None:
+        # --- LOGIKA PEMBUATAN PROJECT OTOMATIS (JIKA KOSONG) ---
+        if not project_id:
+            project = Project.objects.first()
+            
+            if not project:
+                # 1. Cek User dulu (Project butuh Pengguna)
+                pengguna = Pengguna.objects.first()
+                if not pengguna:
+                    # Buat user dummy jika tabel Pengguna kosong
+                    pengguna = Pengguna.objects.create(
+                        id_user="U01", 
+                        nama_user="Admin Dev",
+                        email_user="admin@dev.com",
+                        password="password123"
+                    )
+
+                # 2. Buat Project (Perbaiki 'name' jadi 'nama_project' & isi field wajib lain)
+                project = Project.objects.create(
+                    id_project="P01",                # Wajib diisi manual (CharField PK)
+                    nama_project="Default Project",  # Ganti 'name' jadi 'nama_project'
+                    deskripsi="Auto generated",
+                    pengguna=pengguna                # Wajib ada usernya
+                )
+            
+            # Gunakan 'id_project' bukan 'id'
+            project_id = project.id_project 
+
+        # --- LOGIKA PEMBUATAN GUI BARU ---
+        # Generate ID GUI manual (misal: G01, G02, dst)
+        jumlah_gui = GUI.objects.count() + 1
+        new_gui_id = f"G{str(jumlah_gui).zfill(2)}" # Hasil: G01, G02...
+
+        gui = GUI.objects.create(
+            id_gui=new_gui_id,          # Wajib diisi manual
+            project_id=project_id,
+            nama_atribut="GUI Default"  # Wajib diisi (lihat models.py)
+        )
+        
+        # Redirect menggunakan id_gui yang baru dibuat
+        return redirect('main:input_gui_with_id', gui_id=gui.id_gui)
+    
+    gui = get_object_or_404(GUI, pk=gui_id)
+    return render(request, 'main/input_gui.html', {'gui': gui})

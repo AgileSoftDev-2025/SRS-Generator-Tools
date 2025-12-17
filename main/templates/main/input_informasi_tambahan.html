@@ -16,52 +16,264 @@
       background: #f9fafb;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
 
-    .header {
-      height: 64px;
+    /* Header - SAMA DENGAN HOME PAGE */
+    header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
       padding: 0 24px;
+      flex-shrink: 0;
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
+      height: 64px;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .logo-icon {
+      width: 24px;
+      height: 24px;
+      background-color: #111827;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #111827;
     }
 
-    .logo {
-      font-weight: 600;
-      font-size: 18px;
+    main {
+      flex: 1;
+      padding: 40px 0 60px;
+      width: 100%;
     }
 
     .feature-card {
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 24px;
-      text-align: center;
+      padding: 20px;
+      text-align: left;
       cursor: pointer;
       transition: 0.2s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .feature-card:hover {
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+    }
+
+    .feature-name {
+      font-size: 16px;
+      font-weight: normal;
+      color: #374151;
+      line-height: 1.5;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .path-row {
       margin-bottom: 12px;
     }
 
-    /* NAV BUTTON FIX */
-    .nav-footer {
-      position: sticky;
-      bottom: 0;
-      background: #f9fafb;
-      padding: 16px 0;
+    /* Main Footer - DIBAWAH TOMBOL BACK/NEXT */
+    .main-footer {
+      background-color: #ffffff;
       border-top: 1px solid #e5e7eb;
-      z-index: 500;
+      padding: 20px 0;
+      margin-top: auto;
+      flex-shrink: 0;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+    }
+    
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .footer-link {
+      font-size: 12px;
+      color: #6b7280;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-link:hover {
+      color: #374151;
+    }
+
+    /* Navigation Footer - TOMBOL BACK/NEXT */
+    .nav-footer {
+      background: #ffffff;
+      padding: 20px 0;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 40px;
+    }
+
+    /* Content Container */
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    h3.fw-bold {
+      color: #111827;
+      font-size: 28px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* Modal Styling */
+    .modal-content {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 24px;
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #e5e7eb;
+      padding: 20px 24px;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .form-control, .form-select {
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn-dark {
+      background-color: #111827;
+      border-color: #111827;
+    }
+
+    .btn-dark:hover {
+      background-color: #1f2937;
+      border-color: #1f2937;
+    }
+
+    .btn-outline-secondary {
+      background-color: #ffffff;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      color: #9ca3af;
+      padding: 48px 20px;
+      font-style: italic;
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content,
+      .footer-content,
+      .content-container {
+        padding: 0 16px;
+      }
+      
+      main {
+        padding: 24px 0 40px;
+      }
+      
+      h3.fw-bold {
+        font-size: 24px;
+      }
+      
+      .feature-card {
+        padding: 16px;
+      }
+      
+      .feature-name {
+        font-size: 15px;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+      }
     }
   </style>
 </head>
@@ -69,32 +281,52 @@
 <body>
 
 <!-- HEADER -->
-<header class="header">
-  <div class="logo">OneUML</div>
-  <img src="https://via.placeholder.com/40" class="rounded-circle" />
+<header>
+  <div class="header-content">
+    <div class="logo">
+      <div class="logo-icon">
+        <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+      </div>
+      <span class="logo-text">One UML</span>
+    </div>
+  </div>
 </header>
 
 <!-- CONTENT -->
-<main class="container mt-5 mb-5">
-  <h3 class="fw-bold">Additional Information</h3>
-  <p>Pilih fitur untuk mengisi Use Case Specification.</p>
+<main>
+  <div class="content-container">
+    <h3 class="fw-bold">Additional Information</h3>
+    <p class="subtitle">Pilih fitur untuk mengisi Use Case Specification.</p>
 
-  <div class="row g-4 mt-4" id="featureGrid"></div>
+    <div class="row g-4 mt-2" id="featureGrid"></div>
+  </div>
 </main>
 
-<!-- NAVIGATION -->
-<div class="container nav-footer">
-  <div class="d-flex justify-content-between">
+<!-- NAVIGATION - TOMBOL BACK/NEXT -->
+<div class="nav-footer">
+  <div class="content-container">
+    <div class="d-flex justify-content-between">
+      <button class="btn btn-outline-secondary"
+        onclick="location.href='/user-story'">
+        ← Back
+      </button>
 
-    <button class="btn btn-outline-secondary"
-      onclick="window.location.href='/user-story/'">
-      ← Back
-    </button>
+      <button class="btn btn-dark" id="nextButton">
+        Next →
+      </button>
+    </div>
+  </div>
+</div>
 
-    <button class="btn btn-dark"
-      onclick="window.location.href='/use-case-spec/'">
-      Next →
-    </button>
+<!-- FOOTER - COPYRIGHT & LINKS -->
+<div class="main-footer">
+  <div class="footer-content">
+    <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+    <div class="footer-links">
+      <a href="#" class="footer-link">Help</a>
+      <a href="#" class="footer-link">Privacy</a>
+      <a href="#" class="footer-link">Terms</a>
+    </div>
   </div>
 </div>
 
@@ -107,6 +339,7 @@
 <script>
 const featureGrid = document.getElementById("featureGrid");
 const modalContainer = document.getElementById("modalContainer");
+const nextButton = document.getElementById("nextButton");
 
 /* =============================
    LOAD FEATURE
@@ -117,14 +350,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (featureList.length === 0) {
     featureGrid.innerHTML = `
-      <div class="text-muted">
-        Tidak ada fitur dari tahap sebelumnya.
+      <div class="col-12">
+        <div class="empty-state">
+          Tidak ada fitur dari tahap sebelumnya.
+        </div>
       </div>`;
     return;
   }
 
   featureList.forEach((name, index) => {
     createFeature({ id: index + 1, name });
+  });
+
+  // Add event listener untuk tombol Next
+  nextButton.addEventListener("click", function() {
+    // Simpan semua data yang sudah diisi
+    saveAllData();
+    
+    // Redirect ke use_case_spec.html
+    window.location.href = 'http://127.0.0.1:5501/main/templates/main/use_case_spec.html';
   });
 });
 
@@ -206,7 +450,7 @@ function pathSection(title, type) {
   <div class="mb-3">
     <label class="form-label">${title}</label>
     <div class="path-container" data-type="${type}"></div>
-    <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
+    <button type="button" class="btn btn-sm btn-outline-secondary mt-2 add-path">
       + Tambah Baris
     </button>
   </div>`;
@@ -217,12 +461,12 @@ function pathSection(title, type) {
 ============================= */
 function createFeature(feature) {
   featureGrid.insertAdjacentHTML("beforeend", `
-    <div class="col-md-4">
+    <div class="col-md-4 col-sm-6 mb-4">
       <div class="feature-card"
         data-bs-toggle="modal"
         data-bs-target="#modalFeature${feature.id}"
         onclick="loadUseCase(${feature.id})">
-        <h5>${feature.name}</h5>
+        <p class="feature-name">${feature.name}</p>
       </div>
     </div>`);
 
@@ -230,6 +474,37 @@ function createFeature(feature) {
     "beforeend",
     modalTemplate(feature)
   );
+}
+
+/* =============================
+   SAVE ALL DATA SEBELUM NEXT
+============================= */
+function saveAllData() {
+  // Ambil semua data yang sudah disimpan
+  const allData = JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+  
+  // Ambil semua modal yang ada
+  const modals = document.querySelectorAll('.modal');
+  
+  // Simpan data dari setiap modal yang terbuka/terisi
+  modals.forEach(modal => {
+    const featureId = modal.querySelector('.feature-id')?.value;
+    if (featureId) {
+      allData[featureId] = {
+        summary: modal.querySelector('.summary')?.value || "",
+        priority: modal.querySelector('.priority')?.value || "Must Have",
+        status: modal.querySelector('.status')?.value || "Active",
+        precondition: modal.querySelector('.precondition')?.value || "",
+        postcondition: modal.querySelector('.postcondition')?.value || "",
+        basicPath: collectPath(modal, "basic"),
+        alternativePath: collectPath(modal, "alternative"),
+        exceptionPath: collectPath(modal, "exception"),
+      };
+    }
+  });
+  
+  localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
+  console.log('All data saved before next:', allData);
 }
 
 /* =============================
@@ -265,40 +540,93 @@ function addPathRow(container, actor = "", system = "") {
   div.className = "row path-row";
   div.innerHTML = `
     <div class="col-md-6">
-      <textarea class="form-control actor" rows="2">${actor}</textarea>
+      <textarea class="form-control actor" rows="2" placeholder="Actor action">${actor}</textarea>
     </div>
     <div class="col-md-6">
-      <textarea class="form-control system" rows="2">${system}</textarea>
+      <textarea class="form-control system" rows="2" placeholder="System response">${system}</textarea>
     </div>`;
   container.appendChild(div);
 }
 
 document.addEventListener("click", e => {
+  // 1. Logic Tambah Baris (Gak Berubah)
   if (e.target.classList.contains("add-path")) {
     addPathRow(e.target.previousElementSibling);
   }
 
+  // 2. Logic Tombol Save (INI YANG BARU) 🚀
   if (e.target.classList.contains("save-btn")) {
     const modal = e.target.closest(".modal");
     const featureId = modal.querySelector(".feature-id").value;
+    const saveButton = e.target;
 
-    const allData =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+    // A. Ambil Nama Fitur dari LocalStorage buat dikirim ke DB
+    // (Karena di modal cuma ada ID angka, kita butuh teks namanya)
+    const featureList = JSON.parse(localStorage.getItem("featureList")) || [];
+    // Array mulai dari 0, sedangkan featureId dari 1, jadi dikurang 1
+    const featureName = featureList[featureId - 1] || `Feature ${featureId}`;
 
-    allData[featureId] = {
-      summary: modal.querySelector(".summary").value,
-      priority: modal.querySelector(".priority").value,
-      status: modal.querySelector(".status").value,
-      precondition: modal.querySelector(".precondition").value,
-      postcondition: modal.querySelector(".postcondition").value,
-      basicPath: collectPath(modal, "basic"),
-      alternativePath: collectPath(modal, "alternative"),
-      exceptionPath: collectPath(modal, "exception"),
+    // B. Siapkan Data (Format JSON sesuai Backend)
+    const payload = {
+      [featureId]: {
+        featureName: featureName, // <--- PENTING: Kirim Nama Fitur
+        summary: modal.querySelector(".summary").value,
+        priority: modal.querySelector(".priority").value,
+        status: modal.querySelector(".status").value,
+        precondition: modal.querySelector(".precondition").value,
+        postcondition: modal.querySelector(".postcondition").value,
+        basicPath: collectPath(modal, "basic"),
+        alternativePath: collectPath(modal, "alternative"),
+        exceptionPath: collectPath(modal, "exception"),
+      }
     };
 
-    localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
-    bootstrap.Modal.getInstance(modal).hide();
-    alert("Data berhasil disimpan ✅");
+    // C. Ubah Tombol jadi "Loading..." biar user tau lagi proses
+    const originalText = saveButton.innerText;
+    saveButton.innerText = "Saving...";
+    saveButton.disabled = true;
+
+    // D. KIRIM KE DATABASE (Fetch API)
+    fetch('/api/save_usecase_spec/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            // Kalau kamu pakai csrf_exempt di views.py, baris bawah ini gak wajib.
+            // Tapi kalau nanti dihapus, harus pakai token CSRF Django.
+            // 'X-CSRFToken': getCookie('csrftoken') 
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // 1. Update juga LocalStorage (Buat cadangan di browser)
+            const allData = JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+            allData[featureId] = payload[featureId];
+            localStorage.setItem("useCaseSpecs", JSON.stringify(allData));
+
+            // 2. Kasih tau User Sukses
+            alert("✅ Data Berhasil Disimpan ke Database!");
+
+            // 3. Tutup Modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        } else {
+            // Kalau backend nolak
+            alert("❌ Gagal Simpan: " + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("⚠️ Terjadi kesalahan koneksi ke server!");
+    })
+    .finally(() => {
+        // E. Balikin Tombol kayak semula (Mau sukses/gagal)
+        saveButton.innerText = originalText;
+        saveButton.disabled = false;
+    });
   }
 });
 
@@ -306,8 +634,8 @@ function collectPath(modal, type) {
   return [...modal.querySelectorAll(
     `.path-container[data-type="${type}"] .path-row`
   )].map(r => ({
-    actor: r.querySelector(".actor").value,
-    system: r.querySelector(".system").value,
+    actor: r.querySelector(".actor")?.value || "",
+    system: r.querySelector(".system")?.value || "",
   }));
 }
 </script>
