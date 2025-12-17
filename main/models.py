@@ -84,83 +84,70 @@ class UserStoryScenario(models.Model):
     input_and = models.TextField()
 
 # Tabel UseCaseSpecification
+# main/models.py
+
+# ... (Model Pengguna, Project, GUI, Usecase biarkan saja) ...
+
+# UPDATE BAGIAN INI 👇
+
 class UseCaseSpecification(models.Model):
-    id_usecasespecification = models.CharField(max_length=5, primary_key=True)
-
-    # relasi ke Usecase (punya kamu sebelumnya)
-    usecase = models.ForeignKey(
-        Usecase, 
-        on_delete=models.CASCADE, 
-        related_name='specifications'
-    )
-
-    # gambar hasil
-    hasil_usecasespecification = models.ImageField(upload_to='usecase_specs/')
-
-    # Summary Description
-    summary_description = models.CharField(max_length=500)
-
-    # Priority
+    # Kita ganti PK jadi AutoField biar gampang
+    id = models.AutoField(primary_key=True) 
+    
+    # Kita sambungin ke GUI (Project), bukan ke Usecase Diagram
+    # Kenapa? Karena Spek ini dibuat sebelum diagram jadi pun bisa.
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='specifications')
+    
+    # Tambah kolom Nama Fitur (PENTING!)
+    feature_name = models.CharField(max_length=255, default="Feature")
+    
+    summary_description = models.TextField(null=True, blank=True)
+    
     PRIORITY_CHOICES = [
         ('Must Have', 'Must Have'),
         ('Should Have', 'Should Have'),
         ('Could Have', 'Could Have'),
         ("Won't Have", "Won't Have"),
     ]
-    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES, default='Must Have')
-
-    # Status
-    STATUS_CHOICES = [
-        ('active', 'active'),
-        ('inactive', 'inactive')
-    ]
-    status = models.CharField(max_length=250, choices=STATUS_CHOICES, default='active')
-
-    # Pre & Post Condition
-    input_precondition = models.CharField(max_length=500)
-    input_postcondition = models.CharField(max_length=500)
-
-    def __str__(self):
-        return self.id_usecasespecification
+    priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Must Have')
     
-class BasicPath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='basic_paths'
-    )
-    step_number = models.IntegerField()
-    description = models.CharField(max_length=500)
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive')
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Active')
+    
+    input_precondition = models.TextField(null=True, blank=True)
+    input_postcondition = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Basic Step {self.step_number}"
+        return f"Spec: {self.feature_name}"
 
+
+# UPDATE TABEL JALUR (Biar bisa nampung Actor & System) 👇
+
+class BasicPath(models.Model):
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='basic_paths')
+    step_number = models.IntegerField()
+    
+    # Ganti description jadi 2 kolom ini biar sesuai HTML
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
 
 class AlternativePath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='alternative_paths'
-    )
-    related_basic_step = models.IntegerField()
-    description = models.CharField(max_length=500)
-
-    def __str__(self):
-        return f"Alternative tied to Step {self.related_basic_step}"
-
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='alternative_paths')
+    step_number = models.IntegerField() # Ini buat nyimpen urutan baris
+    
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
 
 class ExceptionPath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='exception_paths'
-    )
-    related_basic_step = models.IntegerField()
-    description = models.CharField(max_length=500)
-
-    def __str__(self):
-        return f"Exception tied to Step {self.related_basic_step}"
-
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='exception_paths')
+    step_number = models.IntegerField()
+    
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
+    
 
 # Tabel ImportedTable
 class ImportedTable(models.Model):

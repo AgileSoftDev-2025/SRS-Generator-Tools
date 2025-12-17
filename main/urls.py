@@ -46,7 +46,7 @@ urlpatterns = [
     
     # API Endpoints
     path('api/save-use-case/', views.save_use_case, name='save_use_case'),
-    path('save_use_case_spec/<int:feature_id>/', views.save_use_case_spec, name='save_use_case_spec'),
+    path('api/save_usecase_spec/', views.save_usecase_spec, name='save_usecase_spec'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
     path("api/get-latest-userstory/", views.get_latest_userstory, name="get_latest_userstory"),
     path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),

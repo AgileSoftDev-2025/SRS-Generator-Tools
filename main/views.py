@@ -26,6 +26,10 @@ from .models import GUI, Page, Element, Usecase
 import requests      
 import urllib.parse   
 from django.core.files.base import ContentFile  
+from .models import GUI, UseCaseSpecification, BasicPath, AlternativePath, ExceptionPath
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
     if 'user_id' not in request.session:
@@ -140,8 +144,6 @@ def save_actors_and_features(request):
         if not current_gui:
             return JsonResponse({'status': 'error', 'message': 'Belum ada GUI!'}, status=400)
 
-        # 🔥 INI KUNCINYA: Hapus data lama sebelum simpan baru 🔥
-        # Artinya: "Tolong hapus semua UserStory milik GUI ini"
         UserStory.objects.filter(gui=current_gui).delete()
 
         # 2. Baru setelah bersih, kita simpan data yang baru masuk
@@ -294,31 +296,72 @@ def use_case_spec(request):
     })
 
 
-def save_use_case_spec(request, feature_id):
-    if request.method == "POST":
-        # Ambil data dari form
-        summary = request.POST.get("summary")
-        priority = request.POST.get("priority")
-        status = request.POST.get("status")
-        
-        # Ambil feature terkait
-        feature = get_object_or_404(Feature, id=feature_id)
-        
-        # Simpan data ke UseCaseSpecification (buat baru atau update)
-        use_case, created = UseCaseSpecification.objects.update_or_create(
-            feature=feature,  # hubungan foreign key
-            defaults={
-                'summary': summary,
-                'priority': priority,
-                'status': status
-            }
-        )
-        
-        # Redirect kembali ke halaman input
-        return redirect("input_informasi_tambahan")
-    else:
-        # Jika bukan POST, redirect ke halaman input
-        return redirect("input_informasi_tambahan")
+@csrf_exempt
+def save_usecase_spec(request):
+    # CCTV 1: Cek apakah function dipanggil
+    print("🔥 REQUEST MASUK KE VIEW!") 
+    
+    if request.method == 'POST':
+        try:
+            # CCTV 2: Cek data mentah yang dikirim browser
+            print(f"📦 Body Mentah: {request.body}") 
+            
+            data = json.loads(request.body)
+            
+            # CCTV 3: Cek data setelah diterjemahkan jadi Python Dictionary
+            print(f"📊 Data Parsed: {data}") 
+            
+            # --- MULAI LOGIC SAVE ---
+            current_gui = GUI.objects.last()
+            if not current_gui:
+                print("❌ GUI Tidak Ditemukan!")
+                return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+
+            for key, spec_data in data.items():
+                fname = spec_data.get('featureName', f"Feature {key}")
+                print(f"💾 Menyimpan Fitur: {fname}") # CCTV 4
+                
+                # 1. Simpan Header
+                spec_obj, created = UseCaseSpecification.objects.update_or_create(
+                    gui=current_gui,
+                    feature_name=fname,
+                    defaults={
+                        'summary_description': spec_data.get('summary'),
+                        'priority': spec_data.get('priority'),
+                        'status': spec_data.get('status'),
+                        'input_precondition': spec_data.get('precondition'),
+                        'input_postcondition': spec_data.get('postcondition'),
+                    }
+                )
+
+                # 2. Hapus Lama
+                BasicPath.objects.filter(usecase_spec=spec_obj).delete()
+                AlternativePath.objects.filter(usecase_spec=spec_obj).delete()
+                ExceptionPath.objects.filter(usecase_spec=spec_obj).delete()
+
+                # 3. Simpan Baru
+                def save_paths(path_list, ModelClass):
+                    for idx, step in enumerate(path_list):
+                        ModelClass.objects.create(
+                            usecase_spec=spec_obj,
+                            step_number=idx + 1,
+                            actor_action=step.get('actor'),
+                            system_response=step.get('system')
+                        )
+
+                save_paths(spec_data.get('basicPath', []), BasicPath)
+                save_paths(spec_data.get('alternativePath', []), AlternativePath)
+                save_paths(spec_data.get('exceptionPath', []), ExceptionPath)
+
+            print("✅ SUKSES SIMPAN KE DB!") # CCTV 5
+            return JsonResponse({'status': 'success', 'message': 'Data Saved Successfully!'})
+
+        # INI PASANGANNYA 'TRY' YANG TADI HILANG 👇
+        except Exception as e:
+            print(f"❌ ERROR DI VIEW: {e}") # Ini bakal nyetak error di terminal kalau ada
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid Method'}, status=405)
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
