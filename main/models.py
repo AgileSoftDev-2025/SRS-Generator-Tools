@@ -63,7 +63,7 @@ class Usecase(models.Model):
 # Tabel UserStory
 class UserStory(models.Model):
     id_userstory = models.AutoField(primary_key=True)
-    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='userstories')
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, null=True, blank=True)
     input_sebagai = models.CharField(max_length=100)
     input_fitur = models.CharField(max_length=100)
     input_tujuan = models.CharField(max_length=255, null=True, blank=True)

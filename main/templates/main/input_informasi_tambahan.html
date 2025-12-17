@@ -364,11 +364,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add event listener untuk tombol Next
   nextButton.addEventListener("click", function() {
+  window.location.href = "/use-case-spec/";
     // Simpan semua data yang sudah diisi
     saveAllData();
-    
-    // Redirect ke use_case_spec.html
-    window.location.href = 'http://127.0.0.1:5501/main/templates/main/use_case_spec.html';
   });
 });
 
