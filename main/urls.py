@@ -28,7 +28,8 @@ urlpatterns = [
     # Alternative/Special Features 
     path('use-case/', views.use_case, name='use_case'),
     path('user_scenario/', views.user_scenario, name='user_scenario'),
-    path('api/save_scenarios/', views.save_scenarios_api, name='save_scenarios_api'),
+    path('save_scenarios/', views.save_scenarios_api, name='save_scenarios_api'),
+    path('scenario_result/', views.scenario_result, name='scenario_result'),
     
     # SQL Import & Class Diagram
     path('import-sql/', views.import_sql, name='import_sql'),

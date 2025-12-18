@@ -95,8 +95,8 @@
         {% endif %}
 
         <div class="navigation">
-            <a href="#" class="nav-btn" style="background:#6c757d">&lt; BACK</a>
-            <button onclick="saveAllScenarios()" class="nav-btn">FINISH & SAVE &gt;</button>
+            <a href="/input_gui/G02/" class="nav-btn" style="background:#6c757d">&lt; BACK</a>
+            <button onclick="saveAllScenarios()" class="nav-btn">NEXT &gt;</button>
         </div>
     </div>
 
@@ -252,7 +252,7 @@
             });
         });
 
-        fetch('/api/save_scenarios/', {
+        fetch('/save_scenarios/', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -263,8 +263,8 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === 'success') {
-                alert("Skenario Berhasil Disimpan!");
-                window.location.href = '/sequence-diagram/'; 
+                // alert("Skenario Berhasil Disimpan!");
+                window.location.href = "{% url 'main:scenario_result' %}";
             } else {
                 alert("Error: " + data.message);
             }

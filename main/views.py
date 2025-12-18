@@ -1,4 +1,6 @@
 import os
+# Di baris paling atas views.py kamu
+from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, TestStep
 from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
@@ -256,39 +258,84 @@ def save_scenarios_api(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # data format: [{ spec_id: 1, type: 'Positive', steps: [...] }, ...]
-
+            print("=" * 60)
+            print("🔵 DATA DITERIMA:", data)
+            print("=" * 60)
+            
+            saved_count = 0
+            
             for item in data:
                 spec_id = item.get('spec_id')
-                scen_type = item.get('type') # Positive / Negative
+                scen_type = item.get('type')
                 steps = item.get('steps', [])
-
-                spec = UseCaseSpecification.objects.get(pk=spec_id)
-
-                # Hapus skenario lama biar gak duplikat (Clean slate)
-                TestScenario.objects.filter(use_case=spec, scenario_type=scen_type).delete()
-
-                # Buat Skenario Baru
+                
+                print(f"🔵 Processing Spec ID: {spec_id}, Type: {scen_type}")
+                
+                # ⚠️ PENTING: Pastikan spec_id adalah INTEGER, bukan string
+                try:
+                    spec = UseCaseSpecification.objects.get(pk=int(spec_id))
+                except UseCaseSpecification.DoesNotExist:
+                    print(f"❌ Spec dengan ID {spec_id} tidak ditemukan!")
+                    continue
+                
+                # Hapus scenario lama dengan type yang sama
+                deleted_count = TestScenario.objects.filter(
+                    use_case=spec, 
+                    scenario_type=scen_type
+                ).delete()
+                print(f"🗑️ Deleted {deleted_count[0]} old scenarios")
+                
+                # Buat scenario baru
                 scenario = TestScenario.objects.create(
                     use_case=spec,
                     scenario_type=scen_type
                 )
-
-                # Simpan Step-stepnya
-                for idx, step in enumerate(steps):
-                    TestStep.objects.create(
+                print(f"✅ Created Scenario ID: {scenario.id}")
+                
+                # Simpan steps
+                for idx, step in enumerate(steps, start=1):
+                    test_step = TestStep.objects.create(
                         scenario=scenario,
-                        step_number=idx + 1,
-                        condition=step.get('condition'),
-                        action_type=step.get('activity'),
-                        target_id=step.get('target_id'),   # ID element/page
-                        target_text=step.get('target_text') # Nama element/page/custom text
+                        step_number=idx,
+                        condition=step.get('condition', 'Given'),
+                        action_type=step.get('activity', ''),
+                        target_id=step.get('target_id'),
+                        target_text=step.get('target_text', '')
                     )
+                    print(f"  ✅ Step {idx}: {test_step.condition} - {test_step.action_type}")
+                
+                saved_count += 1
             
-            return JsonResponse({'status': 'success'})
+            print("=" * 60)
+            print(f"🎉 TOTAL SAVED: {saved_count} scenarios")
+            print("=" * 60)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{saved_count} scenarios saved',
+                'count': saved_count
+            })
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON Error: {e}")
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Invalid JSON: {str(e)}'
+            }, status=400)
+            
         except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-    return JsonResponse({'status': 'error'}, status=400)
+            print(f"❌ ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'status': 'error', 
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error', 
+        'message': 'Method not allowed'
+    }, status=405)
 
 def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
@@ -1034,3 +1081,24 @@ def activity_diagram(request):
         'use_case_data': json.dumps(specs_data) # Kirim sebagai JSON List
     }
     return render(request, 'main/activity_diagram.html', context)
+
+def scenario_result(request):
+    # ✅ GANTI: testscenario_set__teststep_set → scenarios__steps
+    specs = UseCaseSpecification.objects.prefetch_related(
+        'scenarios__steps'  # ← Sesuaikan dengan related_name di models
+    ).all()
+    
+    # DEBUG: Print untuk memastikan data ada
+    print("=" * 60)
+    print("🔍 SCENARIO RESULT DEBUG")
+    print(f"Total Specs: {specs.count()}")
+    for spec in specs:
+        scenarios = spec.scenarios.all()  # ← Ganti jadi .scenarios
+        print(f"\nSpec: {spec.feature_name} (ID: {spec.id})")
+        print(f"  Scenarios: {scenarios.count()}")
+        for scenario in scenarios:
+            steps = scenario.steps.all()  # ← Ganti jadi .steps
+            print(f"    - {scenario.scenario_type}: {steps.count()} steps")
+    print("=" * 60)
+    
+    return render(request, 'main/scenario_result.html', {'specs': specs})
