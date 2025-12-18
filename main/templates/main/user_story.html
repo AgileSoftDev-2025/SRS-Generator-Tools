@@ -337,35 +337,67 @@ let useCases = [];
 let currentPlantUMLUrl = '';
 let currentPlantUMLCode = '';
 
-// Fungsi untuk mengambil data dari halaman sebelumnya
+// 🔥 FUNGSI BARU: Simpan data ke localStorage sebelum ke halaman berikutnya
+function saveDataForNextPage() {
+    const saveData = {
+        useCases: useCases,
+        plantUMLCode: currentPlantUMLCode,
+        plantUMLUrl: currentPlantUMLUrl,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('generatedUseCaseData', JSON.stringify(saveData));
+    console.log('Data saved for next page:', saveData);
+}
+
+// 🔥 FUNGSI DIPERBAIKI: Mengambil data dari berbagai sumber
 function loadUseCasesFromPreviousPage() {
+    // 1. COBA ambil dari localStorage 'generatedUseCaseData' (data yang disimpan sebelumnya)
+    const savedGeneratedData = localStorage.getItem('generatedUseCaseData');
+    if (savedGeneratedData) {
+        try {
+            const data = JSON.parse(savedGeneratedData);
+            useCases = data.useCases || [];
+            currentPlantUMLCode = data.plantUMLCode || '';
+            currentPlantUMLUrl = data.plantUMLUrl || '';
+            console.log('✅ Loaded from generatedUseCaseData:', useCases.length, 'use cases');
+            return useCases.length > 0;
+        } catch (e) {
+            console.error('❌ Error parsing generatedUseCaseData:', e);
+        }
+    }
+    
+    // 2. Fallback: Ambil dari localStorage 'actorsAndFeatures' (data awal)
     const savedData = localStorage.getItem('actorsAndFeatures');
     if (savedData) {
-        const actors = JSON.parse(savedData);
-        
-        // Konversi data aktor ke format use case
-        useCases = [];
-        let hasValidData = false;
-        
-        actors.forEach(actor => {
-            if (actor.name && actor.name.trim() !== '') {
-                actor.features.forEach(feature => {
-                    // PERUBAHAN PENTING: Hanya memeriksa apakah "what" diisi
-                    // "why" sekarang opsional
-                    if (feature.what && feature.what.trim() !== '') {
-                        useCases.push({
-                            actor: actor.name,
-                            feature: feature.what,
-                            purpose: feature.why || '' // Jika why kosong, gunakan string kosong
-                        });
-                        hasValidData = true;
-                    }
-                });
-            }
-        });
-        
-        return hasValidData;
+        try {
+            const actors = JSON.parse(savedData);
+            useCases = [];
+            let hasValidData = false;
+            
+            actors.forEach(actor => {
+                if (actor.name && actor.name.trim() !== '') {
+                    actor.features.forEach(feature => {
+                        if (feature.what && feature.what.trim() !== '') {
+                            useCases.push({
+                                actor: actor.name,
+                                feature: feature.what,
+                                purpose: feature.why || '' // Jika why kosong, gunakan string kosong
+                            });
+                            hasValidData = true;
+                        }
+                    });
+                }
+            });
+            
+            console.log('✅ Loaded from actorsAndFeatures:', useCases.length, 'use cases');
+            return hasValidData;
+        } catch (e) {
+            console.error('❌ Error parsing actorsAndFeatures:', e);
+        }
     }
+    
+    console.log('❌ No data found in localStorage');
     return false;
 }
 
@@ -844,16 +876,21 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
 // 🔥 PERUBAHAN PENTING: Event listener untuk tombol navigasi - DIPERBAIKI!
 document.getElementById('backButton').addEventListener('click', function() {
     // Kembali ke halaman use_case_diagram dengan URL Django yang benar
-    window.location.href = '/use-case-diagram/';  // 🔥 PERUBAHAN: Dari 'use_case_diagram.html' ke '/use-case-diagram/'
+    window.location.href = '/use-case-diagram/';
 });
 
+// 🔥 PERUBAHAN PENTING: Simpan data SEBELUM ke halaman berikutnya
 document.getElementById('nextButton').addEventListener('click', function() {
     if (useCases.length === 0) {
         alert('Please generate use cases first before proceeding.');
         return;
     }
-    // Beralih ke halaman input_informasi_tambahan dengan URL Django yang benar
-    window.location.href = '/input-informasi-tambahan/';  // 🔥 PERUBAHAN: Dari 'input_informasi_tambahan.html' ke '/input-informasi-tambahan/'
+    
+    // 🔥 SIMPAN DATA ke localStorage SEBELUM redirect
+    saveDataForNextPage();
+    
+    // Beralih ke halaman input_informasi_tambahan
+    window.location.href = '/input-informasi-tambahan/';
 });
 
 // 🔥 PERUBAHAN: Tambahkan fungsi untuk handle tombol "Go to Define Actors" di state kosong
