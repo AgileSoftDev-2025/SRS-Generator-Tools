@@ -50,14 +50,28 @@ class GUI(models.Model):
 class Usecase(models.Model):
     id_usecase = models.AutoField(primary_key=True)
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='usecases')
+    
+    # simpan gambar
     hasil_usecase = models.ImageField(upload_to='usecases/')
+    
+    # simpan kode PlantUML
+    plantuml_code = models.TextField(null=True, blank=True) 
+
+    def __str__(self):
+        return f"Use Case - {self.gui.nama_atribut}"
 
 # Tabel UserStory
 class UserStory(models.Model):
     id_userstory = models.AutoField(primary_key=True)
-    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='userstories')
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, null=True, blank=True)
     input_sebagai = models.CharField(max_length=100)
     input_fitur = models.CharField(max_length=100)
+    input_tujuan = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        # Kalau ada tujuannya, tambahin "so that..."
+        tujuan_text = f", so that {self.input_tujuan}" if self.input_tujuan else ""
+        return f"As a {self.input_sebagai}, I want to {self.input_fitur}{tujuan_text}."
 
 # Tabel UserStoryScenario
 class UserStoryScenario(models.Model):
@@ -70,83 +84,68 @@ class UserStoryScenario(models.Model):
     input_and = models.TextField()
 
 # Tabel UseCaseSpecification
+# main/models.py
+
+# ... (Model Pengguna, Project, GUI, Usecase biarkan saja) ...
+
+# UPDATE BAGIAN INI 👇
+
 class UseCaseSpecification(models.Model):
-    id_usecasespecification = models.CharField(max_length=5, primary_key=True)
-
-    # relasi ke Usecase (punya kamu sebelumnya)
-    usecase = models.ForeignKey(
-        Usecase, 
-        on_delete=models.CASCADE, 
-        related_name='specifications'
-    )
-
-    # gambar hasil
-    hasil_usecasespecification = models.ImageField(upload_to='usecase_specs/')
-
-    # Summary Description
-    summary_description = models.CharField(max_length=500)
-
-    # Priority
+    # Kita ganti PK jadi AutoField biar gampang
+    id = models.AutoField(primary_key=True) 
+    
+    gui = models.ForeignKey(GUI, on_delete=models.CASCADE, null=True, blank=True)
+    
+    # Tambah kolom Nama Fitur (PENTING!)
+    feature_name = models.CharField(max_length=255, default="Feature")
+    
+    summary_description = models.TextField(null=True, blank=True)
+    
     PRIORITY_CHOICES = [
         ('Must Have', 'Must Have'),
         ('Should Have', 'Should Have'),
         ('Could Have', 'Could Have'),
         ("Won't Have", "Won't Have"),
     ]
-    priority = models.CharField(max_length=250, choices=PRIORITY_CHOICES, default='Must Have')
-
-    # Status
-    STATUS_CHOICES = [
-        ('active', 'active'),
-        ('inactive', 'inactive')
-    ]
-    status = models.CharField(max_length=250, choices=STATUS_CHOICES, default='active')
-
-    # Pre & Post Condition
-    input_precondition = models.CharField(max_length=500)
-    input_postcondition = models.CharField(max_length=500)
-
-    def __str__(self):
-        return self.id_usecasespecification
+    priority = models.CharField(max_length=50, choices=PRIORITY_CHOICES, default='Must Have')
     
-class BasicPath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='basic_paths'
-    )
-    step_number = models.IntegerField()
-    description = models.CharField(max_length=500)
+    STATUS_CHOICES = [
+        ('Active', 'Active'),
+        ('Inactive', 'Inactive')
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Active')
+    
+    input_precondition = models.TextField(null=True, blank=True)
+    input_postcondition = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return f"Basic Step {self.step_number}"
+        return f"Spec: {self.feature_name}"
 
+
+# UPDATE TABEL JALUR (Biar bisa nampung Actor & System) 👇
+
+class BasicPath(models.Model):
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='basic_paths')
+    step_number = models.IntegerField()
+    
+    # Ganti description jadi 2 kolom ini biar sesuai HTML
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
 
 class AlternativePath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='alternative_paths'
-    )
-    related_basic_step = models.IntegerField()
-    description = models.CharField(max_length=500)
-
-    def __str__(self):
-        return f"Alternative tied to Step {self.related_basic_step}"
-
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='alternative_paths')
+    step_number = models.IntegerField() # Ini buat nyimpen urutan baris
+    
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
 
 class ExceptionPath(models.Model):
-    usecase_spec = models.ForeignKey(
-        UseCaseSpecification,
-        on_delete=models.CASCADE,
-        related_name='exception_paths'
-    )
-    related_basic_step = models.IntegerField()
-    description = models.CharField(max_length=500)
-
-    def __str__(self):
-        return f"Exception tied to Step {self.related_basic_step}"
-
+    usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='exception_paths')
+    step_number = models.IntegerField()
+    
+    actor_action = models.TextField(null=True, blank=True)
+    system_response = models.TextField(null=True, blank=True)
+    
 
 # Tabel ImportedTable
 class ImportedTable(models.Model):
@@ -242,20 +241,19 @@ class Page(models.Model):
     gui = models.ForeignKey(GUI, on_delete=models.CASCADE, related_name='pages')
     name = models.CharField(max_length=255)
     order = models.PositiveIntegerField()
-
+    
     class Meta:
         unique_together = ('gui', 'order')
-
+        ordering = ['order']
+    
     def __str__(self):
         return f"{self.name} (Page {self.order})"
 
-
 class Element(models.Model):
     INPUT_TYPES = [
+        ("button", "Button"),
         ("text", "Text"),
         ("number", "Number"),
-        ("email", "Email"),
-        ("password", "Password"),
         ("date", "Date"),
         ("checkbox", "Checkbox"),
         ("radio", "Radio"),
@@ -266,10 +264,39 @@ class Element(models.Model):
     name = models.CharField(max_length=255)
     input_type = models.CharField(max_length=20, choices=INPUT_TYPES)
     order = models.PositiveIntegerField()
+    element_type = models.CharField(max_length=50, default="text")  # baru, bisa diisi default
 
     class Meta:
+        db_table = 'main_inputelement'  # pastiin nyambung sama tabel SQLite lama
         unique_together = ('page', 'order')
 
     def __str__(self):
-        return f"{self.name} [{self.input_type}]"
+        return f"{self.name} ({self.input_type})"
 
+class TestScenario(models.Model):
+    SCENARIO_TYPES = [('Positive', 'Positive'), ('Negative', 'Negative')]
+    
+    # Menghubungkan ke Use Case Spec
+    use_case = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='scenarios')
+    scenario_type = models.CharField(max_length=20, choices=SCENARIO_TYPES)
+    
+    def __str__(self):
+        return f"{self.use_case.feature_name} - {self.scenario_type}"
+
+class TestStep(models.Model):
+    scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE, related_name='steps')
+    step_number = models.IntegerField()
+    
+    # Dropdown 1: Given/When/Then
+    condition = models.CharField(max_length=50) 
+    
+    # Dropdown 2: User Activity (click, input, page, custom)
+    action_type = models.CharField(max_length=50)
+    
+    # Dropdown 3: Target (Bisa Page, Element, atau Custom Text)
+    # Kita simpan ID-nya saja biar fleksibel, atau text kalau custom
+    target_id = models.CharField(max_length=100, null=True, blank=True)
+    target_text = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.condition} {self.action_type} {self.target_text}"

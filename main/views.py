@@ -1,4 +1,7 @@
 import os
+# Di baris paling atas views.py kamu
+from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, TestStep
+from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
@@ -18,15 +21,27 @@ from .forms import RegisterForm
 from main.generators.sequence_generator import generate_sequence_plantuml
 import subprocess
 from django.conf import settings
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from .models import GUI, Page, Element, Usecase
+import requests      
+import urllib.parse   
+from django.core.files.base import ContentFile  
+from .models import GUI, UseCaseSpecification, BasicPath, AlternativePath, ExceptionPath
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def home(request):
-    projects = Project.objects.all() 
-    return render(request, 'main/home.html', {'projects': projects})
     if 'user_id' not in request.session:
         return redirect('main:login')
+
     user_id = request.session['user_id']
     pengguna = get_object_or_404(Pengguna, id_user=user_id)
-    projects = Project.objects.all()  # ambil semua project
+
+    projects = Project.objects.filter(pengguna=pengguna)
     return render(request, 'main/home.html', {'projects': projects})
 
 def login_view(request):
@@ -120,80 +135,453 @@ def save_userstory(request):
         )
         userstory.save()
         return redirect("halaman_sukses")
+
+@csrf_exempt
+@require_http_methods(["POST"])
+@transaction.atomic
+def save_actors_and_features(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # ==========================================
+            # 1. BERSIHKAN DATA LAMA (RESET)
+            # ==========================================
+            UserStory.objects.all().delete()
+            UseCaseSpecification.objects.all().delete()
+            
+            saved_count = 0
+            
+            # ==========================================
+            # 2. SIAPKAN PENAMPUNG (GROUPING)
+            # ==========================================
+            # Ini kuncinya: Kita kumpulkan dulu fiturnya biar nggak duplikat di Spec
+            feature_map = {} 
+
+            # ==========================================
+            # 3. LOOPING DATA INPUT
+            # ==========================================
+            for actor in data:
+                actor_name = actor.get('name')
+                features = actor.get('features', [])
+                
+                for feat in features:
+                    feature_name = feat.get('what')
+                    feature_purpose = feat.get('why')
+                    
+                    # ---------------------------------------------------
+                    # A. SIMPAN USER STORY (Untuk Garis Panah Diagram)
+                    # ---------------------------------------------------
+                    # Tetap disimpan satu-per-satu meskipun fiturnya sama.
+                    # Contoh: 
+                    # Row 1: Babi -> Makan
+                    # Row 2: Customer -> Makan
+                    UserStory.objects.create(
+                        input_sebagai=actor_name,
+                        input_fitur=feature_name,
+                        input_tujuan=feature_purpose,
+                    )
+
+                    # ---------------------------------------------------
+                    # B. KUMPULKAN DATA SPEC (Untuk Oval & Dokumen)
+                    # ---------------------------------------------------
+                    # Jangan simpan ke DB dulu, masukkan ke map biar unik.
+                    if feature_name not in feature_map:
+                        feature_map[feature_name] = {
+                            'actors': [], 
+                            'purpose': feature_purpose
+                        }
+                    
+                    # Catat aktornya siapa aja yang pakai fitur ini
+                    if actor_name not in feature_map[feature_name]['actors']:
+                        feature_map[feature_name]['actors'].append(actor_name)
+
+            # ==========================================
+            # 4. SIMPAN USE CASE SPECIFICATION (FINAL)
+            # ==========================================
+            # Sekarang baru kita simpan ke DB UseCaseSpecification (dijamin unik per fitur)
+            for feat_name, info in feature_map.items():
+                # Gabungkan aktor jadi teks cantik: "Babi, Customer"
+                actors_str = ", ".join(info['actors'])
+                
+                UseCaseSpecification.objects.create(
+                    feature_name=feat_name,
+                    # Summary otomatis jadi pintar: "Users (Babi, Customer) want to..."
+                    summary_description=f"Users ({actors_str}) want to {feat_name} so that {info['purpose']}",
+                    priority="Must Have",
+                    status="Active"
+                )
+                saved_count += 1
+
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'Berhasil! {saved_count} fitur unik disimpan & User Story tercatat.'
+            })
+
+        except Exception as e:
+            print(f"❌ Error Save: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     
+    return JsonResponse({'status': 'error', 'message': 'Invalid Method'}, status=400)
+
 def use_case(request):
     return render(request, 'main/use_case.html')
 
 def user_scenario(request):
-    return render(request, 'main/user_scenario.html')
+    gui = GUI.objects.last() 
+    specs = UseCaseSpecification.objects.prefetch_related(
+        'scenarios__steps'  # ← PENTING: Harus pakai 'scenarios' bukan 'testscenario_set'
+    ).all()
+    
+    gui_data = {'pages': [], 'elements': []}
+
+    if gui:
+        pages = Page.objects.filter(gui=gui)
+        for p in pages:
+            gui_data['pages'].append({'id': p.id, 'name': p.name})
+        
+        elements = Element.objects.filter(page__gui=gui)
+        for el in elements:
+            gui_data['elements'].append({
+                'id': el.id, 
+                'name': el.name, 
+                'type': el.input_type.lower() if el.input_type else "text", 
+                'page': el.page.name
+            })
+
+    # SIAPKAN DATA SCENARIO YANG SUDAH TERSIMPAN
+    saved_scenarios = {}
+    for spec in specs:
+        saved_scenarios[str(spec.id)] = {  # ← PENTING: Ubah jadi string
+            'Positive': [],
+            'Negative': []
+        }
+        for scenario in spec.scenarios.all():
+            steps_data = []
+            for step in scenario.steps.all().order_by('step_number'):
+                steps_data.append({
+                    'condition': step.condition,
+                    'activity': step.action_type,
+                    'target_id': step.target_id or '',
+                    'target_text': step.target_text or ''
+                })
+            saved_scenarios[str(spec.id)][scenario.scenario_type] = steps_data
+    
+    # DEBUG: Print di terminal untuk cek data
+    print("=" * 60)
+    print("🔍 USER SCENARIO DEBUG")
+    print(f"Total Specs: {specs.count()}")
+    print(f"Saved Scenarios: {saved_scenarios}")
+    print("=" * 60)
+
+    return render(request, 'main/user_scenario.html', {
+        'specs': specs,
+        'gui_data_json': json.dumps(gui_data),
+        'saved_scenarios_json': json.dumps(saved_scenarios)
+    })
+
+@csrf_exempt
+def save_scenarios_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print("=" * 60)
+            print("🔵 DATA DITERIMA:", data)
+            print("=" * 60)
+            
+            saved_count = 0
+            
+            for item in data:
+                spec_id = item.get('spec_id')
+                scen_type = item.get('type')
+                steps = item.get('steps', [])
+                
+                print(f"🔵 Processing Spec ID: {spec_id}, Type: {scen_type}")
+                
+                # ⚠️ PENTING: Pastikan spec_id adalah INTEGER, bukan string
+                try:
+                    spec = UseCaseSpecification.objects.get(pk=int(spec_id))
+                except UseCaseSpecification.DoesNotExist:
+                    print(f"❌ Spec dengan ID {spec_id} tidak ditemukan!")
+                    continue
+                
+                # Hapus scenario lama dengan type yang sama
+                deleted_count = TestScenario.objects.filter(
+                    use_case=spec, 
+                    scenario_type=scen_type
+                ).delete()
+                print(f"🗑️ Deleted {deleted_count[0]} old scenarios")
+                
+                # Buat scenario baru
+                scenario = TestScenario.objects.create(
+                    use_case=spec,
+                    scenario_type=scen_type
+                )
+                print(f"✅ Created Scenario ID: {scenario.id}")
+                
+                # Simpan steps
+                for idx, step in enumerate(steps, start=1):
+                    test_step = TestStep.objects.create(
+                        scenario=scenario,
+                        step_number=idx,
+                        condition=step.get('condition', 'Given'),
+                        action_type=step.get('activity', ''),
+                        target_id=step.get('target_id'),
+                        target_text=step.get('target_text', '')
+                    )
+                    print(f"  ✅ Step {idx}: {test_step.condition} - {test_step.action_type}")
+                
+                saved_count += 1
+            
+            print("=" * 60)
+            print(f"🎉 TOTAL SAVED: {saved_count} scenarios")
+            print("=" * 60)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'{saved_count} scenarios saved',
+                'count': saved_count
+            })
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON Error: {e}")
+            return JsonResponse({
+                'status': 'error', 
+                'message': f'Invalid JSON: {str(e)}'
+            }, status=400)
+            
+        except Exception as e:
+            print(f"❌ ERROR: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                'status': 'error', 
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error', 
+        'message': 'Method not allowed'
+    }, status=405)
 
 def use_case_diagram(request):
     return render(request, 'main/use_case_diagram.html')
 
+@csrf_exempt
+@require_http_methods(["POST", "GET"])
+def generate_usecase_diagram(request):
+    try:
+        # 1. Ambil GUI terakhir (Project Aktif)
+        current_gui = GUI.objects.last()
+        if not current_gui:
+            return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
+
+        # 2. Ambil User Stories (Bahan Bakunya)
+        stories = UserStory.objects.filter(gui=current_gui)
+        if not stories.exists():
+            return JsonResponse({'status': 'error', 'message': 'Belum ada User Story! Input dulu.'}, status=400)
+
+        # 3. --- RAKIT KODE PLANTUML ---
+        plantuml = []
+        plantuml.append("@startuml")
+        plantuml.append("left to right direction")
+        plantuml.append("skinparam packageStyle rectangle")
+        
+        defined_actors = set()
+        
+        for story in stories:
+            # Bersihin nama (ganti spasi jadi underscore)
+            actor_clean = story.input_sebagai.replace(" ", "_")
+            feature_clean = story.input_fitur
+            
+            # Definisi Actor
+            if actor_clean not in defined_actors:
+                plantuml.append(f"actor \"{story.input_sebagai}\" as {actor_clean}")
+                defined_actors.add(actor_clean)
+            
+            # Relasi
+            plantuml.append(f"{actor_clean} --> ({feature_clean})")
+            
+        plantuml.append("@enduml")
+        final_code = "\n".join(plantuml)
+
+        # 4. --- MINTA GAMBAR KE PLANTUML SERVER ---
+        encoded_code = urllib.parse.quote(final_code)
+        plantuml_url = f"http://www.plantuml.com/plantuml/png/{encoded_code}"
+        
+        response = requests.get(plantuml_url)
+        
+        if response.status_code == 200:
+            # 5. --- SIMPAN KE DATABASE ---
+            # Cari atau Buat row baru di tabel Usecase
+            diagram, created = Usecase.objects.update_or_create(
+                gui=current_gui,
+                defaults={
+                    'plantuml_code': final_code  # Simpan Resep
+                }
+            )
+
+            # Simpan File Gambar
+            file_name = f"usecase_{current_gui.id_gui}.png"
+            
+            # Hapus file lama kalau ada (biar rapi)
+            if diagram.hasil_usecase:
+                diagram.hasil_usecase.delete(save=False)
+            
+            # Simpan file baru
+            diagram.hasil_usecase.save(file_name, ContentFile(response.content), save=True)
+
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Diagram berhasil digenerate!',
+                'image_url': diagram.hasil_usecase.url
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Gagal konek ke PlantUML'}, status=500)
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 def input_informasi_tambahan(request):
-    return render(request, 'main/input_informasi_tambahan.html')
+    specs = UseCaseSpecification.objects.all().prefetch_related(
+        'basic_paths', 'alternative_paths', 'exception_paths'
+    )
+
+    use_cases_list = []
+    for spec in specs:
+        # Helper kecil buat format path
+        def get_paths(path_manager):
+            return [{'actor': p.actor_action, 'system': p.system_response} for p in path_manager.all()]
+
+        use_cases_list.append({
+            'id': spec.id,
+            'name': spec.feature_name,
+            'summary': spec.summary_description or "",
+            'priority': spec.priority,
+            'status': spec.status,
+            'precondition': spec.input_precondition or "",
+            'postcondition': spec.input_postcondition or "",
+            'basicPath': get_paths(spec.basic_paths),
+            'alternativePath': get_paths(spec.alternative_paths),
+            'exceptionPath': get_paths(spec.exception_paths)
+        })
+
+    context = {
+        # Kita pakai json.dumps biar datanya siap pakai
+        'use_cases_json': json.dumps(use_cases_list)
+    }
+    return render(request, 'main/input_informasi_tambahan.html', context)
 
 def use_case_spec(request):
-    # Ambil user story terakhir
-    userstory = UserStory.objects.last()
-
-    if not userstory:
-        messages.error(request, "Belum ada User Story")
-        return redirect("main:user_story")
-
-    # Auto-generate Use Case
-    usecase, _ = Usecase.objects.get_or_create(
-        userstory=userstory,
-        defaults={
-            "nama_usecase": userstory.input_fitur
-        }
+    # 1. Ambil data Use Case Spec
+    specs = UseCaseSpecification.objects.all().prefetch_related(
+        'basic_paths', 'alternative_paths', 'exception_paths'
     )
 
-    # Auto-generate Use Case Specification
-    spec, created = UseCaseSpecification.objects.get_or_create(
-        usecase=usecase,
-        defaults={
-            "summary_description": f"User dapat {userstory.input_fitur}",
-            "actor": userstory.input_sebagai,
-            "pre_condition": "User sudah login ke sistem",
-            "post_condition": "Proses berhasil dijalankan",
-            "priority": "High",
-            "status": "Draft"
-        }
-    )
-
-    return render(request, "main/use_case_spec.html", {
-        "userstory": userstory,
-        "usecase": usecase,
-        "spec": spec
-    })
-
-
-def save_use_case_spec(request, feature_id):
-    if request.method == "POST":
-        # Ambil data dari form
-        summary = request.POST.get("summary")
-        priority = request.POST.get("priority")
-        status = request.POST.get("status")
-        
-        # Ambil feature terkait
-        feature = get_object_or_404(Feature, id=feature_id)
-        
-        # Simpan data ke UseCaseSpecification (buat baru atau update)
-        use_case, created = UseCaseSpecification.objects.update_or_create(
-            feature=feature,  # hubungan foreign key
-            defaults={
-                'summary': summary,
-                'priority': priority,
-                'status': status
-            }
+    # 2. LOGIKA PINTAR: GET OR CREATE (Cari dulu, kalau gak ada baru bikin)
+    
+    # A. Pastikan ada USER
+    # Kita ambil user pertama yg ada di DB. Karena error tadi bilang udah ada, pasti ini berhasil.
+    current_user = Pengguna.objects.first()
+    if not current_user:
+        # Fallback cuma kalau beneran kosong melompong (jarang terjadi setelah error tadi)
+        current_user = Pengguna.objects.create(
+            id_user="U001", nama_user="Admin", email_user="admin@oneuml.com", password="123"
         )
-        
-        # Redirect kembali ke halaman input
-        return redirect("input_informasi_tambahan")
-    else:
-        # Jika bukan POST, redirect ke halaman input
-        return redirect("input_informasi_tambahan")
+
+    # B. Pastikan ada PROJECT (Milik User tadi)
+    # get_or_create mengembalikan 2 benda: (objek, created_boolean) -> kita cuma butuh objeknya (current_project)
+    current_project, _ = Project.objects.get_or_create(
+        id_project="P001",  # Kunci pencarian
+        defaults={          # Kalau belum ada, isi data ini:
+            'nama_project': "Project Skripsi",
+            'deskripsi': "Auto Generated",
+            'pengguna': current_user
+        }
+    )
+
+    # C. Pastikan ada GUI (Milik Project tadi)
+    current_gui, _ = GUI.objects.get_or_create(
+        id_gui="G001",      # Kunci pencarian
+        defaults={          # Kalau belum ada, isi data ini:
+            'project': current_project,
+            'nama_atribut': "Home Screen"
+        }
+    )
+
+    # 3. Kirim ke HTML (Siap dipakai tombol Next)
+    context = {
+        'specs': specs,
+        'gui': current_gui
+    }
+    return render(request, 'main/use_case_spec.html', context)
+
+@csrf_exempt
+def save_usecase_spec(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Kita perlu hapus data lama dulu biar gak duplikat (Opsional, tapi aman)
+            # UseCaseSpecification.objects.all().delete() 
+            
+            saved_count = 0
+
+            # Loop setiap fitur yang dikirim dari Frontend
+            for key, item in data.items():
+                
+                # 1. SIMPAN BAPAKNYA (UseCaseSpecification)
+                spec = UseCaseSpecification.objects.create(
+                    feature_name=item.get('featureName', 'No Name'),
+                    summary_description=item.get('summary', ''),
+                    priority=item.get('priority', 'Must Have'),
+                    status=item.get('status', 'Active'),
+                    input_precondition=item.get('precondition', ''),
+                    input_postcondition=item.get('postcondition', ''),
+                    # gui=current_gui (Kalau mau disambungin ke GUI, buka komen ini)
+                )
+
+                # 2. SIMPAN ANAK PERTAMA: Basic Path
+                # Ambil list 'basicPath' dari JSON
+                basic_paths = item.get('basicPath', []) 
+                for index, path in enumerate(basic_paths, start=1):
+                    BasicPath.objects.create(
+                        usecase_spec=spec,       # <--- Sambungkan ke Bapaknya
+                        step_number=index,       # Urutan langkah
+                        actor_action=path.get('actor', ''),
+                        system_response=path.get('system', '')
+                    )
+
+                # 3. SIMPAN ANAK KEDUA: Alternative Path
+                alt_paths = item.get('alternativePath', [])
+                for index, path in enumerate(alt_paths, start=1):
+                    AlternativePath.objects.create(
+                        usecase_spec=spec,
+                        step_number=index,
+                        actor_action=path.get('actor', ''),
+                        system_response=path.get('system', '')
+                    )
+
+                # 4. SIMPAN ANAK KETIGA: Exception Path
+                exc_paths = item.get('exceptionPath', [])
+                for index, path in enumerate(exc_paths, start=1):
+                    ExceptionPath.objects.create(
+                        usecase_spec=spec,
+                        step_number=index,
+                        actor_action=path.get('actor', ''),
+                        system_response=path.get('system', '')
+                    )
+                
+                saved_count += 1
+
+            return JsonResponse({'status': 'success', 'message': f'Berhasil simpan {saved_count} fitur!'})
+
+        except Exception as e:
+            print(f"❌ Error saat save: {e}") # Print error di terminal biar ketahuan
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
@@ -442,21 +830,17 @@ def generate_srs(request):
     return render(request, 'main/generate_srs.html')
 
 def project_new(request):
+    #validatelogin
+    if 'user_id' not in request.session:
+        return redirect('main:login')
+
     if request.method == 'POST':
         name = request.POST.get('name')
         desc = request.POST.get('description')
-        
-        pengguna = Pengguna.objects.first()
-        if pengguna is None:
-            # bikin dummy user sementara biar ga error
-            pengguna = Pengguna.objects.create(
-                id_user="U001",
-                nama_user="dummyuser",
-                email_user="dummy@example.com"
-            )
 
-        # Buat ID otomatis sederhana (opsional)
-        new_id = str(Project.objects.count() + 1).zfill(5)
+        # get user yang lagi login dari session
+        user_id = request.session['user_id']
+        pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
         Project.objects.create(
             id_project=new_id,
@@ -465,11 +849,11 @@ def project_new(request):
             pengguna=pengguna,
             tanggal_project_dibuat=timezone.now(),
             tanggal_akses_terakhir=timezone.now(),
-        
         )
-        return redirect('main:home') # setelah berhasil tambah project
 
-    return render(request, 'main/home.html') 
+        return redirect('main:home')
+
+    return redirect('main:home')
 
 def project_detail(request, id_project):
     # Ambil data project berdasarkan id
@@ -595,5 +979,153 @@ def download_plantuml(request):
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
         return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     
-def user_scenario(request):
-    return render(request, 'main/user_scenario.html')
+
+@require_http_methods(["POST"])
+def save_gui(request, gui_id):
+    try:
+        # Ambil GUI berdasarkan ID
+        gui = get_object_or_404(GUI, pk=gui_id)
+        
+        # Ambil data JSON dari request body
+        data = json.loads(request.body)
+        
+        # 1. Hapus data lama (Pages & Elements) agar bersih sebelum simpan baru
+        # Ini akan otomatis menghapus Elements karena on_delete=CASCADE
+        gui.pages.all().delete()
+        
+        # 2. Loop setiap Halaman (Page) dari data JSON
+        for page_idx, page_data in enumerate(data, start=1):
+            # Buat Page baru
+            page = Page.objects.create(
+                gui=gui,
+                name=page_data.get('name', f'Page {page_idx}'),
+                order=page_idx
+            )
+            
+            # 3. Loop setiap Elemen di dalam Halaman tersebut
+            elements_list = page_data.get('elements', [])
+            for elem_idx, elem_data in enumerate(elements_list, start=1):
+                elem_name = elem_data.get('name')
+                elem_type = elem_data.get('type')
+                
+                # Cek agar tidak menyimpan data kosong
+                if elem_name and elem_type:
+                    Element.objects.create(
+                        page=page,
+                        name=elem_name,
+                        
+                        # BAGIAN PENTING: Masukkan ke 'input_type' (sesuai models.py)
+                        input_type=elem_type.lower(),
+                        
+                        # Kita isi juga element_type biar aman (opsional)
+                        element_type=elem_type.lower(),
+                        
+                        order=elem_idx
+                    )
+        
+        return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
+    except Exception as e:
+        print(f"Error saving GUI: {e}") # Cek terminal jika masih error
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+def input_gui(request, gui_id=None, project_id=None):
+    if gui_id is None:
+        # --- LOGIKA PEMBUATAN PROJECT OTOMATIS (JIKA KOSONG) ---
+        if not project_id:
+            project = Project.objects.first()
+            
+            if not project:
+                # 1. Cek User dulu (Project butuh Pengguna)
+                pengguna = Pengguna.objects.first()
+                if not pengguna:
+                    # Buat user dummy jika tabel Pengguna kosong
+                    pengguna = Pengguna.objects.create(
+                        id_user="U01", 
+                        nama_user="Admin Dev",
+                        email_user="admin@dev.com",
+                        password="password123"
+                    )
+
+                # 2. Buat Project (Perbaiki 'name' jadi 'nama_project' & isi field wajib lain)
+                project = Project.objects.create(
+                    id_project="P01",                # Wajib diisi manual (CharField PK)
+                    nama_project="Default Project",  # Ganti 'name' jadi 'nama_project'
+                    deskripsi="Auto generated",
+                    pengguna=pengguna                # Wajib ada usernya
+                )
+            
+            # Gunakan 'id_project' bukan 'id'
+            project_id = project.id_project 
+
+        # --- LOGIKA PEMBUATAN GUI BARU ---
+        # Generate ID GUI manual (misal: G01, G02, dst)
+        jumlah_gui = GUI.objects.count() + 1
+        new_gui_id = f"G{str(jumlah_gui).zfill(2)}" # Hasil: G01, G02...
+
+        gui = GUI.objects.create(
+            id_gui=new_gui_id,          # Wajib diisi manual
+            project_id=project_id,
+            nama_atribut="GUI Default"  # Wajib diisi (lihat models.py)
+        )
+        
+        # Redirect menggunakan id_gui yang baru dibuat
+        return redirect('main:input_gui_with_id', gui_id=gui.id_gui)
+    
+    gui = get_object_or_404(GUI, pk=gui_id)
+    return render(request, 'main/input_gui.html', {'gui': gui})
+
+def reset_usecase_data(request):
+    # Hapus semua data Use Case Specification
+    UseCaseSpecification.objects.all().delete()
+    return redirect('main:input_informasi_tambahan') # Atau redirect ke halaman input fitu
+
+def activity_diagram(request):
+    """
+    Halaman untuk menampilkan dan generate activity diagram
+    """
+    # AMBIL DATA DARI DATABASE, bukan session
+    # Karena data sudah disave permanen di step sebelumnya
+    specs = UseCaseSpecification.objects.all()
+    
+    # Kita perlu convert ke format JSON string agar bisa dibaca JavaScript untuk generate diagram
+    specs_data = []
+    for spec in specs:
+        specs_data.append({
+            'featureName': spec.feature_name,
+            'precondition': spec.input_precondition,
+            'postcondition': spec.input_postcondition,
+            # Ambil paths (Basic, Alt, Exception)
+            'basicPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.basic_paths.all()],
+            'alternativePath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.alternative_paths.all()],
+            'exceptionPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.exception_paths.all()],
+        })
+
+    context = {
+        'page_title': 'Activity Diagram Generator',
+        'use_case_data': json.dumps(specs_data) # Kirim sebagai JSON List
+    }
+    return render(request, 'main/activity_diagram.html', context)
+
+def scenario_result(request):
+    # ✅ GANTI: testscenario_set__teststep_set → scenarios__steps
+    specs = UseCaseSpecification.objects.prefetch_related(
+        'scenarios__steps'  # ← Sesuaikan dengan related_name di models
+    ).all()
+    
+    # DEBUG: Print untuk memastikan data ada
+    print("=" * 60)
+    print("🔍 SCENARIO RESULT DEBUG")
+    print(f"Total Specs: {specs.count()}")
+    for spec in specs:
+        scenarios = spec.scenarios.all()  # ← Ganti jadi .scenarios
+        print(f"\nSpec: {spec.feature_name} (ID: {spec.id})")
+        print(f"  Scenarios: {scenarios.count()}")
+        for scenario in scenarios:
+            steps = scenario.steps.all()  # ← Ganti jadi .steps
+            print(f"    - {scenario.scenario_type}: {steps.count()} steps")
+    print("=" * 60)
+    
+    return render(request, 'main/scenario_result.html', {'specs': specs})

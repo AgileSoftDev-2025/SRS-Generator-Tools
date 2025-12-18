@@ -4,331 +4,273 @@
   <meta charset="UTF-8" />
   <title>OneUML - Additional Information</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Bootstrap -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body {
-      background: #f9fafb;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Roboto, sans-serif;
-    }
-
-    .header {
-      height: 64px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .logo {
-      font-weight: 600;
-      font-size: 18px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .feature-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .feature-card:hover {
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .path-row {
-      margin-bottom: 12px;
-    }
+    /* STYLE SAMA SEPERTI SEBELUMNYA */
+    body { background: #f9fafb; font-family: sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+    header, .main-footer, .nav-footer { background: #fff; border-color: #e5e7eb; padding: 0 24px; }
+    header { height: 64px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; }
+    .header-content { width: 100%; max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; }
+    .feature-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; cursor: pointer; transition: 0.2s; height: 100%; display: flex; align-items: center; }
+    .feature-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-color: #cbd5e1; }
+    .content-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; width: 100%; }
+    .empty-state { text-align: center; color: #9ca3af; padding: 48px 20px; }
+    .nav-footer { margin-top: auto; padding: 20px 0; border-top: 1px solid #e5e7eb; }
+    .form-control, .form-select { border-radius: 6px; font-size: 14px; margin-bottom: 10px; }
+    .path-row { margin-bottom: 10px; }
   </style>
 </head>
-
 <body>
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo">OneUML</div>
-    <img src="https://via.placeholder.com/40" class="rounded-circle" />
-  </header>
 
-  <!-- CONTENT -->
-  <main class="container mt-5">
-    <h3 class="fw-bold">Additional Information</h3>
-    <p>Pilih fitur untuk mengisi Use Case Specification.</p>
+<header>
+  <div class="header-content">
+    <div style="font-weight:bold; font-size:20px;">⚡ One UML</div>
+  </div>
+</header>
 
-    <div class="row g-4 mt-4" id="featureGrid"></div>
-    <!-- NAVIGATION BUTTON -->
-    <div class="d-flex justify-content-between mt-5">
-      <button class="btn btn-outline-secondary" id="btnBack">
-        ← Back
-      </button>
+<main style="padding: 40px 0;">
+  <div class="content-container">
+    <h3 class="fw-bold mb-2">Additional Information</h3>
+    <p class="text-muted mb-4">Klik kartu di bawah untuk melengkapi detail Use Case.</p>
 
-      <button class="btn btn-dark" id="btnNext">
-        Next →
-      </button>
+    <div class="row g-4" id="featureGrid"></div>
+  </div>
+</main>
+
+<div class="nav-footer">
+  <div class="content-container d-flex justify-content-between">
+    <a href="/user-story/" class="btn btn-outline-secondary">← Back</a>
+    <button class="btn btn-dark" id="nextButton">Next →</button>
+  </div>
 </div>
 
-  </main>
+<div id="modalContainer"></div>
 
-  <!-- BOOTSTRAP -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// 1. AMBIL DATA DARI DJANGO (Cara Paling Aman)
+// Menggunakan JSON.parse + escapejs agar tidak error syntax di browser/vscode
+let dbData = [];
+try {
+    const rawData = '{{ use_cases_json|escapejs }}';
+    if(rawData) {
+        dbData = JSON.parse(rawData);
+    }
+} catch (e) {
+    console.error("Gagal parsing data:", e);
+}
 
-  <script>
-  const featureGrid = document.getElementById("featureGrid");
+console.log("Data loaded:", dbData);
 
-  // =============================
-  // LOAD FEATURE DARI LOCALSTORAGE
-  // =============================
-  document.addEventListener("DOMContentLoaded", () => {
-    const featureList =
-      JSON.parse(localStorage.getItem("featureList")) || [];
+// Elemen DOM
+const featureGrid = document.getElementById("featureGrid");
+const modalContainer = document.getElementById("modalContainer");
 
-    console.log("Feature dari localStorage:", featureList);
-
-    if (featureList.length === 0) {
-      featureGrid.innerHTML = `
-        <div class="text-muted">
-          Tidak ada fitur dari tahap sebelumnya.
-        </div>`;
-      return;
+// --- INITIALIZE ---
+document.addEventListener("DOMContentLoaded", () => {
+    if (!dbData || dbData.length === 0) {
+        featureGrid.innerHTML = `<div class="col-12 empty-state">Belum ada fitur. Silakan input di tahap sebelumnya.</div>`;
+        return;
     }
 
-    featureList.forEach((name, index) => {
-      createFeature({
-        id: index + 1,
-        name: name,
-      });
+    // Render Kartu & Modal
+    dbData.forEach(item => {
+        createFeatureUI(item);
     });
-  });
 
-  // =============================
-  // TEMPLATE MODAL
-  // =============================
-  function modalTemplate(feature) {
+    // Setup Tombol Next
+    document.getElementById("nextButton").addEventListener("click", () => {
+        window.location.href = "/use-case-spec/";
+    });
+});
+
+// --- RENDER UI ---
+function createFeatureUI(feature) {
+    // 1. Buat Kartu (Tanpa onclick inline, kita pakai Data Attribute)
+    const cardHtml = `
+        <div class="col-md-4 col-sm-6">
+            <div class="feature-card" 
+                 data-id="${feature.id}" 
+                 data-bs-toggle="modal" 
+                 data-bs-target="#modalFeature${feature.id}">
+                <strong class="text-dark">${feature.name}</strong>
+            </div>
+        </div>`;
+    featureGrid.insertAdjacentHTML("beforeend", cardHtml);
+
+    // 2. Buat Modal
+    const modalHtml = modalTemplate(feature);
+    modalContainer.insertAdjacentHTML("beforeend", modalHtml);
+}
+
+// --- TEMPLATE MODAL ---
+function modalTemplate(feature) {
     return `
     <div class="modal fade" id="modalFeature${feature.id}" tabindex="-1">
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">${feature.name}</h5>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" class="feature-id" value="${feature.id}">
+                    
+                    <label class="form-label fw-bold">Summary</label>
+                    <textarea class="form-control summary" rows="2">${feature.summary}</textarea>
 
-          <div class="modal-header">
-            <h5 class="modal-title">
-              Use Case Specification: ${feature.name}
-            </h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Priority</label>
+                            <select class="form-select priority">
+                                <option ${feature.priority === 'Must Have' ? 'selected' : ''}>Must Have</option>
+                                <option ${feature.priority === 'Should Have' ? 'selected' : ''}>Should Have</option>
+                                <option ${feature.priority === 'Could Have' ? 'selected' : ''}>Could Have</option>
+                                <option ${feature.priority === "Won't Have" ? 'selected' : ''}>Won't Have</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Status</label>
+                            <select class="form-select status">
+                                <option ${feature.status === 'Active' ? 'selected' : ''}>Active</option>
+                                <option ${feature.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
 
-          <div class="modal-body">
-            <input type="hidden" class="feature-id" value="${feature.id}" />
+                    <label class="form-label fw-bold mt-3">Pre-Condition</label>
+                    <textarea class="form-control precondition" rows="2">${feature.precondition}</textarea>
 
-            <div class="mb-3">
-              <label class="form-label">Summary</label>
-              <textarea class="form-control summary" rows="2"></textarea>
+                    <label class="form-label fw-bold mt-3">Post-Condition</label>
+                    <textarea class="form-control postcondition" rows="2">${feature.postcondition}</textarea>
+
+                    ${pathSection("Basic Path", "basic", feature.basicPath)}
+                    ${pathSection("Alternative Path", "alternative", feature.alternativePath)}
+                    ${pathSection("Exception Path", "exception", feature.exceptionPath)}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-dark save-btn">Save Changes</button>
+                </div>
             </div>
-
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Priority</label>
-                <select class="form-select priority">
-                  <option>Must Have</option>
-                  <option>Should Have</option>
-                  <option>Could Have</option>
-                  <option>Won't Have</option>
-                </select>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label">Status</label>
-                <select class="form-select status">
-                  <option>Active</option>
-                  <option>Inactive</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Pre-Condition</label>
-              <textarea class="form-control precondition" rows="2"></textarea>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Post-Condition</label>
-              <textarea class="form-control postcondition" rows="2"></textarea>
-            </div>
-
-            ${pathSection("Basic Path", "basic")}
-            ${pathSection("Alternative Path", "alternative")}
-            ${pathSection("Exception", "exception")}
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button class="btn btn-dark save-btn">
-              Save
-            </button>
-          </div>
-
         </div>
-      </div>
     </div>`;
-  }
+}
 
-  function pathSection(title, type) {
-    return `
-    <div class="mb-3">
-      <label class="form-label">${title}</label>
-      <div class="path-container" data-type="${type}"></div>
-      <button class="btn btn-sm btn-outline-secondary mt-2 add-path">
-        + Tambah Baris
-      </button>
-    </div>`;
-  }
-
-  // =============================
-  // CREATE CARD + MODAL
-  // =============================
-  function createFeature(feature) {
-    featureGrid.innerHTML += `
-      <div class="col-md-4">
-        <div class="feature-card"
-             data-bs-toggle="modal"
-             data-bs-target="#modalFeature${feature.id}"
-             onclick="loadUseCase(${feature.id})">
-          <h5>${feature.name}</h5>
-        </div>
-      </div>`;
-
-    document.body.insertAdjacentHTML(
-      "beforeend",
-      modalTemplate(feature)
-    );
-  }
-
-  // =============================
-  // LOAD USE CASE DARI LOCALSTORAGE
-  // =============================
-  function loadUseCase(featureId) {
-    const allData =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
-
-    const data = allData[featureId];
-    if (!data) return;
-
-    const modal = document.getElementById(
-      `modalFeature${featureId}`
-    );
-
-    modal.querySelector(".summary").value = data.summary || "";
-    modal.querySelector(".priority").value = data.priority || "Must Have";
-    modal.querySelector(".status").value = data.status || "Active";
-    modal.querySelector(".precondition").value = data.precondition || "";
-    modal.querySelector(".postcondition").value = data.postcondition || "";
-
-    fillPath(modal, "basic", data.basicPath);
-    fillPath(modal, "alternative", data.alternativePath);
-    fillPath(modal, "exception", data.exceptionPath);
-  }
-
-  function fillPath(modal, type, paths = []) {
-    const container = modal.querySelector(
-      `.path-container[data-type="${type}"]`
-    );
-    container.innerHTML = "";
-    paths.forEach(p =>
-      addPathRow(container, p.actor, p.system)
-    );
-  }
-
-  // =============================
-  // ADD PATH
-  // =============================
-  function addPathRow(container, actor = "", system = "") {
-    const div = document.createElement("div");
-    div.className = "row path-row";
-    div.innerHTML = `
-      <div class="col-md-6">
-        <textarea class="form-control actor" rows="2"
-          placeholder="Aksi Aktor">${actor}</textarea>
-      </div>
-      <div class="col-md-6">
-        <textarea class="form-control system" rows="2"
-          placeholder="Aksi Sistem">${system}</textarea>
-      </div>`;
-    container.appendChild(div);
-  }
-
-  document.addEventListener("click", e => {
-    if (e.target.classList.contains("add-path")) {
-      addPathRow(e.target.previousElementSibling);
+function pathSection(title, type, paths = []) {
+    let rowsHtml = '';
+    
+    // Kalau ada data path, render barisnya
+    if (paths.length > 0) {
+        paths.forEach(p => {
+            rowsHtml += createPathRow(p.actor, p.system);
+        });
+    } else {
+        // Kalau kosong, kasih 1 baris default
+        rowsHtml = createPathRow();
     }
-  });
 
-  // =============================
-  // SAVE KE LOCALSTORAGE
-  // =============================
-  document.addEventListener("click", e => {
-    if (!e.target.classList.contains("save-btn")) return;
+    return `
+    <div class="mt-4">
+        <label class="form-label fw-bold text-primary">${title}</label>
+        <div class="path-container" data-type="${type}">
+            ${rowsHtml}
+        </div>
+        <button class="btn btn-sm btn-outline-primary mt-2 add-path">+ Add Row</button>
+    </div>`;
+}
 
-    const modal = e.target.closest(".modal");
-    const featureId =
-      modal.querySelector(".feature-id").value;
+function createPathRow(actor = '', system = '') {
+    return `
+    <div class="row path-row">
+        <div class="col-6">
+            <textarea class="form-control actor" rows="1" placeholder="Actor Action">${actor}</textarea>
+        </div>
+        <div class="col-6">
+            <textarea class="form-control system" rows="1" placeholder="System Response">${system}</textarea>
+        </div>
+    </div>`;
+}
 
-    const allData =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
+// --- GLOBAL EVENT LISTENER (Untuk tombol dinamis) ---
+document.addEventListener('click', function(e) {
+    
+    // 1. TOMBOL ADD ROW (Tambah Baris)
+    if (e.target.classList.contains('add-path')) {
+        const container = e.target.previousElementSibling;
+        container.insertAdjacentHTML('beforeend', createPathRow());
+    }
 
-    allData[featureId] = {
-      summary: modal.querySelector(".summary").value,
-      priority: modal.querySelector(".priority").value,
-      status: modal.querySelector(".status").value,
-      precondition: modal.querySelector(".precondition").value,
-      postcondition: modal.querySelector(".postcondition").value,
-      basicPath: collectPath(modal, "basic"),
-      alternativePath: collectPath(modal, "alternative"),
-      exceptionPath: collectPath(modal, "exception"),
+    // 2. TOMBOL SAVE (Simpan ke DB)
+    if (e.target.classList.contains('save-btn')) {
+        handleSave(e.target);
+    }
+});
+
+// --- FUNGSI SIMPAN ---
+function handleSave(btn) {
+    const modal = btn.closest('.modal');
+    const featureId = modal.querySelector('.feature-id').value;
+    
+    // Ambil nama fitur asli dari data lokal biar gak hilang
+    const originalFeature = dbData.find(d => d.id == featureId);
+    const featureName = originalFeature ? originalFeature.name : "Feature";
+
+    // Kumpulkan data Path
+    const collectPaths = (type) => {
+        const rows = modal.querySelectorAll(`.path-container[data-type="${type}"] .path-row`);
+        return Array.from(rows).map(row => ({
+            actor: row.querySelector('.actor').value,
+            system: row.querySelector('.system').value
+        })).filter(p => p.actor.trim() || p.system.trim());
     };
 
-    localStorage.setItem(
-      "useCaseSpecs",
-      JSON.stringify(allData)
-    );
+    const payload = {
+        [featureId]: {
+            featureName: featureName,
+            summary: modal.querySelector('.summary').value,
+            priority: modal.querySelector('.priority').value,
+            status: modal.querySelector('.status').value,
+            precondition: modal.querySelector('.precondition').value,
+            postcondition: modal.querySelector('.postcondition').value,
+            basicPath: collectPaths('basic'),
+            alternativePath: collectPaths('alternative'),
+            exceptionPath: collectPaths('exception')
+        }
+    };
 
-    alert("Data berhasil disimpan ✅");
-    bootstrap.Modal.getInstance(modal).hide();
-  });
+    // UI Loading
+    const oldText = btn.innerText;
+    btn.innerText = "Saving...";
+    btn.disabled = true;
 
-  function collectPath(modal, type) {
-    return [...modal.querySelectorAll(
-      `.path-container[data-type="${type}"] .path-row`
-    )].map(r => ({
-      actor: r.querySelector(".actor").value,
-      system: r.querySelector(".system").value,
-    }));
-  }
-
-  // =============================
-  // NAVIGATION (ROUTE BASED)
-  // =============================
-  document.getElementById("btnBack").addEventListener("click", () => {
-    window.location.href = "http://127.0.0.1:8000/user-story";
-  });
-
-  document.getElementById("btnNext").addEventListener("click", () => {
-    window.location.href = "http://127.0.0.1:8000/use-case-spec";
-  });
-
+    // Fetch API
+    fetch('/api/save_usecase_spec/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ Berhasil disimpan!');
+            // Tutup modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            modalInstance.hide();
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('⚠️ Error koneksi server');
+    })
+    .finally(() => {
+        btn.innerText = oldText;
+        btn.disabled = false;
+    });
+}
 </script>
+
 </body>
 </html>

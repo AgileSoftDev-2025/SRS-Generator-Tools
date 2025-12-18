@@ -25,9 +25,11 @@ urlpatterns = [
     path("api/sequence/<str:feature_id>/generate/", views.generate_sequence_diagram_by_feature, name="generate_sequence_diagram_by_feature"),
     path("api/sequence/features/", views.sequence_feature_list, name="sequence_feature_list"),
 
-    # Alternative/Special Features
+    # Alternative/Special Features 
     path('use-case/', views.use_case, name='use_case'),
     path('user_scenario/', views.user_scenario, name='user_scenario'),
+    path('save_scenarios/', views.save_scenarios_api, name='save_scenarios_api'),
+    path('scenario_result/', views.scenario_result, name='scenario_result'),
     
     # SQL Import & Class Diagram
     path('import-sql/', views.import_sql, name='import_sql'),
@@ -38,14 +40,21 @@ urlpatterns = [
     # Other Diagrams
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
     path('input_gui/', views.input_gui, name='input_gui'),
-    
+    path('project/<int:project_id>/input_gui/', views.input_gui, name='input_gui_for_project'),
+    path('input_gui/<str:gui_id>/', views.input_gui, name='input_gui_with_id'),
+    path('reset-data/', views.reset_usecase_data, name='reset_usecase_data'),
+
     # Final Output
     path('generate-srs/', views.generate_srs, name='generate_srs'),
     
     # API Endpoints
     path('api/save-use-case/', views.save_use_case, name='save_use_case'),
-    path('save_use_case_spec/<int:feature_id>/', views.save_use_case_spec, name='save_use_case_spec'),
+    path('api/save_usecase_spec/', views.save_usecase_spec, name='save_usecase_spec'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
     path("api/get-latest-userstory/", views.get_latest_userstory, name="get_latest_userstory"),
     path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),
+    path('api/save_gui/<str:gui_id>/', views.save_gui, name='save_gui'),
+    path('api/save-actors/', views.save_actors_and_features, name='save_actors_and_features'),
+    path('api/generate-usecase/', views.generate_usecase_diagram, name='generate_usecase_diagram'),
+
 ]
