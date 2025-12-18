@@ -1,15 +1,11 @@
-{% extends 'main/base.html' %}
-{% block title %}Home - OneUML{% endblock %}
-
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - OneUML</title>
+    <title>Home - One UML</title>
     <style>
-        /* Global Styles */
+        /* Global Styles - SAMA SEPERTI FILE SEBELUMNYA */
         * {
             margin: 0;
             padding: 0;
@@ -23,7 +19,7 @@
             line-height: 1.5;
         }
         
-        /* Header & Footer */
+        /* Header - SAMA SEPERTI FILE SEBELUMNYA */
         header {
             background-color: #ffffff;
             border-bottom: 1px solid #e5e7eb;
@@ -61,21 +57,52 @@
             color: #111827;
         }
         
+        /* User Menu */
         .user-menu {
             display: flex;
             align-items: center;
             gap: 16px;
         }
         
-        .logout-btn {
-            background: none;
-            border: 1px solid #d1d5db;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
+        .user-email {
             font-size: 14px;
+            color: #6b7280;
         }
         
+        /* Buttons - SAMA SEPERTI FILE SEBELUMNYA */
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Main Content */
         main {
             max-width: 1200px;
             margin: 0 auto;
@@ -83,10 +110,195 @@
             min-height: calc(100vh - 128px);
         }
         
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 48px;
+            padding: 0 20px;
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+            margin-top: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Card Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Projects Section */
+        .projects-section .card {
+            height: 100%;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .section-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        /* Project Item */
+        .project-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .project-item:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .project-info {
+            flex: 1;
+        }
+        
+        .project-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+        
+        .project-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .project-meta {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* Empty State - SAMA SEPERTI FILE SEBELUMNYA */
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #e5e7eb;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        /* Form Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        .form-card {
+            background: #fff;
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Footer - SAMA SEPERTI FILE SEBELUMNYA */
         footer {
             background-color: #ffffff;
             border-top: 1px solid #e5e7eb;
             padding: 16px 24px;
+            margin-top: 48px;
         }
         
         .footer-content {
@@ -109,214 +321,58 @@
             text-decoration: none;
         }
         
-        /* Home Content Styles */
-        .home-wrapper {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
+        .footer-link:hover {
+            color: #374151;
         }
         
-        .home-header {
-            text-align: center;
-            margin-bottom: 40px;
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
         }
         
-        .home-title {
-            font-size: 48px;
-            margin: 0 0 10px;
-            font-weight: 700;
-            color: #111827;
-        }
-        
-        .home-subtitle {
-            margin: 0;
-            color: #6b7280;
-            font-size: 16px;
-        }
-        
-        .content-section {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-            flex-wrap: wrap;
-        }
-        
-        .project-list {
-            flex: 1 1 420px;
-        }
-        
-        .project-form {
-            width: 360px;
-        }
-        
-        /* Project List Styles */
-        .project-card {
-            background: #fff;
-            padding: 24px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .project-list-title {
-            margin: 0 0 10px;
-            font-size: 20px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .project-list-subtitle {
-            margin: 0 0 20px;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .project-item {
-            margin-bottom: 12px;
-            padding: 16px;
+        .stat-card {
             background: #f8fafc;
+            padding: 16px;
             border-radius: 8px;
+            text-align: center;
             border: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.2s ease;
         }
         
-        .project-item:hover {
-            border-color: #cbd5e1;
-            background: #f1f5f9;
-        }
-        
-        .project-info {
-            flex: 1;
-        }
-        
-        .project-name {
+        .stat-number {
+            font-size: 24px;
             font-weight: 600;
             color: #111827;
             margin-bottom: 4px;
         }
         
-        .project-description {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .empty-state {
-            color: #9ca3af;
-            text-align: center;
-            padding: 40px 20px;
-            font-style: italic;
-        }
-        
-        /* Form Styles */
-        .form-card {
-            background: #fff;
-            padding: 24px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .form-title {
-            margin: 0 0 16px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #ffffff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #ffffff;
-            resize: vertical;
-            min-height: 80px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .form-textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .help-text {
+        .stat-label {
             font-size: 12px;
             color: #6b7280;
-            margin-top: 4px;
         }
         
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-        
-        .btn-primary {
-            background-color: #111827;
-            color: #ffffff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        .btn-secondary {
-            background-color: #3b82f6;
-            color: #ffffff;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #2563eb;
-        }
-        
-        .btn-outline {
-            background-color: #ffffff;
-            color: #6b7280;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-outline:hover {
-            background-color: #f9fafb;
-            color: #374151;
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .hero-subtitle {
+                font-size: 16px;
+            }
+            
+            .project-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .project-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
     </style>
 </head>
@@ -331,65 +387,78 @@
                 <span class="logo-text">One UML</span>
             </div>
             <div class="user-menu">
-                <!-- Jika menggunakan Django auth, tambahkan ini -->
-                <!-- <span>Welcome, {{ user.username }}</span> -->
-                <!-- <form method="post" action="{% url 'main:logout' %}"> -->
-                <!--     {% csrf_token %} -->
-                <!--     <button type="submit" class="logout-btn">Logout</button> -->
-                <!-- </form> -->
-                
-                <!-- Untuk standalone, gunakan ini -->
-                <span>Welcome, User</span>
-                <button class="logout-btn" onclick="window.location.href='/login/'">Logout</button>
+                <!-- 🔥 PERUBAHAN: Ambil email dari Django user object -->
+                <span class="user-email">{{ user.email }}</span>
+                <form method="post" action="{% url 'main:logout' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline">
+                        Logout
+                    </button>
+                </form>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <main>
-        <div class="home-wrapper">
-            <!-- Header -->
-            <header class="home-header">
-                <h1 class="home-title">ONEUML</h1>
-                <p class="home-subtitle">
-                    Generate UML Diagram & Software Requirements Specification (SRS) secara otomatis, cepat, dan terstruktur.
-                </p>
-            </header>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">Welcome to One UML</h1>
+            <p class="hero-subtitle">
+                Generate UML diagrams and Software Requirements Specification (SRS) automatically, quickly, and in a structured way.
+            </p>
+        </div>
 
-            <section class="content-section">
-                <!-- Project List -->
-                <div class="project-list">
-                    <div class="project-card">
-                        <h2 class="project-list-title">Your Projects</h2>
-                        <p class="project-list-subtitle">Project yang kamu buat akan muncul di sini.</p>
-
-                        <div id="projectsContainer">
-                            <!-- Projects will be dynamically added here -->
-                            <div class="empty-state">
-                                Belum ada project.
-                            </div>
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Projects Section -->
+            <div class="projects-section">
+                <div class="card">
+                    <h2 class="section-title">Your Projects</h2>
+                    <p class="section-subtitle">Projects you create will appear here</p>
+                    
+                    <div id="projectsContainer">
+                        <!-- Projects will be dynamically added here -->
+                        <div class="empty-state">
+                            <i>📁</i>
+                            <p>No projects yet</p>
+                            <p>Create your first project to get started</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalProjects">0</div>
+                            <div class="stat-label">Total Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="activeProjects">0</div>
+                            <div class="stat-label">Active</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Add Project Form -->
-                <div class="project-form">
-                    <form method="post" action="/project/new/" class="form-card" id="addProjectForm">
-                        <!-- Jika menggunakan Django, uncomment ini -->
-                        <!-- {% csrf_token %} -->
+            <!-- New Project Form -->
+            <div>
+                <div class="form-card">
+                    <h3 class="form-title">+ New Project</h3>
+                    
+                    <!-- Form action ke /home/ -->
+                    <form method="post" action="/home/" id="addProjectForm">
+                        {% csrf_token %}
                         
-                        <h3 class="form-title">+ Add New Project</h3>
-
                         <div class="form-group">
                             <label class="form-label">Project Name</label>
-                            <input type="text" name="name" class="form-input" placeholder="Nama project" required>
-                            <div class="help-text">Wajib diisi</div>
+                            <input type="text" name="name" class="form-input" placeholder="Enter project name" required>
+                            <div class="help-text">Required</div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Short Description</label>
-                            <textarea name="description" class="form-textarea" placeholder="Deskripsi singkat (optional)" rows="3"></textarea>
-                            <div class="help-text">Opsional</div>
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-textarea" placeholder="Brief description (optional)" rows="3"></textarea>
+                            <div class="help-text">Optional</div>
                         </div>
 
                         <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -397,7 +466,7 @@
                         </button>
                     </form>
                 </div>
-            </section>
+            </div>
         </div>
     </main>
 
@@ -413,29 +482,54 @@
         </div>
     </footer>
 
-   <script>
+    <script>
         class ProjectManager {
-            constructor(userEmail) {
-                this.userEmail = userEmail;
-                this.projects = JSON.parse(localStorage.getItem(`oneUML_projects_${this.userEmail}`)) || [];
+            constructor() {
+                this.projects = [];
+                // 🔥 PERUBAHAN: Ambil email user dari Django template
+                this.userEmail = "{{ user.email }}";
                 this.init();
             }
 
             init() {
+                this.loadProjects();
                 this.bindEvents();
                 this.renderProjects();
+                this.updateStats();
+            }
+
+            loadProjects() {
+                // Try to load from localStorage with user-specific key
+                const storageKey = `oneUML_projects_${this.userEmail}`;
+                const savedProjects = localStorage.getItem(storageKey);
+                
+                if (savedProjects) {
+                    try {
+                        this.projects = JSON.parse(savedProjects);
+                        console.log('✅ Loaded projects for user:', this.userEmail, this.projects);
+                    } catch (e) {
+                        console.error('❌ Error loading projects:', e);
+                        this.projects = [];
+                    }
+                } else {
+                    console.log('📁 No saved projects for user:', this.userEmail);
+                    this.projects = [];
+                }
             }
 
             bindEvents() {
                 const form = document.getElementById('addProjectForm');
-                form.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.createProject();
-                });
+                if (form) {
+                    form.addEventListener('submit', (e) => {
+                        this.handleFormSubmit(e);
+                    });
+                }
             }
 
-            createProject() {
-                const form = document.getElementById('addProjectForm');
+            handleFormSubmit(e) {
+                e.preventDefault();
+                
+                const form = e.target;
                 const nameInput = form.querySelector('input[name="name"]');
                 const descInput = form.querySelector('textarea[name="description"]');
 
@@ -447,24 +541,32 @@
                     return;
                 }
 
+                // Create project for immediate UI update
                 const newProject = {
-                    id: Date.now().toString(),
+                    id: `project_${Date.now()}`,
                     name: projectName,
                     description: projectDesc,
                     createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
+                    status: 'active',
+                    createdBy: this.userEmail  // 🔥 Simpan siapa pembuatnya
                 };
 
                 this.projects.unshift(newProject);
                 this.saveProjects();
                 this.renderProjects();
+                this.updateStats();
 
-                // Reset form
+                // Clear form
                 nameInput.value = '';
                 descInput.value = '';
 
-                // Redirect ke halaman use-case diagram
-                window.location.href = '/use-case-diagram/';
+                // Show success message
+                alert(`Project "${projectName}" created successfully!`);
+                
+                // Redirect ke halaman use-case-diagram
+                setTimeout(() => {
+                    window.location.href = '/use-case-diagram/';
+                }, 500);
             }
 
             deleteProject(projectId) {
@@ -472,11 +574,15 @@
                     this.projects = this.projects.filter(p => p.id !== projectId);
                     this.saveProjects();
                     this.renderProjects();
+                    this.updateStats();
                 }
             }
 
             saveProjects() {
-                localStorage.setItem(`oneUML_projects_${this.userEmail}`, JSON.stringify(this.projects));
+                // 🔥 PERUBAHAN: Simpan dengan key spesifik untuk user ini
+                const storageKey = `oneUML_projects_${this.userEmail}`;
+                localStorage.setItem(storageKey, JSON.stringify(this.projects));
+                console.log('💾 Saved projects for user:', this.userEmail, this.projects);
             }
 
             renderProjects() {
@@ -485,7 +591,9 @@
                 if (this.projects.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            Belum ada project.
+                            <i>📁</i>
+                            <p>No projects yet</p>
+                            <p>Create your first project to get started</p>
                         </div>
                     `;
                     return;
@@ -493,15 +601,30 @@
 
                 let html = '';
                 this.projects.forEach(project => {
+                    const date = new Date(project.createdAt);
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+
                     html += `
-                        <div class="project-item">
+                        <div class="project-item" data-project-id="${project.id}">
                             <div class="project-info">
                                 <div class="project-name">${project.name}</div>
                                 ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                                <div class="project-meta">
+                                    Created on ${formattedDate}
+                                    ${project.createdBy ? `<br><small>by ${project.createdBy}</small>` : ''}
+                                </div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <a href="/use-case-diagram/" class="btn btn-secondary" style="padding: 8px 16px; font-size: 13px;">Open</a>
-                                <button class="btn btn-outline" onclick="projectManager.deleteProject('${project.id}')" style="padding: 8px 12px; font-size: 13px;">×</button>
+                            <div class="project-actions">
+                                <a href="/use-case-diagram/" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">
+                                    Open
+                                </a>
+                                <button class="btn btn-outline" onclick="projectManager.deleteProject('${project.id}')" style="padding: 8px 12px; font-size: 13px;">
+                                    ×
+                                </button>
                             </div>
                         </div>
                     `;
@@ -509,18 +632,27 @@
 
                 container.innerHTML = html;
             }
+
+            updateStats() {
+                const totalProjects = this.projects.length;
+                const activeProjects = this.projects.filter(p => p.status === 'active').length;
+                
+                document.getElementById('totalProjects').textContent = totalProjects;
+                document.getElementById('activeProjects').textContent = activeProjects;
+            }
         }
 
-        // Ambil email user dari Django template
-        const userEmail = "{{ pengguna.email_user }}";
-        const projectManager = new ProjectManager(userEmail);
+        // Initialize Project Manager
+        const projectManager = new ProjectManager();
 
+        // Make it available globally for onclick events
+        window.projectManager = projectManager;
+
+        // Load projects on page load
         window.addEventListener('load', () => {
             projectManager.renderProjects();
+            projectManager.updateStats();
         });
-        </script>
-
+    </script>
 </body>
 </html>
-
-{% endblock %}

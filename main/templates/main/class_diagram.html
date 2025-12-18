@@ -95,6 +95,17 @@
         <img src="<%= uml_image_url %>">
     </div>
 
+    <!-- AREA HASIL GENERATE -->
+    <div id="diagramContent" style="margin-top: 30px;"></div>
+
+    <!-- INFO DATABASE -->
+    <pre id="databaseContent" style="text-align:left; max-width:800px; margin:20px auto;"></pre>
+
+    <!-- TOGGLE KODE -->
+    <button id="codeToggle" onclick="toggleCode()" style="margin-bottom:30px;">
+        Show PlantUML Code
+    </button>
+
     <div class="buttons">
         <a href="sequence_diagram.html" class="back">⬅ Kembali</a>
         <a href="generate_srs.html">Selanjutnya ➜</a>
@@ -143,6 +154,8 @@
             </div>
         </div>
     </footer>
+    
+    <script src="https://unpkg.com/plantuml-encoder/dist/plantuml-encoder.min.js"></script>
 
     <script>
         // Global variables
