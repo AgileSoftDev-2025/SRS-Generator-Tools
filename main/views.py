@@ -888,6 +888,10 @@ def activity_diagram(request):
     Halaman untuk menampilkan dan generate activity diagram
     """
     use_case_data = request.session.get('use_case_data', None)
+
+    print("=== DEBUG USE CASE DATA ===")
+    print(use_case_data)
+    print("===========================")
     
     context = {
         'page_title': 'Generated Activity Diagram',
@@ -1080,34 +1084,7 @@ def input_gui(request, gui_id=None, project_id=None):
 def reset_usecase_data(request):
     # Hapus semua data Use Case Specification
     UseCaseSpecification.objects.all().delete()
-    return redirect('main:input_informasi_tambahan') # Atau redirect ke halaman input fitu
-
-def activity_diagram(request):
-    """
-    Halaman untuk menampilkan dan generate activity diagram
-    """
-    # AMBIL DATA DARI DATABASE, bukan session
-    # Karena data sudah disave permanen di step sebelumnya
-    specs = UseCaseSpecification.objects.all()
-    
-    # Kita perlu convert ke format JSON string agar bisa dibaca JavaScript untuk generate diagram
-    specs_data = []
-    for spec in specs:
-        specs_data.append({
-            'featureName': spec.feature_name,
-            'precondition': spec.input_precondition,
-            'postcondition': spec.input_postcondition,
-            # Ambil paths (Basic, Alt, Exception)
-            'basicPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.basic_paths.all()],
-            'alternativePath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.alternative_paths.all()],
-            'exceptionPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.exception_paths.all()],
-        })
-
-    context = {
-        'page_title': 'Activity Diagram Generator',
-        'use_case_data': json.dumps(specs_data) # Kirim sebagai JSON List
-    }
-    return render(request, 'main/activity_diagram.html', context)
+    return redirect('main:input_informasi_tambahan') # Atau redirect ke halaman input fitur
 
 def scenario_result(request):
     # ✅ GANTI: testscenario_set__teststep_set → scenarios__steps
