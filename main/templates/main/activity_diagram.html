@@ -1,14 +1,18 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Generated Activity Diagram</title>
+  <title>Generated Activity Diagram - OneUML</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
       background-color: #f9f9f9;
-      font-family: "Arial", sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     .header {
       background-color: #fff;
@@ -17,16 +21,15 @@
       justify-content: space-between;
       padding: 15px 30px;
       border-bottom: 1px solid #ddd;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .logo {
       display: flex;
       align-items: center;
       font-weight: bold;
-      font-size: 20px;
-    }
-    .logo img {
-      height: 35px;
-      margin-right: 10px;
+      font-size: 24px;
+      color: #1f2937;
+      gap: 8px;
     }
     .profile-img {
       width: 40px;
@@ -38,26 +41,28 @@
     .content-section {
       background-color: #fff;
       border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
-      margin-top: 30px;
+      padding: 32px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      margin-top: 32px;
     }
     .preview-container {
       background-color: #fafafa;
-      border: 1px dashed #ddd;
-      border-radius: 8px;
-      padding: 40px;
+      border: 2px dashed #ddd;
+      border-radius: 12px;
+      padding: 48px;
       text-align: center;
-      min-height: 400px;
+      min-height: 500px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .preview-container img {
       max-width: 100%;
       height: auto;
       border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .placeholder-icon {
       font-size: 80px;
@@ -65,68 +70,86 @@
       margin-bottom: 20px;
     }
     .btn-dark {
-      background-color: #000;
+      background-color: #1f2937;
       color: #fff;
       border: none;
-      padding: 12px 30px;
-      border-radius: 6px;
-      font-weight: 500;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-dark:hover {
+      background-color: #111827;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .btn-light-outline {
       background-color: #fff;
-      color: #333;
-      border: 1px solid #ddd;
-      padding: 12px 30px;
-      border-radius: 6px;
-      font-weight: 500;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      padding: 12px 28px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-light-outline:hover {
+      background-color: #f3f4f6;
+      border-color: #9ca3af;
     }
     .bottom-buttons {
       display: flex;
       justify-content: space-between;
-      margin-top: 40px;
+      margin-top: 48px;
+      padding: 24px 0;
     }
     .action-buttons {
       display: flex;
-      gap: 15px;
-      margin-top: 30px;
+      gap: 16px;
+      margin-top: 32px;
       justify-content: center;
     }
     .toolbar-icons {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
     .toolbar-icons button {
-      background: none;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      width: 35px;
-      height: 35px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      width: 38px;
+      height: 38px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
     }
     .toolbar-icons button:hover {
-      background-color: #f0f0f0;
+      background-color: #f3f4f6;
+      border-color: #9ca3af;
     }
     .preview-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
     #plantUMLCode {
       display: none;
     }
     .tip-text {
-      color: #999;
+      color: #6b7280;
       font-size: 14px;
-      margin-top: 20px;
+      margin-top: 24px;
+      padding: 16px;
+      background: #f3f4f6;
+      border-radius: 8px;
     }
     .loading-spinner {
       border: 4px solid #f3f3f3;
-      border-top: 4px solid #000;
+      border-top: 4px solid #3b82f6;
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -137,14 +160,34 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .container {
+      flex: 1;
+    }
+    .page-title {
+      color: #1f2937;
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .page-subtitle {
+      color: #6b7280;
+      font-size: 15px;
+    }
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 16px;
+      color: #991b1b;
+      margin-top: 16px;
+    }
   </style>
 </head>
 <body>
   <!-- Header -->
   <header class="header">
     <div class="logo">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="OneUML Logo">
-      OneUML
+      ⚡ OneUML
     </div>
     <div>
       <img src="https://via.placeholder.com/40" alt="Profile" class="profile-img">
@@ -154,14 +197,14 @@
   <!-- Content -->
   <div class="container">
     <div class="content-section">
-      <h3 class="fw-bold">Generated Activity Diagram</h3>
-      <p class="text-muted">Preview the generated activity diagram or download its PlantUML source for further editing.</p>
+      <h3 class="page-title">Generated Activity Diagram</h3>
+      <p class="page-subtitle">Preview the generated activity diagram or download its PlantUML source for further editing.</p>
 
       <div class="preview-header">
         <h5 class="fw-bold mb-0">Activity Diagram Preview</h5>
         <div class="toolbar-icons">
           <button id="zoomInBtn" title="Zoom In">🔍+</button>
-          <button id="zoomOutBtn" title="Zoom Out">🔍-</button>
+          <button id="zoomOutBtn" title="Zoom Out">🔍−</button>
           <button id="fullscreenBtn" title="Fullscreen">⛶</button>
           <button id="refreshBtn" title="Refresh">↻</button>
           <button id="infoBtn" title="Info">ⓘ</button>
@@ -175,9 +218,9 @@
         <img id="diagramImage" style="display: none;" alt="Activity Diagram">
       </div>
 
-      <p class="tip-text text-center">
-        Tip: Click 'Download PlantUML' to get editable source; use 'Copy Source' to paste into PlantUML editors.
-      </p>
+      <div class="tip-text text-center">
+        💡 <strong>Tip:</strong> Click 'Download PlantUML' to get editable source code. You can paste it into PlantUML editors for further customization.
+      </div>
 
       <!-- PlantUML Code (hidden) -->
       <textarea id="plantUMLCode" class="form-control" rows="15"></textarea>
@@ -193,30 +236,49 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <div class="bottom-buttons">
+    <div class="bottom-buttons container">
       <button class="btn btn-light-outline px-4 py-2" id="backBtn">← Back</button>
       <button class="btn btn-dark px-4 py-2" id="nextBtn">Next →</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <script>
-    // Fungsi untuk membuat PlantUML dari data use case
+    // ===== AMBIL DATA DARI DJANGO CONTEXT =====
+    const useCaseDataRaw = '{{ use_case_data|escapejs }}';
+    let useCaseData = null;
+
+    if (useCaseDataRaw && useCaseDataRaw !== 'null') {
+        try {
+            useCaseData = JSON.parse(useCaseDataRaw);
+        } catch(e) {
+            console.error("Error parsing data:", e);
+        }
+    }
+
+    console.log("=== USE CASE DATA ===");
+    console.log(useCaseData);
+    console.log("=====================");
+
+    // ===== GENERATE PLANTUML CODE =====
     function generatePlantUML(data) {
       let plantUML = "@startuml\n";
       plantUML += "title Activity Diagram - " + data.featureName + "\n\n";
       
-      // Start event dari pre-condition
+      // Start event
       plantUML += "start\n";
+      
+      // Pre-condition (START EVENT)
       if (data.precondition && data.precondition.trim()) {
         plantUML += ":" + data.precondition + ";\n";
       }
       plantUML += "\n";
 
-      // Basic Path - Actor dan System Actions
+      // Basic Path
       if (data.basicPath && data.basicPath.length > 0) {
-        plantUML += "partition \"Basic Flow\" {\n";
-        data.basicPath.forEach((step, index) => {
+        plantUML += 'partition "Basic Flow" {\n';
+        data.basicPath.forEach((step) => {
           if (step.actor && step.actor.trim()) {
             plantUML += "  :" + step.actor + ";\n";
           }
@@ -234,8 +296,8 @@
         );
         
         if (hasAlternativeContent) {
-          plantUML += "partition \"Alternative Flow\" {\n";
-          data.alternativePath.forEach((step, index) => {
+          plantUML += 'partition "Alternative Flow" {\n';
+          data.alternativePath.forEach((step) => {
             if (step.actor && step.actor.trim()) {
               plantUML += "  :" + step.actor + ";\n";
             }
@@ -254,8 +316,8 @@
         );
         
         if (hasExceptionContent) {
-          plantUML += "partition \"Exception Flow\" {\n";
-          data.exceptionPath.forEach((step, index) => {
+          plantUML += 'partition "Exception Flow" {\n';
+          data.exceptionPath.forEach((step) => {
             if (step.actor && step.actor.trim()) {
               plantUML += "  :" + step.actor + ";\n";
             }
@@ -267,17 +329,19 @@
         }
       }
 
-      // End event dari post-condition
+      // Post-condition (END EVENT)
       if (data.postcondition && data.postcondition.trim()) {
         plantUML += ":" + data.postcondition + ";\n";
       }
+      
+      // End event
       plantUML += "stop\n";
       plantUML += "@enduml";
 
       return plantUML;
     }
 
-    // Fungsi untuk menghasilkan diagram menggunakan PlantUML server
+    // ===== RENDER DIAGRAM =====
     async function renderDiagram(plantUMLCode) {
       const loadingSpinner = document.getElementById('loadingSpinner');
       const diagramImage = document.getElementById('diagramImage');
@@ -286,13 +350,17 @@
       // Show loading
       loadingSpinner.style.display = 'block';
       diagramImage.style.display = 'none';
-      previewContainer.querySelector('.placeholder-icon').style.display = 'none';
-      previewContainer.querySelector('p').style.display = 'none';
+      const placeholderIcon = previewContainer.querySelector('.placeholder-icon');
+      const placeholderText = previewContainer.querySelector('p');
+      if (placeholderIcon) placeholderIcon.style.display = 'none';
+      if (placeholderText) placeholderText.style.display = 'none';
 
       try {
         // Encode PlantUML code
         const encoded = encodePlantUML(plantUMLCode);
         const imageUrl = `https://www.plantuml.com/plantuml/png/${encoded}`;
+        
+        console.log("PlantUML URL:", imageUrl);
         
         // Load image
         diagramImage.src = imageUrl;
@@ -303,9 +371,11 @@
         
         diagramImage.onerror = function() {
           loadingSpinner.style.display = 'none';
-          alert('Failed to render diagram. Please check your internet connection.');
-          previewContainer.querySelector('.placeholder-icon').style.display = 'block';
-          previewContainer.querySelector('p').style.display = 'block';
+          previewContainer.innerHTML += `
+            <div class="error-message">
+              <strong>⚠️ Failed to render diagram</strong><br>
+              Please check your internet connection or try again later.
+            </div>`;
         };
       } catch (error) {
         console.error('Error rendering diagram:', error);
@@ -314,9 +384,8 @@
       }
     }
 
-    // PlantUML encoding function (deflate + base64)
+    // ===== PLANTUML ENCODING FUNCTIONS =====
     function encodePlantUML(text) {
-      // Simple encoding for PlantUML
       const compressed = pako.deflate(text, { level: 9 });
       return encode64(compressed);
     }
@@ -360,13 +429,10 @@
       return "?";
     }
 
-    // Load data dari localStorage saat halaman dimuat
+    // ===== INITIALIZE =====
     document.addEventListener('DOMContentLoaded', function() {
-      const savedData = localStorage.getItem('useCaseData');
-      
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        const plantUMLCode = generatePlantUML(data);
+      if (useCaseData && useCaseData !== null) {
+        const plantUMLCode = generatePlantUML(useCaseData);
         
         // Set PlantUML code ke textarea (tersembunyi)
         document.getElementById('plantUMLCode').value = plantUMLCode;
@@ -374,11 +440,16 @@
         // Render diagram
         renderDiagram(plantUMLCode);
       } else {
-        alert('No use case data found. Please go back and fill in the information.');
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = `
+          <div class="error-message">
+            <strong>⚠️ No use case data found</strong><br>
+            Please go back and fill in the information first.
+          </div>`;
       }
     });
 
-    // Download PlantUML source
+    // ===== DOWNLOAD PLANTUML =====
     document.getElementById('downloadPlantUMLBtn').addEventListener('click', function() {
       const plantUMLCode = document.getElementById('plantUMLCode').value;
       const blob = new Blob([plantUMLCode], { type: 'text/plain' });
@@ -392,7 +463,7 @@
       URL.revokeObjectURL(url);
     });
 
-    // Export as PNG
+    // ===== EXPORT PNG =====
     document.getElementById('exportPNGBtn').addEventListener('click', function() {
       const img = document.getElementById('diagramImage');
       if (img.src && img.style.display !== 'none') {
@@ -407,7 +478,7 @@
       }
     });
 
-    // Toolbar buttons
+    // ===== TOOLBAR BUTTONS =====
     document.getElementById('refreshBtn').addEventListener('click', function() {
       const plantUMLCode = document.getElementById('plantUMLCode').value;
       renderDiagram(plantUMLCode);
@@ -429,29 +500,27 @@
       const img = document.getElementById('diagramImage');
       if (img.requestFullscreen) {
         img.requestFullscreen();
+      } else if (img.webkitRequestFullscreen) {
+        img.webkitRequestFullscreen();
+      } else if (img.msRequestFullscreen) {
+        img.msRequestFullscreen();
       }
     });
 
     document.getElementById('infoBtn').addEventListener('click', function() {
-      const savedData = localStorage.getItem('useCaseData');
-      if (savedData) {
-        const data = JSON.parse(savedData);
-        alert(`Feature: ${data.featureName}\nPriority: ${data.priority}\nStatus: ${data.status}`);
+      if (useCaseData) {
+        alert(`Feature: ${useCaseData.featureName}\nPriority: ${useCaseData.priority}\nStatus: ${useCaseData.status}`);
       }
     });
 
-    // Navigation buttons
+    // ===== NAVIGATION BUTTONS =====
     document.getElementById('backBtn').addEventListener('click', function() {
-      window.location.href = "{% url 'main:input_informasi_tambahan' %}";
+      window.location.href = "{% url 'main:use_case_spec' %}";
     });
 
     document.getElementById('nextBtn').addEventListener('click', function() {
-      // Navigate to next page
       window.location.href = "{% url 'main:input_gui' %}";
     });
   </script>
-  
-  <!-- Pako library for compression -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 </body>
 </html>
