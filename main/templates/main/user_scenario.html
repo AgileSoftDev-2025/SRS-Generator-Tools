@@ -5,14 +5,12 @@
     <title>User Scenario</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* CSS SAMA PERSIS KAYA PUNYAMU, SAYA RINGKAS BIAR RAPI */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 40px 20px; color: #1f2937; }
         .container { background: #fff; width: 100%; max-width: 1200px; padding: 40px 48px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
         .subtitle { font-size: 14px; color: #6b7280; margin-bottom: 32px; }
         
-        /* CARD STYLES */
         .user-story-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 20px; background: #fff; }
         .user-story-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; cursor: pointer; }
         .user-story-header:hover { background: #f9fafb; }
@@ -31,7 +29,6 @@
         .scenario-type-content { padding: 16px 20px; }
         .scenario-type-content.collapsed { display: none; }
         
-        /* STEP ROW DINAMIS */
         .step-row { display: grid; grid-template-columns: 40px 120px 1fr 1fr 40px; gap: 12px; margin-bottom: 12px; align-items: center; }
         select, input { width: 100%; height: 38px; padding: 6px; border-radius: 6px; border: 1px solid #d1d5db; }
         .add-scenario-btn { width: 100%; padding: 8px; border: 1px dashed #d1d5db; background: #fff; cursor: pointer; margin-top: 8px; }
@@ -39,6 +36,7 @@
         
         .navigation { display: flex; justify-content: space-between; margin-top: 32px; }
         .nav-btn { padding: 12px 24px; background: #000; color: #fff; border-radius: 6px; text-decoration: none; border: none; cursor: pointer; }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -63,7 +61,8 @@
                     <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
 
-                <div class="user-story-content"> <div class="scenario-type-card" data-type="Positive">
+                <div class="user-story-content">
+                    <div class="scenario-type-card" data-type="Positive">
                         <div class="scenario-type-header" onclick="toggleScenarioType(this)">
                             <div><span class="type-badge positive">POSITIVE</span> Positive Scenario</div>
                             <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -84,7 +83,6 @@
                             <button class="add-scenario-btn" onclick="addStep(this)">+ ADD STEP</button>
                         </div>
                     </div>
-
                 </div>
             </div>
             {% endfor %}
@@ -95,30 +93,37 @@
         {% endif %}
 
         <div class="navigation">
-            <a href="/input_gui/G02/" class="nav-btn" style="background:#6c757d">&lt; BACK</a>
-            <button onclick="saveAllScenarios()" class="nav-btn">NEXT &gt;</button>
+            <a href="{% url 'main:input_informasi_tambahan' %}" class="nav-btn" style="background:#6c757d">&lt; BACK</a>
+            <button id="nextBtn" onclick="saveAllScenarios()" class="nav-btn">NEXT &gt;</button>
         </div>
     </div>
 
     <script>
-    // 1. AMBIL DATA DARI DJANGO
-    // Gunakan try-catch agar jika data kosong, aplikasi tidak crash
+    // AMBIL DATA DARI DJANGO
     let guiData = { pages: [], elements: [] };
+    let savedScenarios = {};
+    
     try {
         guiData = JSON.parse('{{ gui_data_json|escapejs }}');
-        console.log("GUI Data Loaded:", guiData);
+        console.log("✅ GUI Data Loaded:", guiData);
     } catch (e) {
-        console.error("Gagal memuat data GUI:", e);
+        console.error("❌ Gagal memuat GUI data:", e);
     }
 
-    // 2. FUNGSI TOGGLE (Biar bisa dibuka-tutup)
+    try {
+        savedScenarios = JSON.parse('{{ saved_scenarios_json|escapejs }}');
+        console.log("✅ Saved Scenarios Loaded:", savedScenarios);
+    } catch (e) {
+        console.error("❌ Gagal memuat saved scenarios:", e);
+    }
+
+    // TOGGLE FUNCTIONS
     function toggleUserStory(header) {
         const content = header.nextElementSibling;
         header.querySelector('.toggle-icon').classList.toggle('collapsed');
         content.classList.toggle('collapsed');
     }
 
-    // FIX: Fungsi ini yang membuat Negative Scenario bisa dibuka
     function toggleScenarioType(header) {
         const content = header.nextElementSibling;
         const icon = header.querySelector('.toggle-icon');
@@ -126,7 +131,7 @@
         if(icon) icon.classList.toggle('collapsed');
     }
 
-    // 3. MANAJEMEN BARIS STEP
+    // STEP MANAGEMENT
     function addStep(btn) {
         const container = btn.previousElementSibling;
         const stepNum = container.children.length + 1;
@@ -168,7 +173,6 @@
         });
     }
 
-    // 4. LOGIC PINTAR DROPDOWN TARGET
     function updateTargetOptions(activitySelect) {
         const row = activitySelect.parentElement;
         const targetSelect = row.querySelector('.select-target');
@@ -178,7 +182,6 @@
         targetSelect.disabled = false;
         targetSelect.style.display = 'block';
 
-        // Hapus input custom jika ada
         const existingInput = row.querySelector('.custom-target-input');
         if(existingInput) existingInput.remove();
 
@@ -193,16 +196,13 @@
         }
 
         if (activity === 'page') {
-            // Tampilkan daftar halaman (Page)
             guiData.pages.forEach(p => {
                 const opt = document.createElement('option');
                 opt.value = p.id;
                 opt.text = "[Page] " + p.name;
                 targetSelect.appendChild(opt);
             });
-        } else {
-            // Tampilkan daftar elemen (Button/Text/dll)
-            // Longgarkan filter agar semua elemen muncul dulu untuk testing
+        } else if (activity) {
             guiData.elements.forEach(el => {
                 const opt = document.createElement('option');
                 opt.value = el.id;
@@ -212,13 +212,94 @@
         }
     }
 
-    // 5. SIMPAN KE DATABASE
+    // LOAD SAVED SCENARIOS FROM DATABASE
+    function loadSavedScenarios() {
+        console.log("🔄 Starting to load saved scenarios...");
+        
+        document.querySelectorAll('.user-story-card').forEach(card => {
+            const specId = card.dataset.specId;
+            console.log(`🔍 Checking spec ID: ${specId}`);
+            
+            if (!savedScenarios[specId]) {
+                console.log(`⚠️ No saved data for spec ${specId}`);
+                return;
+            }
+            
+            const specData = savedScenarios[specId];
+            console.log(`📦 Found data for spec ${specId}:`, specData);
+            
+            ['Positive', 'Negative'].forEach(type => {
+                const typeCard = card.querySelector(`.scenario-type-card[data-type="${type}"]`);
+                if (!typeCard) return;
+                
+                const container = typeCard.querySelector('.step-container');
+                const steps = specData[type];
+                
+                if (steps && steps.length > 0) {
+                    console.log(`✅ Loading ${steps.length} ${type} steps for spec ${specId}`);
+                    container.innerHTML = '';
+                    
+                    steps.forEach((stepData, index) => {
+                        const row = document.createElement('div');
+                        row.className = 'step-row';
+                        row.innerHTML = `
+                            <div class="step-num" style="text-align:center; font-weight:bold;">${index + 1}</div>
+                            <select class="select-condition">
+                                <option value="Given" ${stepData.condition === 'Given' ? 'selected' : ''}>Given</option>
+                                <option value="When" ${stepData.condition === 'When' ? 'selected' : ''}>When</option>
+                                <option value="Then" ${stepData.condition === 'Then' ? 'selected' : ''}>Then</option>
+                                <option value="And" ${stepData.condition === 'And' ? 'selected' : ''}>And</option>
+                            </select>
+                            <select class="select-activity" onchange="updateTargetOptions(this)">
+                                <option value="">-- Activity --</option>
+                                <option value="page" ${stepData.activity === 'page' ? 'selected' : ''}>I am on page</option>
+                                <option value="click" ${stepData.activity === 'click' ? 'selected' : ''}>User click</option>
+                                <option value="input" ${stepData.activity === 'input' ? 'selected' : ''}>User input</option>
+                                <option value="custom" ${stepData.activity === 'custom' ? 'selected' : ''}>Other / Custom</option>
+                            </select>
+                            <select class="select-target" disabled>
+                                <option value="">-- Target --</option>
+                            </select>
+                            <button class="delete-btn" onclick="removeStep(this)">×</button>
+                        `;
+                        container.appendChild(row);
+                        
+                        const activitySelect = row.querySelector('.select-activity');
+                        updateTargetOptions(activitySelect);
+                        
+                        setTimeout(() => {
+                            if (stepData.activity === 'custom') {
+                                const customInput = row.querySelector('.custom-target-input');
+                                if (customInput) {
+                                    customInput.value = stepData.target_text;
+                                }
+                            } else {
+                                const targetSelect = row.querySelector('.select-target');
+                                if (targetSelect && stepData.target_id) {
+                                    targetSelect.value = stepData.target_id;
+                                }
+                            }
+                        }, 50);
+                    });
+                }
+            });
+        });
+        
+        console.log("✅ Load saved scenarios complete!");
+    }
+
+    // SAVE ALL SCENARIOS
     function saveAllScenarios() {
         const payload = [];
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const nextBtn = document.getElementById('nextBtn');
+
+        nextBtn.disabled = true;
+        nextBtn.textContent = 'SAVING...';
 
         document.querySelectorAll('.user-story-card').forEach(card => {
             const specId = card.dataset.specId;
+            
             card.querySelectorAll('.scenario-type-card').forEach(typeCard => {
                 const type = typeCard.dataset.type;
                 const steps = [];
@@ -231,11 +312,12 @@
                     let targetText = "";
 
                     if(activity === 'custom') {
-                        targetText = row.querySelector('.custom-target-input').value;
+                        const customInput = row.querySelector('.custom-target-input');
+                        targetText = customInput ? customInput.value : "";
                     } else {
                         const targetSelect = row.querySelector('.select-target');
-                        targetId = targetSelect.value;
-                        targetText = targetSelect.options[targetSelect.selectedIndex].text;
+                        targetId = targetSelect.value || null;
+                        targetText = targetSelect.options[targetSelect.selectedIndex]?.text || "";
                     }
 
                     steps.push({
@@ -247,10 +329,16 @@
                 });
 
                 if(steps.length > 0) {
-                    payload.push({ spec_id: specId, type: type, steps: steps });
+                    payload.push({ 
+                        spec_id: specId, 
+                        type: type, 
+                        steps: steps 
+                    });
                 }
             });
         });
+
+        console.log("📦 Payload:", payload);
 
         fetch('/save_scenarios/', {
             method: 'POST',
@@ -263,17 +351,36 @@
         .then(res => res.json())
         .then(data => {
             if(data.status === 'success') {
-                // alert("Skenario Berhasil Disimpan!");
+                alert("✅ Skenario Berhasil Disimpan!");
                 window.location.href = "{% url 'main:scenario_result' %}";
             } else {
-                alert("Error: " + data.message);
+                alert("❌ Error: " + (data.message || 'Unknown error'));
+                nextBtn.disabled = false;
+                nextBtn.textContent = 'NEXT >';
             }
+        })
+        .catch(error => {
+            console.error("❌ Error:", error);
+            alert("❌ Gagal menyimpan: " + error.message);
+            nextBtn.disabled = false;
+            nextBtn.textContent = 'NEXT >';
         });
     }
 
-    // Init otomatis 1 baris
+    // INIT ON PAGE LOAD
     document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.add-scenario-btn').forEach(btn => btn.click());
+        const hasData = Object.keys(savedScenarios).some(specId => {
+            const spec = savedScenarios[specId];
+            return spec.Positive.length > 0 || spec.Negative.length > 0;
+        });
+
+        if (hasData) {
+            console.log("📥 Has saved data, loading...");
+            loadSavedScenarios();
+        } else {
+            console.log("📝 No saved data, creating empty rows...");
+            document.querySelectorAll('.add-scenario-btn').forEach(btn => btn.click());
+        }
     });
 </script>
 </body>

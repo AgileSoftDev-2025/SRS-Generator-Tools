@@ -228,9 +228,11 @@ def use_case(request):
     return render(request, 'main/use_case.html')
 
 def user_scenario(request):
-    # Cari GUI yang paling akhir dibuat
     gui = GUI.objects.last() 
-    specs = UseCaseSpecification.objects.all()
+    specs = UseCaseSpecification.objects.prefetch_related(
+        'scenarios__steps'  # ← PENTING: Harus pakai 'scenarios' bukan 'testscenario_set'
+    ).all()
+    
     gui_data = {'pages': [], 'elements': []}
 
     if gui:
@@ -247,10 +249,35 @@ def user_scenario(request):
                 'page': el.page.name
             })
 
-    # POSISI RETURN: Harus di luar blok 'if' agar selalu mengembalikan respon
+    # SIAPKAN DATA SCENARIO YANG SUDAH TERSIMPAN
+    saved_scenarios = {}
+    for spec in specs:
+        saved_scenarios[str(spec.id)] = {  # ← PENTING: Ubah jadi string
+            'Positive': [],
+            'Negative': []
+        }
+        for scenario in spec.scenarios.all():
+            steps_data = []
+            for step in scenario.steps.all().order_by('step_number'):
+                steps_data.append({
+                    'condition': step.condition,
+                    'activity': step.action_type,
+                    'target_id': step.target_id or '',
+                    'target_text': step.target_text or ''
+                })
+            saved_scenarios[str(spec.id)][scenario.scenario_type] = steps_data
+    
+    # DEBUG: Print di terminal untuk cek data
+    print("=" * 60)
+    print("🔍 USER SCENARIO DEBUG")
+    print(f"Total Specs: {specs.count()}")
+    print(f"Saved Scenarios: {saved_scenarios}")
+    print("=" * 60)
+
     return render(request, 'main/user_scenario.html', {
         'specs': specs,
-        'gui_data_json': json.dumps(gui_data)
+        'gui_data_json': json.dumps(gui_data),
+        'saved_scenarios_json': json.dumps(saved_scenarios)
     })
 
 @csrf_exempt
