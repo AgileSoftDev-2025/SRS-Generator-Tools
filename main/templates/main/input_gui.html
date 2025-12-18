@@ -239,7 +239,7 @@ input:focus, select:focus, textarea:focus {
 </style>
 </head>
 <body>
-    <div class="container" data-gui-id="{{ gui.id }}">
+    <div class="container" data-gui-id="{{ gui.id_gui }}">
         {% csrf_token %}
         <h1>INPUT GUI</h1>
         <p class="subtitle">List all pages and describe their input elements.</p>
@@ -258,14 +258,12 @@ input:focus, select:focus, textarea:focus {
                 <div class="element-row">
                     <input type="text" placeholder="Element name..." />
                     <select>
-                        <option value="">Type</option>
-                        <option value="button">Button</option>
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="date">Date</option>
-                        <option value="checkbox">Checkbox</option>
-                        <option value="radio">Radio</option>
-                        <option value="textarea">Textarea</option>
+                       <option value="">Type</option>
+        <option value="button">Button</option>
+        <option value="text">Text</option>
+        <option value="date">Date</option>
+        <option value="checkbox">Checkbox</option>
+        <option value="radio">Radio Button</option>
                     </select>
                 </div>
 
@@ -293,31 +291,37 @@ input:focus, select:focus, textarea:focus {
     }
 
     function saveData(guiId) {
-        const pages = [];
-        document.querySelectorAll('.page-card').forEach((card, pIdx) => {
-            const pageName = card.querySelector('.page-name-input').value;
-            const elements = [];
-            card.querySelectorAll('.element-row').forEach((el, eIdx) => {
-                const name = el.querySelector('input').value;
-                const type = el.querySelector('select').value;
-                elements.push({ name, type });
-            });
-            pages.push({ name: pageName, elements });
+    const pages = [];
+    document.querySelectorAll('.page-card').forEach((card) => {
+        const pageName = card.querySelector('.page-name-input').value;
+        const elements = [];
+        card.querySelectorAll('.element-row').forEach((el) => {
+            const name = el.querySelector('input').value;
+            const type = el.querySelector('select').value;
+            elements.push({ name, type });
         });
+        pages.push({ name: pageName, elements });
+    });
 
-        fetch(`/api/save_gui/${guiId}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
-            },
-            body: JSON.stringify(pages)
-        })
-        .then(res => res.json())
-        .then(data => console.log('Saved:', data))
-        .catch(err => console.error(err));
-    }
-
+    // TAMBAHKAN 'return' di depan fetch
+    return fetch(`/api/save_gui/${guiId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+        body: JSON.stringify(pages)
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('Saved:', data);
+        return data; // Kembalikan data agar bisa dicek sukses/tidaknya
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        throw err;
+    });
+}
     function togglePage(btn) {
         // Tidak digunakan
     }
@@ -330,14 +334,11 @@ input:focus, select:focus, textarea:focus {
             <input type="text" placeholder="Element name..." />
             <select>
                 <option value="">Type</option>
+                <option value="button">Button</option>
                 <option value="text">Text</option>
-                <option value="number">Number</option>
-                <option value="email">Email</option>
-                <option value="password">Password</option>
                 <option value="date">Date</option>
                 <option value="checkbox">Checkbox</option>
-                <option value="radio">Radio</option>
-                <option value="textarea">Textarea</option>
+                <option value="radio">Radio Button</option>
             </select>
         `;
         content.insertBefore(newElement, btn);
@@ -364,15 +365,12 @@ input:focus, select:focus, textarea:focus {
                 <div class="element-row">
                     <input type="text" placeholder="Element name..." />
                     <select>
-                        <option value="">Type</option>
+                      <option value="">Type</option>
+                        <option value="button">Button</option>
                         <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="email">Email</option>
-                        <option value="password">Password</option>
                         <option value="date">Date</option>
                         <option value="checkbox">Checkbox</option>
-                        <option value="radio">Radio</option>
-                        <option value="textarea">Textarea</option>
+                        <option value="radio">Radio Button</option>
                     </select>
                 </div>
 
@@ -390,12 +388,29 @@ input:focus, select:focus, textarea:focus {
         const nextBtn = document.querySelector('.nav-btn.next');
         const backBtn = document.querySelector('.nav-btn.back');
 
-        nextBtn.addEventListener('click', (e) => {
+       nextBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            saveData(guiId);
-            setTimeout(() => {
-                window.location.href = nextBtn.href;
-            }, 500);
+            
+            try {
+                nextBtn.innerText = "Saving..."; // Kasih tanda ke user kalau lagi proses
+                nextBtn.style.opacity = "0.5";
+
+                // TUNGGU sampai proses simpan benar-benar selesai
+                const result = await saveData(guiId);
+
+                if (result.status === 'success') {
+                    // Kalau sukses, baru pindah halaman
+                    window.location.href = nextBtn.href;
+                } else {
+                    alert("Gagal menyimpan: " + result.message);
+                    nextBtn.innerText = "NEXT >";
+                    nextBtn.style.opacity = "1";
+                }
+            } catch (error) {
+                alert("Terjadi kesalahan koneksi atau database locked.");
+                nextBtn.innerText = "NEXT >";
+                nextBtn.style.opacity = "1";
+            }
         });
 
         backBtn.addEventListener('click', (e) => {

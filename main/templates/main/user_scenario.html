@@ -101,191 +101,180 @@
     </div>
 
     <script>
-        // 2. INI KUNCINYA: MENGAMBIL DATA DARI DJANGO VIEWS
-        const guiData = JSON.parse('{{ gui_data_json|escapejs }}');
+    // 1. AMBIL DATA DARI DJANGO
+    // Gunakan try-catch agar jika data kosong, aplikasi tidak crash
+    let guiData = { pages: [], elements: [] };
+    try {
+        guiData = JSON.parse('{{ gui_data_json|escapejs }}');
         console.log("GUI Data Loaded:", guiData);
+    } catch (e) {
+        console.error("Gagal memuat data GUI:", e);
+    }
 
-        function toggleUserStory(header) {
-            const content = header.nextElementSibling;
-            header.querySelector('.toggle-icon').classList.toggle('collapsed');
-            content.classList.toggle('collapsed');
-        }
+    // 2. FUNGSI TOGGLE (Biar bisa dibuka-tutup)
+    function toggleUserStory(header) {
+        const content = header.nextElementSibling;
+        header.querySelector('.toggle-icon').classList.toggle('collapsed');
+        content.classList.toggle('collapsed');
+    }
 
-        function toggleScenarioType(header) {
-            const content = header.nextElementSibling;
-            header.querySelector('.toggle-icon').classList.toggle('collapsed');
-            content.classList.toggle('collapsed');
-        }
+    // FIX: Fungsi ini yang membuat Negative Scenario bisa dibuka
+    function toggleScenarioType(header) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        content.classList.toggle('collapsed');
+        if(icon) icon.classList.toggle('collapsed');
+    }
 
-        function removeStep(btn) {
-            btn.parentElement.remove();
-            renumberSteps(btn.closest('.step-container'));
-        }
+    // 3. MANAJEMEN BARIS STEP
+    function addStep(btn) {
+        const container = btn.previousElementSibling;
+        const stepNum = container.children.length + 1;
+        
+        const row = document.createElement('div');
+        row.className = 'step-row';
+        row.innerHTML = `
+            <div class="step-num" style="text-align:center; font-weight:bold;">${stepNum}</div>
+            <select class="select-condition">
+                <option value="Given">Given</option>
+                <option value="When">When</option>
+                <option value="Then">Then</option>
+                <option value="And">And</option>
+            </select>
+            <select class="select-activity" onchange="updateTargetOptions(this)">
+                <option value="">-- Activity --</option>
+                <option value="page">I am on page</option>
+                <option value="click">User click</option>
+                <option value="input">User input</option>
+                <option value="custom">Other / Custom</option>
+            </select>
+            <select class="select-target" disabled>
+                <option value="">-- Target --</option>
+            </select>
+            <button class="delete-btn" onclick="removeStep(this)">×</button>
+        `;
+        container.appendChild(row);
+    }
 
-        function renumberSteps(container) {
-            container.querySelectorAll('.step-num').forEach((el, index) => {
-                el.innerText = index + 1;
-            });
-        }
+    function removeStep(btn) {
+        const container = btn.closest('.step-container');
+        btn.parentElement.remove();
+        if(container) renumberSteps(container);
+    }
 
-        function addStep(btn) {
-            const container = btn.previousElementSibling;
-            const stepNum = container.children.length + 1;
-            
-            const row = document.createElement('div');
-            row.className = 'step-row';
-            row.innerHTML = `
-                <div class="step-num" style="text-align:center; font-weight:bold;">${stepNum}</div>
-                
-                <select class="select-condition">
-                    <option value="Given">Given</option>
-                    <option value="When">When</option>
-                    <option value="Then">Then</option>
-                    <option value="And">And</option>
-                </select>
-                
-                <select class="select-activity" onchange="updateTargetOptions(this)">
-                    <option value="">-- Activity --</option>
-                    <option value="click">I click button</option>
-                    <option value="input">I input text</option>
-                    <option value="page">I am on page</option>
-                    <option value="custom">Other / Custom</option>
-                </select>
-                
-                <select class="select-target" disabled>
-                    <option value="">-- Target --</option>
-                </select>
-                
-                <button class="delete-btn" onclick="removeStep(this)">×</button>
-            `;
-            container.appendChild(row);
-        }
-
-        // 3. LOGIC PINTAR: FILTER DROPDOWN SESUAI PILIHAN USER
-        function updateTargetOptions(activitySelect) {
-            const row = activitySelect.parentElement;
-            const targetSelect = row.querySelector('.select-target');
-            const activity = activitySelect.value;
-
-            // Reset
-            targetSelect.innerHTML = '<option value="">-- Target --</option>';
-            targetSelect.disabled = false;
-            targetSelect.style.display = 'block';
-
-            // Hapus input custom kalau ada
-            const existingInput = row.querySelector('.custom-target-input');
-            if(existingInput) existingInput.remove();
-
-            if (activity === 'custom') {
-                targetSelect.style.display = 'none';
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.placeholder = 'Type custom scenario...';
-                input.className = 'custom-target-input';
-                row.insertBefore(input, row.lastElementChild); // Insert sebelum tombol delete
-                return;
-            }
-
-            if (activity === 'page') {
-                guiData.pages.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.text = "Page: " + p.name;
-                    targetSelect.appendChild(opt);
-                });
-            } else if (activity === 'click') {
-                // Filter elemen button
-                const buttons = guiData.elements.filter(e => e.type === 'button');
-                buttons.forEach(el => {
-                    const opt = document.createElement('option');
-                    opt.value = el.id;
-                    opt.text = `Button: ${el.name} (on ${el.page})`;
-                    targetSelect.appendChild(opt);
-                });
-            } else if (activity === 'input') {
-                // Filter elemen input teks
-                const inputs = guiData.elements.filter(e => ['text', 'email', 'password', 'number', 'textarea'].includes(e.type));
-                inputs.forEach(el => {
-                    const opt = document.createElement('option');
-                    opt.value = el.id;
-                    opt.text = `Field: ${el.name} (on ${el.page})`;
-                    targetSelect.appendChild(opt);
-                });
-            }
-        }
-
-        // 4. KIRIM DATA KE BACKEND DJANGO
-        function saveAllScenarios() {
-            const payload = [];
-
-            document.querySelectorAll('.user-story-card').forEach(card => {
-                const specId = card.dataset.specId;
-                
-                card.querySelectorAll('.scenario-type-card').forEach(typeCard => {
-                    const type = typeCard.dataset.type;
-                    const steps = [];
-
-                    typeCard.querySelectorAll('.step-row').forEach(row => {
-                        const condition = row.querySelector('.select-condition').value;
-                        const activity = row.querySelector('.select-activity').value;
-                        
-                        let targetId = null;
-                        let targetText = "";
-
-                        if(activity === 'custom') {
-                            const input = row.querySelector('.custom-target-input');
-                            targetText = input ? input.value : "";
-                        } else {
-                            const targetSelect = row.querySelector('.select-target');
-                            targetId = targetSelect.value;
-                            if(targetSelect.selectedIndex > -1) {
-                                targetText = targetSelect.options[targetSelect.selectedIndex].text;
-                            }
-                        }
-
-                        if(activity) { 
-                            steps.push({
-                                condition: condition,
-                                activity: activity,
-                                target_id: targetId,
-                                target_text: targetText
-                            });
-                        }
-                    });
-
-                    if(steps.length > 0) {
-                        payload.push({
-                            spec_id: specId,
-                            type: type,
-                            steps: steps
-                        });
-                    }
-                });
-            });
-
-            console.log("Sending Payload:", payload);
-
-            fetch('/api/save_scenarios/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === 'success') {
-                    alert("Berhasil disimpan!");
-                    // Disini bisa redirect: window.location.href = '/halaman-selanjutnya/';
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(err => console.error(err));
-        }
-
-        // Init: Tambahkan 1 step kosong di setiap skenario positif biar user gak bingung
-        document.addEventListener('DOMContentLoaded', () => {
-             document.querySelectorAll('.scenario-type-card[data-type="Positive"] .add-scenario-btn').forEach(btn => btn.click());
+    function renumberSteps(container) {
+        container.querySelectorAll('.step-num').forEach((el, index) => {
+            el.innerText = index + 1;
         });
-    </script>
+    }
+
+    // 4. LOGIC PINTAR DROPDOWN TARGET
+    function updateTargetOptions(activitySelect) {
+        const row = activitySelect.parentElement;
+        const targetSelect = row.querySelector('.select-target');
+        const activity = activitySelect.value;
+
+        targetSelect.innerHTML = '<option value="">-- Target --</option>';
+        targetSelect.disabled = false;
+        targetSelect.style.display = 'block';
+
+        // Hapus input custom jika ada
+        const existingInput = row.querySelector('.custom-target-input');
+        if(existingInput) existingInput.remove();
+
+        if (activity === 'custom') {
+            targetSelect.style.display = 'none';
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Type custom...';
+            input.className = 'custom-target-input';
+            row.insertBefore(input, row.lastElementChild);
+            return;
+        }
+
+        if (activity === 'page') {
+            // Tampilkan daftar halaman (Page)
+            guiData.pages.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id;
+                opt.text = "[Page] " + p.name;
+                targetSelect.appendChild(opt);
+            });
+        } else {
+            // Tampilkan daftar elemen (Button/Text/dll)
+            // Longgarkan filter agar semua elemen muncul dulu untuk testing
+            guiData.elements.forEach(el => {
+                const opt = document.createElement('option');
+                opt.value = el.id;
+                opt.text = `[${el.type}] ${el.name} (on ${el.page})`;
+                targetSelect.appendChild(opt);
+            });
+        }
+    }
+
+    // 5. SIMPAN KE DATABASE
+    function saveAllScenarios() {
+        const payload = [];
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        document.querySelectorAll('.user-story-card').forEach(card => {
+            const specId = card.dataset.specId;
+            card.querySelectorAll('.scenario-type-card').forEach(typeCard => {
+                const type = typeCard.dataset.type;
+                const steps = [];
+
+                typeCard.querySelectorAll('.step-row').forEach(row => {
+                    const activity = row.querySelector('.select-activity').value;
+                    if(!activity) return;
+
+                    let targetId = null;
+                    let targetText = "";
+
+                    if(activity === 'custom') {
+                        targetText = row.querySelector('.custom-target-input').value;
+                    } else {
+                        const targetSelect = row.querySelector('.select-target');
+                        targetId = targetSelect.value;
+                        targetText = targetSelect.options[targetSelect.selectedIndex].text;
+                    }
+
+                    steps.push({
+                        condition: row.querySelector('.select-condition').value,
+                        activity: activity,
+                        target_id: targetId,
+                        target_text: targetText
+                    });
+                });
+
+                if(steps.length > 0) {
+                    payload.push({ spec_id: specId, type: type, steps: steps });
+                }
+            });
+        });
+
+        fetch('/api/save_scenarios/', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken 
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === 'success') {
+                alert("Skenario Berhasil Disimpan!");
+                window.location.href = '/sequence-diagram/'; 
+            } else {
+                alert("Error: " + data.message);
+            }
+        });
+    }
+
+    // Init otomatis 1 baris
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.add-scenario-btn').forEach(btn => btn.click());
+    });
+</script>
 </body>
 </html>

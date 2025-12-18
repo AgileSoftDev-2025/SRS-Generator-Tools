@@ -226,46 +226,30 @@ def use_case(request):
     return render(request, 'main/use_case.html')
 
 def user_scenario(request):
-    return render(request, 'main/user_scenario.html')
-
-def user_scenario(request):
-    # 1. Ambil GUI terakhir (atau logic sesuai session kamu)
-    gui = GUI.objects.last()
-    
-    # 2. Ambil Semua Use Case Spec (ini yang jadi "User Story 1, 2, dst")
+    # Cari GUI yang paling akhir dibuat
+    gui = GUI.objects.last() 
     specs = UseCaseSpecification.objects.all()
-
-    # 3. SIAPKAN DATA GUI UNTUK JAVASCRIPT
-    # Kita harus convert QuerySet Django jadi List of Dictionaries biasa
-    gui_data = {
-        'pages': [],
-        'elements': []
-    }
+    gui_data = {'pages': [], 'elements': []}
 
     if gui:
-        # Ambil Pages
         pages = Page.objects.filter(gui=gui)
         for p in pages:
-            gui_data['pages'].append({
-                'id': p.id,
-                'name': p.name
-            })
+            gui_data['pages'].append({'id': p.id, 'name': p.name})
         
-        # Ambil Elements
         elements = Element.objects.filter(page__gui=gui)
         for el in elements:
             gui_data['elements'].append({
-                'id': el.id,
-                'name': el.name,
-                'type': el.input_type, # text, button, etc
-                'page': el.page.name   # Nama page-nya buat label
+                'id': el.id, 
+                'name': el.name, 
+                'type': el.input_type.lower() if el.input_type else "text", 
+                'page': el.page.name
             })
 
-    context = {
+    # POSISI RETURN: Harus di luar blok 'if' agar selalu mengembalikan respon
+    return render(request, 'main/user_scenario.html', {
         'specs': specs,
-        'gui_data_json': json.dumps(gui_data) # Kirim sebagai String JSON
-    }
-    return render(request, 'main/user_scenario.html', context)
+        'gui_data_json': json.dumps(gui_data)
+    })
 
 @csrf_exempt
 def save_scenarios_api(request):
