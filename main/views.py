@@ -1,4 +1,5 @@
 import os
+from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
@@ -135,50 +136,91 @@ def save_userstory(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@transaction.atomic
 def save_actors_and_features(request):
-    try:
-        data = json.loads(request.body)
-        
-        # 1. Tentukan konteks GUI
-        current_gui = GUI.objects.last() 
-        
-        # 👇 BAGIAN INI KITA UBAH (Biar gak error 400 lagi)
-        # if not current_gui:
-        #     # Daripada return Error 400, kita return Sukses (200) tapi gak ngapa-ngapain.
-        #     # Ini biar frontend seneng dan log kamu BERSIH dari warna merah.
-        #     print("⚠️ Warning: GUI Kosong. Skip simpan actors sementara.")
-        #     return JsonResponse({'status': 'success', 'message': 'GUI kosong, skip save.'}, status=200)
-        # 👆 SELESAI MODIFIKASI 
-
-        # Hapus data lama di GUI ini
-        UserStory.objects.filter(gui=current_gui).delete()
-
-        # 2. Simpan data baru
-        saved_count = 0
-        for actor in data:
-            actor_name = actor.get('name')
-            features = actor.get('features', [])
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
             
-            for feat in features:
-                feature_name = feat.get('what')
-                feature_purpose = feat.get('why')
+            # ==========================================
+            # 1. BERSIHKAN DATA LAMA (RESET)
+            # ==========================================
+            UserStory.objects.all().delete()
+            UseCaseSpecification.objects.all().delete()
+            
+            saved_count = 0
+            
+            # ==========================================
+            # 2. SIAPKAN PENAMPUNG (GROUPING)
+            # ==========================================
+            # Ini kuncinya: Kita kumpulkan dulu fiturnya biar nggak duplikat di Spec
+            feature_map = {} 
+
+            # ==========================================
+            # 3. LOOPING DATA INPUT
+            # ==========================================
+            for actor in data:
+                actor_name = actor.get('name')
+                features = actor.get('features', [])
                 
-                UserStory.objects.create(
-                    input_sebagai=actor_name,
-                    input_fitur=feature_name,
-                    input_tujuan=feature_purpose,
-                    gui=current_gui
+                for feat in features:
+                    feature_name = feat.get('what')
+                    feature_purpose = feat.get('why')
+                    
+                    # ---------------------------------------------------
+                    # A. SIMPAN USER STORY (Untuk Garis Panah Diagram)
+                    # ---------------------------------------------------
+                    # Tetap disimpan satu-per-satu meskipun fiturnya sama.
+                    # Contoh: 
+                    # Row 1: Babi -> Makan
+                    # Row 2: Customer -> Makan
+                    UserStory.objects.create(
+                        input_sebagai=actor_name,
+                        input_fitur=feature_name,
+                        input_tujuan=feature_purpose,
+                    )
+
+                    # ---------------------------------------------------
+                    # B. KUMPULKAN DATA SPEC (Untuk Oval & Dokumen)
+                    # ---------------------------------------------------
+                    # Jangan simpan ke DB dulu, masukkan ke map biar unik.
+                    if feature_name not in feature_map:
+                        feature_map[feature_name] = {
+                            'actors': [], 
+                            'purpose': feature_purpose
+                        }
+                    
+                    # Catat aktornya siapa aja yang pakai fitur ini
+                    if actor_name not in feature_map[feature_name]['actors']:
+                        feature_map[feature_name]['actors'].append(actor_name)
+
+            # ==========================================
+            # 4. SIMPAN USE CASE SPECIFICATION (FINAL)
+            # ==========================================
+            # Sekarang baru kita simpan ke DB UseCaseSpecification (dijamin unik per fitur)
+            for feat_name, info in feature_map.items():
+                # Gabungkan aktor jadi teks cantik: "Babi, Customer"
+                actors_str = ", ".join(info['actors'])
+                
+                UseCaseSpecification.objects.create(
+                    feature_name=feat_name,
+                    # Summary otomatis jadi pintar: "Users (Babi, Customer) want to..."
+                    summary_description=f"Users ({actors_str}) want to {feat_name} so that {info['purpose']}",
+                    priority="Must Have",
+                    status="Active"
                 )
                 saved_count += 1
 
-        return JsonResponse({
-            'status': 'success', 
-            'message': f'Berhasil update! Total {saved_count} User Stories tersimpan.'
-        })
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'Berhasil! {saved_count} fitur unik disimpan & User Story tercatat.'
+            })
 
-    except Exception as e:
-        print(f"❌ Error Save Actors: {e}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        except Exception as e:
+            print(f"❌ Error Save: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid Method'}, status=400)
 
 def use_case(request):
     return render(request, 'main/use_case.html')
@@ -344,7 +386,34 @@ def generate_usecase_diagram(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_informasi_tambahan(request):
-    return render(request, 'main/input_informasi_tambahan.html')
+    specs = UseCaseSpecification.objects.all().prefetch_related(
+        'basic_paths', 'alternative_paths', 'exception_paths'
+    )
+
+    use_cases_list = []
+    for spec in specs:
+        # Helper kecil buat format path
+        def get_paths(path_manager):
+            return [{'actor': p.actor_action, 'system': p.system_response} for p in path_manager.all()]
+
+        use_cases_list.append({
+            'id': spec.id,
+            'name': spec.feature_name,
+            'summary': spec.summary_description or "",
+            'priority': spec.priority,
+            'status': spec.status,
+            'precondition': spec.input_precondition or "",
+            'postcondition': spec.input_postcondition or "",
+            'basicPath': get_paths(spec.basic_paths),
+            'alternativePath': get_paths(spec.alternative_paths),
+            'exceptionPath': get_paths(spec.exception_paths)
+        })
+
+    context = {
+        # Kita pakai json.dumps biar datanya siap pakai
+        'use_cases_json': json.dumps(use_cases_list)
+    }
+    return render(request, 'main/input_informasi_tambahan.html', context)
 
 def use_case_spec(request):
     # 1. Ambil data Use Case Spec
@@ -949,3 +1018,35 @@ def input_gui(request, gui_id=None, project_id=None):
     
     gui = get_object_or_404(GUI, pk=gui_id)
     return render(request, 'main/input_gui.html', {'gui': gui})
+
+def reset_usecase_data(request):
+    # Hapus semua data Use Case Specification
+    UseCaseSpecification.objects.all().delete()
+    return redirect('main:input_informasi_tambahan') # Atau redirect ke halaman input fitu
+
+def activity_diagram(request):
+    """
+    Halaman untuk menampilkan dan generate activity diagram
+    """
+    # AMBIL DATA DARI DATABASE, bukan session
+    # Karena data sudah disave permanen di step sebelumnya
+    specs = UseCaseSpecification.objects.all()
+    
+    # Kita perlu convert ke format JSON string agar bisa dibaca JavaScript untuk generate diagram
+    specs_data = []
+    for spec in specs:
+        specs_data.append({
+            'featureName': spec.feature_name,
+            'precondition': spec.input_precondition,
+            'postcondition': spec.input_postcondition,
+            # Ambil paths (Basic, Alt, Exception)
+            'basicPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.basic_paths.all()],
+            'alternativePath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.alternative_paths.all()],
+            'exceptionPath': [{'actor': p.actor_action, 'system': p.system_response} for p in spec.exception_paths.all()],
+        })
+
+    context = {
+        'page_title': 'Activity Diagram Generator',
+        'use_case_data': json.dumps(specs_data) # Kirim sebagai JSON List
+    }
+    return render(request, 'main/activity_diagram.html', context)

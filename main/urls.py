@@ -41,6 +41,7 @@ urlpatterns = [
     path('input_gui/', views.input_gui, name='input_gui'),
     path('project/<int:project_id>/input_gui/', views.input_gui, name='input_gui_for_project'),
     path('input_gui/<str:gui_id>/', views.input_gui, name='input_gui_with_id'),
+    path('reset-data/', views.reset_usecase_data, name='reset_usecase_data'),
 
     # Final Output
     path('generate-srs/', views.generate_srs, name='generate_srs'),
