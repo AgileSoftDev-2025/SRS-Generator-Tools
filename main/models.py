@@ -274,3 +274,5 @@ class Element(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.input_type})"
+    
+    
