@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scenario Summary Results</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #059669;
+            --danger: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: #f4f7fa;
+            color: var(--gray-800);
+            line-height: 1.5;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            border-bottom: 2px solid var(--gray-100);
+            padding-bottom: 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 { font-size: 28px; margin-bottom: 8px; color: var(--gray-800); }
+        .subtitle { color: #6b7280; font-size: 15px; }
+
+        .story-card {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .story-header {
+            background: var(--gray-50);
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .story-header h2 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .scenario-container { padding: 24px; }
+
+        .scenario-group { margin-bottom: 24px; }
+        .scenario-group:last-child { margin-bottom: 0; }
+
+        .scenario-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .bg-pos { background: #dcfce7; color: var(--success); }
+        .bg-neg { background: #fee2e2; color: var(--danger); }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .result-table th {
+            background: var(--gray-50);
+            text-align: left;
+            padding: 12px;
+            border: 1px solid var(--gray-200);
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+
+        .result-table td {
+            padding: 12px;
+            border: 1px solid var(--gray-200);
+            vertical-align: top;
+        }
+
+        .step-col { text-align: center; font-weight: 600; color: #9ca3af; }
+        .cond-col { font-weight: 700; color: var(--gray-800); width: 100px; }
+        
+        .target-highlight {
+            background: #eff6ff;
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'SFMono-Regular', Consolas, monospace;
+            font-size: 13px;
+        }
+
+        .no-data {
+            padding: 20px;
+            background: var(--gray-50);
+            border: 1px dashed var(--gray-200);
+            border-radius: 6px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary { background: white; border: 1px solid var(--gray-200); color: var(--gray-700); }
+        .btn-primary { background: var(--gray-800); color: white; border: none; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        @media print {
+            .navigation { display: none; }
+            body { padding: 0; background: white; }
+            .container { box-shadow: none; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Scenario Summary Results</h1>
+        <p class="subtitle">Dokumentasi hasil skenario pengujian berdasarkan User Story dan elemen GUI.</p>
+    </header>
+
+    {% for spec in specs %}
+    <div class="story-card">
+        <div class="story-header">
+            <h2>User Story {{ forloop.counter }}: {{ spec.feature_name }}</h2>
+            <p style="font-size: 14px; color: #6b7280;">{{ spec.summary_description|default:"No description provided." }}</p>
+        </div>
+
+        <div class="scenario-container">
+            {% for scenario in spec.scenarios.all %}
+            <div class="scenario-group">
+                <span class="scenario-badge {% if scenario.scenario_type == 'Positive' %}bg-pos{% else %}bg-neg{% endif %}">
+                    {{ scenario.scenario_type }} Scenario
+                </span>
+                
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th width="80">Step</th>
+                            <th width="120">Condition</th>
+                            <th>Action & Target Element</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for step in scenario.steps.all|dictsort:"step_number" %}
+                        <tr>
+                            <td class="step-col">{{ step.step_number }}</td>
+                            <td class="cond-col">{{ step.condition }}</td>
+                            <td>
+                                <span>{{ step.action_type }}</span> pada 
+                                <span class="target-highlight">{{ step.target_text }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% empty %}
+            <div class="no-data">
+                <p>Belum ada skenario (Positive/Negative) yang tersimpan untuk fitur ini.</p>
+                <small>Pastikan Anda mengisi langkah-langkah di halaman sebelumnya sebelum menekan FINISH.</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="navigation">
+        <a href="{% url 'main:user_scenario' %}" class="btn btn-secondary">&larr; Edit Scenarios</a>
+        <a href="{% url 'main:sequence_diagram' %}" class="btn btn-primary">Generate Sequence Diagram &rarr;</a>
+    </div>
+</div>
+
+</body>
+</html>

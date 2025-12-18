@@ -2,146 +2,133 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <title>OneUML - Use Case Specification</title>
+  <title>OneUML - Use Case Specification Result</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Bootstrap -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background: #f9fafb;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", Roboto, sans-serif;
-    }
-
-    .header {
-      height: 64px;
-      padding: 0 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .spec-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 32px;
-    }
-
-    .section-title {
-      font-weight: 600;
-      margin-top: 24px;
-    }
+    body { background: #f9fafb; font-family: system-ui, -apple-system, sans-serif; }
+    .header { height: 64px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #e5e7eb; }
+    .spec-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 32px; }
+    .section-title { font-weight: 600; margin-top: 24px; }
+    .table th { background-color: #f8f9fa; }
+    .badge { font-size: 0.9em; }
   </style>
 </head>
 
 <body>
-  <!-- HEADER -->
   <header class="header">
     <div class="fw-semibold">OneUML</div>
     <img src="https://via.placeholder.com/40" class="rounded-circle" />
   </header>
 
-  <!-- CONTENT -->
   <main class="container mt-5">
     <h3 class="fw-bold mb-4">Use Case Specification</h3>
 
-    <div id="useCaseContainer"></div>
+    <div id="useCaseContainer">
+        
+        {% if specs %}
+            {% for spec in specs %}
+            <div class="spec-card">
+                <h5 class="fw-bold text-primary">{{ spec.feature_name }}</h5>
 
-    <!-- NAVIGATION -->
-    <div class="d-flex justify-content-between mt-5">
-      <button class="btn btn-outline-secondary"
-        onclick="location.href='/input-informasi-tambahan'">
-        ← Back
-      </button>
+                <p><strong>Summary:</strong><br>{{ spec.summary_description|default:"-" }}</p>
 
-      <button class="btn btn-dark"
-        onclick="location.href='/activity-diagram'">
-        Next →
-      </button>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Priority:</strong> 
+                        <span class="badge {% if spec.priority == 'Must Have' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ spec.priority }}
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong> 
+                        <span class="badge bg-success">{{ spec.status }}</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Pre-Condition:</strong><br>{{ spec.input_precondition|default:"-" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Post-Condition:</strong><br>{{ spec.input_postcondition|default:"-" }}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="section-title">Basic Flow (Jalur Utama)</div>
+                    <table class="table table-bordered mt-2">
+                        <thead>
+                            <tr>
+                                <th width="50%">Aksi Aktor</th>
+                                <th width="50%">Respon Sistem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for step in spec.basic_paths.all %}
+                            <tr>
+                                <td>{{ step.actor_action }}</td>
+                                <td>{{ step.system_response }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="2" class="text-center text-muted">Tidak ada data</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if spec.alternative_paths.all %}
+                <div class="mt-4">
+                    <div class="section-title">Alternative Flow</div>
+                    <table class="table table-bordered mt-2">
+                        <thead><tr><th width="50%">Aksi Aktor</th><th width="50%">Respon Sistem</th></tr></thead>
+                        <tbody>
+                            {% for step in spec.alternative_paths.all %}
+                            <tr><td>{{ step.actor_action }}</td><td>{{ step.system_response }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if spec.exception_paths.all %}
+                <div class="mt-4">
+                    <div class="section-title">Exception Flow</div>
+                    <table class="table table-bordered mt-2">
+                        <thead><tr><th width="50%">Aksi Aktor</th><th width="50%">Respon Sistem</th></tr></thead>
+                        <tbody>
+                            {% for step in spec.exception_paths.all %}
+                            <tr><td>{{ step.actor_action }}</td><td>{{ step.system_response }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        
+        {% else %}
+            <div class="alert alert-warning text-center py-5">
+                <h4>Belum ada data Use Case.</h4>
+                <p>Silakan input data terlebih dahulu di halaman sebelumnya.</p>
+                <a href="/input-informasi-tambahan/" class="btn btn-primary mt-2">Input Data</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between mt-5 mb-5">
+      <a href="/input-informasi-tambahan/" class="btn btn-outline-secondary">← Back</a>
+      
+      {% if gui %}
+          <a href="{% url 'main:activity_diagram' %}" class="btn btn-dark">Next →</a>
+      {% else %}
+          <button class="btn btn-dark" disabled>Next (Loading...)</button>
+      {% endif %}
     </div>
   </main>
 
-  <script>
-    const container = document.getElementById("useCaseContainer");
-
-    const featureList =
-      JSON.parse(localStorage.getItem("featureList")) || [];
-    const specs =
-      JSON.parse(localStorage.getItem("useCaseSpecs")) || {};
-
-    if (featureList.length === 0) {
-      container.innerHTML =
-        "<p class='text-muted'>Tidak ada data Use Case.</p>";
-    }
-
-    featureList.forEach((feature, index) => {
-      const id = index + 1;
-      const data = specs[id];
-
-      if (!data) return;
-
-      container.innerHTML += `
-        <div class="spec-card">
-          <h5 class="fw-bold">${feature}</h5>
-
-          <p><strong>Summary:</strong><br>${data.summary || "-"}</p>
-
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <strong>Priority:</strong> ${data.priority}
-            </div>
-            <div class="col-md-6">
-              <strong>Status:</strong> ${data.status}
-            </div>
-          </div>
-
-          <p><strong>Pre-Condition:</strong><br>
-            ${data.precondition || "-"}</p>
-
-          <p><strong>Post-Condition:</strong><br>
-            ${data.postcondition || "-"}</p>
-
-          ${renderTable("Basic Flow", data.basicPath)}
-          ${renderTable("Alternative Flow", data.alternativePath)}
-          ${renderTable("Exception Flow", data.exceptionPath)}
-        </div>
-      `;
-    });
-
-    function renderTable(title, rows = []) {
-      if (!rows || rows.length === 0) return "";
-
-      return `
-        <div class="mt-4">
-          <div class="section-title">${title}</div>
-          <table class="table table-bordered mt-2">
-            <thead>
-              <tr>
-                <th width="50%">Aksi Aktor</th>
-                <th width="50%">Respon Sistem</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows.map(r => `
-                <tr>
-                  <td>${r.actor || "-"}</td>
-                  <td>${r.system || "-"}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
