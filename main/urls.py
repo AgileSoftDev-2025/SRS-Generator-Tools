@@ -21,9 +21,6 @@ urlpatterns = [
     path('use-case-spec/', views.use_case_spec, name='use_case_spec'),          # Step 4
     path('activity-diagram/', views.activity_diagram, name='activity_diagram'), # Step 5
     path('sequence-diagram/', views.sequence_diagram, name='sequence_diagram'),
-    path("api/sequence/features/", views.get_sequence_features, name="sequence_features"),
-    path("api/sequence/<str:feature_id>/generate/", views.generate_sequence_diagram_by_feature, name="generate_sequence_diagram_by_feature"),
-    path("api/sequence/features/", views.sequence_feature_list, name="sequence_feature_list"),
 
     # Alternative/Special Features 
     path('use-case/', views.use_case, name='use_case'),
@@ -56,5 +53,6 @@ urlpatterns = [
     path('api/save_gui/<str:gui_id>/', views.save_gui, name='save_gui'),
     path('api/save-actors/', views.save_actors_and_features, name='save_actors_and_features'),
     path('api/generate-usecase/', views.generate_usecase_diagram, name='generate_usecase_diagram'),
-
+    path("api/sequence/<str:feature_id>/generate/", views.generate_sequence_diagram_by_feature, name="generate_sequence_diagram_by_feature"),
+    path("api/sequence/features/", views.sequence_feature_list, name="sequence_feature_list"),
 ]

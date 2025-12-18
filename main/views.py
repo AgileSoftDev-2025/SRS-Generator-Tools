@@ -4,33 +4,25 @@ from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, Test
 from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram
+from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram, Page, ImportedTable, ImportedRelationship
 from django.utils import timezone
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
 from .parsers.sql_parser import parse_sql_file
 from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
-import base64
-import requests
-import urllib.parse
+import base64, requests, urllib.parse, binascii, json, subprocess
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponse
-import json
 from .forms import RegisterForm 
-from main.generators.sequence_generator import generate_sequence_plantuml
-import subprocess
+from main.generators.sequence_generator import generate_sequence_plantuml, build_sequence_plantuml
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-import json
 from .models import GUI, Page, Element, Usecase
-import requests      
-import urllib.parse   
 from django.core.files.base import ContentFile  
 from .models import GUI, UseCaseSpecification, BasicPath, AlternativePath, ExceptionPath
-import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -652,134 +644,154 @@ def sequence_diagram(request):
     return render(request, 'main/sequence_diagram.html')
 
 def generate_sequence_diagram(request, userstory_id):
+    try:
+        # 1. Generate text kode PlantUML
+        plantuml_code = generate_sequence_plantuml(userstory_id)
+        
+        # DEBUG: Cek kode di terminal
+        print("=== PLANTUML CODE ===")
+        print(plantuml_code)
+        
+        if not plantuml_code:
+            return HttpResponse("Error: PlantUML Code is empty", status=400)
 
-    plantuml_code = generate_sequence_plantuml(userstory_id)
+        # 2. GUNAKAN SERVER KROKI.IO (Alternatif Cepat & Stabil)
+        # Kroki menerima kode mentah via POST, jadi tidak perlu ribet encode HEX/Base64
+        kroki_url = "https://kroki.io/plantuml/png"
+        
+        # Kirim kode langsung sebagai body request
+        response = requests.post(kroki_url, data=plantuml_code, timeout=10)
+        
+        if response.status_code == 200:
+            # Sukses, kembalikan gambar PNG
+            return HttpResponse(response.content, content_type="image/png")
+        else:
+            # Jika Kroki gagal, tampilkan pesan errornya
+            return HttpResponse(f"Gagal generate (Kroki Error): {response.text}", status=500)
 
-    file_path = os.path.join(settings.MEDIA_ROOT, f"sequence_{userstory_id}.puml")
-    with open(file_path, "w") as f:
-        f.write(plantuml_code)
-
-    subprocess.run(["plantuml", file_path])
-
-    png_path = file_path.replace(".puml", ".png")
-    with open(png_path, "rb") as img:
-        return HttpResponse(img.read(), content_type="image/png")
-    
-def get_sequence_features(request):
-    features = UseCaseSpecification.objects.select_related(
-        'usecase__gui'
-    ).all()
-
-    data = []
-    for f in features:
-        data.append({
-            "id": f.id_usecasespecification,
-            "title": f.summary_description,
-            "gui": f.usecase.gui.nama_atribut
-        })
-
-    return JsonResponse(data, safe=False)
+    except requests.exceptions.ConnectionError:
+        return HttpResponse("Gagal koneksi internet. Pastikan laptop connect wifi.", status=500)
+    except Exception as e:
+        print(f"System Error: {str(e)}")
+        return HttpResponse(f"System Error: {str(e)}", status=500)
 
 def generate_sequence_diagram_by_feature(request, feature_id):
-    usecase_spec = get_object_or_404(
-        UseCaseSpecification,
-        id_usecasespecification=feature_id
-    )
+    # 1. Ambil Spesifikasi Fitur
+    usecase_spec = get_object_or_404(UseCaseSpecification, pk=feature_id)
+    
+    target_gui = usecase_spec.gui
 
-    basic_paths = usecase_spec.basic_paths.order_by("step_number")
-    alt_paths = usecase_spec.alternative_paths.all()
-    exc_paths = usecase_spec.exception_paths.all()
+    # Validasi 1: Jika GUI yang terhubung ternyata kosong (tidak punya halaman)
+    if target_gui and not Page.objects.filter(gui=target_gui).exists():
+        print(f"DEBUG: GUI {target_gui.id_gui} terhubung tapi kosong. Mencari GUI lain yang valid...")
+        target_gui = None #anggap tidak valid
 
-    gui = usecase_spec.usecase.gui
-    pages = Page.objects.filter(gui=gui).prefetch_related("elements")
+    # Validasi 2: Jika belum nemu, cari dari relasi UseCase lama (Backward Compatibility)
+    if not target_gui and hasattr(usecase_spec, 'usecase') and usecase_spec.usecase:
+        candidate = usecase_spec.usecase.gui
+        if candidate and Page.objects.filter(gui=candidate).exists():
+            target_gui = candidate
 
+    # Validasi 3 (FINAL & PALING PENTING): 
+    # Cari GUI manapun di database yang MEMILIKI Pages (Input Elements).
+    if not target_gui:
+        # Filter GUI yang memiliki setidaknya 1 Page
+        valid_gui = GUI.objects.filter(pages__isnull=False).distinct().first()
+        
+        if valid_gui:
+            target_gui = valid_gui
+            print(f"DEBUG: Menggunakan GUI Valid (G02/lainnya) -> {target_gui.id_gui}")
+        else:
+            # Jika benar-benar tidak ada satupun GUI yang punya halaman
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'Data GUI tidak lengkap. Anda sudah membuat Nama GUI, tapi belum mengisi Halaman (Pages) dan Elemen-nya. Silakan isi Input GUI.'
+            }, status=400)
+    
+    # 2. Ambil Artefak Pages (Boundary) dari GUI yang Valid tadi
+    pages = Page.objects.filter(gui=target_gui).prefetch_related("elements").order_by('order')
+    
+    # 3. Ambil Artefak SQL (Entity)
     tables = ImportedTable.objects.all()
     relationships = ImportedRelationship.objects.all()
 
-    plantuml = build_sequence_plantuml(
-        usecase_spec,
-        basic_paths,
-        alt_paths,
-        exc_paths,
-        pages,
-        tables,
-        relationships
-    )
+    # 4. Generate PlantUML Code
+    try:
+        basic_paths = usecase_spec.basic_paths.order_by("step_number")
+        alt_paths = usecase_spec.alternative_paths.all()
+        exc_paths = usecase_spec.exception_paths.all()
 
-    return JsonResponse({"plantuml": plantuml})
+        plantuml_code = build_sequence_plantuml(
+            usecase_spec, basic_paths, alt_paths, exc_paths, pages, tables, relationships
+        )
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f'Gagal logic generator: {str(e)}'}, status=500)
+
+    # 5. Render Gambar via Kroki (Paling Stabil & Cepat)
+    try:
+        kroki_url = "https://kroki.io/plantuml/png"
+        response = requests.post(kroki_url, data=plantuml_code, timeout=20)
+        
+        if response.status_code == 200:
+            image_base64 = base64.b64encode(response.content).decode('utf-8')
+            return JsonResponse({
+                'status': 'success',
+                'plantuml': plantuml_code,
+                'image_base64': image_base64
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Gagal render gambar: {response.status_code}'
+            }, status=500)
+            
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': f"Connection Error: {str(e)}"}, status=500)
 
 def sequence_feature_list(request):
-    features = UseCaseSpecification.objects.select_related(
-        'usecase__gui'
-    )
+    try:
+        # Ambil semua data Use Case Spec
+        specs = UseCaseSpecification.objects.all().order_by('-id')
+        
+        # DEBUG: Lihat di terminal apakah data terbaca
+        print(f"=== DEBUG: Found {specs.count()} specs in Database ===")
 
-    data = []
-    for f in features:
-        data.append({
-            "id": f.id_usecasespecification,
-            "title": f.summary_description,
-            "gui": f.usecase.gui.nama_atribut,
-        })
+        data = []
+        for spec in specs:
+            # LOGIKA AMAN UNTUK MENGAMBIL NAMA GUI
+            gui_name = "No GUI connected"
+            
+            try:
+                # Cek 1: Apakah field 'gui' terisi langsung?
+                if spec.gui:
+                    gui_name = spec.gui.nama_atribut
+                
+                # Cek 2: Fallback ke relasi lama (usecase -> gui)
+                elif hasattr(spec, 'usecase') and spec.usecase and spec.usecase.gui:
+                    gui_name = spec.usecase.gui.nama_atribut
+                    
+            except Exception as e:
+                # Jika ada error saat ambil nama GUI, jangan stop program.
+                # Cukup set jadi Error Text.
+                print(f"Warning on Spec ID {spec.id}: {str(e)}")
+                gui_name = "Error retrieving GUI"
 
-    return JsonResponse(data, safe=False)
+            # Masukkan ke list
+            data.append({
+                "id": spec.id,                # Pastikan ini sesuai kolom ID di screenshot (id)
+                "title": spec.feature_name,   # Sesuai kolom di screenshot
+                "gui": gui_name
+            })
 
-def build_sequence_plantuml(
-    usecase_spec,
-    basic_paths,
-    alt_paths,
-    exc_paths,
-    pages,
-    tables,
-    relationships
-):
-    lines = []
-    lines.append("@startuml")
-    lines.append("actor User")
-    lines.append("boundary UI")
-    lines.append("control Controller")
-    lines.append("database DB")
-    lines.append("")
+        # DEBUG: Print data yang akan dikirim ke frontend
+        # print(f"Sending Data: {data}") 
+        
+        return JsonResponse(data, safe=False)
 
-    lines.append(f"User -> UI : {usecase_spec.summary_description}")
-    lines.append("UI -> Controller : request")
-
-    # BASIC PATH
-    for step in basic_paths:
-        lines.append(f"Controller -> Controller : Step {step.step_number} - {step.description}")
-
-    # GUI interaction
-    for page in pages:
-        lines.append(f"Controller -> UI : Open page {page.name}")
-        for el in page.elements.all():
-            lines.append(f"User -> UI : Input {el.name} ({el.input_type})")
-
-    # SQL interaction
-    for table in tables:
-        lines.append(f"Controller -> DB : access {table.name}")
-
-    lines.append("DB --> Controller : result")
-    lines.append("Controller --> UI : response")
-
-    # ALTERNATIVE PATH
-    if alt_paths.exists():
-        lines.append("alt Alternative Flow")
-        for alt in alt_paths:
-            lines.append(
-                f"Controller -> Controller : Alt Step from {alt.related_basic_step} - {alt.description}"
-            )
-        lines.append("end")
-
-    # EXCEPTION PATH
-    if exc_paths.exists():
-        lines.append("alt Exception Flow")
-        for exc in exc_paths:
-            lines.append(
-                f"Controller -> Controller : Exception at {exc.related_basic_step} - {exc.description}"
-            )
-        lines.append("end")
-
-    lines.append("@enduml")
-    return "\n".join(lines) 
+    except Exception as e:
+        # Jika error fatal, print di terminal
+        print(f"CRITICAL ERROR in sequence_feature_list: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 def class_diagram(request):
     if request.method != "POST":
