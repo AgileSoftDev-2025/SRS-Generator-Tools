@@ -250,7 +250,7 @@
     </div>
     
     <div class="info-text">
-        <p><strong>Note:</strong> Diagram Use Case dan User Story dihasilkan secara otomatis berdasarkan data yang telah Anda input sebelumnya.</p>
+        <p><strong>Note:</strong> Diagram Use Case dan User Story dihasilkan secara otomatis berdasarkan data yang telah Anda input sebelumnya. Fitur yang sama digunakan oleh beberapa aktor akan muncul sebagai <strong>satu use case</strong> dengan <strong>multiple associations</strong>.</p>
     </div>
     
     <!-- Use Case Diagram Section -->
@@ -514,7 +514,11 @@ function generatePlantUMLUrl(plantUMLCode) {
     return `https://www.plantuml.com/plantuml/svg/${encoded}`;
 }
 
-// Fungsi untuk menghasilkan diagram PlantUML
+// ============================================================================
+// 🔥 FUNGSI UTAMA YANG DIPERBAIKI: generatePlantUMLDiagram()
+// Sekarang membuat SATU use case untuk fitur yang sama digunakan multiple actors
+// TANPA tulisan "Shared by X actors"
+// ============================================================================
 function generatePlantUMLDiagram() {
     const container = document.getElementById('diagramContainer');
     const regenerateBtn = document.getElementById('regenerateDiagram');
@@ -538,32 +542,61 @@ function generatePlantUMLDiagram() {
     }
     
     try {
-        // Membuat kode PlantUML berdasarkan data use case
+        // =======================================================
+        // KODE PLANTUML YANG SUDAH DIPERBAIKI
+        // =======================================================
         currentPlantUMLCode = `@startuml\nleft to right direction\nskinparam monochrome true\nskinparam shadowing false\nskinparam usecase {\n  BackgroundColor #F8F9FA\n  BorderColor #6B7280\n}\ntitle Use Case Diagram\n\n`;
         
-        // Menambahkan aktor
+        // 1. TAMBAHKAN SEMUA AKTOR UNIK
         const actors = [...new Set(useCases.map(uc => uc.actor))];
         actors.forEach(actor => {
             const actorId = actor.replace(/\s+/g, '');
             currentPlantUMLCode += `actor "${actor}" as ${actorId}\n`;
         });
         
-        // Menambahkan use case
-        useCases.forEach((useCase, index) => {
-            const useCaseId = `UC${index + 1}`;
-            currentPlantUMLCode += `usecase "${useCase.feature}" as ${useCaseId}\n`;
+        // 2. IDENTIFIKASI FITUR UNIK DAN AKTOR YANG MENGGUNAKANNYA
+        // Membuat Map untuk menyimpan fitur unik dan aktor yang menggunakannya
+        const uniqueFeatures = new Map();
+        
+        useCases.forEach((useCase) => {
+            const featureKey = useCase.feature.trim().toLowerCase();
+            if (!uniqueFeatures.has(featureKey)) {
+                uniqueFeatures.set(featureKey, {
+                    name: useCase.feature,
+                    actors: new Set(), // Gunakan Set untuk menyimpan aktor unik
+                    id: `UC${uniqueFeatures.size + 1}`
+                });
+            }
+            // Tambahkan aktor ke set aktor untuk fitur ini
+            uniqueFeatures.get(featureKey).actors.add(useCase.actor);
         });
         
-        // Menambahkan hubungan
-        useCases.forEach((useCase, index) => {
-            const actorId = useCase.actor.replace(/\s+/g, '');
-            const useCaseId = `UC${index + 1}`;
-            currentPlantUMLCode += `${actorId} --> ${useCaseId}\n`;
+        console.log('Unique Features Found:', Array.from(uniqueFeatures.entries()));
+        
+        // 3. BUAT USE CASE UNIK SAJA (SATU LINGKARAN PER FITUR)
+        // TIDAK ADA WARNA KHUSUS untuk shared features
+        uniqueFeatures.forEach((feature, key) => {
+            currentPlantUMLCode += `usecase "${feature.name}" as ${feature.id}\n`;
         });
+        
+        // 4. HUBUNGKAN SETIAP AKTOR KE USE CASE YANG SESUAI
+        uniqueFeatures.forEach((feature, key) => {
+            feature.actors.forEach(actorName => {
+                const actorId = actorName.replace(/\s+/g, '');
+                currentPlantUMLCode += `${actorId} --> ${feature.id}\n`;
+            });
+        });
+        
+        // 5. TIDAK ADA CATATAN "Shared by X actors" (DIHAPUS)
+        // Biarkan diagram bersih tanpa catatan tambahan
         
         currentPlantUMLCode += `@enduml`;
         
-        console.log('PlantUML Code:', currentPlantUMLCode);
+        console.log('PlantUML Code (Clean - no shared notes):', currentPlantUMLCode);
+        
+        // =======================================================
+        // END KODE PLANTUML YANG SUDAH DIPERBAIKI
+        // =======================================================
         
         // Generate URL for PlantUML
         currentPlantUMLUrl = generatePlantUMLUrl(currentPlantUMLCode);
@@ -663,6 +696,19 @@ function showTextualRepresentation() {
     // Get unique actors
     const actors = [...new Set(useCases.map(uc => uc.actor))];
     
+    // Identifikasi fitur unik dan aktor yang menggunakannya
+    const uniqueFeatures = new Map();
+    useCases.forEach((useCase) => {
+        const featureKey = useCase.feature.trim().toLowerCase();
+        if (!uniqueFeatures.has(featureKey)) {
+            uniqueFeatures.set(featureKey, {
+                name: useCase.feature,
+                actors: new Set()
+            });
+        }
+        uniqueFeatures.get(featureKey).actors.add(useCase.actor);
+    });
+    
     let diagramHTML = `
         <div style="text-align: center; padding: 20px;">
             <div style="margin-bottom: 20px;">
@@ -677,8 +723,21 @@ function showTextualRepresentation() {
     // Show use cases
     diagramHTML += `<div style="margin-bottom: 20px;">`;
     diagramHTML += `<strong>Use Cases:</strong><br>`;
-    useCases.forEach((useCase, index) => {
-        diagramHTML += `${index + 1}. ${useCase.feature} (${useCase.actor})<br>`;
+    let index = 1;
+    uniqueFeatures.forEach((feature, key) => {
+        diagramHTML += `${index}. ${feature.name}<br>`;
+        index++;
+    });
+    diagramHTML += `</div>`;
+    
+    // Show relationships
+    diagramHTML += `<div style="margin-bottom: 20px;">`;
+    diagramHTML += `<strong>Relationships:</strong><br>`;
+    uniqueFeatures.forEach((feature, key) => {
+        const actorList = Array.from(feature.actors);
+        actorList.forEach(actor => {
+            diagramHTML += `• ${actor} → ${feature.name}<br>`;
+        });
     });
     diagramHTML += `</div>`;
     
