@@ -868,6 +868,7 @@ def save_use_case(request):
             data = json.loads(request.body)
             # Simpan ke session
             request.session['use_case_data'] = data
+            request.session.modified = True
             return JsonResponse({
                 'status': 'success',
                 'message': 'Use case data saved successfully'

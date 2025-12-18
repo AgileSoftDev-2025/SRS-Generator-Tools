@@ -3,234 +3,557 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - OneUML</title>
+    <title>Login - One UML</title>
     <style>
+        /* Global Styles - SAMA SEPERTI FILE LAINNYA */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
             align-items: center;
             justify-content: center;
+            padding: 32px 24px;
         }
-
+        
+        /* Login Container */
         .login-container {
-            background-color: #e8e8e8;
-            border-radius: 12px;
             width: 100%;
-            max-width: 520px;
-            padding: 48px 56px;
-            margin: 20px;
+            max-width: 480px;
+            margin: 0 auto;
         }
-
-        .logo-section {
+        
+        /* Card Styles - SAMA SEPERTI FILE LAINNYA */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 40px;
+        }
+        
+        /* Logo Inside Card */
+        .card-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-bottom: 32px;
+            text-align: center;
         }
-
-        .logo-section h2 {
-            font-size: 16px;
-            font-weight: 400;
-            color: #333;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
+        
+        .card-logo-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #111827;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
         }
-
-        .logo-section h1 {
-            font-size: 32px;
-            font-weight: 400;
-            color: #1a1a1a;
+        
+        .card-logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
         }
-
+        
+        .card-logo-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* Form Styles - SAMA SEPERTI FILE LAINNYA */
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .form-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* Buttons - SAMA SEPERTI FILE LAINNYA */
+        .btn {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        .btn-block {
+            width: 100%;
+            display: block;
+        }
+        
+        /* Alert Messages */
         .alert {
             padding: 12px 16px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-size: 14px;
+            border: 1px solid transparent;
         }
-
+        
         .alert-error {
-            background-color: #fee;
-            border: 1px solid #fcc;
-            color: #c33;
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
         }
-
+        
         .alert-success {
-            background-color: #efe;
-            border: 1px solid #cfc;
-            color: #3c3;
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #16a34a;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        
+        .alert-info {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            color: #2563eb;
         }
-
-        .form-group label {
-            display: block;
-            font-size: 15px;
-            font-weight: 400;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
+        
+        /* Footer - SAMA SEPERTI FILE LAINNYA */
+        footer {
             background-color: #ffffff;
-            color: #333;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
         }
-
-        .form-group input::placeholder {
-            color: #c0c0c0;
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-
-        .form-group input:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
-
-        .forgot-password {
-            text-align: left;
-            margin-top: 8px;
-            margin-bottom: 24px;
-        }
-
-        .forgot-password a {
-            font-size: 14px;
-            color: #1a1a1a;
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
             text-decoration: none;
         }
-
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Login Form Specific */
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        
+        .forgot-password a {
+            font-size: 14px;
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
         .forgot-password a:hover {
+            color: #374151;
             text-decoration: underline;
         }
-
-        .login-btn {
-            width: 100%;
-            padding: 14px;
-            background-color: #a0a0a0;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .login-btn:hover {
-            background-color: #8a8a8a;
-        }
-
-        .login-btn:active {
-            background-color: #707070;
-        }
-
+        
         .signup-link {
             text-align: center;
             margin-top: 24px;
             padding-top: 24px;
-            border-top: 1px solid #d0d0d0;
-        }
-
-        .signup-link p {
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
             font-size: 14px;
-            color: #666;
         }
-
+        
         .signup-link a {
-            font-size: 14px;
-            color: #1a1a1a;
+            color: #111827;
             text-decoration: none;
-            font-weight: 400;
+            font-weight: 500;
+            cursor: pointer;
         }
-
+        
         .signup-link a:hover {
             text-decoration: underline;
         }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f5f5f5;
-            padding: 20px;
+        
+        /* Forgot Password Page Styles */
+        .back-to-login {
+            margin-top: 16px;
             text-align: center;
-            border-top: 1px solid #e0e0e0;
         }
-
-        .footer p {
-            font-size: 13px;
-            color: #666;
+        
+        .back-to-login a {
+            font-size: 14px;
+            color: #6b7280;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .back-to-login a:hover {
+            color: #374151;
+            text-decoration: underline;
+        }
+        
+        .instructions {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+            text-align: center;
+            line-height: 1.6;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 24px;
+        }
+        
+        .success-message i {
+            font-size: 48px;
+            color: #16a34a;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .success-message h3 {
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .success-message p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        /* Hidden Class */
+        .hidden {
+            display: none;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .card {
+                padding: 24px;
+            }
+            
+            .form-title {
+                font-size: 20px;
+            }
+            
+            .card-logo {
+                margin-bottom: 24px;
+            }
+            
+            .card-logo-icon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .card-logo-text {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo-section">
-            <h2>OneUML</h2>
-            <h1>Login</h1>
-        </div>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% endif %}">
-                    {{ message }}
+    <!-- Main Content -->
+    <main>
+        <div class="login-container">
+            <div class="card">
+                <!-- Logo di dalam card -->
+                <div class="card-logo">
+                    <div class="card-logo-icon">
+                        <span style="color: white; font-size: 20px; font-weight: bold;">⚡</span>
+                    </div>
+                    <div class="card-logo-text">One UML</div>
+                    <div class="card-logo-subtitle">UML Diagram Generator</div>
                 </div>
-            {% endfor %}
-        {% endif %}
-
-        <form method="POST" action="{% url 'main:login' %}">
-            {% csrf_token %}   
-             
-            <div class="form-group">
-                <label for="username">Email</label>
-                <input 
-                    type="text" 
-                    id="username" 
-                    name="username" 
-                    placeholder="username@gmail.com"
-                    required
-                    autofocus
-                >
+                
+                <!-- LOGIN PAGE (Default) -->
+                <div id="loginPage">
+                    <h1 class="form-title">Welcome back</h1>
+                    <p class="form-subtitle">Login to your One UML account</p>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="POST" action="{% url 'main:login' %}">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="username" class="form-label">Email</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                class="form-input" 
+                                placeholder="Enter your email"
+                                required
+                                autofocus
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input" 
+                                placeholder="Enter your password"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="forgot-password">
+                            <a onclick="showForgotPassword()">Forgot password?</a>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Login
+                        </button>
+                    </form>
+                    
+                    <div class="signup-link">
+                        <p>Don't have an account? <a href="{% url 'main:register' %}">Sign up</a></p>
+                    </div>
+                </div>
+                
+                <!-- FORGOT PASSWORD PAGE (Hidden by default) -->
+                <div id="forgotPasswordPage" class="hidden">
+                    <h1 class="form-title">Reset your password</h1>
+                    <p class="form-subtitle">Enter your email to receive a reset link</p>
+                    
+                    <div class="instructions">
+                        Enter the email address associated with your account and we'll send you a link to reset your password.
+                    </div>
+                    
+                    <form id="forgotPasswordForm" onsubmit="submitForgotPassword(event)">
+                        <div class="form-group">
+                            <label for="resetEmail" class="form-label">Email Address</label>
+                            <input 
+                                type="email" 
+                                id="resetEmail" 
+                                class="form-input" 
+                                placeholder="Enter your email"
+                                required
+                                autofocus
+                            >
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block">
+                            Send Reset Link
+                        </button>
+                    </form>
+                    
+                    <div class="back-to-login">
+                        <a onclick="showLogin()">← Back to Login</a>
+                    </div>
+                </div>
+                
+                <!-- SUCCESS MESSAGE (Hidden by default) -->
+                <div id="successMessage" class="hidden">
+                    <div class="success-message">
+                        <i>✉️</i>
+                        <h3>Check your email</h3>
+                        <p>We've sent password reset instructions to your email address.</p>
+                        <button onclick="showLogin()" class="btn btn-outline">
+                            Return to Login
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    placeholder="password"
-                    required
-                >
-            </div>
-
-            <div class="forgot-password">
-                <a href="#">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="login-btn">
-                Login
-            </button>
-        </form>
-
-        <div class="signup-link">
-            <p>Don't have an account? <a href="{% url 'main:register' %}">Sign up</a></p>
         </div>
-    </div>
+    </main>
 
-    <div class="footer">
-        <p>© 2025 All in One UML. All rights reserved.</p>
-    </div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Function to show forgot password page
+        function showForgotPassword() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('forgotPasswordPage').classList.remove('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Focus on email input
+            setTimeout(() => {
+                document.getElementById('resetEmail').focus();
+            }, 100);
+        }
+        
+        // Function to show login page
+        function showLogin() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('forgotPasswordPage').classList.add('hidden');
+            document.getElementById('successMessage').classList.add('hidden');
+            
+            // Focus on username input
+            setTimeout(() => {
+                document.getElementById('username').focus();
+            }, 100);
+        }
+        
+        // Function to handle forgot password form submission
+        function submitForgotPassword(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('resetEmail').value;
+            
+            // Basic email validation
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                // In a real application, you would make an API call here
+                console.log('Password reset requested for:', email);
+                
+                // Show success message
+                document.getElementById('forgotPasswordPage').classList.add('hidden');
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+                // Clear form
+                document.getElementById('resetEmail').value = '';
+                
+                // Simulate sending email (this is just for demo)
+                console.log('Reset email would be sent to:', email);
+                console.log('Reset link would be: https://oneuml.example.com/reset-password?token=abc123');
+                
+            }, 1500);
+        }
+        
+        // Check if there's a forgot password parameter in URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const showForgot = urlParams.get('forgot');
+            
+            if (showForgot === 'true') {
+                showForgotPassword();
+            }
+        });
+        
+        // Handle Enter key in forgot password form
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !document.getElementById('forgotPasswordPage').classList.contains('hidden')) {
+                const form = document.getElementById('forgotPasswordForm');
+                if (form) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitForgotPassword(new Event('submit'));
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
