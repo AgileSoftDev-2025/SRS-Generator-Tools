@@ -385,20 +385,22 @@
     }
 
     // ===== PLANTUML ENCODING FUNCTIONS =====
-    function encodePlantUML(text) {
-      const compressed = pako.deflate(text, { level: 9 });
+    function encodePlantUML(plantumlText) {
+      const utf8Text = unescape(encodeURIComponent(plantumlText));
+      const compressed = pako.deflate(utf8Text, { level: 9, to: 'string' });
       return encode64(compressed);
     }
 
     function encode64(data) {
       let r = "";
-      for (let i = 0; i < data.length; i += 3) {
-        if (i + 2 === data.length) {
-          r += append3bytes(data[i], data[i + 1], 0);
-        } else if (i + 1 === data.length) {
-          r += append3bytes(data[i], 0, 0);
+      const len = data.length;
+      for (let i = 0; i < len; i += 3) {
+        if (i + 2 === len) {
+          r += append3bytes(data.charCodeAt(i), data.charCodeAt(i + 1), 0);
+        } else if (i + 1 === len) {
+          r += append3bytes(data.charCodeAt(i), 0, 0);
         } else {
-          r += append3bytes(data[i], data[i + 1], data[i + 2]);
+          r += append3bytes(data.charCodeAt(i), data.charCodeAt(i + 1), data.charCodeAt(i + 2));
         }
       }
       return r;
@@ -409,23 +411,29 @@
       const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
       const c3 = ((b2 & 0xf) << 2) | (b3 >> 6);
       const c4 = b3 & 0x3f;
-      let r = "";
-      r += encode6bit(c1 & 0x3f);
-      r += encode6bit(c2 & 0x3f);
-      r += encode6bit(c3 & 0x3f);
-      r += encode6bit(c4 & 0x3f);
-      return r;
+      
+      return encode6bit(c1) + encode6bit(c2) + encode6bit(c3) + encode6bit(c4);
     }
 
     function encode6bit(b) {
-      if (b < 10) return String.fromCharCode(48 + b);
+      if (b < 10) {
+        return String.fromCharCode(48 + b);
+      }
       b -= 10;
-      if (b < 26) return String.fromCharCode(65 + b);
+      if (b < 26) {
+        return String.fromCharCode(65 + b);
+      } 
       b -= 26;
-      if (b < 26) return String.fromCharCode(97 + b);
+      if (b < 26) {
+        return String.fromCharCode(97 + b);
+      }
       b -= 26;
-      if (b === 0) return "-";
-      if (b === 1) return "_";
+      if (b === 0) {
+        return "-";
+      }
+      if (b === 1) {
+        return "_";
+      }
       return "?";
     }
 
