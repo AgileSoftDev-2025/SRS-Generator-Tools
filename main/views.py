@@ -878,14 +878,22 @@ def save_use_case(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # Simpan ke session
-            request.session['use_case_data'] = data
+            all_features = request.session.get('all_use_case_data', [])
+            feature_name = data.get('featureName')
+            existing_index = next((i for i, f in enumerate(all_features) if f['featureName'] == feature_name), None)
+            if existing_index is not None:
+                all_features[existing_index] = data
+            else:
+                all_features.append(data)
+            request.session['all_use_case_data'] = all_features
             request.session.modified = True
             return JsonResponse({
                 'status': 'success',
-                'message': 'Use case data saved successfully'
+                'message': f'{len(all_features)} features saved successfully',
+                'total_features': len(all_features)
             })
         except Exception as e:
+            print(f"Error saving use case: {e}")
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
@@ -900,15 +908,13 @@ def activity_diagram(request):
     """
     Halaman untuk menampilkan dan generate activity diagram
     """
-    use_case_data = request.session.get('use_case_data', None)
+    all_features = request.session.get('all_use_case_data', [])
 
-    print("=== DEBUG USE CASE DATA ===")
-    print(use_case_data)
-    print("===========================")
+    print(f"=== ACTIVITY DIAGRAM: {len(all_features)} FEATURES ===")
     
     context = {
         'page_title': 'Generated Activity Diagram',
-        'use_case_data': json.dumps(use_case_data) if use_case_data else 'null'
+        'all_features': json.dumps(all_features) if all_features else '[]'
     }
     return render(request, 'main/activity_diagram.html', context)
 
