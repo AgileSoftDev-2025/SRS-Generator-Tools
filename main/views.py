@@ -369,6 +369,17 @@ def use_case_diagram(request):
 @csrf_exempt
 @require_http_methods(["POST", "GET"])
 def generate_usecase_diagram(request):
+    uc = Usecase.objects.create(
+        nama="Use Case Diagram",
+    )
+
+    # generate diagram file
+    uc.hasil_usecase.save(
+        "usecase.png",
+        ContentFile(image_bytes),
+        save=True
+    )
+
     try:
         # 1. Ambil GUI terakhir (Project Aktif)
         current_gui = GUI.objects.last()
