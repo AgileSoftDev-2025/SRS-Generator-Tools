@@ -43,12 +43,6 @@
     ```
     Buka `http://127.0.0.1:8000` di browser kamu.
 
-## ⚠️ Catatan Penting (Troubleshooting)
-
-* **Error `_curses`**: Jika muncul `ModuleNotFoundError: No module named '_curses'`, pastikan tidak ada baris `from curses import newpad` di bagian atas file `views.py` (khusus pengguna Windows).
-* **Merge Conflict `db.sqlite3`**: Jangan mengunggah file database ke GitHub. Gunakan `.gitignore` untuk mengecualikan file `.sqlite3` agar tidak terjadi bentrokan data antar anggota tim.
-* **Folder Media**: Pastikan folder `media/usecases/`, `media/sequences/`, dan `media/class_diagrams/` tersedia agar gambar diagram bisa tersimpan dengan benar.
-
 ## 📖 Alur Penggunaan
 
 1.  **Login/Register**: Masuk ke akun pengguna.
