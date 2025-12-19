@@ -95,6 +95,17 @@
         <img src="<%= uml_image_url %>">
     </div>
 
+    <!-- AREA HASIL GENERATE -->
+    <div id="diagramContent" style="margin-top: 30px;"></div>
+
+    <!-- INFO DATABASE -->
+    <pre id="databaseContent" style="text-align:left; max-width:800px; margin:20px auto;"></pre>
+
+    <!-- TOGGLE KODE -->
+    <button id="codeToggle" onclick="toggleCode()" style="margin-bottom:30px;">
+        Show PlantUML Code
+    </button>
+
     <div class="buttons">
         <a href="sequence_diagram.html" class="back">⬅ Kembali</a>
         <a href="generate_srs.html">Selanjutnya ➜</a>
@@ -107,28 +118,6 @@
                 <pre class="plantuml-code" id="plantumlCode"></pre>
             </div>
 
-            <!-- Next Section -->
-            <div class="code-section" style="background: #f0f9ff; border-color: #e0f2fe;">
-                <div class="code-title" style="color: #0369a1;">🚀 Next Steps</div>
-                <p style="color: #0c4a6e; margin-bottom: 16px; font-size: 14px;">
-                    Your class diagram has been generated successfully. You can now proceed to generate sequence diagrams or export your complete UML documentation.
-                </p>
-                <button class="btn btn-primary" onclick="goToNextStep()">
-                    Next: Generate Sequence Diagrams →
-                </button>
-            </div>
-
-            <!-- Footer Actions - Sesuai Template One UML -->
-            <div class="footer-actions">
-                <div class="save-indicator">
-                    <div class="save-dot"></div>
-                    <span id="saveStatus">Diagram generated successfully</span>
-                </div>
-                <div>
-                    <button class="btn btn-outline" onclick="goBack()">← Back</button>
-                    <button class="btn btn-outline" onclick="saveDiagram()">Save Diagram</button>
-                </div>
-            </div>
         </div>
     </main>
 
@@ -136,13 +125,10 @@
     <footer>
         <div class="footer-content">
             <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Help</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
-            </div>
         </div>
     </footer>
+    
+    <script src="https://unpkg.com/plantuml-encoder/dist/plantuml-encoder.min.js"></script>
 
     <script>
         // Global variables
@@ -453,11 +439,11 @@ end note
 
         // Navigation
         function goBack() {
-            window.location.href = 'sql_input.html';
+            window.location.href = 'sequence_diagram.html';
         }
 
         function goToNextStep() {
-            window.location.href = 'sequence_diagram.html';
+            window.location.href = 'generate_srs.html';
         }
 
         // Example data fallback
