@@ -2,7 +2,6 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from curses import newpad
 import os
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import *
