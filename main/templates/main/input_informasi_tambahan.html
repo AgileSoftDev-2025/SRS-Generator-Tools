@@ -736,6 +736,7 @@
         }
 
         // Save feature data
+        // Save feature data
         async function saveFeature() {
             const featureId = document.getElementById('featureId').value;
             const feature = features.find(f => f.id === featureId);
@@ -746,11 +747,21 @@
             }
             
             // Collect data from form
-            feature.summary = document.getElementById('summary').value;
+            feature.summary = document.getElementById('summary').value.trim();
             feature.priority = document.getElementById('priority').value;
             feature.status = document.getElementById('status').value;
-            feature.precondition = document.getElementById('precondition').value;
-            feature.postcondition = document.getElementById('postcondition').value;
+            feature.precondition = document.getElementById('precondition').value.trim();
+            feature.postcondition = document.getElementById('postcondition').value.trim();
+            
+            // ✅ VALIDASI
+            if (!feature.precondition) {
+                alert('⚠️ Pre-condition wajib diisi!');
+                return;
+            }
+            if (!feature.postcondition) {
+                alert('⚠️ Post-condition wajib diisi!');
+                return;
+            }
             
             // Collect path data
             ['basic', 'alternative', 'exception'].forEach(type => {
@@ -769,56 +780,89 @@
                 feature[`${type}Path`] = paths.length > 0 ? paths : [];
             });
             
-            // Save to localStorage
-            localStorage.setItem('useCaseDetails', JSON.stringify(features));
+            // ✅ VALIDASI basic path
+            if (!feature.basicPath || feature.basicPath.length === 0) {
+                alert('⚠️ Basic Path minimal 1 baris harus diisi!');
+                return;
+            }
             
-            // Save to server (Django)
-            await saveToServer(feature);
+            // ✅ Show loading
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+            saveBtn.disabled = true;
             
-            // Close modal
-            closeModal();
-            
-            // Show success message
-            alert('✅ Feature details saved successfully!');
+            try {
+                // Save to localStorage
+                localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                
+                // ✅ Save to Django session
+                await saveToServer(feature);
+                
+                // Close modal
+                closeModal();
+                
+                // Show success message
+                alert('✅ Feature saved! You can now generate activity diagram.');
+                
+            } catch (error) {
+                alert('❌ Error saving: ' + error.message);
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
         }
 
         // Save to Django server
+        // Save to Django server - UNTUK ACTIVITY DIAGRAM
         async function saveToServer(feature) {
             try {
                 const csrfToken = getCsrfToken();
-                const payload = {
-                    [feature.id]: {
-                        featureName: feature.name,
-                        summary: feature.summary,
-                        priority: feature.priority,
-                        status: feature.status,
-                        precondition: feature.precondition,
-                        postcondition: feature.postcondition,
-                        basicPath: feature.basicPath || [],
-                        alternativePath: feature.alternativePath || [],
-                        exceptionPath: feature.exceptionPath || []
-                    }
+                
+                // ✅ STRUKTUR DATA YANG BENAR (flat, tidak nested)
+                const useCaseData = {
+                    featureName: feature.name,
+                    summary: feature.summary || '',
+                    priority: feature.priority || 'Must Have',
+                    status: feature.status || 'Active',
+                    precondition: feature.precondition || '',
+                    postcondition: feature.postcondition || '',
+                    basicPath: feature.basicPath || [],
+                    alternativePath: feature.alternativePath || [],
+                    exceptionPath: feature.exceptionPath || []
                 };
                 
-                const response = await fetch('/api/save_usecase_spec/', {
+                // ✅ VALIDASI
+                if (!useCaseData.precondition || !useCaseData.postcondition) {
+                    console.warn('⚠️ Pre/Post condition kosong!');
+                }
+                
+                console.log('=== SAVING TO SESSION ===');
+                console.log(useCaseData);
+                console.log('========================');
+                
+                // ✅ SAVE KE DJANGO SESSION (untuk activity diagram)
+                const response = await fetch('/api/save-use-case/', {  // ✅ URL yang benar!
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': csrfToken
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(useCaseData)  // ✅ Data flat (tidak nested)
                 });
                 
                 if (!response.ok) {
-                    throw new Error('Failed to save to server');
+                    throw new Error(`Server error: ${response.status}`);
                 }
                 
                 const data = await response.json();
-                console.log('Saved to server:', data);
+                console.log('✅ Saved to session:', data);
+                
+                return data;
                 
             } catch (error) {
-                console.error('Error saving to server:', error);
-                // Continue anyway since we saved to localStorage
+                console.error('❌ Error saving to server:', error);
+                throw error;  // Re-throw agar saveFeature bisa handle
             }
         }
 
