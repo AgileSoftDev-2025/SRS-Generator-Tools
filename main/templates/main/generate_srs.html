@@ -3,216 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One UML - SRS Document Generator</title>
+    <title>One UML - Full SRS Document</title>
     <style>
-        /* --- GLOBAL STYLES (Tetap Sesuai Template Kamu) --- */
+        /* --- GLOBAL STYLES --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f9fafb; color: #111827; line-height: 1.5; }
-        header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0 24px; }
-        .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-        .logo { display: flex; align-items: center; gap: 8px; }
-        .logo-icon { width: 24px; height: 24px; background-color: #111827; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
-        .logo-text { font-size: 20px; font-weight: 600; color: #111827; }
-        main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
-        footer { background-color: #ffffff; border-top: 1px solid #e5e7eb; padding: 16px 24px; margin-top: 48px; }
-        .footer-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
-        .footer-links { display: flex; align-items: center; gap: 24px; }
-        .footer-link { font-size: 12px; color: #6b7280; text-decoration: none; }
-        .footer-link:hover { color: #374151; }
-        .card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb; padding: 32px; margin-bottom: 24px; }
-        .btn { padding: 12px 24px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s ease; }
-        .btn-primary { background-color: #111827; color: #ffffff; }
-        .btn-success { background-color: #059669; color: #ffffff; }
-        .btn-outline { background-color: #ffffff; color: #6b7280; border: 1px solid #d1d5db; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6; color: #111827; }
         
-        /* --- SRS PREVIEW STYLES --- */
-        .srs-preview { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 40px; margin: 20px 0; max-height: 800px; overflow-y: auto; font-family: 'Times New Roman', serif; line-height: 1.6; }
-        .srs-header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #111827; padding-bottom: 20px; }
-        .srs-title { font-size: 28px; font-weight: bold; color: #111827; margin-bottom: 10px; }
-        .srs-section { margin-bottom: 30px; page-break-inside: avoid; }
-        .srs-section-title { font-size: 20px; font-weight: bold; color: #111827; margin-bottom: 15px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; text-transform: uppercase; }
-        .srs-subsection-title { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 10px; margin-top: 15px; }
-        .srs-table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 14px; }
-        .srs-table th, .srs-table td { border: 1px solid #d1d5db; padding: 10px; text-align: left; }
-        .srs-table th { background-color: #f9fafb; }
-        .diagram-mini { text-align: center; margin: 20px 0; padding: 15px; background: #f8fafc; border-radius: 6px; border: 1px solid #e5e7eb; }
-        .diagram-mini img { max-width: 100%; height: auto; border: 1px solid #d1d5db; background: white; }
+        /* --- UI COMPONENTS (Hidden on Print) --- */
+        header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 12px 24px; position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 18px; }
+        .logo-icon { width: 24px; height: 24px; background: #111827; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
         
-        /* --- PRINT CONFIG --- */
+        main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+        .no-print-card { background: white; padding: 24px; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 24px; }
+        .btn { padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-success { background-color: #059669; color: white; }
+        .btn-success:hover { background-color: #047857; }
+        .btn-outline { background: white; border: 1px solid #d1d5db; color: #374151; }
+
+        /* --- SRS DOCUMENT STYLES (The "Paper" Feel) --- */
+        #srsDocument {
+            background: white;
+            padding: 50px 70px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-height: 1100px;
+            font-family: 'Times New Roman', Times, serif; /* Standar Dokumen Formal */
+            line-height: 1.6;
+            color: black;
+        }
+
+        .srs-title-page { text-align: center; margin-top: 100px; margin-bottom: 200px; }
+        .srs-title-page h1 { font-size: 32px; margin-bottom: 10px; text-transform: uppercase; }
+        
+        .section { margin-bottom: 40px; page-break-inside: avoid; }
+        .section-title { font-size: 20px; font-weight: bold; border-bottom: 2px solid black; margin-bottom: 15px; padding-bottom: 5px; text-transform: uppercase; }
+        .subsection-title { font-size: 17px; font-weight: bold; margin: 15px 0 10px 0; }
+        
+        .srs-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .srs-table th, .srs-table td { border: 1px solid #000; padding: 8px; text-align: left; font-size: 14px; }
+        .srs-table th { background-color: #f2f2f2; }
+
+        .diagram-box { text-align: center; margin: 20px 0; padding: 10px; border: 1px dashed #ccc; }
+        .diagram-box img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+        .caption { font-size: 12px; font-style: italic; margin-top: 8px; }
+
+        /* --- PRINT CONFIGURATION --- */
         @media print {
-            body * { visibility: hidden; }
-            #srsPreview, #srsPreview * { visibility: visible; }
-            #srsPreview { position: absolute; left: 0; top: 0; width: 100%; max-height: none; overflow: visible; border: none; padding: 0; }
-            .no-print { display: none !important; }
+            body { background: white; }
+            header, .no-print-card, .no-print { display: none !important; }
+            main { margin: 0; padding: 0; max-width: 100%; }
+            #srsDocument { box-shadow: none; padding: 0; width: 100%; }
+            .page-break { page-break-before: always; }
         }
     </style>
 </head>
 <body>
-    <header class="no-print">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon"><span style="color: white; font-size: 12px; font-weight: bold;">⚡</span></div>
-                <span class="logo-text">One UML</span>
+
+<header class="no-print">
+    <div class="header-content">
+        <div class="logo">
+            <div class="logo-icon">⚡</div>
+            <span>One UML</span>
+        </div>
+        <div class="no-print">
+            <button class="btn btn-outline" onclick="window.history.back()">Back</button>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="no-print-card">
+        <h2 style="margin-bottom: 10px;">SRS Document Ready</h2>
+        <p style="color: #6b7280; margin-bottom: 20px;">Semua 9 artefak telah dikumpulkan dari database. Silakan tinjau sebelum mencetak ke PDF.</p>
+        <button class="btn btn-success" onclick="generatePDF()">📦 Download as PDF</button>
+    </div>
+
+    <div id="srsDocument">
+        <div class="srs-title-page">
+            <h1>Software Requirements Specification</h1>
+            <h2 style="font-weight: normal;">Project: {{ project.nama_project }}</h2>
+            <div style="margin-top: 100px;">
+                <p>Prepared by:</p>
+                <p style="font-weight: bold; font-size: 18px;">{{ project.pengguna.nama_user }}</p>
+                <p>Date: {{ today|date:"d F Y" }}</p>
             </div>
         </div>
-    </header>
 
-    <main>
-        <div class="card no-print">
-            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">SRS Document Generator</h1>
-            <p style="color: #6b7280; font-size: 14px;">Generate comprehensive Software Requirements Specification from your data.</p>
+        <div class="page-break"></div>
+
+        <div class="section">
+            <div class="section-title">1. Introduction & Actors</div>
+            <p>Dokumen ini merincikan kebutuhan perangkat lunak untuk sistem <strong>{{ project.nama_project }}</strong>.</p>
             
-            <div style="margin-top: 20px;" class="button-group">
-                <button class="btn btn-success" onclick="generateSRSDocument()">📦 Download / Save as PDF</button>
-                <button class="btn btn-outline" onclick="refreshPreview()">🔄 Refresh Preview</button>
+            <div class="subsection-title">1.1 Actors and Roles</div>
+            <table class="srs-table">
+                <tr>
+                    <th style="width: 30%;">Actor</th>
+                    <th>Responsibilities / Goals</th>
+                </tr>
+                <tbody id="actorTableBody">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">2. User Stories & Acceptance Criteria</div>
+            <div id="userStoryContainer">
+                </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <div class="section">
+            <div class="section-title">3. Use Case Diagram</div>
+            <div class="diagram-box">
+                <img src="{{ usecase_url }}" alt="Use Case Diagram" onerror="this.style.display='none'">
+                <div class="caption">Gambar 1: Global Use Case Diagram</div>
             </div>
         </div>
 
-        <div class="srs-preview" id="srsPreview">
-            </div>
-    </main>
-
-    <script>
-        let projectData = {};
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadProjectData();
-            renderSRS();
-        });
-
-        function loadProjectData() {
-            // Mapping data dari Django Context ke JavaScript Object
-            // Pastikan di views.py kamu mengirimkan variabel ini menggunakan json.dumps
-            try {
-                projectData = {
-                    info: {
-                        name: "{{ project.nama_project|default:'My One UML Project' }}",
-                        author: "{{ project.pengguna.nama_user|default:'User' }}",
-                        version: "1.0",
-                        date: new Date().toLocaleDateString('id-ID')
-                    },
-                    // 9 ARTEFAK DATA
-                    userStories: JSON.parse('{{ stories_json|safe }}'),
-                    useCaseDiagram: '{{ usecase_url|safe }}',
-                    useCaseSpecs: JSON.parse('{{ specs_json|safe }}'),
-                    sqlTables: JSON.parse('{{ tables_json|safe }}'),
-                    classDiagram: '{{ class_diagram_url|safe }}'
-                };
-            } catch (e) {
-                console.error("Data loading failed. Using fallback examples.");
-                // Fallback jika data Django tidak terbaca (untuk testing)
-            }
-        }
-
-        function renderSRS() {
-            const preview = document.getElementById('srsPreview');
-            let html = `
-                <div class="srs-header">
-                    <div class="srs-title">SOFTWARE REQUIREMENTS SPECIFICATION</div>
-                    <div class="srs-subtitle">System: ${projectData.info.name}</div>
-                    <div style="display:flex; justify-content: space-between; font-size: 12px; margin-top:20px;">
-                        <span>Dibuat Oleh: ${projectData.info.author}</span>
-                        <span>Tanggal: ${projectData.info.date}</span>
-                        <span>Status: Final Draft</span>
-                    </div>
+        <div class="section">
+            <div class="section-title">4. Functional Specifications</div>
+            <div id="featureSpecsContainer">
                 </div>
+        </div>
 
-                <div class="srs-section">
-                    <div class="srs-section-title">1. Actors and System Features</div>
-                    <table class="srs-table">
-                        <tr><th>Actor</th><th>Primary Feature Goal</th></tr>
-                        ${projectData.userStories.map(us => `
-                            <tr><td>${us.input_sebagai}</td><td>${us.input_fitur}</td></tr>
+        <div class="page-break"></div>
+
+        <div class="section">
+            <div class="section-title">5. Data Architecture</div>
+            <div class="subsection-title">5.1 Class Diagram</div>
+            <div class="diagram-box">
+                <img src="{{ class_diagram_url }}" alt="Class Diagram" onerror="this.style.display='none'">
+                <div class="caption">Gambar 2: Entity Relationship / Class Diagram</div>
+            </div>
+
+            <div class="subsection-title">5.2 Data Dictionary</div>
+            <div id="dataDictionaryContainer">
+                </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 100px; border-top: 1px solid #eee; padding-top: 20px;">
+            <p style="font-size: 12px; color: #999;">End of Document - Generated by One UML</p>
+        </div>
+    </div>
+</main>
+
+
+
+<script>
+    // Load Data dari Django Context
+    const stories = JSON.parse('{{ stories_json|safe }}');
+    const specs = JSON.parse('{{ specs_json|safe }}');
+    const tables = JSON.parse('{{ tables_json|safe }}');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderActors();
+        renderUserStories();
+        renderFeatureSpecs();
+        renderDataDictionary();
+    });
+
+    // 1. Render Actors & Features
+    function renderActors() {
+        const tbody = document.getElementById('actorTableBody');
+        let html = '';
+        stories.forEach(s => {
+            html += `<tr><td>${s.input_sebagai}</td><td>Mampu melakukan ${s.input_fitur}</td></tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // 2. Render User Stories & Acceptance Criteria (Gherkin)
+    function renderUserStories() {
+        const container = document.getElementById('userStoryContainer');
+        let html = '';
+        stories.forEach((s, i) => {
+            html += `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>US-${i+1}:</strong> Sebagai ${s.input_sebagai}, saya ingin ${s.input_fitur} agar ${s.input_tujuan || 'tujuan tercapai'}.</p>
+                    <div style="margin-left: 20px; font-size: 13px;">
+                        <p><em>Acceptance Criteria (Scenarios):</em></p>
+                        ${s.scenarios.map(sc => `
+                            <p style="color: #444;">- ${sc.nama_scenario}: <strong>Given</strong> ${sc.input_given} <strong>When</strong> ${sc.input_when} <strong>Then</strong> ${sc.input_then}</p>
+                        `).join('')}
+                    </div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    // 3. Render Detail Fitur (Spec, Activity, Sequence)
+    function renderFeatureSpecs() {
+        const container = document.getElementById('featureSpecsContainer');
+        let html = '';
+        specs.forEach((spec, i) => {
+            html += `
+                <div style="margin-bottom: 40px; border: 1px solid #eee; padding: 15px;">
+                    <h4 class="subsection-title">4.${i+1} Fitur: ${spec.feature_name}</h4>
+                    <p style="font-size: 14px;"><strong>Pre-condition:</strong> ${spec.input_precondition || 'User sudah login'}</p>
+                    
+                    <table class="srs-table" style="margin-top:10px;">
+                        <tr><th>Step</th><th>Actor Action</th><th>System Response</th></tr>
+                        ${spec.basic_paths.map(p => `
+                            <tr><td>${p.step_number}</td><td>${p.actor_action}</td><td>${p.system_response}</td></tr>
                         `).join('')}
                     </table>
-                </div>
 
-                <div class="srs-section">
-                    <div class="srs-section-title">2. User Stories & Acceptance Criteria</div>
-                    ${projectData.userStories.map((us, index) => `
-                        <div style="margin-bottom:20px; border-left: 3px solid #111827; padding-left:15px;">
-                            <p><strong>US-${index+1}:</strong> Sebagai ${us.input_sebagai}, saya ingin ${us.input_fitur} agar ${us.input_tujuan || '-'}</p>
-                            <div style="margin-top:10px; font-size:13px; color:#4b5563;">
-                                <strong>Skenario (Artifact 7):</strong><br>
-                                ${us.scenarios ? us.scenarios.map(sc => `
-                                    <p style="margin-left:10px;"><em>Given ${sc.input_given} | When ${sc.input_when} | Then ${sc.input_then}</em></p>
-                                `).join('') : '<p>No scenarios defined.</p>'}
-                            </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="diagram-box">
+                            <p style="font-weight:bold; font-size:12px;">Activity Diagram</p>
+                            <img src="${spec.activity_url}" style="height:150px;">
                         </div>
-                    `).join('')}
-                </div>
-
-                <div class="srs-section">
-                    <div class="srs-section-title">3. Use Case Diagram</div>
-                    <div class="diagram-mini">
-                        <img src="${projectData.useCaseDiagram}" alt="Use Case Diagram" onerror="this.src='https://placehold.co/600x400?text=Diagram+Not+Found'">
-                        <div style="font-size:11px; font-style:italic; margin-top:10px;">Gambar 1: Use Case Diagram Global</div>
-                    </div>
-                </div>
-
-                <div class="srs-section">
-                    <div class="srs-section-title">4. Functional Details & Dynamic Diagrams</div>
-                    ${projectData.useCaseSpecs.map((spec, i) => `
-                        <div style="margin-bottom:50px;">
-                            <h4 class="srs-subsection-title">4.${i+1} Feature: ${spec.feature_name}</h4>
-                            <p style="font-size:14px;"><strong>Pre-condition:</strong> ${spec.input_precondition || 'None'}</p>
-                            
-                            <table class="srs-table">
-                                <tr><th>Step</th><th>Actor Action</th><th>System Response</th></tr>
-                                ${spec.basic_paths.map(path => `
-                                    <tr><td>${path.step_number}</td><td>${path.actor_action}</td><td>${path.system_response}</td></tr>
-                                `).join('')}
-                            </table>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <div class="diagram-mini">
-                                    <p style="font-size:10px; font-weight:bold;">Activity Diagram</p>
-                                    <img src="${spec.activity_url}" style="max-height:200px;">
-                                </div>
-                                <div class="diagram-mini">
-                                    <p style="font-size:10px; font-weight:bold;">Sequence Diagram</p>
-                                    <img src="${spec.sequence_url}" style="max-height:200px;">
-                                </div>
-                            </div>
+                        <div class="diagram-box">
+                            <p style="font-weight:bold; font-size:12px;">Sequence Diagram</p>
+                            <img src="${spec.sequence_url}" style="height:150px;">
                         </div>
-                    `).join('')}
-                </div>
-
-                <div class="srs-section">
-                    <div class="srs-section-title">5. Data Architecture & Class Diagram</div>
-                    <div class="diagram-mini">
-                        <img src="${projectData.classDiagram}" alt="Class Diagram">
-                        <div style="font-size:11px; font-style:italic; margin-top:10px;">Gambar 2: Class Diagram / Database Relationship</div>
                     </div>
+                </div>`;
+        });
+        container.innerHTML = html;
+    }
 
-                    <h4 class="srs-subsection-title">Data Dictionary</h4>
-                    ${projectData.sqlTables.map(table => `
-                        <p style="font-size:14px; margin-top:10px;"><strong>Table: ${table.name}</strong></p>
-                        <table class="srs-table">
-                            <tr><th>Column</th><th>Type</th><th>Constraint</th></tr>
-                            ${table.columns.map(col => `
-                                <tr><td>${col.name}</td><td>${col.data_type}</td><td>${col.primary_key ? 'PK' : ''}</td></tr>
-                            `).join('')}
-                        </table>
-                    `).join('')}
-                </div>
+    // 4. Render Data Dictionary
+    function renderDataDictionary() {
+        const container = document.getElementById('dataDictionaryContainer');
+        let html = '';
+        tables.forEach(t => {
+            html += `
+                <p style="font-weight:bold; margin-top:15px;">Table: ${t.name}</p>
+                <table class="srs-table">
+                    <tr><th>Column Name</th><th>Data Type</th></tr>
+                    ${t.columns.map(c => `<tr><td>${c.name}</td><td>${c.data_type}</td></tr>`).join('')}
+                </table>`;
+        });
+        container.innerHTML = html;
+    }
 
-                <div style="text-align: center; margin-top: 50px; font-size: 14px; border-top: 1px solid #eee; padding-top: 20px;">
-                    <strong>--- END OF DOCUMENT ---</strong><br>
-                    <small>Generated by One UML - 2025</small>
-                </div>
-            `;
-            preview.innerHTML = html;
-        }
+    function generatePDF() {
+        // Mengubah Title agar saat di Save as PDF namanya rapi
+        document.title = "SRS_Document_{{ project.nama_project }}";
+        window.print();
+    }
+</script>
 
-        function generateSRSDocument() {
-            window.print();
-        }
-
-        function refreshPreview() {
-            loadProjectData();
-            renderSRS();
-        }
-    </script>
 </body>
 </html>

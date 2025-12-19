@@ -1,6 +1,6 @@
 import os
-# Di baris paling atas views.py kamu
-from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, TestStep
+from django.core.serializers.json import DjangoJSONEncoder
+from .models import *
 from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
@@ -113,6 +113,9 @@ def logout_view(request):
 
 def user_story(request):
     return render(request, 'main/user_story.html')
+
+def generatesrs(request):
+    return render(request, 'main/generatesrs.html')
 
 def save_userstory(request):
     if request.method == "POST":
@@ -1156,68 +1159,34 @@ def srs_generator_view(request):
     return render(request, 'main/generate_srs.html', context)
 
 def generate_srs(request):
-    # 1. Ambil Project Terakhir (Agar dinamis)
-    project = Project.objects.last()
+    # 1. Ambil Project Terbaru milikmu (Menghapus nama 'Skripsi' dari database)
+    project = Project.objects.last() 
     if not project:
-        return HttpResponse("Belum ada project. Buat project dulu!")
+        return HttpResponse("Belum ada data project.")
 
-    # 2. Artefak 1, 2, 3, & 7: User Story & Scenario
+    # 2. Ambil Daftar Aktor Unik (Artifact 1)
+    actors = UserStory.objects.filter(gui__project=project).values_list('input_sebagai', flat=True).distinct()
+
+    # 3. Ambil User Stories & Skenario Gherkin (Artifact 3 & 7)
     stories_qs = UserStory.objects.filter(gui__project=project).prefetch_related('scenarios')
-    stories_data = []
-    for us in stories_qs:
-        stories_data.append({
-            'input_sebagai': us.input_sebagai,
-            'input_fitur': us.input_fitur,
-            'input_tujuan': us.input_tujuan,
-            # Ambil skenario Gherkin (Artifact 7)
-            'scenarios': list(us.scenarios.values('nama_scenario', 'input_given', 'input_when', 'input_then'))
-        })
-
-    # 3. Artefak 5, 6, & 8: Use Case Spec, Activity, & Sequence
-    specs_qs = UseCaseSpecification.objects.filter(gui__project=project).prefetch_related('basic_paths', 'activity_diagram')
-    specs_data = []
-    for spec in specs_qs:
-        # Generate URL Sequence (Artifact 8)
-        # Kita rakit kode PlantUML dulu pakai fungsi temanmu yang sudah ada di views.py
-        try:
-            # Mengambil paths untuk Sequence
-            p_code = generate_sequence_plantuml(spec.id) # Pakai ID spec
-            seq_url = f"https://www.plantuml.com/plantuml/png/~1{plantuml_encode(p_code)}"
-        except:
-            seq_url = "https://placehold.co/400x200?text=Sequence+Not+Generated"
-
-        specs_data.append({
-            'feature_name': spec.feature_name,
-            'input_precondition': spec.input_precondition,
-            'basic_paths': list(spec.basic_paths.values('step_number', 'actor_action', 'system_response')),
-            # Artifact 6: Activity Diagram
-            'activity_url': spec.activity_diagram.diagram_image_url if hasattr(spec, 'activity_diagram') else "",
-            'sequence_url': seq_url
-        })
-
-    # 4. Artefak 4: Use Case Diagram Global
-    uc_diagram = Usecase.objects.filter(gui__project=project).first()
-    uc_url = uc_diagram.hasil_usecase.url if uc_diagram and uc_diagram.hasil_usecase else ""
-
-    # 5. Artefak 9: Class Diagram & Data Dictionary
-    tables_qs = ImportedTable.objects.all().prefetch_related('columns')
-    tables_data = []
-    for table in tables_qs:
-        tables_data.append({
-            'name': table.name,
-            'columns': list(table.columns.values('name', 'data_type'))
-        })
     
-    # Gambar Class Diagram
-    cd_obj = ClassDiagram.objects.filter(userstory__gui__project=project).first()
-    cd_url = cd_obj.hasil_classdiagram.url if cd_obj and cd_obj.hasil_classdiagram else ""
+    # 4. Ambil Use Case Specs & Diagram (Artifact 5, 6, 8)
+    # Looping per Fitur agar muncul kotak-kotak artefaknya
+    specs_qs = UseCaseSpecification.objects.filter(gui__project=project).prefetch_related('basic_paths', 'activity_diagram')
 
-    # 6. Kirim ke Template
-    return render(request, 'main/generate_srs.html', {
+    # 5. Data Dictionary & Class Diagram (Artifact 9)
+    tables_qs = ImportedTable.objects.all().prefetch_related('columns')
+    
+    # Ambil Use Case Diagram Utama (Artifact 4)
+    uc_diagram = Usecase.objects.filter(gui__project=project).first()
+
+    context = {
         'project': project,
-        'stories_json': json.dumps(stories_data, cls=DjangoJSONEncoder),
-        'specs_json': json.dumps(specs_data, cls=DjangoJSONEncoder),
-        'tables_json': json.dumps(tables_data, cls=DjangoJSONEncoder),
-        'usecase_url': uc_url,
-        'class_diagram_url': cd_url,
-    })
+        'actors': actors,
+        'stories': stories_qs,
+        'specs': specs_qs,
+        'tables': tables_qs,
+        'uc_url': uc_diagram.hasil_usecase.url if uc_diagram and uc_diagram.hasil_usecase else "",
+        'today': timezone.now(),
+    }
+    return render(request, 'main/generate_srs.html', context)
