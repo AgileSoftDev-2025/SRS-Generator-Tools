@@ -794,6 +794,9 @@ def sequence_feature_list(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 def class_diagram(request):
+    if request.method == "GET":
+        return render(request, "main/class_diagram.html")
+    
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid method"})
 
@@ -1119,3 +1122,62 @@ def scenario_result(request):
     print("=" * 60)
     
     return render(request, 'main/scenario_result.html', {'specs': specs})
+
+def srs_generator_view(request):
+    # Ambil semua data dari berbagai model
+    stories = list(UserStory.objects.all().values())
+    specs = UseCaseSpecification.objects.prefetch_related('basic_paths', 'scenarios__steps').all()
+    
+    # Kumpulkan data spesifikasi lengkap
+    spec_list = []
+    for s in specs:
+        spec_list.append({
+            'id': s.id,
+            'name': s.feature_name,
+            'summary': s.summary_description,
+            'pre': s.input_precondition,
+            'post': s.input_postcondition,
+            # Generate URL PlantUML langsung di sini agar aman
+            'activity_url': f"https://www.plantuml.com/plantuml/png/~1{plantuml_encode(create_plantuml_from_usecase(s))}",
+            'basic_path': list(s.basic_paths.values()),
+            'test_scenarios': [{
+                'type': ts.scenario_type,
+                'steps': list(ts.steps.values())
+            } for ts in s.scenarios.all()]
+        })
+
+    # Kirim ke template
+    context = {
+        'stories_json': json.dumps(stories),
+        'specs_json': json.dumps(spec_list),
+        # Asumsi data SQL disimpan di session atau model lain
+        'db_json': request.session.get('parsed_sql_data', '{}') 
+    }
+    return render(request, 'main/generate_srs.html', context)
+
+def generate_srs(request):
+    # 1. Ambil data User Story
+    stories = list(UserStory.objects.all().values())
+    
+    # 2. Ambil data Spec & Scenarios
+    specs = UseCaseSpecification.objects.prefetch_related('basic_paths', 'scenarios__steps').all()
+    
+    # 3. Rakit data Spec ke dalam List
+    spec_data = []
+    for s in specs:
+        spec_data.append({
+            'name': s.feature_name,
+            'summary': s.summary_description,
+            'basic_path': list(s.basic_paths.values()),
+            'test_scenarios': [{
+                'type': ts.scenario_type,
+                'steps': list(ts.steps.values())
+            } for ts in s.scenarios.all()]
+        })
+
+    # 4. Kirim semua ke template
+    return render(request, 'main/generate_srs.html', {
+        'stories_json': json.dumps(stories),
+        'specs_json': json.dumps(spec_data),
+        'db_json': request.session.get('parsed_sql_data', '{}') # Data dari SQL Parser
+    })

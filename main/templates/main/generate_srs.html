@@ -543,6 +543,82 @@
         let projectData = {};
         let srsContent = '';
 
+    function loadProjectData() {
+        // Ambil data asli dari Django
+        const rawStories = JSON.parse('{{ stories_json|safe }}');
+        const rawSpecs = JSON.parse('{{ specs_json|safe }}');
+        const rawDb = JSON.parse('{{ db_json|safe }}');
+
+        projectData = {
+            userStories: rawStories,
+            specs: rawSpecs,
+            database: rawDb,
+            projectInfo: {
+                name: "{{ project_name|default:'User Management System' }}",
+                version: "1.0",
+                date: new Date().toLocaleDateString()
+            }
+        };
+        updateProjectInfo();
+    }
+
+    // Fungsi utama untuk merender 9 Artefak
+    function generateSRSContent() {
+        let html = `
+            <div class="srs-header">
+                <div class="srs-title">SOFTWARE REQUIREMENTS SPECIFICATION</div>
+                <div class="srs-subtitle">Project: ${projectData.projectInfo.name}</div>
+            </div>
+        `;
+
+        // 1. Render User Stories
+        html += `<div class="srs-section"><div class="srs-section-title">1. User Stories</div>`;
+        projectData.userStories.forEach(us => {
+            html += `<p>US-${us.id}: Sebagai ${us.input_sebagai}, saya ingin ${us.input_fitur} agar ${us.input_tujuan}</p>`;
+        });
+        html += `</div>`;
+
+        // 2 & 3. Render Specs & Diagrams (Looping per Fitur)
+        projectData.specs.forEach(spec => {
+            html += `
+                <div class="srs-section">
+                    <div class="srs-section-title">Feature: ${spec.name}</div>
+                    <p><strong>Summary:</strong> ${spec.summary}</p>
+                    
+                    <div class="diagram-mini">
+                        <img src="${spec.activity_url}" alt="Activity Diagram">
+                        <div class="diagram-mini-caption">Figure: Activity Flow for ${spec.name}</div>
+                    </div>
+
+                    <div class="srs-subsection-title">Test Specifications</div>
+                    <table class="srs-table">
+                        <tr><th>Scenario</th><th>Steps</th></tr>
+                        ${spec.test_scenarios.map(ts => `
+                            <tr>
+                                <td>${ts.type}</td>
+                                <td>${ts.steps.map(step => `${step.step_number}. ${step.action_type}`).join('<br>')}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+            `;
+        });
+
+        // 9. Data Dictionary (Dari SQL Parser)
+        if (projectData.database.tables) {
+            html += `<div class="srs-section"><div class="srs-section-title">9. Data Dictionary</div>`;
+            Object.values(projectData.database.tables).forEach(table => {
+                html += `<h4>Table: ${table.name}</h4><table class="srs-table"><tr><th>Column</th><th>Type</th></tr>`;
+                table.columns.forEach(col => {
+                    html += `<tr><td>${col.name}</td><td>${col.type}</td></tr>`;
+                });
+                html += `</table>`;
+            });
+            html += `</div>`;
+        }
+
+        return html;
+    }
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             initializePage();
@@ -930,17 +1006,16 @@
 
         // Generate SRS Document
         function generateSRSDocument() {
-            document.getElementById('saveStatus').textContent = 'Generating SRS document...';
+            document.getElementById('saveStatus').textContent = 'Preparing document for print...';
             
-            // Simulate document generation
-            setTimeout(() => {
-                const format = document.querySelector('input[name="format"]:checked').value;
-                alert(`SRS document generated successfully in ${format.toUpperCase()} format! Download will start automatically.`);
-                document.getElementById('saveStatus').textContent = 'SRS document generated and downloaded';
-                
-                // In a real implementation, this would trigger file download
-                // triggerDownload(format);
-            }, 2000);
+            // Sembunyikan tombol-tombol agar tidak ikut ter-print
+            const originalContent = document.body.innerHTML;
+            const printContent = document.getElementById('srsPreview').innerHTML;
+            
+            // Gunakan window.print() karena paling stabil untuk format dokumen kampus
+            window.print();
+            
+            document.getElementById('saveStatus').textContent = 'SRS document printed/saved';
         }
 
         // Refresh preview
