@@ -231,6 +231,18 @@
             font-weight: 600;
             color: #111827;
         }
+        
+        /* Alert untuk debug */
+        .debug-alert {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -247,6 +259,11 @@
     <div style="margin-bottom: 32px;">
         <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Generate Use Case Diagram & User Story</h1>
         <p style="color: #6b7280; font-size: 14px;">Review your system logic and generated diagram before proceeding to the next design stage.</p>
+    </div>
+    
+    <!-- Debug Alert -->
+    <div id="debugAlert" class="debug-alert">
+        <strong>Debug Mode:</strong> <span id="debugMessage"></span>
     </div>
     
     <div class="info-text">
@@ -318,6 +335,7 @@
             Next →
         </button>
     </div>
+    
 </main>
 
 <footer>
@@ -332,46 +350,90 @@
 </footer>
 
 <script>
-// Data use case
+// ============================================
+// VARIABLES GLOBAL
+// ============================================
 let useCases = [];
 let currentPlantUMLUrl = '';
 let currentPlantUMLCode = '';
 
-// 🔥 FUNGSI BARU: Simpan data ke localStorage sebelum ke halaman berikutnya
-function saveDataForNextPage() {
-    const saveData = {
-        useCases: useCases,
-        plantUMLCode: currentPlantUMLCode,
-        plantUMLUrl: currentPlantUMLUrl,
-        timestamp: new Date().toISOString()
-    };
-    
-    localStorage.setItem('generatedUseCaseData', JSON.stringify(saveData));
-    console.log('Data saved for next page:', saveData);
+// ============================================
+// DEBUG FUNCTIONS
+// ============================================
+
+function showDebugMessage(message) {
+    const debugAlert = document.getElementById('debugAlert');
+    const debugMessage = document.getElementById('debugMessage');
+    debugMessage.textContent = message;
+    debugAlert.style.display = 'block';
+    setTimeout(() => {
+        debugAlert.style.display = 'none';
+    }, 5000);
 }
 
-// 🔥 FUNGSI DIPERBAIKI: Mengambil data dari berbagai sumber
+function debugStorage() {
+    console.log('🔍 === DEBUG STORAGE ===');
+    
+    // Check localStorage
+    console.log('📦 localStorage:');
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        console.log(`  ${key}:`, value);
+    }
+    
+    // Check sessionStorage
+    console.log('📦 sessionStorage:');
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        const value = sessionStorage.getItem(key);
+        console.log(`  ${key}:`, value);
+    }
+    
+    console.log('📊 Current useCases:', useCases);
+    console.log('📊 Current useCases length:', useCases.length);
+    console.log('🔚 === END DEBUG ===');
+}
+
+// ============================================
+// DATA LOADING FUNCTIONS
+// ============================================
+
 function loadUseCasesFromPreviousPage() {
-    // 1. COBA ambil dari localStorage 'generatedUseCaseData' (data yang disimpan sebelumnya)
-    const savedGeneratedData = localStorage.getItem('generatedUseCaseData');
-    if (savedGeneratedData) {
+    console.log('🔄 Loading use cases from storage...');
+    
+    // Priority 1: Check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlData = urlParams.get('useCases');
+    if (urlData) {
         try {
-            const data = JSON.parse(savedGeneratedData);
-            useCases = data.useCases || [];
-            currentPlantUMLCode = data.plantUMLCode || '';
-            currentPlantUMLUrl = data.plantUMLUrl || '';
-            console.log('✅ Loaded from generatedUseCaseData:', useCases.length, 'use cases');
-            return useCases.length > 0;
+            useCases = JSON.parse(decodeURIComponent(urlData));
+            console.log('✅ Loaded from URL:', useCases.length, 'use cases');
+            showDebugMessage(`Loaded ${useCases.length} use cases from URL`);
+            return true;
         } catch (e) {
-            console.error('❌ Error parsing generatedUseCaseData:', e);
+            console.error('❌ Error parsing URL data:', e);
         }
     }
     
-    // 2. Fallback: Ambil dari localStorage 'actorsAndFeatures' (data awal)
-    const savedData = localStorage.getItem('actorsAndFeatures');
-    if (savedData) {
+    // Priority 2: Check sessionStorage (temporary)
+    const sessionData = sessionStorage.getItem('currentUseCases');
+    if (sessionData) {
         try {
-            const actors = JSON.parse(savedData);
+            useCases = JSON.parse(sessionData);
+            console.log('✅ Loaded from sessionStorage:', useCases.length, 'use cases');
+            showDebugMessage(`Loaded ${useCases.length} use cases from session`);
+            return true;
+        } catch (e) {
+            console.error('❌ Error parsing sessionStorage:', e);
+        }
+    }
+    
+    // Priority 3: Check localStorage 'actorsAndFeatures' (form data)
+    const actorsData = localStorage.getItem('actorsAndFeatures');
+    if (actorsData) {
+        try {
+            const actors = JSON.parse(actorsData);
             useCases = [];
             let hasValidData = false;
             
@@ -382,7 +444,7 @@ function loadUseCasesFromPreviousPage() {
                             useCases.push({
                                 actor: actor.name,
                                 feature: feature.what,
-                                purpose: feature.why || '' // Jika why kosong, gunakan string kosong
+                                purpose: feature.why || ''
                             });
                             hasValidData = true;
                         }
@@ -390,18 +452,56 @@ function loadUseCasesFromPreviousPage() {
                 }
             });
             
-            console.log('✅ Loaded from actorsAndFeatures:', useCases.length, 'use cases');
-            return hasValidData;
+            if (hasValidData) {
+                console.log('✅ Loaded from actorsAndFeatures:', useCases.length, 'use cases');
+                showDebugMessage(`Loaded ${useCases.length} use cases from form data`);
+                // Save to sessionStorage for next time
+                sessionStorage.setItem('currentUseCases', JSON.stringify(useCases));
+                return true;
+            }
         } catch (e) {
             console.error('❌ Error parsing actorsAndFeatures:', e);
         }
     }
     
-    console.log('❌ No data found in localStorage');
+    // Priority 4: Check localStorage 'useCases'
+    const savedUseCases = localStorage.getItem('useCases');
+    if (savedUseCases) {
+        try {
+            useCases = JSON.parse(savedUseCases);
+            console.log('✅ Loaded from useCases:', useCases.length, 'use cases');
+            showDebugMessage(`Loaded ${useCases.length} use cases from saved data`);
+            return true;
+        } catch (e) {
+            console.error('❌ Error parsing useCases:', e);
+        }
+    }
+    
+    // Priority 5: Check localStorage 'generatedUseCaseData'
+    const generatedData = localStorage.getItem('generatedUseCaseData');
+    if (generatedData) {
+        try {
+            const data = JSON.parse(generatedData);
+            useCases = data.useCases || [];
+            currentPlantUMLCode = data.plantUMLCode || '';
+            currentPlantUMLUrl = data.plantUMLUrl || '';
+            console.log('✅ Loaded from generatedUseCaseData:', useCases.length, 'use cases');
+            showDebugMessage(`Loaded ${useCases.length} use cases from generated data`);
+            return true;
+        } catch (e) {
+            console.error('❌ Error parsing generatedUseCaseData:', e);
+        }
+    }
+    
+    console.log('❌ No data found in any storage');
+    showDebugMessage('No data found. Please go back and define actors first.');
     return false;
 }
 
-// Fungsi untuk menampilkan tabel use case
+// ============================================
+// DISPLAY FUNCTIONS
+// ============================================
+
 function populateUseCaseTable() {
     const container = document.getElementById('useCaseTableContainer');
     
@@ -446,7 +546,6 @@ function populateUseCaseTable() {
     container.innerHTML = tableHTML;
 }
 
-// Fungsi untuk menampilkan user story
 function populateUserStories() {
     const container = document.getElementById('userStoryContainer');
     
@@ -464,13 +563,10 @@ function populateUserStories() {
     let storiesHTML = `<ul class="user-story-list">`;
     
     useCases.forEach(useCase => {
-        // PERUBAHAN: Format user story berdasarkan apakah "why" diisi atau tidak
         let storyText;
         if (useCase.purpose && useCase.purpose.trim() !== '') {
-            // Format lengkap dengan "why"
             storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.`;
         } else {
-            // Format hanya dengan "what"
             storyText = `<strong>As a ${useCase.actor}</strong>, I want to ${useCase.feature.toLowerCase()}.`;
         }
         
@@ -488,35 +584,27 @@ function populateUserStories() {
     container.innerHTML = storiesHTML;
 }
 
-// PlantUML Encoding Function yang BENAR dengan header ~1
+// ============================================
+// PLANTUML FUNCTIONS
+// ============================================
+
 function encodePlantUML(text) {
-    // PlantUML menggunakan encoding DEFLATE + base64 dengan format khusus
-    // Kita akan menggunakan pako.js untuk kompresi DEFLATE
-    
     if (typeof pako !== 'undefined') {
         try {
-            // Kompresi menggunakan DEFLATE
             const deflated = pako.deflate(text, { level: 9 });
-            
-            // Encode ke base64 dengan format PlantUML
             const encoded = encode64(deflated);
-            
-            // TAMBAHKAN HEADER ~1 untuk HUFFMAN encoding
             return '~1' + encoded;
-            
         } catch (e) {
-            console.warn('pako deflate failed, using fallback method', e);
+            console.warn('pako deflate failed, using fallback', e);
         }
     }
     
-    // Fallback: gunakan base64 sederhana dengan header ~1
     const bytes = new TextEncoder().encode(text);
     let base64 = btoa(String.fromCharCode(...bytes));
     base64 = base64.replace(/\+/g, '-').replace(/\//g, '_');
     return '~1' + base64;
 }
 
-// Encode base64 versi PlantUML
 function encode64(data) {
     const tbl = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
     let res = "";
@@ -540,17 +628,11 @@ function append3bytes(b1, b2, b3, tbl) {
     return tbl[c1] + tbl[c2] + tbl[c3] + tbl[c4];
 }
 
-// Generate PlantUML URL
 function generatePlantUMLUrl(plantUMLCode) {
     const encoded = encodePlantUML(plantUMLCode);
     return `https://www.plantuml.com/plantuml/svg/${encoded}`;
 }
 
-// ============================================================================
-// 🔥 FUNGSI UTAMA YANG DIPERBAIKI: generatePlantUMLDiagram()
-// Sekarang membuat SATU use case untuk fitur yang sama digunakan multiple actors
-// TANPA tulisan "Shared by X actors"
-// ============================================================================
 function generatePlantUMLDiagram() {
     const container = document.getElementById('diagramContainer');
     const regenerateBtn = document.getElementById('regenerateDiagram');
@@ -574,20 +656,17 @@ function generatePlantUMLDiagram() {
     }
     
     try {
-        // =======================================================
-        // KODE PLANTUML YANG SUDAH DIPERBAIKI
-        // =======================================================
+        // Generate PlantUML code
         currentPlantUMLCode = `@startuml\nleft to right direction\nskinparam monochrome true\nskinparam shadowing false\nskinparam usecase {\n  BackgroundColor #F8F9FA\n  BorderColor #6B7280\n}\ntitle Use Case Diagram\n\n`;
         
-        // 1. TAMBAHKAN SEMUA AKTOR UNIK
+        // Add all unique actors
         const actors = [...new Set(useCases.map(uc => uc.actor))];
         actors.forEach(actor => {
             const actorId = actor.replace(/\s+/g, '');
             currentPlantUMLCode += `actor "${actor}" as ${actorId}\n`;
         });
         
-        // 2. IDENTIFIKASI FITUR UNIK DAN AKTOR YANG MENGGUNAKANNYA
-        // Membuat Map untuk menyimpan fitur unik dan aktor yang menggunakannya
+        // Identify unique features
         const uniqueFeatures = new Map();
         
         useCases.forEach((useCase) => {
@@ -595,23 +674,19 @@ function generatePlantUMLDiagram() {
             if (!uniqueFeatures.has(featureKey)) {
                 uniqueFeatures.set(featureKey, {
                     name: useCase.feature,
-                    actors: new Set(), // Gunakan Set untuk menyimpan aktor unik
+                    actors: new Set(),
                     id: `UC${uniqueFeatures.size + 1}`
                 });
             }
-            // Tambahkan aktor ke set aktor untuk fitur ini
             uniqueFeatures.get(featureKey).actors.add(useCase.actor);
         });
         
-        console.log('Unique Features Found:', Array.from(uniqueFeatures.entries()));
-        
-        // 3. BUAT USE CASE UNIK SAJA (SATU LINGKARAN PER FITUR)
-        // TIDAK ADA WARNA KHUSUS untuk shared features
+        // Create unique use cases
         uniqueFeatures.forEach((feature, key) => {
             currentPlantUMLCode += `usecase "${feature.name}" as ${feature.id}\n`;
         });
         
-        // 4. HUBUNGKAN SETIAP AKTOR KE USE CASE YANG SESUAI
+        // Connect actors to use cases
         uniqueFeatures.forEach((feature, key) => {
             feature.actors.forEach(actorName => {
                 const actorId = actorName.replace(/\s+/g, '');
@@ -619,28 +694,23 @@ function generatePlantUMLDiagram() {
             });
         });
         
-        // 5. TIDAK ADA CATATAN "Shared by X actors" (DIHAPUS)
-        // Biarkan diagram bersih tanpa catatan tambahan
-        
         currentPlantUMLCode += `@enduml`;
         
-        console.log('PlantUML Code (Clean - no shared notes):', currentPlantUMLCode);
+        console.log('PlantUML Code:', currentPlantUMLCode);
         
-        // =======================================================
-        // END KODE PLANTUML YANG SUDAH DIPERBAIKI
-        // =======================================================
-        
-        // Generate URL for PlantUML
+        // Generate URL
         currentPlantUMLUrl = generatePlantUMLUrl(currentPlantUMLCode);
         
         console.log('PlantUML URL:', currentPlantUMLUrl);
         
-        // Menampilkan diagram
+        // Display diagram
         container.innerHTML = `
             <img src="${currentPlantUMLUrl}" alt="Use Case Diagram" class="diagram-image" 
                  onerror="handleImageError(this)" 
                  onload="handleImageLoad(this)">
         `;
+        
+        showDebugMessage('Diagram generated successfully!');
         
     } catch (error) {
         console.error('Error generating PlantUML diagram:', error);
@@ -652,7 +722,10 @@ function generatePlantUMLDiagram() {
     }
 }
 
-// Fungsi untuk mengunduh diagram SVG
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
 async function downloadSVG() {
     if (!currentPlantUMLUrl) {
         alert('No diagram available to download. Please generate a diagram first.');
@@ -662,12 +735,10 @@ async function downloadSVG() {
     const downloadBtn = document.getElementById('downloadDiagram');
     const originalText = downloadBtn.innerHTML;
     
-    // Show loading state
     downloadBtn.innerHTML = '<span class="loading-spinner"></span> Downloading...';
     downloadBtn.disabled = true;
     
     try {
-        // Fetch SVG dari PlantUML server
         const response = await fetch(currentPlantUMLUrl);
         
         if (!response.ok) {
@@ -675,12 +746,9 @@ async function downloadSVG() {
         }
         
         const svgText = await response.text();
-        
-        // Buat nama file dengan timestamp
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const fileName = `use_case_diagram_${timestamp}.svg`;
         
-        // Buat blob dan download
         const blob = new Blob([svgText], { type: 'image/svg+xml' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -696,7 +764,6 @@ async function downloadSVG() {
     } catch (error) {
         console.error('Error downloading SVG:', error);
         
-        // Fallback: Coba download sebagai gambar
         try {
             const img = document.querySelector('.diagram-image');
             if (img && img.src) {
@@ -715,21 +782,17 @@ async function downloadSVG() {
             alert('Failed to download diagram. Please try again.');
         }
     } finally {
-        // Restore button state
         downloadBtn.innerHTML = originalText;
         downloadBtn.disabled = false;
     }
 }
 
-// Fallback: Show textual representation
 function showTextualRepresentation() {
     const container = document.getElementById('diagramContainer');
     
-    // Get unique actors
     const actors = [...new Set(useCases.map(uc => uc.actor))];
-    
-    // Identifikasi fitur unik dan aktor yang menggunakannya
     const uniqueFeatures = new Map();
+    
     useCases.forEach((useCase) => {
         const featureKey = useCase.feature.trim().toLowerCase();
         if (!uniqueFeatures.has(featureKey)) {
@@ -749,10 +812,8 @@ function showTextualRepresentation() {
             </div>
     `;
     
-    // Show actors
     diagramHTML += `<div style="margin-bottom: 20px;"><strong>Actors:</strong> ${actors.join(', ')}</div>`;
     
-    // Show use cases
     diagramHTML += `<div style="margin-bottom: 20px;">`;
     diagramHTML += `<strong>Use Cases:</strong><br>`;
     let index = 1;
@@ -762,7 +823,6 @@ function showTextualRepresentation() {
     });
     diagramHTML += `</div>`;
     
-    // Show relationships
     diagramHTML += `<div style="margin-bottom: 20px;">`;
     diagramHTML += `<strong>Relationships:</strong><br>`;
     uniqueFeatures.forEach((feature, key) => {
@@ -784,28 +844,55 @@ function showTextualRepresentation() {
     container.innerHTML = diagramHTML;
 }
 
-// Handle image loading success
 function handleImageLoad(img) {
     console.log('Diagram loaded successfully');
 }
 
-// Handle image loading errors
 function handleImageError(img) {
     console.error('Failed to load diagram image');
     showTextualRepresentation();
 }
 
-// Event listener untuk tombol regenerate diagram
+// ============================================
+// NAVIGATION FUNCTIONS
+// ============================================
+
+function saveDataForNextPage() {
+    const saveData = {
+        useCases: useCases,
+        plantUMLCode: currentPlantUMLCode,
+        plantUMLUrl: currentPlantUMLUrl,
+        timestamp: new Date().toISOString()
+    };
+    
+    // Save to multiple storages for redundancy
+    localStorage.setItem('generatedUseCaseData', JSON.stringify(saveData));
+    localStorage.setItem('useCases', JSON.stringify(useCases));
+    sessionStorage.setItem('currentUseCases', JSON.stringify(useCases));
+    sessionStorage.setItem('useCaseData', JSON.stringify(saveData));
+    
+    console.log('💾 Data saved for next page:', saveData);
+    showDebugMessage('Data saved successfully!');
+    
+    return saveData;
+}
+
+function goToDefineActors() {
+    window.location.href = '/use-case-diagram/';
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
 document.getElementById('regenerateDiagram').addEventListener('click', function() {
     generatePlantUMLDiagram();
 });
 
-// Event listener untuk tombol download diagram SVG
 document.getElementById('downloadDiagram').addEventListener('click', function() {
     downloadSVG();
 });
 
-// Event listener untuk tombol regenerate text
 document.getElementById('regenerateText').addEventListener('click', function() {
     const hasData = loadUseCasesFromPreviousPage();
     if (hasData) {
@@ -824,7 +911,6 @@ document.getElementById('downloadText').addEventListener('click', function() {
         return;
     }
     
-    // Generate text content for download
     let textContent = "USE CASE DETAILS\n================\n\n";
     useCases.forEach((useCase, index) => {
         textContent += `${index + 1}. Actor: ${useCase.actor}\n`;
@@ -832,7 +918,6 @@ document.getElementById('downloadText').addEventListener('click', function() {
         textContent += `   Purpose: ${useCase.purpose || '(not specified)'}\n\n`;
     });
     
-    // Create download link
     const blob = new Blob([textContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -850,10 +935,8 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
         return;
     }
     
-    // Generate user stories content for download
     let storiesContent = "USER STORIES\n============\n\n";
     useCases.forEach((useCase, index) => {
-        // Format user story berdasarkan apakah "why" diisi
         if (useCase.purpose && useCase.purpose.trim() !== '') {
             storiesContent += `${index + 1}. As a ${useCase.actor}, I want to ${useCase.feature.toLowerCase()}, so that ${useCase.purpose.toLowerCase()}.\n\n`;
         } else {
@@ -861,7 +944,6 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
         }
     });
     
-    // Create download link
     const blob = new Blob([storiesContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -873,47 +955,69 @@ document.getElementById('downloadUserStory').addEventListener('click', function(
     URL.revokeObjectURL(url);
 });
 
-// 🔥 PERUBAHAN PENTING: Event listener untuk tombol navigasi - DIPERBAIKI!
 document.getElementById('backButton').addEventListener('click', function() {
-    // Kembali ke halaman use_case_diagram dengan URL Django yang benar
     window.location.href = '/use-case-diagram/';
 });
 
-// 🔥 PERUBAHAN PENTING: Simpan data SEBELUM ke halaman berikutnya
 document.getElementById('nextButton').addEventListener('click', function() {
     if (useCases.length === 0) {
-        alert('Please generate use cases first before proceeding.');
+        const hasData = loadUseCasesFromPreviousPage();
+        if (!hasData) {
+            alert('No use case data found. Please go back to define actors and features first.');
+            return;
+        }
+    }
+    
+    // Generate diagram if not yet generated
+    if (!currentPlantUMLCode) {
+        generatePlantUMLDiagram();
+        setTimeout(() => {
+            saveDataForNextPage();
+            window.location.href = '/input-informasi-tambahan/';
+        }, 1500);
+    } else {
+        saveDataForNextPage();
+        window.location.href = '/input-informasi-tambahan/';
+    }
+});
+
+// ============================================
+// INITIALIZATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Page loaded - initializing...');
+    
+    // Check for forced refresh
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('forceRefresh')) {
+        console.log('🔄 Force refreshing data...');
+        sessionStorage.clear();
+        localStorage.removeItem('generatedUseCaseData');
+        localStorage.removeItem('useCases');
+        // Reload without parameter
+        window.location.href = window.location.pathname;
         return;
     }
     
-    // 🔥 SIMPAN DATA ke localStorage SEBELUM redirect
-    saveDataForNextPage();
-    
-    // Beralih ke halaman input_informasi_tambahan
-    window.location.href = '/input-informasi-tambahan/';
-});
-
-// 🔥 PERUBAHAN: Tambahkan fungsi untuk handle tombol "Go to Define Actors" di state kosong
-function goToDefineActors() {
-    window.location.href = '/use-case-diagram/';
-}
-
-// Inisialisasi halaman
-document.addEventListener('DOMContentLoaded', function() {
-    // Muat data dari halaman sebelumnya
+    // Load data
     const hasData = loadUseCasesFromPreviousPage();
     
     if (hasData) {
-        // Isi tabel dan user story
+        console.log('✅ Data loaded successfully');
+        
+        // Populate tables
         populateUseCaseTable();
         populateUserStories();
         
-        // Generate diagram setelah semua data siap
+        // Generate diagram
         setTimeout(() => {
             generatePlantUMLDiagram();
-        }, 500);
+        }, 300);
     } else {
-        // Tampilkan state kosong
+        console.log('⚠️ No data found');
+        
+        // Show empty state
         populateUseCaseTable();
         populateUserStories();
         

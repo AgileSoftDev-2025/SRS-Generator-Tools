@@ -56,7 +56,6 @@
       "
     >
       <div style="width: 100%; max-width: 42rem">
-        <!-- Header Section -->
         <div style="text-align: center; margin-bottom: 2rem">
           <h1
             style="
@@ -80,8 +79,6 @@
           </p>
         </div>
 
-
-        <!-- Upload Card -->
         <div
           style="
             background-color: var(--bg-white);
@@ -92,7 +89,6 @@
               0 2px 4px -1px rgba(0, 0, 0, 0.06);
           "
         >
-          <!-- Upload Area -->
           <div
             id="dropArea"
             style="
@@ -104,7 +100,6 @@
               cursor: pointer;
             "
           >
-            <!-- Upload Icon -->
             <div
               style="
                 display: flex;
@@ -127,8 +122,6 @@
               </svg>
             </div>
 
-
-            <!-- Upload Text -->
             <div style="margin-bottom: 0.75rem; text-align: center">
               <p
                 style="
@@ -145,8 +138,6 @@
               </p>
             </div>
 
-
-            <!-- File Info -->
             <p
               style="
                 text-align: center;
@@ -158,8 +149,6 @@
               Supported format: .sql (max size: 10MB)
             </p>
 
-
-            <!-- Hidden File Input -->
             <input
               type="file"
               accept=".sql"
@@ -168,8 +157,6 @@
             />
           </div>
 
-
-          <!-- Result Container -->
           <div id="resultContainer">
             <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem">
               Parsed SQL Result
@@ -179,8 +166,6 @@
           </div>
         </div>
 
-
-        <!-- Navigation Buttons -->
         <div
           style="
             display: flex;
@@ -189,7 +174,6 @@
             padding: 0 1rem;
           "
         >
-          <!-- Back button -->
           <a
             href="{% url 'main:user_scenario' %}"
             style="
@@ -204,10 +188,9 @@
             ← Back
           </a>
 
-
-          <!-- Next button -->
           <a
             id="nextBtn"
+            href="{% url 'main:sequence_diagram' %}"
             style="
               padding: 0.75rem 1.5rem;
               background-color: #2563eb;
@@ -224,7 +207,6 @@
       </div>
     </div>
 
-
     <script>
       const dropArea = document.getElementById("dropArea");
       const fileInput = document.getElementById("fileInput");
@@ -232,22 +214,18 @@
       const resultOutput = document.getElementById("resultOutput");
       const saveBtn = document.getElementById("saveBtn");
 
-
       let parsedSQLData = null; // temporary cache
-
 
       // Make the entire drop area clickable
       dropArea.addEventListener("click", () => {
         fileInput.click();
       });
 
-
       // Handle file selection
       fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) handleFile(file);
       });
-
 
       // Prevent default drag behaviors
       ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
@@ -258,7 +236,6 @@
         e.preventDefault();
         e.stopPropagation();
       }
-
 
       // Highlight drop area when dragging over it
       ["dragenter", "dragover"].forEach((eventName) => {
@@ -276,7 +253,6 @@
         dropArea.style.backgroundColor = "#fafafa";
       }
 
-
       // Handle dropped files
       dropArea.addEventListener("drop", handleDrop, false);
       function handleDrop(e) {
@@ -284,7 +260,6 @@
         const files = dt.files;
         if (files.length > 0) handleFile(files[0]);
       }
-
 
       // Upload logic
       function handleFile(file) {
@@ -297,10 +272,8 @@
           return;
         }
 
-
         const formData = new FormData();
         formData.append("file", file);
-
 
         fetch("/parse-sql/", {
           method: "POST",
@@ -323,14 +296,12 @@
           .catch(() => alert("Failed to parse SQL file."));
       }
 
-
       // SAVE BUTTON LOGIC
       saveBtn.addEventListener("click", () => {
         if (!parsedSQLData) {
           alert("No data to save.");
           return;
         }
-
 
         fetch("/save-parsed-sql/", {
           method: "POST",
@@ -351,7 +322,6 @@
           .catch(() => alert("Terjadi kesalahan saat menyimpan data."));
       });
 
-
       // Helper ambil CSRF token
       function getCookie(name) {
         let cookieValue = null;
@@ -369,21 +339,6 @@
         }
         return cookieValue;
       }
-
-
-      // Next button logic
-      document.getElementById("nextBtn").addEventListener("click", function () {
-        fetch("/api/get-latest-userstory/", { method: "GET" })
-          .then((r) => r.json())
-          .then((data) => {
-            if (data.status === "success") {
-              const id = data.userstory_id;
-              window.location.href = `/sequence/${id}/generate/`;
-            } else {
-              alert("User Story belum tersedia!");
-            }
-          });
-      });
     </script>
   </body>
 </html>

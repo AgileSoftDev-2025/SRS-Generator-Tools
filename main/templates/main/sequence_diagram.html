@@ -1,197 +1,374 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Sequence Diagram</title>
-  </head>
+    <title>Sequence Diagram Generator</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f9fafb;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .container {
+        padding: 48px;
+        max-width: 1100px;
+        margin: auto;
+        /* Agar footer tidak terlalu mepet bawah saat konten sedikit */
+        min-height: 80vh; 
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* Updated Nav Buttons Style */
+      .nav-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px; /* Jarak dari konten di atasnya */
+        padding-top: 20px;
+        border-top: 1px solid #e5e7eb; /* Garis pemisah opsional agar lebih rapi */
+      }
 
-  <body style="margin: 0; background: #f9fafb; font-family: system-ui">
-    <!-- MAIN -->
-    <div style="padding: 48px; max-width: 1100px; margin: auto">
-      <h1 style="font-size: 32px; margin-bottom: 8px">
-        Generate Sequence Diagram
-      </h1>
-      <p style="color: #6b7280; margin-bottom: 32px">
-        Select a feature to preview its sequence diagram
-      </p>
+      .btn {
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+      }
+      .btn-back {
+        background: #6b7280;
+        color: white;
+      }
+      .btn-next {
+        background: #2563eb;
+        color: white;
+      }
+      .btn-save-png {
+        background: #059669;
+        color: white;
+      }
+      .btn-save-code {
+        background: #4b5563;
+        color: white;
+      }
 
-      <!-- FEATURE CARDS -->
-      <div
-        id="feature-container"
-        style="
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 20px;
-        "
-      ></div>
-    </div>
+      h1 {
+        font-size: 32px;
+        color: #111827;
+        margin-bottom: 10px;
+      }
+      p.subtitle {
+        color: #6b7280;
+        margin-bottom: 32px;
+      }
 
-    <!-- MODAL -->
-    <div
-      id="modal"
-      style="
+      .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        flex-grow: 1; /* Agar mengisi ruang kosong */
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        border-color: #2563eb;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        color: #1f2937;
+      }
+      .card p {
+        margin: 0;
+        color: #6b7280;
+        font-size: 14px;
+      }
+      .card .click-hint {
+        margin-top: 15px;
+        color: #3b82f6;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      /* Modal Styles */
+      .modal {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         align-items: center;
         justify-content: center;
         z-index: 50;
-      "
-    >
-      <div
-        style="
-          background: #fff;
-          width: 800px;
-          max-width: 90%;
-          border-radius: 10px;
-          padding: 24px;
-        "
-      >
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          "
-        >
-          <h3 id="modal-title" style="margin: 0">Sequence Diagram</h3>
-          <button
-            onclick="closeModal()"
-            style="
-              border: none;
-              background: none;
-              font-size: 20px;
-              cursor: pointer;
-            "
-          >
-            ✕
-          </button>
-        </div>
+      }
+      .modal-content {
+        background: #fff;
+        width: 900px;
+        max-width: 95%;
+        border-radius: 12px;
+        padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 10px;
+      }
+      .close-btn {
+        font-size: 24px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #6b7280;
+      }
 
-        <pre
-          id="plantuml-output"
-          style="
-            margin-top: 16px;
-            background: #111827;
-            color: #22c55e;
-            padding: 16px;
-            border-radius: 8px;
-            overflow: auto;
-          "
-        ></pre>
+      .preview-area {
+        text-align: center;
+        background: #f3f4f6;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .preview-area img {
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      details {
+        background: #1f2937;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      summary {
+        padding: 10px 15px;
+        cursor: pointer;
+        color: #9ca3af;
+        background: #374151;
+        font-size: 14px;
+      }
+      pre {
+        margin: 0;
+        padding: 15px;
+        color: #4ade80;
+        font-family: monospace;
+        white-space: pre-wrap;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sequence Diagram Generator</h1>
+      <p class="subtitle">
+        Select a feature below to generate its Sequence Diagram. <br />Ensure
+        GUI inputs and SQL imports are completed.
+      </p>
+
+      <div id="feature-container" class="grid-container">
+        <p>Loading features...</p>
+      </div>
+
+      <div class="nav-buttons">
+        <a href="{% url 'main:import_sql' %}" class="btn btn-back"
+          >&larr; Back</a
+        >
+        <a href="{% url 'main:class_diagram' %}" class="btn btn-next"
+          >Next   &rarr;</a
+        >
       </div>
     </div>
 
-    <!-- SCRIPT -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title" style="margin: 0">Sequence Diagram Result</h3>
+          <button onclick="closeModal()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="preview-area" id="preview-box">
+          <span id="loading-text" style="color: #6b7280"
+            >Generating diagram... Please wait.</span
+          >
+          <img
+            id="plantuml-image"
+            src=""
+            alt="Sequence Diagram"
+            style="display: none"
+          />
+        </div>
+
+        <div class="action-buttons">
+          <button
+            onclick="downloadPNG()"
+            class="btn btn-save-png"
+            id="btn-png"
+            disabled
+          >
+            Save PNG Image
+          </button>
+          <button
+            onclick="downloadCode()"
+            class="btn btn-save-code"
+            id="btn-code"
+            disabled
+          >
+            Save PlantUML Code
+          </button>
+        </div>
+
+        <details>
+          <summary>Show PlantUML Code</summary>
+          <pre id="plantuml-code"></pre>
+        </details>
+      </div>
+    </div>
+
     <script>
-      /* =====================================================
-   MODE 1: UI DUMMY (AKTIF SEKARANG)
-   ===================================================== */
-      const mockFeatures = [
-        {
-          id: 1,
-          title: "User Login",
-          plantuml: `
-@startuml
-actor User
-User -> LoginPage : input email & password
-LoginPage -> AuthController : submit
-AuthController -> UserDB : validate
-UserDB --> AuthController : success
-AuthController --> LoginPage : login success
-@enduml`,
-        },
-        {
-          id: 2,
-          title: "User Registration",
-          plantuml: `
-@startuml
-actor User
-User -> RegisterPage : input data
-RegisterPage -> UserController : submit
-UserController -> UserDB : save user
-UserDB --> UserController : success
-@enduml`,
-        },
-      ];
+      let currentFeatureTitle = "";
+      let currentCode = "";
+      let currentBase64Image = "";
 
-      renderCards(mockFeatures);
+      // 1. Load Fitur saat halaman dibuka
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch("{% url 'main:sequence_feature_list' %}") 
+          .then((res) => res.json())
+          .then((data) => {
+            const container = document.getElementById("feature-container");
+            container.innerHTML = "";
 
-      /* =====================================================
-   MODE 2: BACKEND (UNCOMMENT JIKA SUDAH READY)
-   ===================================================== */
+            if (data.length === 0) {
+              container.innerHTML = `<p style="grid-column: 1/-1; color: red;">No features found. Please complete Use Case Specification first.</p>`;
+              return;
+            }
 
-      /*
-fetch("/api/sequence/features/")
-  .then(res => res.json())
-  .then(data => {
-    renderCards(data);
-  })
-  .catch(err => {
-    console.error("Failed to load features", err);
-  });
-*/
+            data.forEach((feature) => {
+              const card = document.createElement("div");
+              card.className = "card";
+              card.innerHTML = `
+                        <h3>${feature.title || "Untitled Feature"}</h3>
+                        <p>GUI: ${feature.gui || "Not set"}</p>
+                        <p class="click-hint">Click to Generate Diagram >></p>
+                    `;
+              card.onclick = () => openModal(feature.id, feature.title);
+              container.appendChild(card);
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            document.getElementById(
+              "feature-container"
+            ).innerHTML = `<p style="color:red">Error loading features.</p>`;
+          });
+      });
 
-      /* =====================================================
-   RENDER CARD FUNCTION
-   ===================================================== */
-      function renderCards(features) {
-        const container = document.getElementById("feature-container");
-        container.innerHTML = "";
+      // 2. Fungsi Buka Modal & Generate
+      function openModal(id, title) {
+        const modal = document.getElementById("modal");
+        const img = document.getElementById("plantuml-image");
+        const loading = document.getElementById("loading-text");
+        const codePre = document.getElementById("plantuml-code");
 
-        features.forEach((feature) => {
-          const card = document.createElement("div");
+        // Reset State
+        modal.style.display = "flex";
+        document.getElementById("modal-title").innerText = title;
+        currentFeatureTitle = title;
+        img.style.display = "none";
+        loading.style.display = "block";
+        loading.innerText = "Validating data & Generating diagram...";
+        codePre.innerText = "";
 
-          card.style = `
-      background:#fff;
-      border:1px solid #e5e7eb;
-      border-radius:8px;
-      padding:20px;
-      cursor:pointer;
-      transition:.2s;
-    `;
+        // Disable tombol saat loading
+        document.getElementById("btn-png").disabled = true;
+        document.getElementById("btn-code").disabled = true;
 
-          card.innerHTML = `
-      <h3 style="margin:0 0 8px;">${feature.title}</h3>
-      <p style="margin:0; color:#6b7280; font-size:14px;">
-        Click to preview sequence diagram
-      </p>
-    `;
+        // Call API
+        fetch(`/api/sequence/${id}/generate/`)
+          .then((res) =>
+            res.json().then((data) => ({ status: res.status, body: data }))
+          )
+          .then((result) => {
+            if (result.status !== 200) {
+              throw new Error(result.body.message || "Unknown error");
+            }
 
-          card.onmouseenter = () =>
-            (card.style.boxShadow = "0 8px 20px rgba(0,0,0,0.08)");
-          card.onmouseleave = () => (card.style.boxShadow = "none");
+            // Sukses
+            const data = result.body;
+            currentCode = data.plantuml;
+            currentBase64Image = data.image_base64;
 
-          card.onclick = () => openModal(feature);
+            // Tampilkan Gambar
+            img.src = "data:image/png;base64," + currentBase64Image;
+            img.style.display = "block";
+            loading.style.display = "none";
 
-          container.appendChild(card);
-        });
-      }
+            // Tampilkan Code
+            codePre.innerText = currentCode;
 
-      /* =====================================================
-   MODAL HANDLER
-   ===================================================== */
-      function openModal(feature) {
-        document.getElementById("modal").style.display = "flex";
-        document.getElementById("modal-title").innerText = feature.title;
-
-        /* MODE DUMMY */
-        document.getElementById("plantuml-output").textContent =
-          feature.plantuml;
-
-        /* MODE BACKEND (UNCOMMENT NANTI) */
-        /*
-  fetch(`/api/sequence/${feature.id}/generate/`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("plantuml-output").textContent = data.plantuml;
-    });
-  */
+            // Enable Tombol
+            document.getElementById("btn-png").disabled = false;
+            document.getElementById("btn-code").disabled = false;
+          })
+          .catch((err) => {
+            loading.innerText = "Error: " + err.message;
+            loading.style.color = "red";
+          });
       }
 
       function closeModal() {
         document.getElementById("modal").style.display = "none";
+      }
+
+      // 3. Fungsi Download PNG
+      function downloadPNG() {
+        if (!currentBase64Image) return;
+        const a = document.createElement("a");
+        a.href = "data:image/png;base64," + currentBase64Image;
+        a.download = `Sequence_${currentFeatureTitle.replace(/\s+/g, "_")}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      // 4. Fungsi Download Code
+      function downloadCode() {
+        if (!currentCode) return;
+        const blob = new Blob([currentCode], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Sequence_${currentFeatureTitle.replace(
+          /\s+/g,
+          "_"
+        )}.puml`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     </script>
   </body>
