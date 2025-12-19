@@ -1,3 +1,8 @@
+import json
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from curses import newpad
 import os
 # Di baris paling atas views.py kamu
 from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, TestStep
@@ -466,46 +471,71 @@ def input_informasi_tambahan(request):
     return render(request, 'main/input_informasi_tambahan.html', context)
 
 def use_case_spec(request):
-    # 1. Ambil data Use Case Spec
+    # 1. Ambil data Use Case Spec dari DATABASE
     specs = UseCaseSpecification.objects.all().prefetch_related(
         'basic_paths', 'alternative_paths', 'exception_paths'
     )
 
-    # 2. LOGIKA PINTAR: GET OR CREATE (Cari dulu, kalau gak ada baru bikin)
-    
-    # A. Pastikan ada USER
-    # Kita ambil user pertama yg ada di DB. Karena error tadi bilang udah ada, pasti ini berhasil.
+    # ✅ TAMBAHAN: Format data untuk dikirim ke template
+    all_features = []
+    for spec in specs:
+        feature_data = {
+            'featureName': spec.feature_name,
+            'summary': spec.summary_description,
+            'priority': spec.priority,
+            'status': spec.status,
+            'precondition': spec.input_precondition,
+            'postcondition': spec.input_postcondition,
+            'basicPath': [
+                {
+                    'actor': bp.actor_action,
+                    'system': bp.system_response
+                } for bp in spec.basic_paths.all().order_by('step_number')
+            ],
+            'alternativePath': [
+                {
+                    'actor': ap.actor_action,
+                    'system': ap.system_response
+                } for ap in spec.alternative_paths.all().order_by('step_number')
+            ],
+            'exceptionPath': [
+                {
+                    'actor': ep.actor_action,
+                    'system': ep.system_response
+                } for ep in spec.exception_paths.all().order_by('step_number')
+            ]
+        }
+        all_features.append(feature_data)
+
+    # 2. LOGIKA PINTAR: GET OR CREATE
     current_user = Pengguna.objects.first()
     if not current_user:
-        # Fallback cuma kalau beneran kosong melompong (jarang terjadi setelah error tadi)
         current_user = Pengguna.objects.create(
             id_user="U001", nama_user="Admin", email_user="admin@oneuml.com", password="123"
         )
 
-    # B. Pastikan ada PROJECT (Milik User tadi)
-    # get_or_create mengembalikan 2 benda: (objek, created_boolean) -> kita cuma butuh objeknya (current_project)
     current_project, _ = Project.objects.get_or_create(
-        id_project="P001",  # Kunci pencarian
-        defaults={          # Kalau belum ada, isi data ini:
+        id_project="P001",
+        defaults={
             'nama_project': "Project Skripsi",
             'deskripsi': "Auto Generated",
             'pengguna': current_user
         }
     )
 
-    # C. Pastikan ada GUI (Milik Project tadi)
     current_gui, _ = GUI.objects.get_or_create(
-        id_gui="G001",      # Kunci pencarian
-        defaults={          # Kalau belum ada, isi data ini:
+        id_gui="G001",
+        defaults={
             'project': current_project,
             'nama_atribut': "Home Screen"
         }
     )
 
-    # 3. Kirim ke HTML (Siap dipakai tombol Next)
+    # 3. ✅ Kirim data ke HTML (PENTING!)
     context = {
         'specs': specs,
-        'gui': current_gui
+        'gui': current_gui,
+        'all_features': json.dumps(all_features)  # ✅ TAMBAHKAN INI!
     }
     return render(request, 'main/use_case_spec.html', context)
 
@@ -855,7 +885,7 @@ def project_new(request):
         pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
         Project.objects.create(
-            id_project=new_id,
+            id_project=newpad,
             nama_project=name,
             deskripsi=desc,
             pengguna=pengguna,
