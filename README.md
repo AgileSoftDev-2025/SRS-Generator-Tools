@@ -8,14 +8,14 @@
 2.  **Automated Use Case Diagram**: Menghasilkan diagram Use Case secara otomatis menggunakan integrasi PlantUML.
 3.  **Sequence & Class Diagram Generator**: Membuat visualisasi alur logika dan arsitektur data dari input User Story dan file SQL.
 4.  **SQL Parser & Data Dictionary**: Mengimpor file `.sql` untuk diubah menjadi tabel kamus data otomatis.
-5.  **SRS Document Preview**: Tampilan preview dokumen format A4 yang rapi dan siap ekspor ke PDF.
+5.  **SRS Document Preview**: Tampilan preview dokumen
 
 ## 🛠️ Tech Stack
 
 * **Backend**: Python 3.12, Django Framework.
 * **Frontend**: HTML5, CSS3 (Modern UI/UX), JavaScript.
 * **Database**: SQLite.
-* **Diagram Engine**: PlantUML & Kroki.io API.
+* **Diagram Engine**: PlantUML
 
 ## 💻 Cara Instalasi
 
