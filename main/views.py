@@ -844,9 +844,6 @@ def class_diagram(request):
         "uml_code": plantuml_code
     })
 
-def generate_srs(request):
-    return render(request, 'main/generate_srs.html')
-
 def project_new(request):
     #validatelogin
     if 'user_id' not in request.session:
@@ -1126,67 +1123,47 @@ def scenario_result(request):
     
     return render(request, 'main/scenario_result.html', {'specs': specs})
 
-def srs_generator_view(request):
-    # Ambil semua data dari berbagai model
-    stories = list(UserStory.objects.all().values())
-    specs = UseCaseSpecification.objects.prefetch_related('basic_paths', 'scenarios__steps').all()
-    
-    # Kumpulkan data spesifikasi lengkap
-    spec_list = []
-    for s in specs:
-        spec_list.append({
-            'id': s.id,
-            'name': s.feature_name,
-            'summary': s.summary_description,
-            'pre': s.input_precondition,
-            'post': s.input_postcondition,
-            # Generate URL PlantUML langsung di sini agar aman
-            'activity_url': f"https://www.plantuml.com/plantuml/png/~1{plantuml_encode(create_plantuml_from_usecase(s))}",
-            'basic_path': list(s.basic_paths.values()),
-            'test_scenarios': [{
-                'type': ts.scenario_type,
-                'steps': list(ts.steps.values())
-            } for ts in s.scenarios.all()]
-        })
-
-    # Kirim ke template
-    context = {
-        'stories_json': json.dumps(stories),
-        'specs_json': json.dumps(spec_list),
-        # Asumsi data SQL disimpan di session atau model lain
-        'db_json': request.session.get('parsed_sql_data', '{}') 
-    }
-    return render(request, 'main/generate_srs.html', context)
-
 def generate_srs(request):
-    # 1. Ambil Project Terbaru milikmu (Menghapus nama 'Skripsi' dari database)
-    project = Project.objects.last() 
+    # 1. Ambil Project Terakhir agar cover tidak 'Skripsi' terus
+    project = Project.objects.last()
     if not project:
-        return HttpResponse("Belum ada data project.")
+        return HttpResponse("Data Project belum ada di database.")
 
-    # 2. Ambil Daftar Aktor Unik (Artifact 1)
-    actors = UserStory.objects.filter(gui__project=project).values_list('input_sebagai', flat=True).distinct()
+    # 2. Ambil ARTEFAK: Actor & Feature (Artifact 3 & 4)
+    # Kita ambil SEMUA data tanpa filter ketat karena relasi GUI sering kosong
+    stories_qs = UserStory.objects.all().prefetch_related('scenarios')
+    actors_unique = stories_qs.values_list('input_sebagai', flat=True).distinct()
 
-    # 3. Ambil User Stories & Skenario Gherkin (Artifact 3 & 7)
-    stories_qs = UserStory.objects.filter(gui__project=project).prefetch_related('scenarios')
-    
-    # 4. Ambil Use Case Specs & Diagram (Artifact 5, 6, 8)
-    # Looping per Fitur agar muncul kotak-kotak artefaknya
-    specs_qs = UseCaseSpecification.objects.filter(gui__project=project).prefetch_related('basic_paths', 'activity_diagram')
+    # 3. Ambil ARTEFAK: Use Case Diagram (Artifact 4)
+    uc_obj = Usecase.objects.all().last()
+    uc_url = uc_obj.hasil_usecase.url if uc_obj and uc_obj.hasil_usecase else None
 
-    # 5. Data Dictionary & Class Diagram (Artifact 9)
+    # 4. Ambil ARTEFAK: Use Case Spec & Activity Diagram (Artifact 6 & 7)
+    # Kita prefetch basic_paths dan activity_diagram agar tabel dan gambarnya muncul
+    specs_qs = UseCaseSpecification.objects.all().prefetch_related('basic_paths', 'activity_diagram')
+
+    # 5. Ambil ARTEFAK: Form GUI (Artifact 8)
+    gui_pages = Page.objects.all().prefetch_related('elements')
+
+    # 6. Ambil ARTEFAK: Sequence Diagram (Artifact 11)
+    sequences_qs = Sequence.objects.all()
+
+    # 7. Ambil ARTEFAK: Class Diagram & Data Dictionary (Artifact 12)
+    cd_obj = ClassDiagram.objects.all().last()
     tables_qs = ImportedTable.objects.all().prefetch_related('columns')
-    
-    # Ambil Use Case Diagram Utama (Artifact 4)
-    uc_diagram = Usecase.objects.filter(gui__project=project).first()
 
+    # 8. Masukkan ke Context (Pastikan NAMA VARIABEL SAMA dengan di HTML)
     context = {
         'project': project,
-        'actors': actors,
+        'actors': actors_unique,
         'stories': stories_qs,
+        'uc_url': uc_url,
         'specs': specs_qs,
+        'gui_pages': gui_pages,
+        'sequences': sequences_qs,
+        'class_url': cd_obj.hasil_classdiagram.url if cd_obj else "",
         'tables': tables_qs,
-        'uc_url': uc_diagram.hasil_usecase.url if uc_diagram and uc_diagram.hasil_usecase else "",
         'today': timezone.now(),
     }
+    
     return render(request, 'main/generate_srs.html', context)

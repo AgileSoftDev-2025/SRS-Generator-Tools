@@ -1,5 +1,7 @@
 from django.urls import path, include
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'main' 
 
@@ -57,3 +59,6 @@ urlpatterns = [
     path("api/sequence/<str:feature_id>/generate/", views.generate_sequence_diagram_by_feature, name="generate_sequence_diagram_by_feature"),
     path("api/sequence/features/", views.sequence_feature_list, name="sequence_feature_list"),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
