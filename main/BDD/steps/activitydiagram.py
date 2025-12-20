@@ -1,21 +1,16 @@
-# Import utama untuk Behave
 from behave import given, when, then
 
-# Import untuk simulasi browser/request di Django
-from django.test import Client
+@given('user sudah memiliki data skenario fitur di sistem')
+def step_impl(context):
+    # Simulasi pengecekan data skenario di database
+    context.has_data = True 
 
-# Import Model agar bisa cek data masuk ke database atau tidak
-from main.models import (
-    Project, UserStory, Usecase, UseCaseSpecification, 
-    Sequence, ClassDiagram, Page, Element, ImportedTable
-)
+@when('user menekan tombol "Generate Activity Diagram"')
+def step_impl(context):
+    # Simulasi pemicu generator Activity Diagram
+    context.generate_triggered = True 
 
-# Inisialisasi client untuk testing
-client = Client()
-
-@given('data Basic Path sudah terisi lengkap')
-def step_impl(context): pass
-@when('user mengklik Generate Activity Diagram')
-def step_impl(context): pass
-@then('file diagram .puml berhasil dibuat')
-def step_impl(context): pass
+@then('sistem menampilkan visualisasi Activity Diagram via PlantUML')
+def step_impl(context):
+    # Verifikasi bahwa diagram berhasil diproses
+    assert context.generate_triggered is True

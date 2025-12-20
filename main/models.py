@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -22,7 +23,7 @@ class Pengguna(models.Model):
 
 # Tabel Project
 class Project(models.Model):
-    id_project = models.CharField(max_length=5, primary_key=True)
+    id_project = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nama_project = models.CharField(max_length=100)
     deskripsi = models.CharField(max_length=100, blank=True)
     tanggal_project_dibuat = models.DateTimeField(default=timezone.now)

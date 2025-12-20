@@ -1,4 +1,5 @@
 import json
+import uuid
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -898,7 +899,6 @@ def project_new(request):
         pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
         Project.objects.create(
-            id_project=newpad,
             nama_project=name,
             deskripsi=desc,
             pengguna=pengguna,

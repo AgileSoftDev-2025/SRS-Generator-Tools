@@ -1,5 +1,6 @@
-Feature: Generate Use Case Diagram
-  Scenario: Membuat diagram dari User Story yang ada
-    Given sudah terdapat data User Story di sistem
-    When user menekan tombol Generate Use Case
-    Then sistem menampilkan gambar diagram via PlantUML
+Feature: Generate Activity Diagram
+
+  Scenario: Membuat Activity Diagram dari skenario yang ada
+    Given user sudah memiliki data skenario fitur di sistem
+    When user menekan tombol "Generate Activity Diagram"
+    Then sistem menampilkan visualisasi Activity Diagram via PlantUML
