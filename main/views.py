@@ -2,10 +2,9 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from curses import newpad
 import os
-# Di baris paling atas views.py kamu
-from .models import UseCaseSpecification, GUI, Page, Element, TestScenario, TestStep
+from django.core.serializers.json import DjangoJSONEncoder
+from .models import *
 from django.db import transaction
 from main.models import Feature, UseCaseSpecification
 from django.shortcuts import render, redirect, get_object_or_404
@@ -118,6 +117,9 @@ def logout_view(request):
 
 def user_story(request):
     return render(request, 'main/user_story.html')
+
+def generatesrs(request):
+    return render(request, 'main/generatesrs.html')
 
 def save_userstory(request):
     if request.method == "POST":
@@ -824,6 +826,9 @@ def sequence_feature_list(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 def class_diagram(request):
+    if request.method == "GET":
+        return render(request, "main/class_diagram.html")
+    
     if request.method != "POST":
         return JsonResponse({"status": "error", "message": "Invalid method"})
 
@@ -867,9 +872,6 @@ def class_diagram(request):
         "uml_image": png_base64,
         "uml_code": plantuml_code
     })
-
-def generate_srs(request):
-    return render(request, 'main/generate_srs.html')
 
 def project_new(request):
     #validatelogin
@@ -1155,3 +1157,48 @@ def scenario_result(request):
     print("=" * 60)
     
     return render(request, 'main/scenario_result.html', {'specs': specs})
+
+def generate_srs(request):
+    # 1. Ambil Project Terakhir agar cover tidak 'Skripsi' terus
+    project = Project.objects.last()
+    if not project:
+        return HttpResponse("Data Project belum ada di database.")
+
+    # 2. Ambil ARTEFAK: Actor & Feature (Artifact 3 & 4)
+    # Kita ambil SEMUA data tanpa filter ketat karena relasi GUI sering kosong
+    stories_qs = UserStory.objects.all().prefetch_related('scenarios')
+    actors_unique = stories_qs.values_list('input_sebagai', flat=True).distinct()
+
+    # 3. Ambil ARTEFAK: Use Case Diagram (Artifact 4)
+    uc_obj = Usecase.objects.all().last()
+    uc_url = uc_obj.hasil_usecase.url if uc_obj and uc_obj.hasil_usecase else None
+
+    # 4. Ambil ARTEFAK: Use Case Spec & Activity Diagram (Artifact 6 & 7)
+    # Kita prefetch basic_paths dan activity_diagram agar tabel dan gambarnya muncul
+    specs_qs = UseCaseSpecification.objects.all().prefetch_related('basic_paths', 'activity_diagram')
+
+    # 5. Ambil ARTEFAK: Form GUI (Artifact 8)
+    gui_pages = Page.objects.all().prefetch_related('elements')
+
+    # 6. Ambil ARTEFAK: Sequence Diagram (Artifact 11)
+    sequences_qs = Sequence.objects.all()
+
+    # 7. Ambil ARTEFAK: Class Diagram & Data Dictionary (Artifact 12)
+    cd_obj = ClassDiagram.objects.all().last()
+    tables_qs = ImportedTable.objects.all().prefetch_related('columns')
+
+    # 8. Masukkan ke Context (Pastikan NAMA VARIABEL SAMA dengan di HTML)
+    context = {
+        'project': project,
+        'actors': actors_unique,
+        'stories': stories_qs,
+        'uc_url': uc_url,
+        'specs': specs_qs,
+        'gui_pages': gui_pages,
+        'sequences': sequences_qs,
+        'class_url': cd_obj.hasil_classdiagram.url if cd_obj else "",
+        'tables': tables_qs,
+        'today': timezone.now(),
+    }
+    
+    return render(request, 'main/generate_srs.html', context)
