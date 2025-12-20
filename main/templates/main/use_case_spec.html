@@ -1,178 +1,1302 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>OneUML - Use Case Specification Result</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-  <style>
-    body { background: #f9fafb; font-family: system-ui, -apple-system, sans-serif; }
-    .header { height: 64px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; background: #fff; border-bottom: 1px solid #e5e7eb; }
-    .spec-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin-bottom: 32px; }
-    .section-title { font-weight: 600; margin-top: 24px; }
-    .table th { background-color: #f8f9fa; }
-    .badge { font-size: 0.9em; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Use Case Specification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+        }
+        
+        footer {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            margin-top: 2rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            color: #6b7280;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .spec-card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        
+        .feature-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background-color: #f8fafc;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background-color: #e5e7eb;
+            transform: translateY(-1px);
+        }
+        
+        .action-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            margin-top: 24px;
+            color: #111827;
+            font-size: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 16px;
+        }
+        
+        .badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .status-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .feature-title {
+            color: #111827;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 20px;
+        }
+        
+        /* IMPROVED TABLE STYLES */
+        .path-table-container {
+            margin-top: 8px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            background: white;
+        }
+        
+        .path-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .path-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .path-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: top;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .path-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .path-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .actor-action, .system-response {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .actor-action .step-content,
+        .system-response .step-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .export-section {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background-color: white;
+            border: 2px solid #111827;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #111827;
+        }
+        
+        .export-btn:hover {
+            background-color: #111827;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .export-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .save-status {
+            margin-top: 8px;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .save-status.success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .save-status.warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        
+        .save-status.danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .save-status.info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .metadata {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .metadata-item {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .metadata-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .metadata-value {
+            color: #111827;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .content-section {
+            margin-bottom: 24px;
+        }
+        
+        .content-label {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+        }
+        
+        .content-value {
+            color: #111827;
+            line-height: 1.6;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        
+        .empty-path-message {
+            color: #9ca3af;
+            font-style: italic;
+            padding: 24px;
+            text-align: center;
+            background: #f9fafb;
+            border-radius: 6px;
+            border: 1px dashed #d1d5db;
+        }
+        
+        .feature-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .feature-id {
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .section-icon {
+            margin-right: 8px;
+            color: #9ca3af;
+        }
+        
+        .column-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .column-icon {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .path-table th,
+            .path-table td {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            .step-number {
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                font-size: 10px;
+            }
+            
+            .metadata-item {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <header class="header">
-    <div class="fw-semibold">OneUML</div>
-    <img src="https://via.placeholder.com/40" class="rounded-circle" />
-  </header>
-
-  <main class="container mt-5">
-    <h3 class="fw-bold mb-4">Use Case Specification</h3>
-
-    <div id="useCaseContainer">
-        
-        {% if specs %}
-            {% for spec in specs %}
-            <div class="spec-card">
-                <h5 class="fw-bold text-primary">{{ spec.feature_name }}</h5>
-
-                <p><strong>Summary:</strong><br>{{ spec.summary_description|default:"-" }}</p>
-
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <strong>Priority:</strong> 
-                        <span class="badge {% if spec.priority == 'Must Have' %}bg-danger{% else %}bg-secondary{% endif %}">
-                            {{ spec.priority }}
-                        </span>
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Status:</strong> 
-                        <span class="badge bg-success">{{ spec.status }}</span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Pre-Condition:</strong><br>{{ spec.input_precondition|default:"-" }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <p><strong>Post-Condition:</strong><br>{{ spec.input_postcondition|default:"-" }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <div class="section-title">Basic Flow (Jalur Utama)</div>
-                    <table class="table table-bordered mt-2">
-                        <thead>
-                            <tr>
-                                <th width="50%">Aksi Aktor</th>
-                                <th width="50%">Respon Sistem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for step in spec.basic_paths.all %}
-                            <tr>
-                                <td>{{ step.actor_action }}</td>
-                                <td>{{ step.system_response }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr><td colspan="2" class="text-center text-muted">Tidak ada data</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                {% if spec.alternative_paths.all %}
-                <div class="mt-4">
-                    <div class="section-title">Alternative Flow</div>
-                    <table class="table table-bordered mt-2">
-                        <thead><tr><th width="50%">Aksi Aktor</th><th width="50%">Respon Sistem</th></tr></thead>
-                        <tbody>
-                            {% for step in spec.alternative_paths.all %}
-                            <tr><td>{{ step.actor_action }}</td><td>{{ step.system_response }}</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endif %}
-
-                {% if spec.exception_paths.all %}
-                <div class="mt-4">
-                    <div class="section-title">Exception Flow</div>
-                    <table class="table table-bordered mt-2">
-                        <thead><tr><th width="50%">Aksi Aktor</th><th width="50%">Respon Sistem</th></tr></thead>
-                        <tbody>
-                            {% for step in spec.exception_paths.all %}
-                            <tr><td>{{ step.actor_action }}</td><td>{{ step.system_response }}</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endif %}
-
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
             </div>
-            {% endfor %}
+            <span class="logo-text">One UML</span>
+        </div>
+    </header>
+
+    <main>
+        <div style="margin-bottom: 32px;">
+            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Use Case Specification</h1>
+            <p style="color: #6b7280; font-size: 14px;">Review and export your use case specifications with enhanced readability.</p>
+        </div>
         
-        {% else %}
-            <div class="alert alert-warning text-center py-5">
-                <h4>Belum ada data Use Case.</h4>
-                <p>Silakan input data terlebih dahulu di halaman sebelumnya.</p>
-                <a href="/input-informasi-tambahan/" class="btn btn-primary mt-2">Input Data</a>
+        <!-- Export Options Section -->
+        <div class="export-section">
+            <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 4px;">Export Options</h3>
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Export your use case specifications in different formats for documentation and sharing.</p>
+            
+            <div class="export-buttons">
+                <button id="saveAllSvgBtn" class="export-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Save All as SVG
+                </button>
+                <button id="saveAllSpecBtn" class="export-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Save All as Document
+                </button>
+                <button id="exportAllBtn" class="export-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export All Formats
+                </button>
             </div>
-        {% endif %}
-    </div>
+            <div id="exportStatus" class="save-status" style="display: none;"></div>
+        </div>
+        
+        <!-- Status Info -->
+        <div id="statusInfo" class="status-info" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span id="completedCount">0</span> of <span id="totalCount">0</span> use cases loaded
+                </div>
+                <div style="font-size: 12px; color: #6b7280;">
+                    <span id="totalSteps">0</span> total steps
+                </div>
+            </div>
+        </div>
+        
+        <!-- Container for dynamically rendered content -->
+        <div id="useCaseContainer">
+            <!-- Content will be dynamically generated by JavaScript -->
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <a href="/input-informasi-tambahan/" class="btn btn-outline">← Back</a>
+            <button class="btn" id="nextBtn" disabled>Next →</button>
+        </div>
+    </main>
 
-    <div class="d-flex justify-content-between mt-5 mb-5">
-      <a href="/input-informasi-tambahan/" class="btn btn-outline-secondary">← Back</a>
-      
-      {% if gui %}
-          <a href="{% url 'main:activity_diagram' %}" class="btn btn-dark">Next →</a>
-      {% else %}
-          <button class="btn btn-dark" disabled>Next (Loading...)</button>
-      {% endif %}
-    </div>
-  </main>
+    <footer>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div style="display: flex; gap: 24px;">
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+            </div>
+        </div>
+    </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // ✅ AMBIL DATA DARI DJANGO CONTEXT (sama seperti activity_diagram.html)
-    const allFeaturesRaw = '{{ all_features|escapejs }}';
-    let allFeatures = [];
-
-    if (allFeaturesRaw && allFeaturesRaw !== '[]' && allFeaturesRaw !== 'None') {
-        try {
-            allFeatures = JSON.parse(allFeaturesRaw);
-            console.log("✅ Data loaded from Django:", allFeatures);
-        } catch(e) {
-            console.error("❌ Error parsing data:", e);
+    <script>
+        // DATA SOURCES
+        let allFeatures = [];
+        let featuresLoaded = false;
+        
+        function loadDataFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            
+            if (encodedData) {
+                try {
+                    const decodedData = decodeURIComponent(encodedData);
+                    allFeatures = JSON.parse(decodedData);
+                    console.log("✅ Data loaded from URL:", allFeatures.length, "features");
+                    return true;
+                } catch(e) {
+                    console.error("❌ Error parsing URL data:", e);
+                }
+            }
+            return false;
         }
-    }
-
-    // ✅ FALLBACK: Kalau Django kosong, coba ambil dari localStorage
-    if (!allFeatures || allFeatures.length === 0) {
-        const localData = localStorage.getItem('useCaseDetails');
-        if (localData) {
-            try {
-                allFeatures = JSON.parse(localData);
-                console.log("✅ Data loaded from localStorage:", allFeatures);
-            } catch(e) {
-                console.error("❌ Error parsing localStorage:", e);
+        
+        function loadDataFromDjango() {
+            const allFeaturesRaw = '{{ all_features|escapejs }}';
+            
+            if (allFeaturesRaw && allFeaturesRaw !== '[]' && allFeaturesRaw !== 'None') {
+                try {
+                    allFeatures = JSON.parse(allFeaturesRaw);
+                    console.log("✅ Data loaded from Django:", allFeatures.length, "features");
+                    return true;
+                } catch(e) {
+                    console.error("❌ Error parsing Django data:", e);
+                }
+            }
+            return false;
+        }
+        
+        function loadDataFromLocalStorage() {
+            const formattedData = localStorage.getItem('formattedUseCaseDetails');
+            if (formattedData) {
+                try {
+                    const parsed = JSON.parse(formattedData);
+                    allFeatures = Object.values(parsed);
+                    console.log("✅ Data loaded from formatted localStorage:", allFeatures.length, "features");
+                    return true;
+                } catch(e) {
+                    console.error("❌ Error parsing formatted localStorage:", e);
+                }
+            }
+            
+            const localData = localStorage.getItem('useCaseDetails');
+            if (localData) {
+                try {
+                    allFeatures = JSON.parse(localData);
+                    console.log("✅ Data loaded from raw localStorage:", allFeatures.length, "features");
+                    return true;
+                } catch(e) {
+                    console.error("❌ Error parsing raw localStorage:", e);
+                }
+            }
+            return false;
+        }
+        
+        function loadDataFromSessionStorage() {
+            const sessionData = sessionStorage.getItem('useCaseDetails');
+            if (sessionData) {
+                try {
+                    allFeatures = JSON.parse(sessionData);
+                    console.log("✅ Data loaded from sessionStorage:", allFeatures.length, "features");
+                    return true;
+                } catch(e) {
+                    console.error("❌ Error parsing sessionStorage:", e);
+                }
+            }
+            return false;
+        }
+        
+        function loadAllData() {
+            const sources = [
+                { name: 'URL', func: loadDataFromURL },
+                { name: 'Django', func: loadDataFromDjango },
+                { name: 'LocalStorage', func: loadDataFromLocalStorage },
+                { name: 'SessionStorage', func: loadDataFromSessionStorage }
+            ];
+            
+            for (const source of sources) {
+                if (source.func()) {
+                    console.log(`📊 Successfully loaded data from ${source.name}`);
+                    return true;
+                }
+            }
+            
+            console.error("❌ No data available from any source!");
+            return false;
+        }
+        
+        // RENDER DATA
+        function renderUseCaseSpecs(features) {
+            const container = document.getElementById('useCaseContainer');
+            const statusInfo = document.getElementById('statusInfo');
+            
+            if (!features || features.length === 0) {
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="empty-state">
+                            <div style="color: #9ca3af; font-size: 48px; margin-bottom: 16px;">📋</div>
+                            <h4 style="color: #111827; margin-bottom: 8px;">No Use Case Data Available</h4>
+                            <p style="color: #6b7280; margin-bottom: 16px;">Please input data on the previous page.</p>
+                            <a href="/input-informasi-tambahan/" class="btn" style="margin-top: 16px;">Input Data</a>
+                        </div>
+                    </div>
+                `;
+                statusInfo.style.display = 'none';
+                return;
+            }
+            
+            // Calculate total steps
+            let totalSteps = 0;
+            features.forEach(feature => {
+                totalSteps += (feature.basicPath?.length || 0) + 
+                            (feature.alternativePath?.length || 0) + 
+                            (feature.exceptionPath?.length || 0);
+            });
+            
+            // Show status info
+            statusInfo.style.display = 'block';
+            document.getElementById('totalCount').textContent = features.length;
+            document.getElementById('completedCount').textContent = features.length;
+            document.getElementById('totalSteps').textContent = totalSteps;
+            
+            let html = '';
+            
+            features.forEach((feature, index) => {
+                const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
+                const summary = feature.summary || feature.description || 'No summary provided.';
+                const priority = feature.priority || 'Should Have';
+                const status = feature.status || 'Active';
+                const precondition = feature.precondition || 'None specified';
+                const postcondition = feature.postcondition || 'None specified';
+                const basicPath = Array.isArray(feature.basicPath) ? feature.basicPath : [];
+                const alternativePath = Array.isArray(feature.alternativePath) ? feature.alternativePath : [];
+                const exceptionPath = Array.isArray(feature.exceptionPath) ? feature.exceptionPath : [];
+                
+                const priorityColors = {
+                    'Must Have': '#ef4444',
+                    'Should Have': '#f59e0b',
+                    'Could Have': '#0ea5e9',
+                    'Won\'t Have': '#6b7280'
+                };
+                
+                const statusColors = {
+                    'Active': '#10b981',
+                    'Inactive': '#6b7280',
+                    'Draft': '#8b5cf6',
+                    'Completed': '#3b82f6'
+                };
+                
+                html += `
+                    <div class="spec-card" id="spec-card-${index}">
+                        <div class="feature-header">
+                            <div class="feature-title">${featureName}</div>
+                            <div class="feature-id">Use Case #${index + 1}</div>
+                        </div>
+                        
+                        <div class="feature-actions">
+                            <button class="action-btn" onclick="saveSingleAsSVG(${index})">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Save as SVG
+                            </button>
+                            <button class="action-btn" onclick="saveSingleAsSpec(${index})">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Save as Document
+                            </button>
+                        </div>
+                        
+                        <div class="metadata">
+                            <div class="metadata-item">
+                                <span class="metadata-label">Priority</span>
+                                <span class="badge metadata-value" style="background-color: ${priorityColors[priority] || '#6b7280'}; color: white; padding: 6px 12px;">
+                                    ${priority}
+                                </span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Status</span>
+                                <span class="badge metadata-value" style="background-color: ${statusColors[status] || '#6b7280'}; color: white; padding: 6px 12px;">
+                                    ${status}
+                                </span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Steps</span>
+                                <span class="metadata-value" style="font-size: 16px; color: #111827;">
+                                    ${basicPath.length + alternativePath.length + exceptionPath.length}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="content-section">
+                            <span class="content-label">Summary</span>
+                            <div class="content-value">${summary}</div>
+                        </div>
+                        
+                        <div class="metadata">
+                            <div class="metadata-item">
+                                <span class="metadata-label">Pre-Condition</span>
+                                <div style="color: #111827; font-size: 14px; line-height: 1.6; padding: 8px 0;">${precondition}</div>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Post-Condition</span>
+                                <div style="color: #111827; font-size: 14px; line-height: 1.6; padding: 8px 0;">${postcondition}</div>
+                            </div>
+                        </div>
+                        
+                        ${renderPathSection('Basic Flow', basicPath, 'basic', index)}
+                        ${renderPathSection('Alternative Flow', alternativePath, 'alternative', index)}
+                        ${renderPathSection('Exception Flow', exceptionPath, 'exception', index)}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.disabled = false;
+                nextBtn.style.backgroundColor = '#111827';
             }
         }
-    }
+        
+        function renderPathSection(title, paths, type, featureIndex) {
+            const validPaths = paths.filter(path => 
+                (path.actor && path.actor.trim() !== '') || 
+                (path.system && path.system.trim() !== '')
+            );
+            
+            if (validPaths.length === 0) {
+                return '';
+            }
+            
+            let rows = '';
+            validPaths.forEach((path, index) => {
+                const stepNum = index + 1;
+                const actorText = path.actor || 'No actor action specified';
+                const systemText = path.system || 'No system response specified';
+                
+                rows += `
+                    <tr>
+                        <td style="width: 50%;">
+                            <div class="actor-action">
+                                <span class="step-number">${stepNum}</span>
+                                <div class="step-content">
+                                    ${actorText}
+                                </div>
+                            </div>
+                        </td>
+                        <td style="width: 50%;">
+                            <div class="system-response">
+                                <div class="step-content">
+                                    ${systemText}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            const sectionIcons = {
+                'basic': '🟢',
+                'alternative': '🟡', 
+                'exception': '🔴'
+            };
+            
+            const icon = sectionIcons[type] || '📋';
+            
+            return `
+                <div class="content-section">
+                    <div class="section-title">
+                        <span class="section-icon">${icon}</span>
+                        ${title} (${validPaths.length} steps)
+                    </div>
+                    <div class="path-table-container">
+                        <table class="path-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">
+                                        <div class="column-header">
+                                            <span class="column-icon">👤</span>
+                                            Actor Action
+                                        </div>
+                                    </th>
+                                    <th style="width: 50%;">
+                                        <div class="column-header">
+                                            <span class="column-icon">💻</span>
+                                            System Response
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // SVG EXPORT FUNCTIONS
+        function saveSingleAsSVG(featureIndex) {
+            if (!allFeatures || allFeatures.length === 0) {
+                showExportStatus('⚠️ No data available', 'warning');
+                return;
+            }
+            
+            const feature = allFeatures[featureIndex];
+            const featureName = feature.featureName || feature.name || `Use_Case_${featureIndex + 1}`;
+            const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            
+            const svgContent = createSVGContent(feature, featureName);
+            
+            const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeFileName}_use_case.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showExportStatus(`✅ SVG saved: ${safeFileName}_use_case.svg`, 'success');
+        }
+        
+        function saveAllAsSVG() {
+            if (!allFeatures || allFeatures.length === 0) {
+                showExportStatus('⚠️ No data available', 'warning');
+                return;
+            }
+            
+            showExportStatus(`Generating ${allFeatures.length} SVG files...`, 'info');
+            
+            setTimeout(() => {
+                allFeatures.forEach((feature, index) => {
+                    const featureName = feature.featureName || feature.name || `Use_Case_${index + 1}`;
+                    const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    const svgContent = createSVGContent(feature, featureName);
+                    
+                    const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${safeFileName}_use_case.svg`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+                
+                showExportStatus(`✅ ${allFeatures.length} SVG files downloaded`, 'success');
+            }, 500);
+        }
+        
+        function createSVGContent(feature, featureName) {
+            const basicPath = feature.basicPath || [];
+            const altPath = feature.alternativePath || [];
+            const excPath = feature.exceptionPath || [];
+            
+            const totalSteps = basicPath.length + altPath.length + excPath.length;
+            const svgHeight = Math.max(600, 200 + totalSteps * 30);
+            
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="${svgHeight}" viewBox="0 0 800 ${svgHeight}">
+    <defs>
+        <style type="text/css">
+            .title { font-family: 'Arial', sans-serif; font-size: 28px; font-weight: bold; fill: #111827; }
+            .subtitle { font-family: 'Arial', sans-serif; font-size: 20px; font-weight: bold; fill: #374151; }
+            .section-title { font-family: 'Arial', sans-serif; font-size: 16px; font-weight: bold; fill: #111827; }
+            .text { font-family: 'Arial', sans-serif; font-size: 14px; fill: #4b5563; }
+            .small-text { font-family: 'Arial', sans-serif; font-size: 12px; fill: #6b7280; }
+            .header-bg { fill: #111827; }
+            .section-bg { fill: #f9fafb; stroke: #e5e7eb; stroke-width: 1; }
+            .step-number { font-family: 'Arial', sans-serif; font-size: 12px; font-weight: bold; fill: #111827; }
+            .priority-badge { fill: ${getPriorityColor(feature.priority)}; }
+            .status-badge { fill: ${feature.status === 'Active' ? '#10b981' : '#6b7280'}; }
+        </style>
+    </defs>
+    
+    <!-- Header -->
+    <rect x="0" y="0" width="800" height="80" class="header-bg"/>
+    <text x="400" y="35" text-anchor="middle" class="title" fill="white">Use Case Specification</text>
+    <text x="400" y="60" text-anchor="middle" class="subtitle" fill="#d1d5db">${featureName}</text>
+    
+    <!-- Summary Section -->
+    <rect x="40" y="100" width="720" height="80" class="section-bg" rx="6"/>
+    <text x="60" y="125" class="section-title">Summary</text>
+    <text x="60" y="150" class="text">${feature.summary || 'No summary provided'}</text>
+    
+    <!-- Metadata -->
+    <rect x="40" y="200" width="720" height="60" class="section-bg" rx="6"/>
+    <text x="60" y="225" class="section-title">Metadata</text>
+    <text x="60" y="250" class="text">
+        Priority: <tspan class="priority-badge">${feature.priority || 'Should Have'}</tspan> | 
+        Status: <tspan class="status-badge">${feature.status || 'Active'}</tspan>
+    </text>
+    
+    <!-- Conditions -->
+    <rect x="40" y="280" width="720" height="80" class="section-bg" rx="6"/>
+    <text x="60" y="305" class="section-title">Conditions</text>
+    <text x="60" y="330" class="small-text">Pre-Condition: ${feature.precondition || 'None'}</text>
+    <text x="60" y="355" class="small-text">Post-Condition: ${feature.postcondition || 'None'}</text>
+    
+    <!-- Basic Path -->
+    <rect x="40" y="380" width="720" height="${Math.max(80, 40 + basicPath.length * 25)}" class="section-bg" rx="6"/>
+    <text x="60" y="405" class="section-title">Basic Path (${basicPath.length} steps)</text>
+    
+    ${basicPath.map((path, i) => `
+        <text x="80" y="${435 + i * 25}" class="text">
+            <tspan class="step-number">${i + 1}.</tspan> 
+            <tspan font-weight="bold">Actor:</tspan> ${path.actor || 'N/A'} | 
+            <tspan font-weight="bold">System:</tspan> ${path.system || 'N/A'}
+        </text>
+    `).join('')}
+    
+    <!-- Footer -->
+    <rect x="0" y="${svgHeight - 40}" width="800" height="40" fill="#f9fafb"/>
+    <text x="400" y="${svgHeight - 15}" text-anchor="middle" class="small-text">
+        Generated by One UML • ${new Date().toLocaleDateString('id-ID', { 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        })}
+    </text>
+</svg>`;
+        }
+        
+        function getPriorityColor(priority) {
+            const colors = {
+                'Must Have': '#ef4444',
+                'Should Have': '#f59e0b',
+                'Could Have': '#0ea5e9',
+                'Won\'t Have': '#6b7280'
+            };
+            return colors[priority] || '#6b7280';
+        }
+        
+        // SPEC EXPORT FUNCTIONS
+        function saveSingleAsSpec(featureIndex) {
+            if (!allFeatures || allFeatures.length === 0) {
+                showExportStatus('⚠️ No data available', 'warning');
+                return;
+            }
+            
+            const feature = allFeatures[featureIndex];
+            const featureName = feature.featureName || feature.name || `Use_Case_${featureIndex + 1}`;
+            const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            
+            const specContent = createSpecContent(feature, featureName);
+            
+            const blob = new Blob([specContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${safeFileName}_specification.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showExportStatus(`✅ Document saved: ${safeFileName}_specification.txt`, 'success');
+        }
+        
+        function saveAllAsSpec() {
+            if (!allFeatures || allFeatures.length === 0) {
+                showExportStatus('⚠️ No data available', 'warning');
+                return;
+            }
+            
+            const allSpecContent = createAllSpecContent();
+            
+            const blob = new Blob([allSpecContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all_use_case_specifications_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showExportStatus(`✅ All specifications saved to single file`, 'success');
+        }
+        
+        function createSpecContent(feature, featureName) {
+            return `===============================================================================
+                             USE CASE SPECIFICATION
+===============================================================================
 
-    // ✅ RENDER DATA
-    if (allFeatures && allFeatures.length > 0) {
-        console.log("=== RENDERING USE CASE SPEC ===");
-        console.log(allFeatures);
+Use Case Name: ${featureName}
+Generated: ${new Date().toLocaleString()}
+Priority: ${feature.priority || 'Should Have'}
+Status: ${feature.status || 'Active'}
+
+===============================================================================
+SUMMARY
+===============================================================================
+
+${feature.summary || 'No summary provided.'}
+
+===============================================================================
+CONDITIONS
+===============================================================================
+
+PRE-CONDITION:
+${feature.precondition || 'None specified.'}
+
+POST-CONDITION:
+${feature.postcondition || 'None specified.'}
+
+===============================================================================
+BASIC PATH
+===============================================================================
+${(feature.basicPath || []).map((path, i) => 
+    `\n${i + 1}. ACTOR ACTION:\n   ${path.actor || 'N/A'}\n\n   SYSTEM RESPONSE:\n   ${path.system || 'N/A'}\n`
+).join('\n---\n')}
+
+${(feature.alternativePath || []).length > 0 ? `
+===============================================================================
+ALTERNATIVE PATHS
+===============================================================================
+${(feature.alternativePath || []).map((path, i) => 
+    `\nALT-${i + 1}. ACTOR ACTION:\n   ${path.actor || 'N/A'}\n\n   SYSTEM RESPONSE:\n   ${path.system || 'N/A'}\n`
+).join('\n---\n')}
+` : ''}
+
+${(feature.exceptionPath || []).length > 0 ? `
+===============================================================================
+EXCEPTION PATHS
+===============================================================================
+${(feature.exceptionPath || []).map((path, i) => 
+    `\nEXC-${i + 1}. ACTOR ACTION:\n   ${path.actor || 'N/A'}\n\n   SYSTEM RESPONSE:\n   ${path.system || 'N/A'}\n`
+).join('\n---\n')}
+` : ''}
+
+===============================================================================
+END OF DOCUMENT
+===============================================================================
+Generated by One UML - Use Case Specification Tool`;
+        }
         
-        // ... kode render HTML mu di sini ...
+        function createAllSpecContent() {
+            let content = `===============================================================================
+                         ALL USE CASE SPECIFICATIONS
+===============================================================================
+
+Generated: ${new Date().toLocaleString()}
+Total Use Cases: ${allFeatures.length}
+
+===============================================================================
+
+`;
+            
+            allFeatures.forEach((feature, index) => {
+                const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
+                
+                content += `\n\n${'='.repeat(80)}\n`;
+                content += `USE CASE ${index + 1}: ${featureName}\n`;
+                content += `${'='.repeat(80)}\n\n`;
+                content += `Priority: ${feature.priority || 'Should Have'} | Status: ${feature.status || 'Active'}\n\n`;
+                content += `Summary: ${feature.summary || 'No summary'}\n\n`;
+                content += `Pre-condition: ${feature.precondition || 'None'}\n`;
+                content += `Post-condition: ${feature.postcondition || 'None'}\n\n`;
+                
+                content += `Basic Path:\n`;
+                (feature.basicPath || []).forEach((path, i) => {
+                    content += `  ${i + 1}. Actor: ${path.actor || 'N/A'}\n`;
+                    content += `     System: ${path.system || 'N/A'}\n\n`;
+                });
+                
+                if ((feature.alternativePath || []).length > 0) {
+                    content += `Alternative Paths:\n`;
+                    (feature.alternativePath || []).forEach((path, i) => {
+                        content += `  ALT-${i + 1}. Actor: ${path.actor || 'N/A'}\n`;
+                        content += `       System: ${path.system || 'N/A'}\n\n`;
+                    });
+                }
+                
+                if ((feature.exceptionPath || []).length > 0) {
+                    content += `Exception Paths:\n`;
+                    (feature.exceptionPath || []).forEach((path, i) => {
+                        content += `  EXC-${i + 1}. Actor: ${path.actor || 'N/A'}\n`;
+                        content += `       System: ${path.system || 'N/A'}\n\n`;
+                    });
+                }
+            });
+            
+            content += `\n\n${'='.repeat(80)}\n`;
+            content += `END OF DOCUMENT\n`;
+            content += `${'='.repeat(80)}\n`;
+            content += `\nGenerated by One UML • ${allFeatures.length} use cases exported`;
+            
+            return content;
+        }
         
-    } else {
-        console.error("❌ No data available!");
-        document.getElementById('yourContainerId').innerHTML = `
-            <div class="alert alert-warning">
-                <strong>⚠️ No data found</strong><br>
-                Please go back to Input Informasi Tambahan and fill in the details.
-            </div>
-        `;
-    }
-</script>
+        // EXPORT ALL FORMATS
+        function exportAllFormats() {
+            if (!allFeatures || allFeatures.length === 0) {
+                showExportStatus('⚠️ No data available', 'warning');
+                return;
+            }
+            
+            showExportStatus(`Starting export of ${allFeatures.length} use cases in all formats...`, 'info');
+            
+            setTimeout(() => {
+                // Export all as SVG
+                allFeatures.forEach((feature, index) => {
+                    const featureName = feature.featureName || feature.name || `Use_Case_${index + 1}`;
+                    const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                    const svgContent = createSVGContent(feature, featureName);
+                    
+                    const svgBlob = new Blob([svgContent], { type: 'image/svg+xml' });
+                    const svgUrl = URL.createObjectURL(svgBlob);
+                    const svgLink = document.createElement('a');
+                    svgLink.href = svgUrl;
+                    svgLink.download = `${safeFileName}_use_case.svg`;
+                    document.body.appendChild(svgLink);
+                    svgLink.click();
+                    document.body.removeChild(svgLink);
+                    URL.revokeObjectURL(svgUrl);
+                });
+                
+                // Export combined spec
+                const allSpecContent = createAllSpecContent();
+                const specBlob = new Blob([allSpecContent], { type: 'text/plain;charset=utf-8' });
+                const specUrl = URL.createObjectURL(specBlob);
+                const specLink = document.createElement('a');
+                specLink.href = specUrl;
+                specLink.download = `all_use_cases_combined_${new Date().getTime()}.txt`;
+                document.body.appendChild(specLink);
+                specLink.click();
+                document.body.removeChild(specLink);
+                URL.revokeObjectURL(specUrl);
+                
+                showExportStatus(`✅ Exported ${allFeatures.length} SVG files + combined document`, 'success');
+            }, 1000);
+        }
+        
+        function showExportStatus(message, type) {
+            const exportStatus = document.getElementById('exportStatus');
+            exportStatus.innerHTML = `
+                <span style="display: flex; align-items: center; gap: 8px;">
+                    ${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : type === 'error' ? '❌' : 'ℹ️'}
+                    ${message}
+                </span>
+            `;
+            exportStatus.className = 'save-status ' + type;
+            exportStatus.style.display = 'flex';
+            
+            setTimeout(() => {
+                exportStatus.style.display = 'none';
+            }, 5000);
+        }
+        
+        // SAVE DATA FOR NEXT PAGE
+        function saveDataForNextPage() {
+            if (allFeatures && allFeatures.length > 0) {
+                sessionStorage.setItem('all_use_case_data', JSON.stringify(allFeatures));
+                
+                const formattedData = {};
+                allFeatures.forEach((feature, index) => {
+                    formattedData[`feature_${index}`] = {
+                        featureName: feature.featureName || feature.name || `Feature ${index}`,
+                        summary: feature.summary || '',
+                        priority: feature.priority || 'Should Have',
+                        status: feature.status || 'Active',
+                        precondition: feature.precondition || '',
+                        postcondition: feature.postcondition || '',
+                        basicPath: feature.basicPath || [],
+                        alternativePath: feature.alternativePath || [],
+                        exceptionPath: feature.exceptionPath || []
+                    };
+                });
+                
+                localStorage.setItem('all_use_case_data', JSON.stringify(formattedData));
+                return true;
+            }
+            return false;
+        }
+        
+        // INITIALIZE PAGE
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('=== USE CASE SPEC PAGE LOADED ===');
+            
+            featuresLoaded = loadAllData();
+            
+            if (featuresLoaded) {
+                console.log(`📊 Total features loaded: ${allFeatures.length}`);
+                
+                renderUseCaseSpecs(allFeatures);
+                
+                // Setup export buttons
+                const saveAllSvgBtn = document.getElementById('saveAllSvgBtn');
+                const saveAllSpecBtn = document.getElementById('saveAllSpecBtn');
+                const exportAllBtn = document.getElementById('exportAllBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                if (saveAllSvgBtn) {
+                    saveAllSvgBtn.addEventListener('click', saveAllAsSVG);
+                }
+                
+                if (saveAllSpecBtn) {
+                    saveAllSpecBtn.addEventListener('click', saveAllAsSpec);
+                }
+                
+                if (exportAllBtn) {
+                    exportAllBtn.addEventListener('click', exportAllFormats);
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        if (!saveDataForNextPage()) {
+                            e.preventDefault();
+                            showExportStatus('⚠️ Please go back to input data first.', 'warning');
+                        } else {
+                            window.location.href = "{% url 'main:activity_diagram' %}";
+                        }
+                    });
+                }
+                
+            } else {
+                const container = document.getElementById('useCaseContainer');
+                container.innerHTML = `
+                    <div class="card">
+                        <div style="padding: 32px; text-align: center;">
+                            <div style="color: #dc2626; font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                            <h4 style="color: #111827; margin-bottom: 8px;">Data Not Found</h4>
+                            <p style="color: #6b7280; margin-bottom: 16px;">Unable to load use case data.</p>
+                            <div style="text-align: left; background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="color: #374151; margin-bottom: 8px; font-weight: 500;">Possible solutions:</p>
+                                <ol style="color: #6b7280; padding-left: 20px; margin-bottom: 0;">
+                                    <li>Go back to <a href="/input-informasi-tambahan/" style="color: #111827; text-decoration: underline;">Input Informasi Tambahan</a></li>
+                                    <li>Complete all forms and click "Next"</li>
+                                    <li>Check browser console (F12) for errors</li>
+                                </ol>
+                            </div>
+                            <button class="btn btn-outline" onclick="location.reload()">🔄 Reload Page</button>
+                        </div>
+                    </div>
+                `;
+                
+                const saveAllSvgBtn = document.getElementById('saveAllSvgBtn');
+                const saveAllSpecBtn = document.getElementById('saveAllSpecBtn');
+                const exportAllBtn = document.getElementById('exportAllBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                if (saveAllSvgBtn) saveAllSvgBtn.disabled = true;
+                if (saveAllSpecBtn) saveAllSpecBtn.disabled = true;
+                if (exportAllBtn) exportAllBtn.disabled = true;
+                if (nextBtn) {
+                    nextBtn.disabled = true;
+                    nextBtn.style.backgroundColor = '#9ca3af';
+                }
+            }
+            
+            // Make functions available globally
+            window.saveSingleAsSVG = saveSingleAsSVG;
+            window.saveSingleAsSpec = saveSingleAsSpec;
+        });
+    </script>
 </body>
 </html>

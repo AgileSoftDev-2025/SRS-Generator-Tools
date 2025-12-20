@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One UML - Additional Information</title>
     <style>
-        /* Global Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        /* Global Styles */
         * {
             margin: 0;
             padding: 0;
@@ -17,25 +17,82 @@
             background-color: #f9fafb;
             color: #111827;
             line-height: 1.5;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
         }
         
-        /* Header - SAMA SEPERTI FILE SEBELUMNYA */
+        /* Header */
         header {
-            background-color: #ffffff;
+            background: #fff;
             border-bottom: 1px solid #e5e7eb;
-            padding: 0 24px;
+            padding: 1rem 2rem;
         }
         
-        .header-content {
+        footer {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            margin-top: 2rem;
+        }
+        
+        main {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            color: #6b7280;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .navigation {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            height: 64px;
+            margin-top: 30px;
         }
         
         .logo {
@@ -60,30 +117,12 @@
             color: #111827;
         }
         
-        /* Main Content */
-        main {
-            flex: 1;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 24px;
-            width: 100%;
-        }
-        
-        /* Card Styles - SAMA SEPERTI FILE SEBELUMNYA */
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            padding: 32px;
-            margin-bottom: 24px;
-        }
-        
         /* Feature Card Styles */
         .feature-card {
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            padding: 24px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.2s ease;
             height: 100%;
@@ -93,10 +132,8 @@
         }
         
         .feature-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-color: #cbd5e1;
-            background-color: #f8fafc;
+            border-color: #d1d5db;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
         .feature-title {
@@ -105,126 +142,26 @@
             color: #111827;
         }
         
-        .empty-state {
-            text-align: center;
-            color: #9ca3af;
-            padding: 48px 20px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
+        .feature-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
         }
         
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
+        .feature-complete {
+            border-left: 4px solid #10b981;
+        }
+        
+        .feature-incomplete {
+            border-left: 4px solid #f59e0b;
         }
         
         /* Grid Layout */
         .features-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-            margin-top: 24px;
-        }
-        
-        /* Form Styles - SAMA SEPERTI FILE SEBELUMNYA */
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #111827;
-            margin-bottom: 8px;
-        }
-        
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            font-size: 14px;
-            background-color: #ffffff;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        /* Buttons - SAMA SEPERTI FILE SEBELUMNYA */
-        .btn {
-            padding: 10px 16px; /* 🔥 SAMA dengan file sebelumnya */
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-primary {
-            background-color: #111827;
-            color: #ffffff;
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f2937;
-        }
-        
-        .btn-outline {
-            background-color: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
-        }
-        
-        .btn-outline:hover {
-            background-color: #f9fafb;
-        }
-        
-        /* 🔥 PERBAIKAN: Navigation SAMA PERSIS dengan file sebelumnya */
-        .navigation {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        
-        /* Footer - SAMA SEPERTI FILE SEBELUMNYA */
-        footer {
-            background-color: #ffffff;
-            border-top: 1px solid #e5e7eb;
-            padding: 16px 24px;
-            margin-top: 48px;
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .footer-links {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        
-        .footer-link {
-            font-size: 12px;
-            color: #6b7280;
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            color: #374151;
+            gap: 16px;
+            margin-top: 20px;
         }
         
         /* Modal Styles */
@@ -258,7 +195,7 @@
         }
         
         .modal-header {
-            padding: 24px;
+            padding: 20px 24px;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
@@ -266,7 +203,7 @@
         }
         
         .modal-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             color: #111827;
         }
@@ -289,7 +226,6 @@
         
         .modal-close:hover {
             background-color: #f3f4f6;
-            color: #374151;
         }
         
         .modal-body {
@@ -299,25 +235,58 @@
         }
         
         .modal-footer {
-            padding: 20px 24px;
+            padding: 16px 24px;
             border-top: 1px solid #e5e7eb;
             display: flex;
             justify-content: flex-end;
             gap: 12px;
         }
         
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #111827;
+        }
+        
         /* Path Section Styles */
         .path-section {
-            margin-top: 24px;
+            margin-top: 20px;
             padding-top: 16px;
             border-top: 1px solid #e5e7eb;
         }
         
         .path-section-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #2563eb;
-            margin-bottom: 16px;
+            color: #111827;
+            margin-bottom: 12px;
         }
         
         .path-row {
@@ -345,56 +314,87 @@
             background: none;
             border: 1px dashed #d1d5db;
             color: #6b7280;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.2s;
-            margin-top: 12px;
+            margin-top: 8px;
         }
         
         .add-path-btn:hover {
-            border-color: #2563eb;
-            color: #2563eb;
+            border-color: #111827;
+            color: #111827;
         }
         
-        /* Loading Spinner - SAMA SEPERTI FILE SEBELUMNYA */
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #f3f4f6;
-            border-top: 2px solid #3b82f6;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 8px;
+            margin-right: 6px;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .status-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .delete-path-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            margin-top: 4px;
+        }
+        
+        .delete-path-btn:hover {
+            background-color: #fef2f2;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <!-- Header - SAMA SEPERTI FILE SEBELUMNYA -->
     <header>
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
-                </div>
-                <span class="logo-text">One UML</span>
+        <div class="logo">
+            <div class="logo-icon">
+                <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
             </div>
+            <span class="logo-text">One UML</span>
         </div>
     </header>
 
-    <!-- Main Content -->
     <main>
+        <div style="margin-bottom: 32px;">
+            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Additional Information</h1>
+            <p style="color: #6b7280; font-size: 14px;">Click cards below to complete Use Case details.</p>
+        </div>
+        
+        <!-- Status Info -->
+        <div id="statusInfo" class="status-info">
+            <span id="completedCount">0</span> of <span id="totalCount">0</span> use cases completed
+        </div>
+        
+        <!-- Features Grid -->
         <div class="card">
-            <div style="margin-bottom: 32px;">
-                <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Additional Information</h1>
-                <p style="color: #6b7280; font-size: 14px;">Click cards below to complete Use Case details.</p>
+            <div style="margin-bottom: 16px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #111827;">Use Cases</h3>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Click to add specifications</p>
             </div>
             
             <div id="featuresGrid" class="features-grid">
@@ -402,25 +402,24 @@
             </div>
         </div>
         
-        <!-- 🔥 PERBAIKAN: Navigation buttons SAMA PERSIS dengan file sebelumnya -->
+        <!-- Navigation -->
         <div class="navigation">
             <button class="btn btn-outline" id="backButton">
                 ← Back
             </button>
-            <button class="btn btn-primary" id="nextButton">
+            <button class="btn" id="nextButton" disabled>
                 Next →
             </button>
         </div>
     </main>
 
-    <!-- Footer - SAMA SEPERTI FILE SEBELUMNYA -->
     <footer>
-        <div class="footer-content">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
             <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Help</a>
-                <a href="#" class="footer-link">Privacy</a>
-                <a href="#" class="footer-link">Terms</a>
+            <div style="display: flex; gap: 24px;">
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
             </div>
         </div>
     </footer>
@@ -429,152 +428,166 @@
     <div id="modalContainer" class="modal-overlay"></div>
 
     <script>
-        // Data dari halaman sebelumnya (user_story.html)
-        let useCases = [];
-        let currentFeatureId = null;
+        // Data management
         let features = [];
+        let currentFeatureId = null;
         
-        // 🔥 FUNGSI BARU: Format data untuk fitur unik
-        function formatUseCasesForFeatures(useCasesData) {
-            console.log('Formatting use cases:', useCasesData);
+        // Load data from storage
+        function loadDataFromStorage() {
+            console.log('Loading data from storage...');
             
-            // Identifikasi fitur unik dan aktor yang menggunakannya
-            const uniqueFeatures = new Map();
-            
-            useCasesData.forEach(useCase => {
-                const featureKey = useCase.feature.trim().toLowerCase();
-                if (!uniqueFeatures.has(featureKey)) {
-                    uniqueFeatures.set(featureKey, {
-                        id: `feature-${uniqueFeatures.size + 1}`,
-                        name: useCase.feature,
-                        actors: new Set(),
-                        purpose: useCase.purpose || ''
-                    });
+            // Priority 1: Check localStorage for saved features
+            const savedFeatures = localStorage.getItem('useCaseDetails');
+            if (savedFeatures) {
+                try {
+                    features = JSON.parse(savedFeatures);
+                    console.log('✅ Loaded from localStorage:', features.length, 'features');
+                    return features;
+                } catch (e) {
+                    console.error('Error parsing localStorage:', e);
                 }
-                uniqueFeatures.get(featureKey).actors.add(useCase.actor);
-            });
+            }
             
-            // Konversi Map ke Array format features
-            const formattedFeatures = Array.from(uniqueFeatures.values()).map((feature, index) => {
-                const actorsArray = Array.from(feature.actors);
-                
-                return {
-                    id: feature.id,
-                    name: feature.name,
-                    description: feature.purpose,
-                    actors: actorsArray,
-                    summary: '',
-                    priority: 'Should Have',
-                    status: 'Active',
-                    precondition: '',
-                    postcondition: '',
-                    basicPath: [{ actor: '', system: '' }],
-                    alternativePath: [],
-                    exceptionPath: []
-                };
-            });
+            // Priority 2: Check Django data from backend
+            try {
+                // Check if there's data from Django in the HTML
+                const djangoDataElement = document.getElementById('djangoUseCaseData');
+                if (djangoDataElement && djangoDataElement.textContent) {
+                    const djangoData = JSON.parse(djangoDataElement.textContent);
+                    if (djangoData && djangoData.length > 0) {
+                        features = formatDjangoDataForFeatures(djangoData);
+                        console.log('✅ Loaded from Django data:', features.length, 'features');
+                        // Save to localStorage
+                        localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                        return features;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing Django data:', e);
+            }
             
-            console.log('Formatted features:', formattedFeatures);
-            return formattedFeatures;
-        }
-
-        // 🔥 FUNGSI DIPERBAIKI: Mengambil data dari user_story.html
-        function loadUseCasesFromPreviousPage() {
-            // 1. COBA ambil dari localStorage 'generatedUseCaseData' (disimpan oleh user_story.html)
+            // Priority 3: Check generatedUseCaseData from user-story
             const generatedData = localStorage.getItem('generatedUseCaseData');
             if (generatedData) {
                 try {
                     const data = JSON.parse(generatedData);
-                    console.log('✅ Loaded generatedUseCaseData:', data);
-                    
                     if (data.useCases && data.useCases.length > 0) {
-                        useCases = data.useCases;
-                        const formattedFeatures = formatUseCasesForFeatures(useCases);
-                        console.log('✅ Formatted features from generatedUseCaseData:', formattedFeatures);
-                        return formattedFeatures;
+                        features = formatUseCasesForFeatures(data.useCases);
+                        console.log('✅ Loaded from generatedData:', features.length, 'features');
+                        // Save to localStorage
+                        localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                        return features;
                     }
                 } catch (e) {
-                    console.error('❌ Error parsing generatedUseCaseData:', e);
+                    console.error('Error parsing generatedData:', e);
                 }
             }
             
-            // 2. COBA ambil dari localStorage 'useCaseDetails' (jika sudah pernah disimpan)
-            const savedDetails = localStorage.getItem('useCaseDetails');
-            if (savedDetails) {
-                try {
-                    const existingFeatures = JSON.parse(savedDetails);
-                    console.log('✅ Loaded existing useCaseDetails:', existingFeatures);
-                    return existingFeatures;
-                } catch (e) {
-                    console.error('❌ Error parsing useCaseDetails:', e);
-                }
-            }
-            
-            // 3. Fallback ke actorsAndFeatures (format lama)
-            const savedData = localStorage.getItem('actorsAndFeatures');
-            if (savedData) {
-                try {
-                    const actors = JSON.parse(savedData);
-                    console.log('✅ Loaded actorsAndFeatures:', actors);
-                    
-                    // Konversi data aktor ke format use case
-                    const tempUseCases = [];
-                    
-                    actors.forEach(actor => {
-                        if (actor.name && actor.name.trim() !== '') {
-                            actor.features.forEach(feature => {
-                                if (feature.what && feature.what.trim() !== '') {
-                                    tempUseCases.push({
-                                        actor: actor.name,
-                                        feature: feature.what,
-                                        purpose: feature.why || ''
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    
-                    useCases = tempUseCases;
-                    const formattedFeatures = formatUseCasesForFeatures(useCases);
-                    console.log('✅ Formatted features from actorsAndFeatures:', formattedFeatures);
-                    return formattedFeatures;
-                } catch (e) {
-                    console.error('❌ Error parsing actorsAndFeatures:', e);
-                }
-            }
-            
-            console.log('❌ No data found in localStorage');
+            console.log('❌ No data found');
             return [];
         }
-
+        
+        // Format Django data into features
+        function formatDjangoDataForFeatures(djangoData) {
+            if (!djangoData || !Array.isArray(djangoData)) {
+                return [];
+            }
+            
+            const uniqueFeatures = new Map();
+            
+            djangoData.forEach(item => {
+                if (!item || !item.name) return;
+                
+                const featureKey = item.name.trim().toLowerCase();
+                if (!uniqueFeatures.has(featureKey)) {
+                    uniqueFeatures.set(featureKey, {
+                        id: `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: item.name,
+                        summary: item.summary || '',
+                        priority: item.priority || 'Should Have',
+                        status: item.status || 'Active',
+                        precondition: item.precondition || '',
+                        postcondition: item.postcondition || '',
+                        basicPath: item.basicPath || [{ actor: '', system: '' }],
+                        alternativePath: item.alternativePath || [],
+                        exceptionPath: item.exceptionPath || [],
+                        actors: item.actors || []
+                    });
+                }
+            });
+            
+            return Array.from(uniqueFeatures.values());
+        }
+        
+        // Format use cases into features (for old format)
+        function formatUseCasesForFeatures(useCasesData) {
+            if (!useCasesData || !Array.isArray(useCasesData)) {
+                return [];
+            }
+            
+            const uniqueFeatures = new Map();
+            
+            useCasesData.forEach(useCase => {
+                if (!useCase || !useCase.feature) return;
+                
+                const featureKey = useCase.feature.trim().toLowerCase();
+                if (!uniqueFeatures.has(featureKey)) {
+                    uniqueFeatures.set(featureKey, {
+                        id: `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: useCase.feature,
+                        summary: useCase.purpose || '',
+                        priority: 'Should Have',
+                        status: 'Active',
+                        precondition: '',
+                        postcondition: '',
+                        basicPath: [{ actor: '', system: '' }],
+                        alternativePath: [],
+                        exceptionPath: [],
+                        actors: useCase.actor ? [useCase.actor] : []
+                    });
+                } else {
+                    // Add actor if not already in list
+                    if (useCase.actor && !uniqueFeatures.get(featureKey).actors.includes(useCase.actor)) {
+                        uniqueFeatures.get(featureKey).actors.push(useCase.actor);
+                    }
+                }
+            });
+            
+            return Array.from(uniqueFeatures.values());
+        }
+        
         // Render features grid
-        function renderFeaturesGrid(featuresArray) {
+        function renderFeaturesGrid() {
             const grid = document.getElementById('featuresGrid');
             
-            if (!featuresArray || featuresArray.length === 0) {
+            if (!features || features.length === 0) {
                 grid.innerHTML = `
-                    <div class="empty-state">
+                    <div class="empty-state" style="grid-column: 1 / -1;">
                         <i>📋</i>
-                        <p>No features available.</p>
-                        <p>Please go back and generate use cases first.</p>
+                        <p>No use cases found.</p>
+                        <p>Please go back and define actors and features first.</p>
                     </div>
                 `;
+                updateStatusInfo();
                 return;
             }
             
             grid.innerHTML = '';
             
-            featuresArray.forEach(feature => {
+            features.forEach(feature => {
+                const isComplete = checkIfFeatureComplete(feature);
+                
                 const featureCard = document.createElement('div');
-                featureCard.className = 'feature-card';
+                featureCard.className = `feature-card ${isComplete ? 'feature-complete' : 'feature-incomplete'}`;
                 featureCard.setAttribute('data-feature-id', feature.id);
                 
                 featureCard.innerHTML = `
-                    <div>
+                    <div style="flex: 1;">
                         <div class="feature-title">${feature.name}</div>
-                        <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
-                            ${feature.actors ? feature.actors.length : 0} actor${feature.actors && feature.actors.length > 1 ? 's' : ''}
-                            ${feature.description ? ' • ' + feature.description : ''}
+                        <div class="feature-info">
+                            ${feature.actors && feature.actors.length > 0 ? feature.actors.length + ' actor' + (feature.actors.length !== 1 ? 's' : '') + ' • ' : ''}
+                            ${feature.summary ? feature.summary.substring(0, 50) + '...' : 'No summary'}
+                            ${isComplete ? ' • ✅ Complete' : ' • ⚠️ Incomplete'}
                         </div>
                     </div>
                 `;
@@ -582,8 +595,47 @@
                 featureCard.addEventListener('click', () => openFeatureModal(feature.id));
                 grid.appendChild(featureCard);
             });
+            
+            updateStatusInfo();
         }
-
+        
+        // Check if a feature is complete
+        function checkIfFeatureComplete(feature) {
+            if (!feature) return false;
+            
+            // Check required fields
+            if (!feature.precondition || feature.precondition.trim() === '') return false;
+            if (!feature.postcondition || feature.postcondition.trim() === '') return false;
+            
+            // Basic path must have at least one valid step
+            if (!feature.basicPath || feature.basicPath.length === 0) return false;
+            const hasValidBasicStep = feature.basicPath.some(step => 
+                (step.actor && step.actor.trim() !== '') || 
+                (step.system && step.system.trim() !== '')
+            );
+            
+            return hasValidBasicStep;
+        }
+        
+        // Update status info
+        function updateStatusInfo() {
+            const totalCount = features.length;
+            const completedCount = features.filter(f => checkIfFeatureComplete(f)).length;
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('completedCount').textContent = completedCount;
+            
+            // Enable/disable next button
+            const nextButton = document.getElementById('nextButton');
+            if (totalCount > 0 && completedCount === totalCount) {
+                nextButton.disabled = false;
+                nextButton.style.backgroundColor = '#111827';
+            } else {
+                nextButton.disabled = true;
+                nextButton.style.backgroundColor = '#9ca3af';
+            }
+        }
+        
         // Open feature modal
         function openFeatureModal(featureId) {
             const feature = features.find(f => f.id === featureId);
@@ -596,10 +648,9 @@
             modalContainer.innerHTML = modalHTML;
             modalContainer.classList.add('active');
             
-            // Setup event listeners for the modal
             setupModalListeners();
         }
-
+        
         // Create modal HTML
         function createModalHTML(feature) {
             return `
@@ -614,10 +665,10 @@
                         
                         <div class="form-group">
                             <label class="form-label">Summary</label>
-                            <textarea class="form-textarea" id="summary" rows="2">${feature.summary || ''}</textarea>
+                            <textarea class="form-textarea" id="summary" rows="2" placeholder="Brief description of the use case...">${feature.summary || ''}</textarea>
                         </div>
                         
-                        <div style="display: flex; gap: 16px; margin-top: 20px;">
+                        <div style="display: flex; gap: 16px;">
                             <div style="flex: 1;">
                                 <label class="form-label">Priority</label>
                                 <select class="form-select" id="priority">
@@ -638,43 +689,70 @@
                         </div>
                         
                         <div class="form-group" style="margin-top: 20px;">
-                            <label class="form-label">Pre-Condition</label>
-                            <textarea class="form-textarea" id="precondition" rows="2">${feature.precondition || ''}</textarea>
+                            <label class="form-label">Pre-Condition <small style="color: #6b7280;">(Required)</small></label>
+                            <textarea class="form-textarea" id="precondition" rows="2" placeholder="What must be true before this use case starts...">${feature.precondition || ''}</textarea>
                         </div>
                         
                         <div class="form-group" style="margin-top: 20px;">
-                            <label class="form-label">Post-Condition</label>
-                            <textarea class="form-textarea" id="postcondition" rows="2">${feature.postcondition || ''}</textarea>
+                            <label class="form-label">Post-Condition <small style="color: #6b7280;">(Required)</small></label>
+                            <textarea class="form-textarea" id="postcondition" rows="2" placeholder="What will be true after this use case completes...">${feature.postcondition || ''}</textarea>
                         </div>
                         
-                        ${createPathSection('Basic Path', 'basic', feature.basicPath || [{ actor: '', system: '' }])}
-                        ${createPathSection('Alternative Path', 'alternative', feature.alternativePath || [])}
-                        ${createPathSection('Exception Path', 'exception', feature.exceptionPath || [])}
+                        ${createPathSection('Basic Path', 'basic', feature.basicPath || [{ actor: '', system: '' }], true)}
+                        ${createPathSection('Alternative Path', 'alternative', feature.alternativePath || [], false)}
+                        ${createPathSection('Exception Path', 'exception', feature.exceptionPath || [], false)}
                     </div>
                     
                     <div class="modal-footer">
                         <button class="btn btn-outline" id="cancelBtn">Cancel</button>
-                        <button class="btn btn-primary" id="saveBtn">Save Changes</button>
+                        <button class="btn" id="saveBtn">Save</button>
                     </div>
                 </div>
             `;
         }
-
+        
         // Create path section HTML
-        function createPathSection(title, type, paths) {
+        function createPathSection(title, type, paths, isRequired = false) {
             let pathRows = '';
             
             if (paths && paths.length > 0) {
-                paths.forEach(path => {
-                    pathRows += createPathRow(path.actor || '', path.system || '');
+                paths.forEach((path, index) => {
+                    pathRows += `
+                        <div class="path-row" data-index="${index}">
+                            <div class="path-column">
+                                <span class="path-label">Actor Action ${isRequired && index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                                <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does...">${path.actor || ''}</textarea>
+                            </div>
+                            <div class="path-column">
+                                <span class="path-label">System Response ${isRequired && index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                                <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds...">${path.system || ''}</textarea>
+                            </div>
+                            ${index > 0 ? `
+                            <div style="align-self: flex-end;">
+                                <button class="delete-path-btn" data-type="${type}" data-index="${index}">🗑️</button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    `;
                 });
             } else {
-                pathRows = createPathRow();
+                pathRows = `
+                    <div class="path-row" data-index="0">
+                        <div class="path-column">
+                            <span class="path-label">Actor Action ${isRequired ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                            <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does..."></textarea>
+                        </div>
+                        <div class="path-column">
+                            <span class="path-label">System Response ${isRequired ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                            <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds..."></textarea>
+                        </div>
+                    </div>
+                `;
             }
             
             return `
                 <div class="path-section">
-                    <div class="path-section-title">${title}</div>
+                    <div class="path-section-title">${title} ${isRequired ? '<small style="color: #6b7280;">(At least one step required)</small>' : ''}</div>
                     <div class="path-container" data-type="${type}">
                         ${pathRows}
                     </div>
@@ -685,23 +763,7 @@
                 </div>
             `;
         }
-
-        // Create a single path row
-        function createPathRow(actor = '', system = '') {
-            return `
-                <div class="path-row">
-                    <div class="path-column">
-                        <span class="path-label">Actor Action</span>
-                        <textarea class="form-textarea path-actor" rows="1" placeholder="What the actor does">${actor}</textarea>
-                    </div>
-                    <div class="path-column">
-                        <span class="path-label">System Response</span>
-                        <textarea class="form-textarea path-system" rows="1" placeholder="How the system responds">${system}</textarea>
-                    </div>
-                </div>
-            `;
-        }
-
+        
         // Setup modal event listeners
         function setupModalListeners() {
             // Close modal buttons
@@ -713,7 +775,42 @@
                 btn.addEventListener('click', (e) => {
                     const type = e.target.getAttribute('data-type');
                     const container = document.querySelector(`.path-container[data-type="${type}"]`);
-                    container.insertAdjacentHTML('beforeend', createPathRow());
+                    const rowCount = container.querySelectorAll('.path-row').length;
+                    
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="path-row" data-index="${rowCount}">
+                            <div class="path-column">
+                                <span class="path-label">Actor Action</span>
+                                <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does..."></textarea>
+                            </div>
+                            <div class="path-column">
+                                <span class="path-label">System Response</span>
+                                <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds..."></textarea>
+                            </div>
+                            <div style="align-self: flex-end;">
+                                <button class="delete-path-btn" data-type="${type}" data-index="${rowCount}">🗑️</button>
+                            </div>
+                        </div>
+                    `);
+                    
+                    // Add delete button listener for new row
+                    const newDeleteBtn = container.querySelector(`.delete-path-btn[data-index="${rowCount}"]`);
+                    if (newDeleteBtn) {
+                        newDeleteBtn.addEventListener('click', function() {
+                            const type = this.getAttribute('data-type');
+                            const index = parseInt(this.getAttribute('data-index'));
+                            deletePathRow(type, index);
+                        });
+                    }
+                });
+            });
+            
+            // Delete path buttons (for existing rows)
+            document.querySelectorAll('.delete-path-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deletePathRow(type, index);
                 });
             });
             
@@ -727,15 +824,33 @@
                 }
             });
         }
-
+        
+        // Delete a path row
+        function deletePathRow(type, index) {
+            const container = document.querySelector(`.path-container[data-type="${type}"]`);
+            const row = container.querySelector(`.path-row[data-index="${index}"]`);
+            if (row) {
+                row.remove();
+                
+                // Re-index remaining rows
+                const rows = container.querySelectorAll('.path-row');
+                rows.forEach((row, newIndex) => {
+                    row.setAttribute('data-index', newIndex);
+                    const deleteBtn = row.querySelector('.delete-path-btn');
+                    if (deleteBtn) {
+                        deleteBtn.setAttribute('data-index', newIndex);
+                    }
+                });
+            }
+        }
+        
         // Close modal
         function closeModal() {
             const modalContainer = document.getElementById('modalContainer');
             modalContainer.classList.remove('active');
             currentFeatureId = null;
         }
-
-        // Save feature data
+        
         // Save feature data
         async function saveFeature() {
             const featureId = document.getElementById('featureId').value;
@@ -753,13 +868,16 @@
             feature.precondition = document.getElementById('precondition').value.trim();
             feature.postcondition = document.getElementById('postcondition').value.trim();
             
-            // ✅ VALIDASI
+            // Validate required fields
             if (!feature.precondition) {
-                alert('⚠️ Pre-condition wajib diisi!');
+                alert('Please fill in the Pre-Condition field');
+                document.getElementById('precondition').focus();
                 return;
             }
+            
             if (!feature.postcondition) {
-                alert('⚠️ Post-condition wajib diisi!');
+                alert('Please fill in the Post-Condition field');
+                document.getElementById('postcondition').focus();
                 return;
             }
             
@@ -772,21 +890,24 @@
                 rows.forEach(row => {
                     const actor = row.querySelector('.path-actor').value.trim();
                     const system = row.querySelector('.path-system').value.trim();
-                    if (actor || system) {
-                        paths.push({ actor, system });
-                    }
+                    paths.push({ actor, system });
                 });
                 
-                feature[`${type}Path`] = paths.length > 0 ? paths : [];
+                feature[`${type}Path`] = paths;
             });
             
-            // ✅ VALIDASI basic path
-            if (!feature.basicPath || feature.basicPath.length === 0) {
-                alert('⚠️ Basic Path minimal 1 baris harus diisi!');
+            // Validate basic path has at least one valid step
+            const hasValidBasicStep = feature.basicPath.some(step => 
+                (step.actor && step.actor.trim() !== '') || 
+                (step.system && step.system.trim() !== '')
+            );
+            
+            if (!hasValidBasicStep) {
+                alert('Basic Path must have at least one step with Actor Action or System Response');
                 return;
             }
             
-            // ✅ Show loading
+            // Show loading
             const saveBtn = document.getElementById('saveBtn');
             const originalText = saveBtn.textContent;
             saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
@@ -795,80 +916,69 @@
             try {
                 // Save to localStorage
                 localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                console.log('✅ Saved to localStorage:', features);
                 
-                // ✅ Save to Django session
-                await saveToServer(feature);
+                // Also save to database via API if needed
+                await saveToDatabase(feature);
+                
+                // Update UI
+                renderFeaturesGrid();
                 
                 // Close modal
                 closeModal();
                 
-                // Show success message
-                alert('✅ Feature saved! You can now generate activity diagram.');
+                // Show success
+                setTimeout(() => {
+                    alert('✅ Feature saved successfully!');
+                }, 100);
                 
             } catch (error) {
-                alert('❌ Error saving: ' + error.message);
+                console.error('Error saving:', error);
+                alert('Error saving data: ' + error.message);
             } finally {
                 saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
             }
         }
-
-        // Save to Django server
-        // Save to Django server - UNTUK ACTIVITY DIAGRAM
-        async function saveToServer(feature) {
+        
+        // Save to database via API
+        async function saveToDatabase(feature) {
             try {
-                const csrfToken = getCsrfToken();
-                
-                // ✅ STRUKTUR DATA YANG BENAR (flat, tidak nested)git
-                const useCaseData = {
-                    featureName: feature.name,
-                    summary: feature.summary || '',
-                    priority: feature.priority || 'Must Have',
-                    status: feature.status || 'Active',
-                    precondition: feature.precondition || '',
-                    postcondition: feature.postcondition || '',
-                    basicPath: feature.basicPath || [],
-                    alternativePath: feature.alternativePath || [],
-                    exceptionPath: feature.exceptionPath || []
-                };
-                
-                // ✅ VALIDASI
-                if (!useCaseData.precondition || !useCaseData.postcondition) {
-                    console.warn('⚠️ Pre/Post condition kosong!');
-                }
-                
-                console.log('=== SAVING TO SESSION ===');
-                console.log(useCaseData);
-                console.log('========================');
-                
-                // ✅ SAVE KE DJANGO SESSION (untuk activity diagram)
-                const response = await fetch('/api/save-use-case/', {  // ✅ URL yang benar!
+                const response = await fetch('/save-usecase-spec/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
+                        'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify(useCaseData)  // ✅ Data flat (tidak nested)
+                    body: JSON.stringify({
+                        [feature.name]: {
+                            featureName: feature.name,
+                            summary: feature.summary,
+                            priority: feature.priority,
+                            status: feature.status,
+                            precondition: feature.precondition,
+                            postcondition: feature.postcondition,
+                            basicPath: feature.basicPath,
+                            alternativePath: feature.alternativePath,
+                            exceptionPath: feature.exceptionPath
+                        }
+                    })
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    console.log('✅ Saved to database:', result.message);
+                } else {
+                    console.warn('⚠️ Database save warning:', result.message);
                 }
-                
-                const data = await response.json();
-                console.log('✅ Saved to session:', data);
-                
-                return data;
-                
             } catch (error) {
-                console.error('❌ Error saving to server:', error);
-                throw error;  // Re-throw agar saveFeature bisa handle
+                console.error('❌ Database save error:', error);
+                // Don't throw error here - localStorage backup is sufficient
             }
         }
-
-        // Get CSRF token function
-        function getCsrfToken() {
-            const name = 'csrftoken';
+        
+        // Get CSRF token
+        function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
@@ -882,53 +992,89 @@
             }
             return cookieValue;
         }
-
+        
+        // Prepare data for next page
+        function prepareDataForNextPage() {
+            // Format features for use-case-spec page
+            const formattedFeatures = {};
+            features.forEach((feature, index) => {
+                formattedFeatures[`feature_${index}`] = {
+                    featureName: feature.name,
+                    summary: feature.summary || '',
+                    priority: feature.priority || 'Should Have',
+                    status: feature.status || 'Active',
+                    precondition: feature.precondition || '',
+                    postcondition: feature.postcondition || '',
+                    basicPath: feature.basicPath || [],
+                    alternativePath: feature.alternativePath || [],
+                    exceptionPath: feature.exceptionPath || []
+                };
+            });
+            return formattedFeatures;
+        }
+        
         // Initialize page
         document.addEventListener('DOMContentLoaded', () => {
-            // Load data from previous page (user_story.html)
-            features = loadUseCasesFromPreviousPage();
+            console.log('Page loaded');
             
-            if (features && features.length > 0) {
-                console.log('✅ Rendering features:', features);
-                renderFeaturesGrid(features);
-            } else {
-                console.log('❌ No features to render');
-                renderFeaturesGrid([]);
-            }
+            // Load data
+            features = loadDataFromStorage();
+            renderFeaturesGrid();
             
-            // 🔥 PERBAIKAN: Navigation buttons - BACK ke user_story.html dengan URL Django
+            // Event listeners
             document.getElementById('backButton').addEventListener('click', () => {
-                // Simpan data terlebih dahulu sebelum kembali
+                // Save data before leaving
                 if (features.length > 0) {
                     localStorage.setItem('useCaseDetails', JSON.stringify(features));
                 }
-                
-                // 🔥 PERUBAHAN PENTING: Kembali ke user_story.html di server Django
-                window.location.href = 'http://127.0.0.1:8000/user-story/';
+                window.location.href = '/use-case/';
             });
             
-            document.getElementById('nextButton').addEventListener('click', () => {
-                // Cek apakah ada features yang sudah diisi
-                const savedDetails = localStorage.getItem('useCaseDetails');
-                if (!savedDetails) {
-                    alert('Please fill in at least one feature detail before proceeding.');
+            document.getElementById('nextButton').addEventListener('click', async () => {
+                // Validate all features are complete
+                const incompleteFeatures = features.filter(f => !checkIfFeatureComplete(f));
+                
+                if (incompleteFeatures.length > 0) {
+                    const featureNames = incompleteFeatures.map(f => f.name).join(', ');
+                    alert(`Please complete all use cases before proceeding.\n\nIncomplete: ${featureNames}`);
                     return;
                 }
                 
+                // Show loading
+                const nextBtn = document.getElementById('nextButton');
+                const originalText = nextBtn.innerHTML;
+                nextBtn.innerHTML = '<span class="loading-spinner"></span>Preparing...';
+                nextBtn.disabled = true;
+                
                 try {
-                    const parsedDetails = JSON.parse(savedDetails);
-                    if (parsedDetails.length === 0) {
-                        alert('Please fill in at least one feature detail before proceeding.');
-                        return;
-                    }
+                    // Format data for next page
+                    const formattedData = prepareDataForNextPage();
                     
-                    // Beralih ke halaman berikutnya
-                    window.location.href = '/use-case-spec/';
-                } catch (e) {
-                    alert('Please fill in at least one feature detail before proceeding.');
+                    // Save to localStorage in the format expected by use-case-spec
+                    localStorage.setItem('formattedUseCaseDetails', JSON.stringify(formattedData));
+                    
+                    // Save to sessionStorage as backup
+                    sessionStorage.setItem('useCaseDetails', JSON.stringify(features));
+                    
+                    // Navigate to next page with data in URL
+                    const dataString = encodeURIComponent(JSON.stringify(features));
+                    window.location.href = `/use-case-spec/?data=${dataString}`;
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error preparing data: ' + error.message);
+                    
+                    // Restore button
+                    nextBtn.innerHTML = originalText;
+                    nextBtn.disabled = false;
                 }
             });
         });
     </script>
+    
+    <!-- Hidden element for Django data -->
+    {% if use_cases_json %}
+    <div id="djangoUseCaseData" style="display: none;">{{ use_cases_json }}</div>
+    {% endif %}
 </body>
 </html>

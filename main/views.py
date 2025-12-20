@@ -1,5 +1,5 @@
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import os
@@ -17,7 +17,6 @@ from .utils import save_parsed_sql_to_db
 from django.views.decorators.csrf import csrf_exempt
 import base64, requests, urllib.parse, binascii, json, subprocess
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponse
 from .forms import RegisterForm 
 from main.generators.sequence_generator import generate_sequence_plantuml, build_sequence_plantuml
 from django.conf import settings
@@ -29,6 +28,8 @@ from django.core.files.base import ContentFile
 from .models import GUI, UseCaseSpecification, BasicPath, AlternativePath, ExceptionPath
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import urllib.parse
 
 def home(request):
     if 'user_id' not in request.session:
@@ -473,47 +474,75 @@ def input_informasi_tambahan(request):
     return render(request, 'main/input_informasi_tambahan.html', context)
 
 def use_case_spec(request):
-    # 1. Ambil data Use Case Spec dari DATABASE
-    specs = UseCaseSpecification.objects.all().prefetch_related(
-        'basic_paths', 'alternative_paths', 'exception_paths'
-    )
-
-    # ✅ TAMBAHAN: Format data untuk dikirim ke template
-    all_features = []
-    for spec in specs:
-        feature_data = {
-            'featureName': spec.feature_name,
-            'summary': spec.summary_description,
-            'priority': spec.priority,
-            'status': spec.status,
-            'precondition': spec.input_precondition,
-            'postcondition': spec.input_postcondition,
-            'basicPath': [
-                {
-                    'actor': bp.actor_action,
-                    'system': bp.system_response
-                } for bp in spec.basic_paths.all().order_by('step_number')
-            ],
-            'alternativePath': [
-                {
-                    'actor': ap.actor_action,
-                    'system': ap.system_response
-                } for ap in spec.alternative_paths.all().order_by('step_number')
-            ],
-            'exceptionPath': [
-                {
-                    'actor': ep.actor_action,
-                    'system': ep.system_response
-                } for ep in spec.exception_paths.all().order_by('step_number')
-            ]
-        }
-        all_features.append(feature_data)
-
-    # 2. LOGIKA PINTAR: GET OR CREATE
+    # 1. Coba ambil data dari URL parameter (dari input_informasi_tambahan)
+    use_cases_data = []
+    
+    # Cek jika ada data di URL parameter
+    if 'data' in request.GET:
+        try:
+            data_param = request.GET.get('data')
+            # Decode URL parameter
+            decoded_data = urllib.parse.unquote(data_param)
+            use_cases_data = json.loads(decoded_data)
+            print(f"✅ Data loaded from URL parameter: {len(use_cases_data)} features")
+            
+            # Simpan ke session Django untuk digunakan di halaman berikutnya
+            request.session['useCaseDetails'] = use_cases_data
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON decode error from URL: {e}")
+        except Exception as e:
+            print(f"❌ Error parsing URL data: {e}")
+    
+    # 2. Jika tidak ada dari URL, coba dari session Django
+    if not use_cases_data:
+        use_cases_data = request.session.get('useCaseDetails', [])
+        if use_cases_data:
+            print(f"✅ Data loaded from session: {len(use_cases_data)} features")
+    
+    # 3. Jika masih kosong, ambil dari database (fallback)
+    if not use_cases_data:
+        specs = UseCaseSpecification.objects.all().prefetch_related(
+            'basic_paths', 'alternative_paths', 'exception_paths'
+        )
+        
+        use_cases_data = []
+        for spec in specs:
+            use_cases_data.append({
+                'featureName': spec.feature_name,
+                'summary': spec.summary_description or '',
+                'priority': spec.priority or 'Should Have',
+                'status': spec.status or 'Active',
+                'precondition': spec.input_precondition or '',
+                'postcondition': spec.input_postcondition or '',
+                'basicPath': [
+                    {
+                        'actor': bp.actor_action or '',
+                        'system': bp.system_response or ''
+                    } for bp in spec.basic_paths.all().order_by('step_number')
+                ],
+                'alternativePath': [
+                    {
+                        'actor': ap.actor_action or '',
+                        'system': ap.system_response or ''
+                    } for ap in spec.alternative_paths.all().order_by('step_number')
+                ],
+                'exceptionPath': [
+                    {
+                        'actor': ep.actor_action or '',
+                        'system': ep.system_response or ''
+                    } for ep in spec.exception_paths.all().order_by('step_number')
+                ]
+            })
+        print(f"✅ Data loaded from database: {len(use_cases_data)} features")
+    
+    # 4. Get or create GUI untuk tombol Next
     current_user = Pengguna.objects.first()
     if not current_user:
         current_user = Pengguna.objects.create(
-            id_user="U001", nama_user="Admin", email_user="admin@oneuml.com", password="123"
+            id_user="U001", 
+            nama_user="Admin", 
+            email_user="admin@oneuml.com", 
+            password="123"
         )
 
     current_project, _ = Project.objects.get_or_create(
@@ -533,79 +562,97 @@ def use_case_spec(request):
         }
     )
 
-    # 3. ✅ Kirim data ke HTML (PENTING!)
+    # 5. Kirim data ke template
     context = {
-        'specs': specs,
+        'specs': [],  # Kosongkan specs karena kita pakai data dari JS
         'gui': current_gui,
-        'all_features': json.dumps(all_features)  # ✅ TAMBAHKAN INI!
+        'all_features': json.dumps(use_cases_data) if use_cases_data else '[]'
     }
     return render(request, 'main/use_case_spec.html', context)
 
 @csrf_exempt
-def save_usecase_spec(request):
+def save_usecase_spec_to_db(request):
+    """API endpoint untuk menyimpan data dari frontend ke database"""
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            
-            # Kita perlu hapus data lama dulu biar gak duplikat (Opsional, tapi aman)
-            # UseCaseSpecification.objects.all().delete() 
+            print(f"📥 Received data to save: {len(data)} features")
             
             saved_count = 0
-
+            
+            # Hapus data lama jika diperlukan
+            # UseCaseSpecification.objects.all().delete()
+            
             # Loop setiap fitur yang dikirim dari Frontend
             for key, item in data.items():
                 
                 # 1. SIMPAN BAPAKNYA (UseCaseSpecification)
-                spec = UseCaseSpecification.objects.create(
+                spec, created = UseCaseSpecification.objects.update_or_create(
                     feature_name=item.get('featureName', 'No Name'),
-                    summary_description=item.get('summary', ''),
-                    priority=item.get('priority', 'Must Have'),
-                    status=item.get('status', 'Active'),
-                    input_precondition=item.get('precondition', ''),
-                    input_postcondition=item.get('postcondition', ''),
-                    # gui=current_gui (Kalau mau disambungin ke GUI, buka komen ini)
+                    defaults={
+                        'summary_description': item.get('summary', ''),
+                        'priority': item.get('priority', 'Must Have'),
+                        'status': item.get('status', 'Active'),
+                        'input_precondition': item.get('precondition', ''),
+                        'input_postcondition': item.get('postcondition', ''),
+                    }
                 )
 
-                # 2. SIMPAN ANAK PERTAMA: Basic Path
-                # Ambil list 'basicPath' dari JSON
+                # 2. Hapus path lama
+                spec.basic_paths.all().delete()
+                spec.alternative_paths.all().delete()
+                spec.exception_paths.all().delete()
+                
+                # 3. SIMPAN Basic Path
                 basic_paths = item.get('basicPath', []) 
                 for index, path in enumerate(basic_paths, start=1):
-                    BasicPath.objects.create(
-                        usecase_spec=spec,       # <--- Sambungkan ke Bapaknya
-                        step_number=index,       # Urutan langkah
-                        actor_action=path.get('actor', ''),
-                        system_response=path.get('system', '')
-                    )
+                    if path.get('actor') or path.get('system'):
+                        BasicPath.objects.create(
+                            usecase_spec=spec,
+                            step_number=index,
+                            actor_action=path.get('actor', ''),
+                            system_response=path.get('system', '')
+                        )
 
-                # 3. SIMPAN ANAK KEDUA: Alternative Path
+                # 4. SIMPAN Alternative Path
                 alt_paths = item.get('alternativePath', [])
                 for index, path in enumerate(alt_paths, start=1):
-                    AlternativePath.objects.create(
-                        usecase_spec=spec,
-                        step_number=index,
-                        actor_action=path.get('actor', ''),
-                        system_response=path.get('system', '')
-                    )
+                    if path.get('actor') or path.get('system'):
+                        AlternativePath.objects.create(
+                            usecase_spec=spec,
+                            step_number=index,
+                            actor_action=path.get('actor', ''),
+                            system_response=path.get('system', '')
+                        )
 
-                # 4. SIMPAN ANAK KETIGA: Exception Path
+                # 5. SIMPAN Exception Path
                 exc_paths = item.get('exceptionPath', [])
                 for index, path in enumerate(exc_paths, start=1):
-                    ExceptionPath.objects.create(
-                        usecase_spec=spec,
-                        step_number=index,
-                        actor_action=path.get('actor', ''),
-                        system_response=path.get('system', '')
-                    )
+                    if path.get('actor') or path.get('system'):
+                        ExceptionPath.objects.create(
+                            usecase_spec=spec,
+                            step_number=index,
+                            actor_action=path.get('actor', ''),
+                            system_response=path.get('system', '')
+                        )
                 
                 saved_count += 1
 
-            return JsonResponse({'status': 'success', 'message': f'Berhasil simpan {saved_count} fitur!'})
+            return JsonResponse({
+                'status': 'success', 
+                'message': f'Berhasil simpan {saved_count} fitur ke database!'
+            })
 
         except Exception as e:
-            print(f"❌ Error saat save: {e}") # Print error di terminal biar ketahuan
+            print(f"❌ Error saat save: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def save_usecase_spec(request):
+    """Legacy function - redirect to new function"""
+    return save_usecase_spec_to_db(request)
 
 def input_gui(request):
     return render(request, 'main/input_gui.html')
@@ -886,8 +933,12 @@ def project_new(request):
         user_id = request.session['user_id']
         pengguna = get_object_or_404(Pengguna, id_user=user_id)
 
+        # Generate project ID
+        project_count = Project.objects.count() + 1
+        project_id = f"P{str(project_count).zfill(3)}"
+        
         Project.objects.create(
-            id_project=newpad,
+            id_project=project_id,
             nama_project=name,
             deskripsi=desc,
             pengguna=pengguna,
@@ -901,7 +952,7 @@ def project_new(request):
 
 def project_detail(request, id_project):
     # Ambil data project berdasarkan id
-    project = get_object_or_404(Project, id_project=project)
+    project = get_object_or_404(Project, id_project=id_project)
     
     # Kirim data ke template HTML
     return render(request, 'main/project_detail.html', {'project': project})
@@ -940,9 +991,23 @@ def activity_diagram(request):
     """
     Halaman untuk menampilkan dan generate activity diagram
     """
-    all_features = request.session.get('all_use_case_data', [])
-
-    print(f"=== ACTIVITY DIAGRAM: {len(all_features)} FEATURES ===")
+    # Coba ambil data dari berbagai sumber
+    all_features = []
+    
+    # 1. Coba dari session Django
+    if 'all_use_case_data' in request.session:
+        all_features = request.session.get('all_use_case_data', [])
+        print(f"✅ Activity Diagram: Loaded {len(all_features)} features from session")
+    
+    # 2. Jika kosong, coba dari useCaseDetails session
+    if not all_features:
+        all_features = request.session.get('useCaseDetails', [])
+        if all_features:
+            print(f"✅ Activity Diagram: Loaded {len(all_features)} features from useCaseDetails")
+    
+    # 3. Jika masih kosong, beri pesan
+    if not all_features:
+        print("⚠️ Activity Diagram: No data found in session")
     
     context = {
         'page_title': 'Generated Activity Diagram',
@@ -1022,18 +1087,19 @@ def create_plantuml_from_usecase(data):
     
     return plantuml
 
+@csrf_exempt
 def download_plantuml(request):
     if request.method == "POST":
         try:
-                data = json.loads(request.body)
-                plantuml_code = data.get('plantuml', '')
-                response = HttpResponse(plantuml_code, content_type='text/plain')
-                response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
-                return response
+            data = json.loads(request.body)
+            plantuml_code = data.get('plantuml', '')
+            response = HttpResponse(plantuml_code, content_type='text/plain')
+            response['Content-Disposition'] = 'attachment; filename="activity_diagram.puml"'
+            return response
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
-        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
     
+    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
 @require_http_methods(["POST"])
 def save_gui(request, gui_id):
@@ -1083,7 +1149,7 @@ def save_gui(request, gui_id):
     except json.JSONDecodeError:
         return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
     except Exception as e:
-        print(f"Error saving GUI: {e}") # Cek terminal jika masih error
+        print(f"Error saving GUI: {e}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_gui(request, gui_id=None, project_id=None):
@@ -1135,7 +1201,7 @@ def input_gui(request, gui_id=None, project_id=None):
 def reset_usecase_data(request):
     # Hapus semua data Use Case Specification
     UseCaseSpecification.objects.all().delete()
-    return redirect('main:input_informasi_tambahan') # Atau redirect ke halaman input fitur
+    return redirect('main:input_informasi_tambahan')
 
 def scenario_result(request):
     # ✅ GANTI: testscenario_set__teststep_set → scenarios__steps
