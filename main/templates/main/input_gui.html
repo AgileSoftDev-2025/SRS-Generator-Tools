@@ -236,6 +236,35 @@ input:focus, select:focus, textarea:focus {
     color: #9ca3af;
     margin-top: 4px;
 }
+
+/* SQL Data Status */
+.sql-status {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    display: none;
+}
+
+.sql-status.visible {
+    display: block;
+}
+
+.sql-status h3 {
+    font-size: 16px;
+    color: #0369a1;
+    margin-bottom: 8px;
+}
+
+.sql-status ul {
+    margin-left: 20px;
+    color: #475569;
+}
+
+.sql-status li {
+    margin-bottom: 4px;
+}
 </style>
 </head>
 <body>
@@ -243,6 +272,13 @@ input:focus, select:focus, textarea:focus {
         {% csrf_token %}
         <h1>INPUT GUI</h1>
         <p class="subtitle">List all pages and describe their input elements.</p>
+
+        <!-- SQL Data Status -->
+        <div class="sql-status" id="sqlStatus">
+            <h3>📊 SQL Data Detected</h3>
+            <p>Database schema will be used for class diagram generation:</p>
+            <div id="sqlDataInfo"></div>
+        </div>
 
         <div class="page-card">
             <div class="page-header">
@@ -259,11 +295,11 @@ input:focus, select:focus, textarea:focus {
                     <input type="text" placeholder="Element name..." />
                     <select>
                        <option value="">Type</option>
-        <option value="button">Button</option>
-        <option value="text">Text</option>
-        <option value="date">Date</option>
-        <option value="checkbox">Checkbox</option>
-        <option value="radio">Radio Button</option>
+                        <option value="button">Button</option>
+                        <option value="text">Text</option>
+                        <option value="date">Date</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="radio">Radio Button</option>
                     </select>
                 </div>
 
@@ -291,37 +327,96 @@ input:focus, select:focus, textarea:focus {
     }
 
     function saveData(guiId) {
-    const pages = [];
-    document.querySelectorAll('.page-card').forEach((card) => {
-        const pageName = card.querySelector('.page-name-input').value;
-        const elements = [];
-        card.querySelectorAll('.element-row').forEach((el) => {
-            const name = el.querySelector('input').value;
-            const type = el.querySelector('select').value;
-            elements.push({ name, type });
+        const pages = [];
+        document.querySelectorAll('.page-card').forEach((card) => {
+            const pageName = card.querySelector('.page-name-input').value;
+            const elements = [];
+            card.querySelectorAll('.element-row').forEach((el) => {
+                const name = el.querySelector('input').value;
+                const type = el.querySelector('select').value;
+                elements.push({ name, type });
+            });
+            pages.push({ name: pageName, elements });
         });
-        pages.push({ name: pageName, elements });
-    });
 
-    // TAMBAHKAN 'return' di depan fetch
-    return fetch(`/api/save_gui/${guiId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-        },
-        body: JSON.stringify(pages)
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log('Saved:', data);
-        return data; // Kembalikan data agar bisa dicek sukses/tidaknya
-    })
-    .catch(err => {
-        console.error('Error:', err);
-        throw err;
-    });
-}
+        return fetch(`/api/save_gui/${guiId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify(pages)
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('GUI Saved:', data);
+            return data;
+        })
+        .catch(err => {
+            console.error('Error saving GUI:', err);
+            throw err;
+        });
+    }
+
+    // FUNGSI BARU: Simpan data SQL ke backend
+    function saveSQLData() {
+        // Cek apakah ada data SQL di localStorage
+        const sqlData = localStorage.getItem('sqlData');
+        if (!sqlData) {
+            console.log('No SQL data found in localStorage');
+            return Promise.resolve({ status: 'no_data' });
+        }
+
+        console.log('Saving SQL data to backend...');
+        
+        return fetch('/api/save_sql_data/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: sqlData
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log('SQL Data saved to backend:', data);
+            return data;
+        })
+        .catch(err => {
+            console.error('Error saving SQL data:', err);
+            return { status: 'error', message: err.message };
+        });
+    }
+
+    // FUNGSI BARU: Tampilkan info SQL data
+    function displaySQLDataInfo() {
+        const sqlData = localStorage.getItem('sqlData');
+        const sqlStatus = document.getElementById('sqlStatus');
+        const sqlDataInfo = document.getElementById('sqlDataInfo');
+        
+        if (sqlData) {
+            try {
+                const parsedData = JSON.parse(sqlData);
+                const tableCount = parsedData.tables ? parsedData.tables.length : 0;
+                const relationshipCount = parsedData.relationships ? parsedData.relationships.length : 0;
+                
+                sqlDataInfo.innerHTML = `
+                    <ul>
+                        <li><strong>${tableCount} tables</strong> detected</li>
+                        <li><strong>${relationshipCount} relationships</strong> found</li>
+                        <li>Class diagram will be generated automatically</li>
+                    </ul>
+                `;
+                sqlStatus.classList.add('visible');
+            } catch (e) {
+                console.error('Error parsing SQL data:', e);
+                sqlStatus.style.display = 'none';
+            }
+        } else {
+            sqlStatus.style.display = 'none';
+        }
+    }
+
     function togglePage(btn) {
         // Tidak digunakan
     }
@@ -388,38 +483,91 @@ input:focus, select:focus, textarea:focus {
         const nextBtn = document.querySelector('.nav-btn.next');
         const backBtn = document.querySelector('.nav-btn.back');
 
-       nextBtn.addEventListener('click', async (e) => {
+        // Tampilkan info SQL data jika ada
+        displaySQLDataInfo();
+
+        // Event listener untuk NEXT button
+        nextBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             
             try {
-                nextBtn.innerText = "Saving..."; // Kasih tanda ke user kalau lagi proses
+                // Ubah teks button menjadi "Saving..."
+                nextBtn.innerText = "Saving...";
                 nextBtn.style.opacity = "0.5";
+                nextBtn.style.cursor = "not-allowed";
 
-                // TUNGGU sampai proses simpan benar-benar selesai
-                const result = await saveData(guiId);
+                // 1. Simpan data GUI ke database
+                console.log('Saving GUI data...');
+                const guiResult = await saveData(guiId);
 
-                if (result.status === 'success') {
-                    // Kalau sukses, baru pindah halaman
-                    window.location.href = nextBtn.href;
-                } else {
-                    alert("Gagal menyimpan: " + result.message);
-                    nextBtn.innerText = "NEXT >";
-                    nextBtn.style.opacity = "1";
+                if (guiResult.status !== 'success') {
+                    alert("Failed to save GUI data: " + guiResult.message);
+                    resetNextButton();
+                    return;
                 }
+
+                // 2. Simpan data SQL ke backend (jika ada)
+                console.log('Saving SQL data...');
+                const sqlResult = await saveSQLData();
+
+                // 3. Lanjutkan ke halaman berikutnya
+                console.log('Proceeding to next page...');
+                window.location.href = nextBtn.href;
+
             } catch (error) {
+                console.error('Error during save process:', error);
                 alert("Terjadi kesalahan koneksi atau database locked.");
-                nextBtn.innerText = "NEXT >";
-                nextBtn.style.opacity = "1";
+                resetNextButton();
             }
         });
 
+        // Event listener untuk BACK button
         backBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            saveData(guiId);
-            setTimeout(() => {
-                window.location.href = backBtn.href;
-            }, 500);
+            
+            // Simpan data sebelum kembali
+            saveData(guiId)
+                .then(() => {
+                    window.location.href = backBtn.href;
+                })
+                .catch(err => {
+                    console.error('Error saving before back:', err);
+                    window.location.href = backBtn.href;
+                });
         });
+
+        // Fungsi untuk reset button NEXT
+        function resetNextButton() {
+            nextBtn.innerText = "NEXT >";
+            nextBtn.style.opacity = "1";
+            nextBtn.style.cursor = "pointer";
+        }
+
+        // Simpan data secara otomatis sebelum user meninggalkan halaman
+        window.addEventListener('beforeunload', function (e) {
+            // Hanya trigger jika user mengedit data
+            const hasUnsavedChanges = checkForUnsavedChanges();
+            if (hasUnsavedChanges) {
+                // Notifikasi browser untuk konfirmasi
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                
+                // Coba simpan secara otomatis
+                saveData(guiId).catch(console.error);
+            }
+        });
+
+        // Fungsi untuk cek perubahan yang belum disimpan
+        function checkForUnsavedChanges() {
+            // Cek apakah ada input yang sudah diisi
+            const inputs = document.querySelectorAll('.page-name-input, .element-row input');
+            for (let input of inputs) {
+                if (input.value.trim() !== '') {
+                    return true;
+                }
+            }
+            return false;
+        }
     });
 </script>
 

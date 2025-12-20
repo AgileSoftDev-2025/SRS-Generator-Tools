@@ -376,7 +376,7 @@ def generate_usecase_diagram(request):
         if not current_gui:
             return JsonResponse({'status': 'error', 'message': 'GUI not found'}, status=404)
 
-        # 2. Ambil User Stories (Bahan Bakunya)
+        # 2. Ambil User Stories (Bahan Bakarnya)
         stories = UserStory.objects.filter(gui=current_gui)
         if not stories.exists():
             return JsonResponse({'status': 'error', 'message': 'Belum ada User Story! Input dulu.'}, status=400)
@@ -535,37 +535,12 @@ def use_case_spec(request):
             })
         print(f"✅ Data loaded from database: {len(use_cases_data)} features")
     
-    # 4. Get or create GUI untuk tombol Next
-    current_user = Pengguna.objects.first()
-    if not current_user:
-        current_user = Pengguna.objects.create(
-            id_user="U001", 
-            nama_user="Admin", 
-            email_user="admin@oneuml.com", 
-            password="123"
-        )
-
-    current_project, _ = Project.objects.get_or_create(
-        id_project="P001",
-        defaults={
-            'nama_project': "Project Skripsi",
-            'deskripsi': "Auto Generated",
-            'pengguna': current_user
-        }
-    )
-
-    current_gui, _ = GUI.objects.get_or_create(
-        id_gui="G001",
-        defaults={
-            'project': current_project,
-            'nama_atribut': "Home Screen"
-        }
-    )
-
+    # 4. PERBAIKAN: Hapus bagian get_or_create Project & GUI yang bermasalah
+    # Halaman use_case_spec.html hanya butuh data untuk ditampilkan, tidak perlu menyimpan ke DB
+    
     # 5. Kirim data ke template
     context = {
         'specs': [],  # Kosongkan specs karena kita pakai data dari JS
-        'gui': current_gui,
         'all_features': json.dumps(use_cases_data) if use_cases_data else '[]'
     }
     return render(request, 'main/use_case_spec.html', context)
@@ -653,9 +628,6 @@ def save_usecase_spec_to_db(request):
 def save_usecase_spec(request):
     """Legacy function - redirect to new function"""
     return save_usecase_spec_to_db(request)
-
-def input_gui(request):
-    return render(request, 'main/input_gui.html')
 
 def get_latest_userstory(request):
     try:
@@ -1152,52 +1124,177 @@ def save_gui(request, gui_id):
         print(f"Error saving GUI: {e}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-def input_gui(request, gui_id=None, project_id=None):
-    if gui_id is None:
-        # --- LOGIKA PEMBUATAN PROJECT OTOMATIS (JIKA KOSONG) ---
-        if not project_id:
-            project = Project.objects.first()
-            
-            if not project:
-                # 1. Cek User dulu (Project butuh Pengguna)
-                pengguna = Pengguna.objects.first()
-                if not pengguna:
-                    # Buat user dummy jika tabel Pengguna kosong
-                    pengguna = Pengguna.objects.create(
-                        id_user="U01", 
-                        nama_user="Admin Dev",
-                        email_user="admin@dev.com",
-                        password="password123"
-                    )
-
-                # 2. Buat Project (Perbaiki 'name' jadi 'nama_project' & isi field wajib lain)
-                project = Project.objects.create(
-                    id_project="P01",                # Wajib diisi manual (CharField PK)
-                    nama_project="Default Project",  # Ganti 'name' jadi 'nama_project'
-                    deskripsi="Auto generated",
-                    pengguna=pengguna                # Wajib ada usernya
-                )
-            
-            # Gunakan 'id_project' bukan 'id'
-            project_id = project.id_project 
-
-        # --- LOGIKA PEMBUATAN GUI BARU ---
-        # Generate ID GUI manual (misal: G01, G02, dst)
-        jumlah_gui = GUI.objects.count() + 1
-        new_gui_id = f"G{str(jumlah_gui).zfill(2)}" # Hasil: G01, G02...
-
-        gui = GUI.objects.create(
-            id_gui=new_gui_id,          # Wajib diisi manual
-            project_id=project_id,
-            nama_atribut="GUI Default"  # Wajib diisi (lihat models.py)
-        )
-        
-        # Redirect menggunakan id_gui yang baru dibuat
-        return redirect('main:input_gui_with_id', gui_id=gui.id_gui)
+# =================== PERBAIKAN UTAMA: FUNGSI input_gui ===================
+def input_gui(request, gui_id=None):
+    """
+    SOLUSI DARURAT: Skip semua logika pembuatan GUI yang kompleks
+    Cari GUI yang sudah ada atau buat yang sederhana TANPA project relation
+    """
     
-    gui = get_object_or_404(GUI, pk=gui_id)
-    return render(request, 'main/input_gui.html', {'gui': gui})
+    print(f"DEBUG input_gui: gui_id={gui_id}, request.path={request.path}")
+    
+    # Jika ada parameter gui_id, coba tampilkan
+    if gui_id:
+        try:
+            # Coba dengan id_gui (CharField) dulu
+            gui = get_object_or_404(GUI, id_gui=gui_id)
+            print(f"DEBUG: Found GUI by id_gui: {gui.id_gui}")
+            return render(request, 'main/input_gui.html', {'gui': gui})
+        except (ValueError, GUI.DoesNotExist):
+            try:
+                # Jika error, coba dengan pk (IntegerField)
+                gui = get_object_or_404(GUI, pk=gui_id)
+                print(f"DEBUG: Found GUI by pk: {gui.id_gui}")
+                return render(request, 'main/input_gui.html', {'gui': gui})
+            except:
+                pass
+    
+    # Jika tidak ada gui_id atau tidak ditemukan, cari GUI pertama yang ada
+    print("DEBUG: No gui_id provided or not found, searching for existing GUI...")
+    
+    gui = GUI.objects.first()
+    if gui:
+        print(f"DEBUG: Found existing GUI: {gui.id_gui}")
+        # Tampilkan GUI yang sudah ada
+        return render(request, 'main/input_gui.html', {'gui': gui})
+    
+    # Jika benar-benar tidak ada GUI sama sekali, buat yang sederhana
+    # TANPA project relation untuk menghindari error
+    print("DEBUG: No GUI found, creating emergency GUI...")
+    
+    try:
+        # PERBAIKAN UTAMA: Buat GUI tanpa field yang bermasalah
+        # Cek field apa yang ada di model GUI
+        from django.db import models
+        field_names = [f.name for f in GUI._meta.get_fields()]
+        print(f"DEBUG: GUI model fields: {field_names}")
+        
+        # Buat data dasar
+        gui_data = {
+            'id_gui': "G01",
+            'nama_atribut': "Default GUI"
+        }
+        
+        # Coba identifikasi field project/id_project
+        if 'project' in field_names:
+            field = GUI._meta.get_field('project')
+            if isinstance(field, models.ForeignKey):
+                # Ini ForeignKey, coba cari project
+                project = Project.objects.first()
+                if project:
+                    gui_data['project'] = project
+                    print(f"DEBUG: Adding project ForeignKey: {project.id_project}")
+                else:
+                    # Skip jika tidak ada project
+                    print("DEBUG: No project found, skipping project field")
+        
+        elif 'id_project' in field_names:
+            field = GUI._meta.get_field('id_project')
+            if isinstance(field, models.ForeignKey):
+                # Ini ForeignKey, coba cari project
+                project = Project.objects.first()
+                if project:
+                    gui_data['id_project'] = project
+                    print(f"DEBUG: Adding id_project ForeignKey: {project.id_project}")
+                else:
+                    # Skip jika tidak ada project
+                    print("DEBUG: No project found, skipping id_project field")
+            else:
+                # Ini CharField, bisa isi string
+                gui_data['id_project'] = "P001"
+                print("DEBUG: Adding id_project as string: P001")
+        
+        # Coba buat GUI
+        gui = GUI.objects.create(**gui_data)
+        print(f"DEBUG: Successfully created GUI: {gui.id_gui}")
+        
+        return render(request, 'main/input_gui.html', {'gui': gui})
+        
+    except Exception as e:
+        print(f"❌ ERROR creating GUI: {e}")
+        
+        # SOLUSI DARURAT TERAKHIR: Coba buat dengan hanya field wajib
+        try:
+            # Coba buat dengan field minimal
+            gui = GUI.objects.create(
+                id_gui="G01",
+                nama_atribut="Emergency GUI"
+                # Tidak menyertakan field lain yang mungkin bermasalah
+            )
+            print(f"DEBUG: Created emergency GUI: {gui.id_gui}")
+            return render(request, 'main/input_gui.html', {'gui': gui})
+        except Exception as e2:
+            print(f"❌ CRITICAL ERROR: {e2}")
+            
+            # Tampilkan error page
+            return render(request, 'main/error.html', {
+                'error_message': f"Failed to create GUI: {str(e2)}. Please check your database structure.",
+                'title': 'GUI Creation Error'
+            })
 
+# =================== API ENDPOINTS BARU ===================
+@csrf_exempt
+def get_existing_gui(request):
+    """API untuk mendapatkan GUI yang sudah ada"""
+    gui = GUI.objects.first()
+    if gui:
+        return JsonResponse({
+            'status': 'success',
+            'gui_id': gui.id_gui,
+            'gui_name': gui.nama_atribut
+        })
+    else:
+        return JsonResponse({
+            'status': 'not_found',
+            'message': 'No GUI found'
+        })
+
+@csrf_exempt
+def create_new_gui(request):
+    """API untuk membuat GUI baru dengan cara yang aman"""
+    try:
+        # Generate ID GUI
+        jumlah_gui = GUI.objects.count() + 1
+        new_gui_id = f"G{str(jumlah_gui).zfill(2)}"
+        
+        # Buat data minimal
+        gui_data = {
+            'id_gui': new_gui_id,
+            'nama_atribut': f"GUI {new_gui_id}"
+        }
+        
+        # Cek field model
+        field_names = [f.name for f in GUI._meta.get_fields()]
+        
+        # Coba tambahkan project jika field ada dan tidak bermasalah
+        if 'id_project' in field_names:
+            field = GUI._meta.get_field('id_project')
+            from django.db import models
+            if isinstance(field, models.ForeignKey):
+                # Cari project pertama
+                project = Project.objects.first()
+                if project:
+                    gui_data['id_project'] = project
+            else:
+                # Jika CharField
+                gui_data['id_project'] = "P001"
+        
+        # Buat GUI
+        gui = GUI.objects.create(**gui_data)
+        
+        return JsonResponse({
+            'status': 'success',
+            'gui_id': gui.id_gui,
+            'message': f'GUI {gui.id_gui} created successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+# =================== FUNGSI LAINNYA ===================
 def reset_usecase_data(request):
     # Hapus semua data Use Case Specification
     UseCaseSpecification.objects.all().delete()

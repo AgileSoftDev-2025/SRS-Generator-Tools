@@ -30,6 +30,7 @@
     h2 {
         font-size: 28px;
         font-weight: 700;
+        color: #111827;
     }
     .note {
         font-size: 15px;
@@ -56,7 +57,7 @@
         justify-content: space-between;
         margin-bottom: 50px;
     }
-    button, a {
+    button, a.nav-btn {
         padding: 12px 35px;
         border-radius: 7px;
         border: none;
@@ -65,10 +66,152 @@
         color: white;
         background: #000;
         text-decoration: none;
+        font-weight: 500;
     }
     .back {
         background: #D5DCE6;
         color: #1b1c20;
+    }
+    .next {
+        background: #2563eb;
+    }
+    
+    /* Diagram Controls */
+    .diagram-controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 25px 0;
+        flex-wrap: wrap;
+    }
+    
+    .control-btn {
+        padding: 10px 20px;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #4b5563;
+        transition: all 0.2s;
+    }
+    
+    .control-btn:hover {
+        background: #e5e7eb;
+    }
+    
+    .control-btn.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+    
+    /* Loading Animation */
+    .loading {
+        border: 3px solid #f3f4f6;
+        border-top: 3px solid #2563eb;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Code Section */
+    .code-section {
+        background: #1f2937;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 30px 0;
+        text-align: left;
+    }
+    
+    .code-title {
+        color: #9ca3af;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .plantuml-code {
+        color: #4ade80;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        overflow-x: auto;
+        padding: 15px;
+        background: #111827;
+        border-radius: 6px;
+    }
+    
+    /* Status Messages */
+    .status-message {
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin: 20px auto;
+        max-width: 800px;
+        text-align: center;
+        font-size: 14px;
+    }
+    
+    .status-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+    
+    .status-warning {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+    
+    .status-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    
+    /* Database Info */
+    #databaseContent {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
+        font-family: 'Monaco', 'Menlo', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        text-align: left;
+        max-height: 400px;
+        overflow-y: auto;
+        margin: 20px auto;
+    }
+    
+    /* Diagram Image */
+    .diagram-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+    }
+    
+    /* Error Placeholder */
+    .diagram-placeholder {
+        padding: 40px;
+        text-align: center;
+        background: #f9fafb;
+        border-radius: 8px;
+        border: 2px dashed #d1d5db;
     }
 </style>
 </head>
@@ -85,41 +228,56 @@
         </div>
     </header>
 
-<header>OneUML</header>
+    <div class="container">
+        <h2>Generated Class Diagram</h2>
+        <p class="note">This page displays the class diagram generated from your SQL database schema.</p>
+        
+        <!-- Status Message -->
+        <div id="statusMessage" class="status-message" style="display: none;"></div>
 
-<div class="container">
-    <h2>Generated Class Diagram</h2>
-    <p class="note">This page displays the class diagram generated from your UML input.</p>
-
-    <div class="preview-area">
-        <img src="<%= uml_image_url %>">
-    </div>
-
-    <!-- AREA HASIL GENERATE -->
-    <div id="diagramContent" style="margin-top: 30px;"></div>
-
-    <!-- INFO DATABASE -->
-    <pre id="databaseContent" style="text-align:left; max-width:800px; margin:20px auto;"></pre>
-
-    <!-- TOGGLE KODE -->
-    <button id="codeToggle" onclick="toggleCode()" style="margin-bottom:30px;">
-        Show PlantUML Code
-    </button>
-
-    <div class="buttons">
-        <a href="{% url 'main:sequence_diagram' %}" class="back">Back</a>
-        <a href="{% url 'main:generate_srs' %}">Next ➜</a>
-    </div>
-</div>
-
-            <!-- PlantUML Code Section -->
-            <div class="code-section" id="codeSection" style="display: none;">
-                <div class="code-title">PlantUML Code</div>
-                <pre class="plantuml-code" id="plantumlCode"></pre>
-            </div>
-
+        <!-- Diagram Controls -->
+        <div class="diagram-controls">
+            <button class="control-btn active" onclick="showDiagram('basic')">Basic View</button>
+            <button class="control-btn" onclick="showDiagram('detailed')">Detailed View</button>
+            <button class="control-btn" onclick="showDiagram('withMethods')">With Methods</button>
+            <button class="control-btn" onclick="showDiagram('complete')">Complete Schema</button>
         </div>
-    </main>
+
+        <!-- AREA HASIL GENERATE -->
+        <div id="diagramContent">
+            <div style="text-align: center; padding: 60px;">
+                <div class="loading"></div>
+                <p>Loading database schema...</p>
+            </div>
+        </div>
+
+        <!-- INFO DATABASE -->
+        <pre id="databaseContent"></pre>
+
+        <!-- Action Buttons -->
+        <div style="margin: 30px 0;">
+            <button id="codeToggle" onclick="toggleCode()" style="margin-right: 10px;">
+                Show PlantUML Code
+            </button>
+            <button onclick="regenerateDiagram()" style="margin-right: 10px;">
+                Regenerate Diagram
+            </button>
+            <button onclick="exportDiagram()">
+                Export Diagram
+            </button>
+        </div>
+
+        <!-- PlantUML Code Section -->
+        <div class="code-section" id="codeSection" style="display: none;">
+            <div class="code-title">PlantUML Code</div>
+            <pre class="plantuml-code" id="plantumlCode"></pre>
+        </div>
+
+        <div class="buttons">
+            <a href="{% url 'main:sequence_diagram' %}" class="nav-btn back">Back</a>
+            <a href="{% url 'main:generate_srs' %}" class="nav-btn next">Next ➜</a>
+        </div>
+    </div>
 
     <!-- Footer - Sesuai Template One UML -->
     <footer>
@@ -129,6 +287,14 @@
     </footer>
     
     <script src="https://unpkg.com/plantuml-encoder/dist/plantuml-encoder.min.js"></script>
+    
+    <!-- CSRF Token untuk Django -->
+    <script>
+        function getCsrfToken() {
+            const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+            return tokenElement ? tokenElement.value : '';
+        }
+    </script>
 
     <script>
         // Global variables
@@ -138,88 +304,181 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            showStatus('Loading database schema...', 'warning');
             loadSQLData();
-            generateAllDiagrams();
         });
 
-        // Load SQL data from localStorage
+        // Show status message
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message status-${type}`;
+            statusEl.style.display = 'block';
+            
+            // Auto-hide info messages after 5 seconds
+            if (type === 'info') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Load SQL data from backend
         function loadSQLData() {
+            // Try localStorage first (for quick load)
             const savedData = localStorage.getItem('sqlData');
             if (savedData) {
-                sqlData = JSON.parse(savedData);
-                displayDatabaseInfo();
-            } else {
-                // Fallback to example data
-                sqlData = getExampleData();
-                displayDatabaseInfo();
-                document.getElementById('saveStatus').textContent = 'Using example data - No SQL file uploaded';
+                try {
+                    sqlData = JSON.parse(savedData);
+                    showStatus('Loaded cached database schema', 'success');
+                    initializeDiagram();
+                    return;
+                } catch (e) {
+                    console.error('Error parsing cached data:', e);
+                }
             }
+            
+            // Fetch from backend
+            fetch('/api/get_sql_data/')
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.status === 'success' && data.sql_data) {
+                        sqlData = JSON.parse(data.sql_data);
+                        // Cache in localStorage
+                        localStorage.setItem('sqlData', data.sql_data);
+                        showStatus(`Loaded ${sqlData.tables?.length || 0} tables from database`, 'success');
+                        initializeDiagram();
+                    } else if (data.status === 'error' && data.message === 'no_data') {
+                        // No SQL data found, use example data
+                        showStatus('No SQL data found. Using example schema.', 'warning');
+                        sqlData = getExampleData();
+                        initializeDiagram();
+                    } else {
+                        throw new Error(data.message || 'Unknown error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading SQL data:', error);
+                    showStatus('Error loading database. Using example schema.', 'error');
+                    sqlData = getExampleData();
+                    initializeDiagram();
+                });
+        }
+
+        // Initialize diagram after data is loaded
+        function initializeDiagram() {
+            if (!sqlData) {
+                showStatus('No data available for diagram generation', 'error');
+                return;
+            }
+            
+            displayDatabaseInfo();
+            generateAllDiagrams();
+            
+            // Show the basic diagram
+            setTimeout(() => {
+                showDiagram('basic');
+            }, 300);
         }
 
         // Display database information
         function displayDatabaseInfo() {
-            if (!sqlData) return;
+            if (!sqlData || !sqlData.tables) {
+                document.getElementById('databaseContent').textContent = 'No database information available.';
+                return;
+            }
             
-            let info = 'Tables found:\n\n';
-            sqlData.tables.forEach(table => {
-                info += `📁 ${table.name}\n`;
+            let info = '📊 DATABASE SCHEMA\n';
+            info += '='.repeat(50) + '\n\n';
+            
+            sqlData.tables.forEach((table, index) => {
+                info += `📁 TABLE ${index + 1}: ${table.name}\n`;
+                info += '─'.repeat(40) + '\n';
+                
                 table.columns.forEach(column => {
-                    const pk = column.primary_key ? ' 🔑' : '';
-                    const fk = column.foreign_key ? ' 🔗' : '';
-                    const unique = column.unique ? ' ⭐' : '';
-                    info += `   ${column.name} : ${column.type}${pk}${fk}${unique}\n`;
+                    const pk = column.primary_key ? ' 🔑 PK' : '';
+                    const fk = column.foreign_key ? ' 🔗 FK' : '';
+                    const unique = column.unique ? ' ⭐ UNIQUE' : '';
+                    const nullable = column.nullable ? ' NULL' : ' NOT NULL';
+                    info += `  • ${column.name.padEnd(25)} : ${column.type.padEnd(15)} ${pk}${fk}${unique}${nullable}\n`;
                 });
                 info += '\n';
             });
             
             if (sqlData.relationships && sqlData.relationships.length > 0) {
-                info += 'Relationships:\n';
-                sqlData.relationships.forEach(rel => {
-                    info += `   ${rel.from_table}.${rel.from_column} → ${rel.to_table}.${rel.to_column}\n`;
+                info += '\n🔗 RELATIONSHIPS\n';
+                info += '─'.repeat(40) + '\n';
+                sqlData.relationships.forEach((rel, index) => {
+                    info += `${index + 1}. ${rel.from_table}.${rel.from_column} → ${rel.to_table}.${rel.to_column}\n`;
                 });
             }
+            
+            // Count statistics
+            const tableCount = sqlData.tables.length;
+            const columnCount = sqlData.tables.reduce((sum, table) => sum + table.columns.length, 0);
+            const relationshipCount = sqlData.relationships ? sqlData.relationships.length : 0;
+            
+            info += '\n' + '='.repeat(50) + '\n';
+            info += `📈 STATISTICS: ${tableCount} tables, ${columnCount} columns, ${relationshipCount} relationships\n`;
             
             document.getElementById('databaseContent').textContent = info;
         }
 
         // Generate all diagram types
         function generateAllDiagrams() {
-            if (!sqlData) return;
+            if (!sqlData) {
+                showStatus('Cannot generate diagrams: No data available', 'error');
+                return;
+            }
             
-            // Basic Diagram
-            plantUmlCodes.basic = generateBasicDiagram();
-            
-            // Detailed Diagram
-            plantUmlCodes.detailed = generateDetailedDiagram();
-            
-            // Diagram with Methods
-            plantUmlCodes.withMethods = generateDiagramWithMethods();
-            
-            // Complete Diagram
-            plantUmlCodes.complete = generateCompleteDiagram();
-            
-            // Show the basic diagram by default
-            setTimeout(() => {
-                showDiagram('basic');
-            }, 500);
+            try {
+                // Basic Diagram
+                plantUmlCodes.basic = generateBasicDiagram();
+                
+                // Detailed Diagram
+                plantUmlCodes.detailed = generateDetailedDiagram();
+                
+                // Diagram with Methods
+                plantUmlCodes.withMethods = generateDiagramWithMethods();
+                
+                // Complete Diagram
+                plantUmlCodes.complete = generateCompleteDiagram();
+                
+                showStatus('All diagrams generated successfully', 'success');
+            } catch (error) {
+                console.error('Error generating diagrams:', error);
+                showStatus('Error generating diagrams: ' + error.message, 'error');
+            }
         }
 
         // Generate Basic Diagram
         function generateBasicDiagram() {
             let plantUmlCode = `@startuml
 !theme plain
+hide empty members
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor #666
+}
 title Class Diagram - Basic View
 
 ' Entities
 ${sqlData.tables.map(table => `
-class ${table.name} {
-${table.columns.filter(col => col.primary_key).map(col => `  + ${col.name} : ${col.type}`).join('\\n')}
+class "${table.name}" {
+${table.columns
+    .filter(col => col.primary_key)
+    .map(col => `  + ${col.name} : ${col.type}`)
+    .join('\\n')}
 }
 `).join('')}
 
 ' Relationships
 ${sqlData.relationships ? sqlData.relationships.map(rel => `
-${rel.from_table} }o--|| ${rel.to_table}
+"${rel.from_table}" }o--|| "${rel.to_table}"
 `).join('') : ''}
 
 @enduml`;
@@ -231,15 +490,22 @@ ${rel.from_table} }o--|| ${rel.to_table}
         function generateDetailedDiagram() {
             let plantUmlCode = `@startuml
 !theme plain
+hide empty members
+skinparam class {
+    BackgroundColor #F9FAFB
+    BorderColor #4B5563
+    ArrowColor #666
+    FontSize 13
+}
 title Class Diagram - Detailed View
 
 ' Entities with all attributes
 ${sqlData.tables.map(table => `
-class ${table.name} {
+class "${table.name}" {
 ${table.columns.map(col => {
-    const pk = col.primary_key ? ' 🔑' : '';
-    const fk = col.foreign_key ? ' 🔗' : '';
-    const unique = col.unique ? ' ⭐' : '';
+    const pk = col.primary_key ? ' <<PK>>' : '';
+    const fk = col.foreign_key ? ' <<FK>>' : '';
+    const unique = col.unique ? ' <<U>>' : '';
     return `  + ${col.name} : ${col.type}${pk}${fk}${unique}`;
 }).join('\\n')}
 }
@@ -247,7 +513,7 @@ ${table.columns.map(col => {
 
 ' Relationships with labels
 ${sqlData.relationships ? sqlData.relationships.map(rel => `
-${rel.from_table} }o--|| ${rel.to_table} : ${rel.from_column} → ${rel.to_column}
+"${rel.from_table}" }o--|| "${rel.to_table}" : "${rel.from_column} → ${rel.to_column}"
 `).join('') : ''}
 
 @enduml`;
@@ -259,26 +525,33 @@ ${rel.from_table} }o--|| ${rel.to_table} : ${rel.from_column} → ${rel.to_colum
         function generateDiagramWithMethods() {
             let plantUmlCode = `@startuml
 !theme plain
-title Class Diagram - With Methods
+skinparam class {
+    BackgroundColor #F0F9FF
+    BorderColor #0369A1
+    ArrowColor #666
+}
+title Class Diagram - With CRUD Methods
 
 ${sqlData.tables.map(table => `
-class ${table.name} {
+class "${table.name}" {
+' --- Attributes ---
 ${table.columns.map(col => {
-    const pk = col.primary_key ? ' 🔑' : '';
-    const fk = col.foreign_key ? ' 🔗' : '';
+    const pk = col.primary_key ? ' <<PK>>' : '';
+    const fk = col.foreign_key ? ' <<FK>>' : '';
     return `  + ${col.name} : ${col.type}${pk}${fk}`;
 }).join('\\n')}
-  --
-  + create() : void
-  + read() : ${table.name}
-  + update() : void
-  + delete() : void
+' --- Methods ---
+  + create() : boolean
+  + read(id: int) : ${table.name}
+  + update() : boolean
+  + delete() : boolean
+  + findAll() : List<${table.name}>
 }
 `).join('')}
 
 ' Relationships
 ${sqlData.relationships ? sqlData.relationships.map(rel => `
-${rel.from_table} }o--|| ${rel.to_table}
+"${rel.from_table}" }o--|| "${rel.to_table}"
 `).join('') : ''}
 
 @enduml`;
@@ -290,40 +563,54 @@ ${rel.from_table} }o--|| ${rel.to_table}
         function generateCompleteDiagram() {
             let plantUmlCode = `@startuml
 !theme plain
-title Class Diagram - Complete Database Schema
-
 skinparam class {
     BackgroundColor White
     BorderColor Black
-    ArrowColor Black
+    ArrowColor #666
+    Shadowing false
+    RoundCorner 10
 }
+title Complete Database Schema
 
 ' Entities with full details
 ${sqlData.tables.map(table => `
-class ${table.name} <<Entity>> {
+entity "${table.name}" << (E,#ADD8E6) >> {
 ${table.columns.map(col => {
     const pk = col.primary_key ? ' <<PK>>' : '';
     const fk = col.foreign_key ? ' <<FK>>' : '';
-    const unique = col.unique ? ' <<Unique>>' : '';
-    return `  + ${col.name} : ${col.type}${pk}${fk}${unique}`;
+    const unique = col.unique ? ' <<U>>' : '';
+    const nullable = col.nullable ? ' <<nullable>>' : ' <<not null>>';
+    return `  + ${col.name} : ${col.type}${pk}${fk}${unique}${nullable}`;
 }).join('\\n')}
-  --
+  ..
   + insert() : boolean
-  + select() : ResultSet
-  + update() : boolean
-  + delete() : boolean
+  + select(id: int) : ResultSet
+  + update(values: Map) : boolean
+  + delete(id: int) : boolean
+  + validate() : boolean
 }
 `).join('')}
 
 ' Detailed Relationships
 ${sqlData.relationships ? sqlData.relationships.map(rel => `
-${rel.from_table} }o--|| ${rel.to_table} : "foreign key"
+"${rel.from_table}" }o--|| "${rel.to_table}" : "${rel.from_column} references ${rel.to_column}"
 `).join('') : ''}
 
-note top of ${sqlData.tables[0]?.name || 'users'}
+' Notes for important tables
+${sqlData.tables.length > 0 ? `
+note top of "${sqlData.tables[0].name}"
   Primary entity in the system
-  Manages core business logic
+  Contains core business data
 end note
+` : ''}
+
+legend right
+  | Symbol | Meaning |
+  | 🔑 | Primary Key |
+  | 🔗 | Foreign Key |
+  | ⭐ | Unique Constraint |
+  | E | Entity |
+end legend
 
 @enduml`;
 
@@ -332,6 +619,11 @@ end note
 
         // Show selected diagram
         function showDiagram(type) {
+            if (!plantUmlCodes[type]) {
+                showStatus(`Diagram type "${type}" not available`, 'error');
+                return;
+            }
+            
             currentDiagramType = type;
             
             // Update active button
@@ -341,41 +633,47 @@ end note
             event.target.classList.add('active');
 
             const plantUmlCode = plantUmlCodes[type];
-            if (!plantUmlCode) return;
-
-            // Encode for PlantUML
-            const encoded = plantumlEncoder.encode(plantUmlCode);
-            const plantUmlUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
-
+            
             // Show loading
             document.getElementById('diagramContent').innerHTML = `
                 <div style="text-align: center; padding: 40px;">
-                    <div class="loading" style="margin: 0 auto 20px;"></div>
-                    <p>Generating diagram...</p>
+                    <div class="loading"></div>
+                    <p>Generating ${getDiagramTitle(type)}...</p>
                 </div>
             `;
 
-            // Load diagram
-            const img = new Image();
-            img.onload = function() {
-                document.getElementById('diagramContent').innerHTML = `
-                    <div style="text-align: center;">
-                        <h3 style="color: #111827; margin-bottom: 16px;">${getDiagramTitle(type)}</h3>
-                        <img src="${plantUmlUrl}" alt="Class Diagram" class="diagram-image" 
-                             onerror="handleDiagramError()">
-                    </div>
-                `;
-            };
-            img.onerror = function() {
-                handleDiagramError();
-            };
-            img.src = plantUmlUrl;
+            // Encode for PlantUML
+            try {
+                const encoded = plantumlEncoder.encode(plantUmlCode);
+                const plantUmlUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
 
-            // Update code display
-            document.getElementById('plantumlCode').textContent = plantUmlCode;
-            
-            // Update status
-            document.getElementById('saveStatus').textContent = `${getDiagramTitle(type)} generated`;
+                // Load diagram
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('diagramContent').innerHTML = `
+                        <div style="text-align: center;">
+                            <h3 style="color: #111827; margin-bottom: 16px; font-size: 20px;">
+                                ${getDiagramTitle(type)}
+                            </h3>
+                            <img src="${plantUmlUrl}" alt="Class Diagram" class="diagram-image" 
+                                 onerror="handleDiagramError()">
+                        </div>
+                    `;
+                };
+                img.onerror = function() {
+                    handleDiagramError();
+                };
+                img.src = plantUmlUrl;
+
+                // Update code display
+                document.getElementById('plantumlCode').textContent = plantUmlCode;
+                
+                // Update status
+                showStatus(`${getDiagramTitle(type)} generated successfully`, 'success');
+            } catch (error) {
+                console.error('Error encoding PlantUML:', error);
+                handleDiagramError();
+            }
         }
 
         // Get diagram title
@@ -383,7 +681,7 @@ end note
             const titles = {
                 'basic': 'Basic Class Diagram',
                 'detailed': 'Detailed Class Diagram',
-                'withMethods': 'Class Diagram with Methods',
+                'withMethods': 'Class Diagram with CRUD Methods',
                 'complete': 'Complete Database Schema'
             };
             return titles[type] || 'Class Diagram';
@@ -394,13 +692,20 @@ end note
             document.getElementById('diagramContent').innerHTML = `
                 <div class="diagram-placeholder">
                     <div style="font-size: 48px; margin-bottom: 16px;">❌</div>
-                    <h3>Error Generating Diagram</h3>
-                    <p>Unable to generate the diagram. Please try again.</p>
-                    <button class="btn btn-outline" onclick="showDiagram('${currentDiagramType}')" style="margin-top: 16px;">
+                    <h3 style="color: #dc2626; margin-bottom: 12px;">Error Generating Diagram</h3>
+                    <p style="color: #6b7280; margin-bottom: 20px;">
+                        Unable to generate the diagram. This might be due to:<br>
+                        1. Network connectivity issues<br>
+                        2. Invalid PlantUML syntax<br>
+                        3. PlantUML service temporarily unavailable
+                    </p>
+                    <button class="control-btn" onclick="showDiagram('${currentDiagramType}')" 
+                            style="background: #2563eb; color: white; border: none; padding: 10px 20px;">
                         Retry
                     </button>
                 </div>
             `;
+            showStatus('Error generating diagram. Please try again.', 'error');
         }
 
         // Toggle code visibility
@@ -411,6 +716,7 @@ end note
             if (codeSection.style.display === 'none') {
                 codeSection.style.display = 'block';
                 toggleButton.textContent = 'Hide PlantUML Code';
+                showStatus('PlantUML code displayed', 'info');
             } else {
                 codeSection.style.display = 'none';
                 toggleButton.textContent = 'Show PlantUML Code';
@@ -419,31 +725,94 @@ end note
 
         // Regenerate diagram
         function regenerateDiagram() {
+            showStatus('Regenerating diagrams...', 'warning');
             generateAllDiagrams();
-            showDiagram(currentDiagramType);
-            document.getElementById('saveStatus').textContent = 'Diagram regenerated';
+            setTimeout(() => {
+                showDiagram(currentDiagramType);
+            }, 500);
         }
 
         // Export diagram
         function exportDiagram() {
+            if (!plantUmlCodes[currentDiagramType]) {
+                showStatus('No diagram to export', 'error');
+                return;
+            }
+            
             const diagramType = getDiagramTitle(currentDiagramType);
-            alert(`Exporting ${diagramType} as PNG and SVG files...`);
-            // In real implementation, this would trigger file download
+            showStatus(`Exporting ${diagramType}...`, 'info');
+            
+            // Create download link for PlantUML code
+            const codeBlob = new Blob([plantUmlCodes[currentDiagramType]], { type: 'text/plain' });
+            const codeUrl = URL.createObjectURL(codeBlob);
+            const codeLink = document.createElement('a');
+            codeLink.href = codeUrl;
+            codeLink.download = `class_diagram_${currentDiagramType}.puml`;
+            document.body.appendChild(codeLink);
+            codeLink.click();
+            document.body.removeChild(codeLink);
+            
+            // Try to export as SVG/PNG if possible
+            try {
+                const encoded = plantumlEncoder.encode(plantUmlCodes[currentDiagramType]);
+                const imgUrl = `https://www.plantuml.com/plantuml/svg/${encoded}`;
+                
+                // Create image download
+                fetch(imgUrl)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const imgUrl = URL.createObjectURL(blob);
+                        const imgLink = document.createElement('a');
+                        imgLink.href = imgUrl;
+                        imgLink.download = `class_diagram_${currentDiagramType}.svg`;
+                        document.body.appendChild(imgLink);
+                        imgLink.click();
+                        document.body.removeChild(imgLink);
+                        showStatus('Diagram exported as PUML and SVG files', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Error exporting image:', err);
+                        showStatus('Diagram code exported. Image export failed.', 'warning');
+                    });
+            } catch (error) {
+                showStatus('Diagram code exported successfully', 'success');
+            }
         }
 
-        // Save diagram
+        // Save diagram to backend
         function saveDiagram() {
-            document.getElementById('saveStatus').textContent = 'Diagram saved to project';
-            // In real implementation, this would save to backend
-        }
-
-        // Navigation
-        function goBack() {
-            window.location.href = 'sequence_diagram.html';
-        }
-
-        function goToNextStep() {
-            window.location.href = 'generate_srs.html';
+            if (!sqlData) {
+                showStatus('No data to save', 'error');
+                return;
+            }
+            
+            showStatus('Saving diagram to project...', 'info');
+            
+            fetch('/api/save_diagram/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    type: 'class_diagram',
+                    diagram_type: currentDiagramType,
+                    sql_data: sqlData,
+                    plantuml_code: plantUmlCodes[currentDiagramType]
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showStatus('Diagram saved to project successfully', 'success');
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving diagram:', error);
+                showStatus('Error saving diagram: ' + error.message, 'error');
+            });
         }
 
         // Example data fallback
@@ -453,32 +822,37 @@ end note
                     {
                         name: "users",
                         columns: [
-                            { name: "id", type: "INT", primary_key: true },
-                            { name: "username", type: "VARCHAR(255)", unique: true },
-                            { name: "email", type: "VARCHAR(255)" },
-                            { name: "password", type: "VARCHAR(255)" },
-                            { name: "created_at", type: "TIMESTAMP" }
+                            { name: "id", type: "INT", primary_key: true, nullable: false },
+                            { name: "username", type: "VARCHAR(255)", unique: true, nullable: false },
+                            { name: "email", type: "VARCHAR(255)", nullable: false },
+                            { name: "password_hash", type: "VARCHAR(255)", nullable: false },
+                            { name: "created_at", type: "TIMESTAMP", nullable: false },
+                            { name: "updated_at", type: "TIMESTAMP", nullable: true }
                         ]
                     },
                     {
                         name: "products",
                         columns: [
-                            { name: "id", type: "INT", primary_key: true },
-                            { name: "name", type: "VARCHAR(255)" },
-                            { name: "price", type: "DECIMAL(10,2)" },
-                            { name: "description", type: "TEXT" },
-                            { name: "user_id", type: "INT", foreign_key: true }
+                            { name: "id", type: "INT", primary_key: true, nullable: false },
+                            { name: "name", type: "VARCHAR(255)", nullable: false },
+                            { name: "description", type: "TEXT", nullable: true },
+                            { name: "price", type: "DECIMAL(10,2)", nullable: false },
+                            { name: "stock", type: "INT", nullable: false, default: "0" },
+                            { name: "user_id", type: "INT", foreign_key: true, nullable: false },
+                            { name: "created_at", type: "TIMESTAMP", nullable: false }
                         ]
                     },
                     {
                         name: "orders",
                         columns: [
-                            { name: "id", type: "INT", primary_key: true },
-                            { name: "user_id", type: "INT", foreign_key: true },
-                            { name: "product_id", type: "INT", foreign_key: true },
-                            { name: "quantity", type: "INT" },
-                            { name: "total_price", type: "DECIMAL(10,2)" },
-                            { name: "order_date", type: "TIMESTAMP" }
+                            { name: "id", type: "INT", primary_key: true, nullable: false },
+                            { name: "user_id", type: "INT", foreign_key: true, nullable: false },
+                            { name: "product_id", type: "INT", foreign_key: true, nullable: false },
+                            { name: "quantity", type: "INT", nullable: false },
+                            { name: "total_price", type: "DECIMAL(10,2)", nullable: false },
+                            { name: "status", type: "VARCHAR(50)", nullable: false, default: "'pending'" },
+                            { name: "order_date", type: "TIMESTAMP", nullable: false },
+                            { name: "shipping_address", type: "TEXT", nullable: true }
                         ]
                     }
                 ],
@@ -487,23 +861,35 @@ end note
                         from_table: "products",
                         from_column: "user_id",
                         to_table: "users",
-                        to_column: "id"
+                        to_column: "id",
+                        type: "foreign_key"
                     },
                     {
                         from_table: "orders",
                         from_column: "user_id",
                         to_table: "users",
-                        to_column: "id"
+                        to_column: "id",
+                        type: "foreign_key"
                     },
                     {
                         from_table: "orders",
                         from_column: "product_id",
                         to_table: "products",
-                        to_column: "id"
+                        to_column: "id",
+                        type: "foreign_key"
                     }
                 ]
             };
         }
+        
+        // Auto-save before leaving page
+        window.addEventListener('beforeunload', function(e) {
+            if (sqlData && Object.keys(plantUmlCodes).length > 0) {
+                // Try to save data before leaving
+                localStorage.setItem('sqlData', JSON.stringify(sqlData));
+                localStorage.setItem('lastDiagramType', currentDiagramType);
+            }
+        });
     </script>
 </body>
 </html>
