@@ -6,7 +6,7 @@ import os
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import *
 from django.db import transaction
-from main.models import Feature, UseCaseSpecification
+from main.models import Feature, UseCaseSpecification, GUI
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project, Pengguna, Session, GUI, Usecase, UserStory, UserStoryScenario, UseCaseSpecification, Sequence, ClassDiagram, ActivityDiagram, Page, ImportedTable, ImportedRelationship
 from django.utils import timezone
@@ -643,18 +643,28 @@ def get_latest_userstory(request):
             "message": "No User Story found"
         })
 
-
 def import_sql(request):
     if request.method == 'POST':
         file = request.FILES.get('sql_file')
         if not file:
             return JsonResponse({'error': 'No file uploaded'}, status=400)
         
+        # Asumsikan fungsi parse_sql_file sudah diimport
         parsed_data = parse_sql_file(file)
-        # nanti kita bisa tambahkan logika untuk save ke DB di sini
+        
         return JsonResponse({'message': 'File parsed successfully', 'data': parsed_data})
     
-    return render(request, 'main/import_sql.html')
+    # --- PERBAIKAN DI SINI ---
+    # Ambil GUI terakhir yang aktif/dibuat
+    active_gui = GUI.objects.last()
+    
+    # Kirim ke template sebagai context
+    context = {
+        'gui': active_gui
+    }
+    
+    return render(request, 'main/import_sql.html', context)
+
 
 def parse_sql(request):
     if request.method == "POST" and request.FILES.get('file'):

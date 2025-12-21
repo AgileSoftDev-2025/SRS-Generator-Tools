@@ -174,8 +174,9 @@
             padding: 0 1rem;
           "
         >
+          {% if gui %}
           <a
-            href="{% url 'main:user_scenario' %}"
+            href="{% url 'main:user_scenario' gui.id_gui %}"
             style="
               padding: 0.75rem 1.5rem;
               background-color: #e5e7eb;
@@ -187,6 +188,21 @@
           >
             ← Back
           </a>
+          {% else %}
+          <a
+            href="{% url 'main:home' %}"
+            style="
+              padding: 0.75rem 1.5rem;
+              background-color: #e5e7eb;
+              color: #111827;
+              border-radius: 0.5rem;
+              text-decoration: none;
+              font-weight: 500;
+            "
+          >
+            ← Back (Home)
+          </a>
+          {% endif %}
 
           <a
             id="nextBtn"
