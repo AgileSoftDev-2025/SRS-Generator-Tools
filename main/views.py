@@ -1140,111 +1140,65 @@ def save_gui(request, gui_id):
 
 # =================== PERBAIKAN UTAMA: FUNGSI input_gui ===================
 def input_gui(request, gui_id=None):
-    """
-    SOLUSI DARURAT: Skip semua logika pembuatan GUI yang kompleks
-    Cari GUI yang sudah ada atau buat yang sederhana TANPA project relation
-    """
-    
+    from main.models import Pengguna
+
+    pengguna = Pengguna.objects.first()
+    if pengguna is None:
+        pengguna = Pengguna.objects.create(
+            id_pengguna="U001",
+            nama_pengguna="Default User"
+        )
+
     print(f"DEBUG input_gui: gui_id={gui_id}, request.path={request.path}")
-    
-    # Jika ada parameter gui_id, coba tampilkan
+
+    # ===============================
+    # 1. Cek gui_id kalau dikirim
+    # ===============================
     if gui_id:
         try:
-            # Coba dengan id_gui (CharField) dulu
             gui = get_object_or_404(GUI, id_gui=gui_id)
             print(f"DEBUG: Found GUI by id_gui: {gui.id_gui}")
             return render(request, 'main/input_gui.html', {'gui': gui})
         except (ValueError, GUI.DoesNotExist):
             try:
-                # Jika error, coba dengan pk (IntegerField)
                 gui = get_object_or_404(GUI, pk=gui_id)
                 print(f"DEBUG: Found GUI by pk: {gui.id_gui}")
                 return render(request, 'main/input_gui.html', {'gui': gui})
             except:
-                pass
-    
-    # Jika tidak ada gui_id atau tidak ditemukan, cari GUI pertama yang ada
-    print("DEBUG: No gui_id provided or not found, searching for existing GUI...")
-    
+                print("DEBUG: gui_id provided but not found, will fallback")
+
+    # ===============================
+    # 2. Ambil GUI pertama jika ada
+    # ===============================
     gui = GUI.objects.first()
     if gui:
         print(f"DEBUG: Found existing GUI: {gui.id_gui}")
-        # Tampilkan GUI yang sudah ada
         return render(request, 'main/input_gui.html', {'gui': gui})
-    
-    # Jika benar-benar tidak ada GUI sama sekali, buat yang sederhana
-    # TANPA project relation untuk menghindari error
+
+    # ===============================
+    # 3. Tidak ada GUI sama sekali, buat emergency GUI
+    # ===============================
     print("DEBUG: No GUI found, creating emergency GUI...")
-    
-    try:
-        # PERBAIKAN UTAMA: Buat GUI tanpa field yang bermasalah
-        # Cek field apa yang ada di model GUI
-        from django.db import models
-        field_names = [f.name for f in GUI._meta.get_fields()]
-        print(f"DEBUG: GUI model fields: {field_names}")
-        
-        # Buat data dasar
-        gui_data = {
-            'id_gui': "G01",
-            'nama_atribut': "Default GUI"
-        }
-        
-        # Coba identifikasi field project/id_project
-        if 'project' in field_names:
-            field = GUI._meta.get_field('project')
-            if isinstance(field, models.ForeignKey):
-                # Ini ForeignKey, coba cari project
-                project = Project.objects.first()
-                if project:
-                    gui_data['project'] = project
-                    print(f"DEBUG: Adding project ForeignKey: {project.id_project}")
-                else:
-                    # Skip jika tidak ada project
-                    print("DEBUG: No project found, skipping project field")
-        
-        elif 'id_project' in field_names:
-            field = GUI._meta.get_field('id_project')
-            if isinstance(field, models.ForeignKey):
-                # Ini ForeignKey, coba cari project
-                project = Project.objects.first()
-                if project:
-                    gui_data['id_project'] = project
-                    print(f"DEBUG: Adding id_project ForeignKey: {project.id_project}")
-                else:
-                    # Skip jika tidak ada project
-                    print("DEBUG: No project found, skipping id_project field")
-            else:
-                # Ini CharField, bisa isi string
-                gui_data['id_project'] = "P001"
-                print("DEBUG: Adding id_project as string: P001")
-        
-        # Coba buat GUI
-        gui = GUI.objects.create(**gui_data)
-        print(f"DEBUG: Successfully created GUI: {gui.id_gui}")
-        
-        return render(request, 'main/input_gui.html', {'gui': gui})
-        
-    except Exception as e:
-        print(f"❌ ERROR creating GUI: {e}")
-        
-        # SOLUSI DARURAT TERAKHIR: Coba buat dengan hanya field wajib
-        try:
-            # Coba buat dengan field minimal
-            gui = GUI.objects.create(
-                id_gui="G01",
-                nama_atribut="Emergency GUI"
-                # Tidak menyertakan field lain yang mungkin bermasalah
-            )
-            print(f"DEBUG: Created emergency GUI: {gui.id_gui}")
-            return render(request, 'main/input_gui.html', {'gui': gui})
-        except Exception as e2:
-            print(f"❌ CRITICAL ERROR: {e2}")
-            
-            # Tampilkan error page
-            return render(request, 'main/error.html', {
-                'error_message': f"Failed to create GUI: {str(e2)}. Please check your database structure.",
-                'title': 'GUI Creation Error'
-            })
+
+    # Ambil project pertama, buat default jika belum ada
+    project = Project.objects.first()
+    if project is None:
+        project = Project.objects.create(
+            id_project="0001",
+            nama_project="Default Project",
+            pengguna=pengguna,
+        )
+        print(f"DEBUG: Created default project: {project.id_project}")
+
+    # Buat emergency GUI dengan project wajib
+    gui = GUI.objects.create(
+        id_gui="G01",
+        nama_atribut="Emergency GUI",
+        project=project
+    )
+    print(f"DEBUG: Created emergency GUI with project: {gui.id_gui}")
+
+    return render(request, 'main/input_gui.html', {'gui': gui})
 
 # =================== API ENDPOINTS BARU ===================
 @csrf_exempt
@@ -1291,7 +1245,7 @@ def create_new_gui(request):
                     gui_data['id_project'] = project
             else:
                 # Jika CharField
-                gui_data['id_project'] = "P001"
+                gui_data['id_project'] = "0001"
         
         # Buat GUI
         gui = GUI.objects.create(**gui_data)
