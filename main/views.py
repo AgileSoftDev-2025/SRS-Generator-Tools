@@ -227,8 +227,8 @@ def save_actors_and_features(request):
 def use_case(request):
     return render(request, 'main/use_case.html')
 
-def user_scenario(request):
-    gui = GUI.objects.last() 
+def user_scenario(request,gui_id):
+    gui = get_object_or_404(GUI, id_gui=gui_id)
     specs = UseCaseSpecification.objects.prefetch_related(
         'scenarios__steps'  # ← PENTING: Harus pakai 'scenarios' bukan 'testscenario_set'
     ).all()
@@ -277,7 +277,8 @@ def user_scenario(request):
     return render(request, 'main/user_scenario.html', {
         'specs': specs,
         'gui_data_json': json.dumps(gui_data),
-        'saved_scenarios_json': json.dumps(saved_scenarios)
+        'saved_scenarios_json': json.dumps(saved_scenarios),
+        'gui': gui,
     })
 
 @csrf_exempt
@@ -1073,56 +1074,59 @@ def download_plantuml(request):
     
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
-@require_http_methods(["POST"])
 def save_gui(request, gui_id):
+    print("🔥 MASUK SAVE_GUI", gui_id)
     try:
-        # Ambil GUI berdasarkan ID
-        gui = get_object_or_404(GUI, pk=gui_id)
-        
-        # Ambil data JSON dari request body
+        gui = get_object_or_404(GUI, id_gui=gui_id)
         data = json.loads(request.body)
-        
-        # 1. Hapus data lama (Pages & Elements) agar bersih sebelum simpan baru
-        # Ini akan otomatis menghapus Elements karena on_delete=CASCADE
-        gui.pages.all().delete()
-        
-        # 2. Loop setiap Halaman (Page) dari data JSON
-        for page_idx, page_data in enumerate(data, start=1):
-            # Buat Page baru
-            page = Page.objects.create(
-                gui=gui,
-                name=page_data.get('name', f'Page {page_idx}'),
-                order=page_idx
-            )
-            
-            # 3. Loop setiap Elemen di dalam Halaman tersebut
-            elements_list = page_data.get('elements', [])
-            for elem_idx, elem_data in enumerate(elements_list, start=1):
-                elem_name = elem_data.get('name')
-                elem_type = elem_data.get('type')
-                
-                # Cek agar tidak menyimpan data kosong
-                if elem_name and elem_type:
+
+        # 🔒 KUNCI SEMUA OPERASI DB DALAM 1 TRANSAKSI
+        with transaction.atomic():
+
+            # 1. Hapus data lama
+            gui.pages.all().delete()
+
+            # 2. Simpan ulang data terbaru
+            for page_idx, page_data in enumerate(data, start=1):
+                page = Page.objects.create(
+                    gui=gui,
+                    name=page_data.get('name') or f'Page {page_idx}',
+                    order=page_idx
+                )
+
+                elements_list = page_data.get('elements', [])
+                for elem_idx, elem_data in enumerate(elements_list, start=1):
+                    elem_name = elem_data.get('name')
+                    elem_type = elem_data.get('type')
+
+                    if not elem_name or not elem_type:
+                        continue
+
                     Element.objects.create(
                         page=page,
                         name=elem_name,
-                        
-                        # BAGIAN PENTING: Masukkan ke 'input_type' (sesuai models.py)
                         input_type=elem_type.lower(),
-                        
-                        # Kita isi juga element_type biar aman (opsional)
                         element_type=elem_type.lower(),
-                        
                         order=elem_idx
                     )
-        
-        return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
-    
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Data saved successfully'
+        })
+
     except json.JSONDecodeError:
-        return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Invalid JSON format'
+        }, status=400)
+
     except Exception as e:
-        print(f"Error saving GUI: {e}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        print(f"❌ Error saving GUI: {e}")
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
 
 # =================== PERBAIKAN UTAMA: FUNGSI input_gui ===================
 def input_gui(request, gui_id=None):
@@ -1300,26 +1304,23 @@ def reset_usecase_data(request):
     UseCaseSpecification.objects.all().delete()
     return redirect('main:input_informasi_tambahan')
 
-def scenario_result(request):
-    # ✅ GANTI: testscenario_set__teststep_set → scenarios__steps
-    specs = UseCaseSpecification.objects.prefetch_related(
-        'scenarios__steps'  # ← Sesuaikan dengan related_name di models
-    ).all()
+def scenario_result(request, gui_id): 
+    from .models import GUI, UseCaseSpecification
     
-    # DEBUG: Print untuk memastikan data ada
-    print("=" * 60)
-    print("🔍 SCENARIO RESULT DEBUG")
-    print(f"Total Specs: {specs.count()}")
-    for spec in specs:
-        scenarios = spec.scenarios.all()  # ← Ganti jadi .scenarios
-        print(f"\nSpec: {spec.feature_name} (ID: {spec.id})")
-        print(f"  Scenarios: {scenarios.count()}")
-        for scenario in scenarios:
-            steps = scenario.steps.all()  # ← Ganti jadi .steps
-            print(f"    - {scenario.scenario_type}: {steps.count()} steps")
-    print("=" * 60)
+    # Berikan proteksi jika gui_id tidak ada
+    if gui_id:
+        gui_obj = get_object_or_404(GUI, id_gui=gui_id)
+    else:
+        # Ambil GUI terbaru atau yang pertama sebagai fallback
+        gui_obj = GUI.objects.first() 
     
-    return render(request, 'main/scenario_result.html', {'specs': specs})
+    # ... sisa kode lainnya tetap sama ...
+    specs = UseCaseSpecification.objects.prefetch_related('scenarios__steps').all()
+    
+    return render(request, 'main/scenario_result.html', {
+        'specs': specs, 
+        'gui': gui_obj
+    })
 
 def generate_srs(request):
     # 1. Ambil Project Terakhir agar cover tidak 'Skripsi' terus

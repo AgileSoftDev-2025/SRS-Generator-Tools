@@ -352,7 +352,7 @@
         .then(data => {
             if(data.status === 'success') {
                 alert("✅ Skenario Berhasil Disimpan!");
-                window.location.href = "{% url 'main:scenario_result' %}";
+                window.location.href = "{% url 'main:scenario_result' gui.id_gui %}";
             } else {
                 alert("❌ Error: " + (data.message || 'Unknown error'));
                 nextBtn.disabled = false;

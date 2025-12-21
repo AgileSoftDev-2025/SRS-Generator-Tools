@@ -206,7 +206,8 @@
     {% endfor %}
 
     <div class="navigation">
-        <a href="{% url 'main:user_scenario' %}" class="btn btn-secondary">&larr; Edit Scenarios</a>
+        <a href="{% url 'main:user_scenario' gui.id_gui %}" class="btn btn-secondary">&larr; Edit Scenarios</a>
+
         <a href="{% url 'main:import_sql' %}" class="btn btn-primary">Next &rarr;</a>
     </div>
 </div>

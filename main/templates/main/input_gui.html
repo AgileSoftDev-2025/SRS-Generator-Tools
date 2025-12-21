@@ -314,7 +314,7 @@ input:focus, select:focus, textarea:focus {
                 &lt; BACK
             </a>
 
-            <a href="{% url 'main:user_scenario' %}" class="nav-btn next">
+            <a href="{% url 'main:user_scenario' gui.id_gui %}" class="nav-btn next">
                 NEXT &gt;
             </a>
         </div>
@@ -542,20 +542,6 @@ input:focus, select:focus, textarea:focus {
             nextBtn.style.opacity = "1";
             nextBtn.style.cursor = "pointer";
         }
-
-        // Simpan data secara otomatis sebelum user meninggalkan halaman
-        window.addEventListener('beforeunload', function (e) {
-            // Hanya trigger jika user mengedit data
-            const hasUnsavedChanges = checkForUnsavedChanges();
-            if (hasUnsavedChanges) {
-                // Notifikasi browser untuk konfirmasi
-                e.preventDefault();
-                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-                
-                // Coba simpan secara otomatis
-                saveData(guiId).catch(console.error);
-            }
-        });
 
         // Fungsi untuk cek perubahan yang belum disimpan
         function checkForUnsavedChanges() {
