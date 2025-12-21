@@ -51,7 +51,6 @@ urlpatterns = [
     path('api/save_usecase_spec/', views.save_usecase_spec, name='save_usecase_spec'),
     path('api/download-plantuml/', views.download_plantuml, name='download_plantuml'),
     path("api/get-latest-userstory/", views.get_latest_userstory, name="get_latest_userstory"),
-    path("sequence/<int:userstory_id>/generate/", views.generate_sequence_diagram, name="generate_sequence_diagram"),
     path('api/save_gui/<str:gui_id>/', views.save_gui, name='save_gui'),
     path('api/save-actors/', views.save_actors_and_features, name='save_actors_and_features'),
     path('api/generate-usecase/', views.generate_usecase_diagram, name='generate_usecase_diagram'),

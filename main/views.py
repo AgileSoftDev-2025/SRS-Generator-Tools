@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 import base64, requests, urllib.parse, binascii, json, subprocess
 from django.shortcuts import render
 from .forms import RegisterForm 
-from main.generators.sequence_generator import generate_sequence_plantuml, build_sequence_plantuml
+from main.generators.sequence_generator import build_sequence_plantuml
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -737,79 +737,100 @@ def generate_sequence_diagram(request, userstory_id):
         print(f"System Error: {str(e)}")
         return HttpResponse(f"System Error: {str(e)}", status=500)
 
+
 def generate_sequence_diagram_by_feature(request, feature_id):
-    # 1. Ambil Spesifikasi Fitur
+    # 1. AMBIL DATA UTAMA (Definisi Variabel)
     usecase_spec = get_object_or_404(UseCaseSpecification, pk=feature_id)
     
+    # Tentukan Target GUI
     target_gui = usecase_spec.gui
 
-    # Validasi 1: Jika GUI yang terhubung ternyata kosong (tidak punya halaman)
+    # Validasi 1: Jika GUI yang terhubung kosong
     if target_gui and not Page.objects.filter(gui=target_gui).exists():
-        print(f"DEBUG: GUI {target_gui.id_gui} terhubung tapi kosong. Mencari GUI lain yang valid...")
-        target_gui = None #anggap tidak valid
+        print(f"DEBUG: GUI {target_gui.id_gui} terhubung tapi kosong. Mencari GUI lain...")
+        target_gui = None 
 
-    # Validasi 2: Jika belum nemu, cari dari relasi UseCase lama (Backward Compatibility)
+    # Validasi 2: Backward Compatibility (Cek relasi lama)
     if not target_gui and hasattr(usecase_spec, 'usecase') and usecase_spec.usecase:
         candidate = usecase_spec.usecase.gui
         if candidate and Page.objects.filter(gui=candidate).exists():
             target_gui = candidate
 
-    # Validasi 3 (FINAL & PALING PENTING): 
-    # Cari GUI manapun di database yang MEMILIKI Pages (Input Elements).
+    # Validasi 3: Fallback ke GUI manapun yang valid (Punya Pages)
     if not target_gui:
-        # Filter GUI yang memiliki setidaknya 1 Page
         valid_gui = GUI.objects.filter(pages__isnull=False).distinct().first()
-        
         if valid_gui:
             target_gui = valid_gui
-            print(f"DEBUG: Menggunakan GUI Valid (G02/lainnya) -> {target_gui.id_gui}")
+            print(f"DEBUG: Menggunakan Fallback GUI -> {target_gui.id_gui}")
         else:
-            # Jika benar-benar tidak ada satupun GUI yang punya halaman
             return JsonResponse({
                 'status': 'error', 
-                'message': 'Data GUI tidak lengkap. Anda sudah membuat Nama GUI, tapi belum mengisi Halaman (Pages) dan Elemen-nya. Silakan isi Input GUI.'
+                'message': 'Data GUI tidak lengkap (Belum ada Page/Element). Silakan isi Input GUI dulu.'
             }, status=400)
     
-    # 2. Ambil Artefak Pages (Boundary) dari GUI yang Valid tadi
+    # 2. SIAPKAN BAHAN (ARTEFAK)
+    # Ambil Pages (Boundary) dari GUI yang valid
     pages = Page.objects.filter(gui=target_gui).prefetch_related("elements").order_by('order')
     
-    # 3. Ambil Artefak SQL (Entity)
+    # Ambil Tables (Entity) dari Import SQL
     tables = ImportedTable.objects.all()
     relationships = ImportedRelationship.objects.all()
 
-    # 4. Generate PlantUML Code
+    # 3. GENERATE KODE PLANTUML
     try:
+        # Ambil paths dari Use Case Spec
         basic_paths = usecase_spec.basic_paths.order_by("step_number")
-        alt_paths = usecase_spec.alternative_paths.all()
-        exc_paths = usecase_spec.exception_paths.all()
+        alt_paths = usecase_spec.alternative_paths.all().order_by("step_number")
+        exc_paths = usecase_spec.exception_paths.all().order_by("step_number")
 
+        # Panggil fungsi generator (pastikan sudah di-import di atas file views.py)
         plantuml_code = build_sequence_plantuml(
             usecase_spec, basic_paths, alt_paths, exc_paths, pages, tables, relationships
         )
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': f'Gagal logic generator: {str(e)}'}, status=500)
+        
+        # [DEBUG] PRINT KODE KE TERMINAL (Cek terminal Anda jika gambar gagal)
+        print("\n" + "="*20 + " GENERATED PLANTUML " + "="*20)
+        print(plantuml_code) 
+        print("="*60 + "\n")
 
-    # 5. Render Gambar via Kroki (Paling Stabil & Cepat)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'status': 'error', 'message': f'Logic Generator Error: {str(e)}'}, status=500)
+
+    # 4. RENDER GAMBAR VIA KROKI
     try:
         kroki_url = "https://kroki.io/plantuml/png"
+        # Kirim kode PlantUML ke server Kroki
         response = requests.post(kroki_url, data=plantuml_code, timeout=20)
         
         if response.status_code == 200:
-            image_base64 = base64.b64encode(response.content).decode('utf-8')
-            return JsonResponse({
-                'status': 'success',
-                'plantuml': plantuml_code,
-                'image_base64': image_base64
-            })
+            # Pastikan kontennya gambar
+            content_type = response.headers.get('Content-Type', '')
+            if 'image' in content_type or 'png' in content_type:
+                # Convert ke Base64 agar bisa ditampilkan di frontend via JSON
+                image_base64 = base64.b64encode(response.content).decode('utf-8')
+                
+                return JsonResponse({
+                    'status': 'success',
+                    'plantuml': plantuml_code,
+                    'image_base64': image_base64
+                })
+            else:
+                # Jika status 200 tapi isinya teks error (kadang terjadi)
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': f'Kroki returned text instead of image: {response.text}'
+                }, status=500)
         else:
             return JsonResponse({
                 'status': 'error',
-                'message': f'Gagal render gambar: {response.status_code}'
+                'message': f'Gagal render gambar (Status {response.status_code}). Pesan: {response.text}'
             }, status=500)
             
     except Exception as e:
-        return JsonResponse({'status': 'error', 'message': f"Connection Error: {str(e)}"}, status=500)
-
+        return JsonResponse({'status': 'error', 'message': f"Connection/Render Error: {str(e)}"}, status=500)
+    
 def sequence_feature_list(request):
     try:
         # Ambil semua data Use Case Spec
