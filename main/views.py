@@ -445,18 +445,19 @@ def generate_usecase_diagram(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 def input_informasi_tambahan(request):
+    # Ambil data dari database agar user bisa edit, bukan mulai dari nol
     specs = UseCaseSpecification.objects.all().prefetch_related(
         'basic_paths', 'alternative_paths', 'exception_paths'
     )
 
     use_cases_list = []
     for spec in specs:
-        # Helper kecil buat format path
+        # Helper untuk format path
         def get_paths(path_manager):
-            return [{'actor': p.actor_action, 'system': p.system_response} for p in path_manager.all()]
+            return [{'actor': p.actor_action or '', 'system': p.system_response or ''} for p in path_manager.all().order_by('step_number')]
 
         use_cases_list.append({
-            'id': spec.id,
+            'id': spec.id, # Penting untuk update
             'name': spec.feature_name,
             'summary': spec.summary_description or "",
             'priority': spec.priority,
@@ -465,84 +466,57 @@ def input_informasi_tambahan(request):
             'postcondition': spec.input_postcondition or "",
             'basicPath': get_paths(spec.basic_paths),
             'alternativePath': get_paths(spec.alternative_paths),
-            'exceptionPath': get_paths(spec.exception_paths)
+            'exceptionPath': get_paths(spec.exception_paths),
+            'actors': [] # Opsional jika tidak disimpan di tabel spec
         })
 
     context = {
-        # Kita pakai json.dumps biar datanya siap pakai
         'use_cases_json': json.dumps(use_cases_list)
     }
     return render(request, 'main/input_informasi_tambahan.html', context)
 
 def use_case_spec(request):
-    # 1. Coba ambil data dari URL parameter (dari input_informasi_tambahan)
+    # Ambil data REAL dari Database
+    specs = UseCaseSpecification.objects.all().prefetch_related(
+        'basic_paths', 'alternative_paths', 'exception_paths'
+    )
+    
     use_cases_data = []
     
-    # Cek jika ada data di URL parameter
-    if 'data' in request.GET:
-        try:
-            data_param = request.GET.get('data')
-            # Decode URL parameter
-            decoded_data = urllib.parse.unquote(data_param)
-            use_cases_data = json.loads(decoded_data)
-            print(f"✅ Data loaded from URL parameter: {len(use_cases_data)} features")
-            
-            # Simpan ke session Django untuk digunakan di halaman berikutnya
-            request.session['useCaseDetails'] = use_cases_data
-        except json.JSONDecodeError as e:
-            print(f"❌ JSON decode error from URL: {e}")
-        except Exception as e:
-            print(f"❌ Error parsing URL data: {e}")
-    
-    # 2. Jika tidak ada dari URL, coba dari session Django
-    if not use_cases_data:
-        use_cases_data = request.session.get('useCaseDetails', [])
-        if use_cases_data:
-            print(f"✅ Data loaded from session: {len(use_cases_data)} features")
-    
-    # 3. Jika masih kosong, ambil dari database (fallback)
-    if not use_cases_data:
-        specs = UseCaseSpecification.objects.all().prefetch_related(
-            'basic_paths', 'alternative_paths', 'exception_paths'
-        )
-        
-        use_cases_data = []
-        for spec in specs:
-            use_cases_data.append({
-                'featureName': spec.feature_name,
-                'summary': spec.summary_description or '',
-                'priority': spec.priority or 'Should Have',
-                'status': spec.status or 'Active',
-                'precondition': spec.input_precondition or '',
-                'postcondition': spec.input_postcondition or '',
-                'basicPath': [
-                    {
-                        'actor': bp.actor_action or '',
-                        'system': bp.system_response or ''
-                    } for bp in spec.basic_paths.all().order_by('step_number')
-                ],
-                'alternativePath': [
-                    {
-                        'actor': ap.actor_action or '',
-                        'system': ap.system_response or ''
-                    } for ap in spec.alternative_paths.all().order_by('step_number')
-                ],
-                'exceptionPath': [
-                    {
-                        'actor': ep.actor_action or '',
-                        'system': ep.system_response or ''
-                    } for ep in spec.exception_paths.all().order_by('step_number')
-                ]
-            })
-        print(f"✅ Data loaded from database: {len(use_cases_data)} features")
-    
-    # 4. PERBAIKAN: Hapus bagian get_or_create Project & GUI yang bermasalah
-    # Halaman use_case_spec.html hanya butuh data untuk ditampilkan, tidak perlu menyimpan ke DB
-    
-    # 5. Kirim data ke template
+    for spec in specs:
+        use_cases_data.append({
+            'featureName': spec.feature_name, 
+            'summary': spec.summary_description or '',
+            'priority': spec.priority,
+            'status': spec.status,
+            'precondition': spec.input_precondition or '',
+            'postcondition': spec.input_postcondition or '',
+            # Mapping Basic Path
+            'basicPath': [
+                {
+                    'actor': bp.actor_action or '',
+                    'system': bp.system_response or ''
+                } for bp in spec.basic_paths.all().order_by('step_number')
+            ],
+            # Mapping Alternative Path
+            'alternativePath': [
+                {
+                    'actor': ap.actor_action or '',
+                    'system': ap.system_response or ''
+                } for ap in spec.alternative_paths.all().order_by('step_number')
+            ],
+            # Mapping Exception Path
+            'exceptionPath': [
+                {
+                    'actor': ep.actor_action or '',
+                    'system': ep.system_response or ''
+                } for ep in spec.exception_paths.all().order_by('step_number')
+            ]
+        })
+
+    # Kirim ke Template dalam format JSON String yang aman
     context = {
-        'specs': [],  # Kosongkan specs karena kita pakai data dari JS
-        'all_features': json.dumps(use_cases_data) if use_cases_data else '[]'
+        'all_features': json.dumps(use_cases_data) 
     }
     return render(request, 'main/use_case_spec.html', context)
 
