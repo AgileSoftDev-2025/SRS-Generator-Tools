@@ -1,117 +1,201 @@
+import re
 from main.models import UserStory, UserStoryScenario, Page, ImportedTable
 
-# main/generators/sequence_generator.py
-
 def build_sequence_plantuml(usecase_spec, basic_paths, alt_paths, exc_paths, pages, tables, relationships):
+    # ====================================================
+    # 1. SETUP DEBUG & TEXT ANALYSIS
+    # ====================================================
+    print("\n" + "="*40)
+    print("🚀 SEQUENCE GENERATOR START")
+    
+    # Gabungkan semua teks langkah untuk analisa global
+    all_steps_text = ""
+    for path in basic_paths: all_steps_text += f" {path.system_response or ''} {path.actor_action or ''} "
+    for path in alt_paths: all_steps_text += f" {path.system_response or ''} {path.actor_action or ''} "
+    for path in exc_paths: all_steps_text += f" {path.system_response or ''} {path.actor_action or ''} "
+    
+    all_steps_text = all_steps_text.lower()
+    print(f"📄 Analisis Teks Langkah: {all_steps_text[:100]}...")
+
+    # ====================================================
+    # 2. BANGUN LOOKUP TABLE (Mapping Nama Tabel ke Alias)
+    # ====================================================
+    table_lookup = {}
+    active_entities = {} # Menyimpan tabel yang BENAR-BENAR dipanggil
+    
+    if tables.exists():
+        print(f"📊 Total Tabel SQL Ditemukan: {tables.count()}")
+        for table in tables:
+            # 1. Bersihkan nama tabel (misal: "tbl_customers" -> "customer")
+            clean_name = table.name.lower()
+            clean_name = re.sub(r'^(tbl_|tb_|m_|t_|tr_|mst_|dt_)', '', clean_name) # Hapus prefix
+            clean_name = re.sub(r'(_table|_tbl|_data|_list)$', '', clean_name) # Hapus suffix
+            clean_name = re.sub(r'\d+$', '', clean_name) # Hapus angka
+            
+            # 2. Buat variasi Singular & Plural
+            # Contoh: customers -> [customers, customer]
+            variations = set()
+            variations.add(clean_name)
+            variations.add(table.name.lower()) # Nama asli
+            
+            if clean_name.endswith('s'): 
+                variations.add(clean_name[:-1]) # customers -> customer
+            else: 
+                variations.add(clean_name + 's') # customer -> customers
+
+            # Tambahan khusus (Hardcode logic umum)
+            if "auth" in clean_name or "login" in clean_name:
+                variations.add("user")
+                variations.add("users")
+
+            alias = f"E_{table.id}"
+            
+            # Simpan ke lookup
+            for var in variations:
+                table_lookup[var] = {
+                    "real_name": table.name,
+                    "alias": alias
+                }
+            
+            # DEBUG: Cek apakah tabel ini disebut di teks?
+            is_found = False
+            for var in variations:
+                # Cek exact word match atau partial match panjang
+                if re.search(r'\b' + re.escape(var) + r'\b', all_steps_text) or (len(var) > 4 and var in all_steps_text):
+                    active_entities[alias] = table.name
+                    print(f"   ✅ MATCH: Tabel '{table.name}' terdeteksi via kata '{var}'")
+                    is_found = True
+                    break
+            
+            if not is_found:
+                print(f"   ❌ SKIP: Tabel '{table.name}' tidak disebut di langkah-langkah.")
+
+    # ====================================================
+    # 3. HEADER & PARTICIPANTS DEFINITION
+    # ====================================================
     lines = []
     lines.append("@startuml")
     lines.append("autonumber")
+    lines.append("skinparam style strictuml")
     lines.append("skinparam responseMessageBelowArrow true")
-    lines.append("actor User")
+    lines.append("skinparam ParticipantPadding 25")
+    lines.append("skinparam BoxPadding 10")
+    
+    lines.append(f"title {usecase_spec.feature_name}")
 
-    # =============================
-    # 1. BOUNDARY (GUI)
-    # =============================
-    boundary_map = {}
-    active_boundary = "UI"
+    # A. Actor
+    lines.append("actor User as U")
 
+    # B. Boundary (UI)
+    boundary_alias = "UI"
+    boundary_name = "System UI"
     if pages.exists():
-        for page in pages:
-            # Buat ID unik: B_NamaPage_ID
-            safe_name = "".join(c for c in page.name if c.isalnum())
-            safe_alias = f"B_{safe_name}_{page.id}"
-            
-            lines.append(f'boundary "{page.name}" as {safe_alias}')
-            boundary_map[page.name.lower()] = safe_alias
-        
-        if boundary_map:
-            active_boundary = list(boundary_map.values())[0]
-    else:
-        lines.append('boundary "Application UI" as UI')
+        first_page = pages.first()
+        boundary_name = first_page.name
+        boundary_alias = f"B_{first_page.id}"
+    lines.append(f'boundary "{boundary_name}" as {boundary_alias}')
 
-    # =============================
-    # 2. CONTROLLER (PERBAIKAN NAMA)
-    # =============================
-    # Logika: Jika nama fitur diawali "As a...", potong jadi "System Controller"
-    # atau ambil kata kuncinya saja.
-    
-    feature_name = usecase_spec.feature_name
-    display_name = feature_name
-    
-    # Jika nama fitur terlalu panjang atau berupa kalimat user story
-    if len(feature_name) > 25 or "As a" in feature_name or "I want to" in feature_name:
-        display_name = "System Controller"
-    
-    controller_alias = f"C_Controller_{usecase_spec.id}"
-    lines.append(f'control "{display_name}" as {controller_alias}')
+    # C. Controller
+    ctrl_alias = "CTRL"
+    lines.append(f'control "System Controller" as {ctrl_alias}')
 
-    # =============================
-    # 3. ENTITY (DATABASE)
-    # =============================
-    entity_map = {}
-    for table in tables:
-        safe_tbl = "".join(c for c in table.name if c.isalnum())
-        safe_entity = f"E_{safe_tbl}"
-        lines.append(f'entity "{table.name}" as {safe_entity}')
-        entity_map[table.name.lower()] = safe_entity
+    # D. Entity (Hanya render tabel yang terdeteksi aktif)
+    for alias, name in active_entities.items():
+        lines.append(f'entity "{name}" as {alias}')
+
+    # E. Generic DB (Fallback jika ada aktivitas DB tapi tabel spesifik tidak ketemu)
+    fallback_db_alias = "DB_GENERIC"
+    db_keywords = ['save', 'simpan', 'store', 'update', 'delete', 'hapus', 'insert', 'create', 'fetch', 'get', 'retrieve', 'ambil', 'cari', 'check', 'validate', 'validasi', 'database', 'db', 'record']
+    
+    has_generic_activity = False
+    # Cek apakah ada kata kerja DB tapi tidak ada tabel yang cocok di kalimat itu
+    # (Kita lakukan pengecekan per kalimat di logic bawah, tapi deklarasi di sini)
+    if any(kw in all_steps_text for kw in db_keywords):
+        # Jika tidak ada satupun entity spesifik yang aktif, ATAU mau fallback ditampilkan
+        if not active_entities:
+            lines.append(f'database "Database System" as {fallback_db_alias}')
+            has_generic_activity = True
+            print("   ⚠️ Menggunakan Generic Database (karena tidak ada tabel spesifik yang cocok)")
 
     lines.append("")
-    lines.append(f"title {feature_name}") # Judul tetap nama asli agar jelas
 
-    # =============================
-    # 4. LOGIC LANGKAH
-    # =============================
+    # ====================================================
+    # 4. HELPER FUNCTION PENCARI TARGET
+    # ====================================================
+    def get_target_db(sentence):
+        sentence = sentence.lower()
+        
+        # 1. Cek Tabel Spesifik (Prioritas Utama)
+        for keyword, data in table_lookup.items():
+            # Regex boundary match (biar 'user' tidak match 'username')
+            if re.search(r'\b' + re.escape(keyword) + r'\b', sentence):
+                return data['alias']
+            # Partial match untuk kata panjang
+            if len(keyword) > 4 and keyword in sentence:
+                return data['alias']
+        
+        # 2. Cek Generic DB
+        if has_generic_activity:
+            if any(kw in sentence for kw in db_keywords):
+                return fallback_db_alias
+        
+        return None
+
+    # ====================================================
+    # 5. LOGIC FLOW WRITER
+    # ====================================================
     def write_steps(path_list):
         if not path_list: return
 
         for step in path_list:
-            # AKSI USER
+            # --- ACTION ---
             if step.actor_action:
                 action = step.actor_action.replace('"', "'")
-                lines.append(f"User -> {active_boundary}: {action}")
+                lines.append(f"U -> {boundary_alias}: {action}")
 
-            # RESPON SISTEM
+            # --- RESPONSE ---
             if step.system_response:
                 resp = step.system_response.replace('"', "'")
-                resp_lower = resp.lower()
                 
-                # 1. Boundary -> Controller
-                lines.append(f"{active_boundary} -> {controller_alias}: Request Process")
-                
-                # 2. Cek apakah respon mengandung nama tabel (Entity)
-                found_entity = None
-                for tbl_name, tbl_alias in entity_map.items():
-                    if tbl_name in resp_lower:
-                        found_entity = tbl_alias
-                        break
-                
-                # 3. Controller -> Entity (Jika ada)
-                if found_entity:
-                    lines.append(f"{controller_alias} -> {found_entity}: Query/Update")
-                    lines.append(f"{found_entity} --> {controller_alias}: Result Data")
-                
-                # 4. Controller -> Boundary
-                lines.append(f"{controller_alias} --> {active_boundary}: Return Result")
-                
-                # 5. Boundary -> User
-                lines.append(f"{active_boundary} --> User: {resp}")
+                # UI -> Controller
+                lines.append(f"{boundary_alias} -> {ctrl_alias}: Request Process")
+                lines.append(f"activate {ctrl_alias}")
 
-    # =============================
-    # 5. DRAW FLOWS
-    # =============================
-    
-    # Cek Data Kosong (Penting untuk debugging user)
-    if not basic_paths.exists():
-        lines.append(f"note right of User #ffaaaa")
-        lines.append(f"DATA KOSONG:\nTidak ada langkah 'Basic Flow' di database.\nSilakan input langkah-langkah di menu Input Informasi Tambahan.")
-        lines.append("end note")
+                # Controller -> Database (Mana yang dipanggil?)
+                target_alias = get_target_db(resp)
+                
+                if target_alias:
+                    # Tentukan jenis operasi (Read/Write)
+                    method = "Query"
+                    if any(k in resp.lower() for k in ['save', 'simpan', 'add', 'tambah', 'create', 'update']):
+                        method = "Insert/Update"
+                    elif any(k in resp.lower() for k in ['delete', 'hapus']):
+                        method = "Delete"
+                    
+                    lines.append(f"{ctrl_alias} -> {target_alias}: {method}")
+                    lines.append(f"activate {target_alias}")
+                    lines.append(f"{target_alias} --> {ctrl_alias}: Result")
+                    lines.append(f"deactivate {target_alias}")
 
-    lines.append("== Basic Flow ==")
-    write_steps(basic_paths)
+                # Controller -> UI
+                lines.append(f"{ctrl_alias} --> {boundary_alias}: Response")
+                lines.append(f"deactivate {ctrl_alias}")
+
+                # UI -> User
+                lines.append(f"{boundary_alias} --> U: {resp}")
+                lines.append("")
+
+    # ====================================================
+    # 6. GENERATE BODY
+    # ====================================================
+    lines.append("group Basic Flow")
+    if basic_paths.exists(): write_steps(basic_paths)
+    else: lines.append(f"U -> {boundary_alias}: (No steps)")
+    lines.append("end")
 
     if alt_paths.exists():
         lines.append("")
-        lines.append("alt Alternative Flow")
+        lines.append("group Alternative Flow")
         write_steps(alt_paths)
         lines.append("end")
 
@@ -122,4 +206,8 @@ def build_sequence_plantuml(usecase_spec, basic_paths, alt_paths, exc_paths, pag
         lines.append("end")
 
     lines.append("@enduml")
+    
+    print("🚀 SEQUENCE GENERATOR FINISHED")
+    print("="*40 + "\n")
+    
     return "\n".join(lines)
