@@ -12,7 +12,6 @@ psycopg2-binary>=2.9.9
 # Environment variable management
 python-decouple>=3.8
 dj-database-url>=2.1.0
-DATABASE_URL=postgresql://postgres:Unairhebatberprestasi@db.epxbwchqsgfnhzsqufwa.supabase.co:5432/postgres
 
 
 # Static files serving in production
