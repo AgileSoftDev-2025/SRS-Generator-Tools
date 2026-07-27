@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #f9fafb;
@@ -22,27 +23,27 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         header {
             background: #fff;
             border-bottom: 1px solid #e5e7eb;
             padding: 1rem 2rem;
         }
-        
+
         footer {
             background: #fff;
             border-top: 1px solid #e5e7eb;
             padding: 1rem 2rem;
             margin-top: 2rem;
         }
-        
+
         main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
             flex: 1;
         }
-        
+
         .card {
             background: white;
             border-radius: 8px;
@@ -50,7 +51,7 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        
+
         .btn {
             background-color: #111827;
             color: white;
@@ -61,27 +62,27 @@
             font-size: 14px;
             transition: background-color 0.2s;
         }
-        
+
         .btn:hover {
             background-color: #1f2937;
         }
-        
+
         .btn-outline {
             background-color: white;
             color: #374151;
             border: 1px solid #d1d5db;
         }
-        
+
         .btn-outline:hover {
             background-color: #f9fafb;
         }
-        
+
         .logo {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        
+
         .logo-icon {
             width: 24px;
             height: 24px;
@@ -91,13 +92,13 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .logo-text {
             font-size: 20px;
             font-weight: 600;
             color: #111827;
         }
-        
+
         .diagram-container {
             background: white;
             border-radius: 8px;
@@ -106,7 +107,7 @@
             margin-bottom: 32px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        
+
         .feature-header {
             display: flex;
             justify-content: space-between;
@@ -115,25 +116,25 @@
             padding-bottom: 16px;
             border-bottom: 1px solid #e5e7eb;
         }
-        
+
         .feature-title {
             color: #111827;
             font-weight: 600;
             font-size: 20px;
         }
-        
+
         .feature-meta {
             display: flex;
             gap: 12px;
         }
-        
+
         .badge {
             font-size: 0.8em;
             padding: 4px 8px;
             border-radius: 4px;
             display: inline-block;
         }
-        
+
         .diagram-preview {
             background: #f8fafc;
             border: 2px dashed #d1d5db;
@@ -147,7 +148,7 @@
             align-items: center;
             justify-content: center;
         }
-        
+
         .diagram-image {
             max-width: 100%;
             height: auto;
@@ -155,7 +156,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: none;
         }
-        
+
         .loading-spinner {
             display: inline-block;
             width: 40px;
@@ -166,23 +167,28 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .placeholder-icon {
             font-size: 48px;
             color: #9ca3af;
             margin-bottom: 16px;
         }
-        
+
         .placeholder-text {
             color: #6b7280;
             font-size: 14px;
         }
-        
+
         .toolbar {
             display: flex;
             gap: 8px;
@@ -190,7 +196,7 @@
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
         .tool-btn {
             background: white;
             border: 1px solid #d1d5db;
@@ -203,12 +209,12 @@
             gap: 6px;
             transition: all 0.2s;
         }
-        
+
         .tool-btn:hover {
             background: #f3f4f6;
             border-color: #9ca3af;
         }
-        
+
         .export-section {
             background: #f8fafc;
             border: 1px solid #e5e7eb;
@@ -216,14 +222,14 @@
             padding: 20px;
             margin-bottom: 24px;
         }
-        
+
         .export-buttons {
             display: flex;
             gap: 12px;
             margin-top: 15px;
             flex-wrap: wrap;
         }
-        
+
         .export-btn {
             display: flex;
             align-items: center;
@@ -238,56 +244,56 @@
             transition: all 0.2s;
             color: #111827;
         }
-        
+
         .export-btn:hover {
             background-color: #111827;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .export-btn svg {
             width: 20px;
             height: 20px;
         }
-        
+
         .save-status {
             margin-top: 8px;
             font-size: 13px;
             padding: 6px 10px;
             border-radius: 4px;
         }
-        
+
         .save-status.success {
             background-color: #d1fae5;
             color: #065f46;
             border: 1px solid #a7f3d0;
         }
-        
+
         .save-status.warning {
             background-color: #fef3c7;
             color: #92400e;
             border: 1px solid #fde68a;
         }
-        
+
         .save-status.danger {
             background-color: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
         }
-        
+
         .save-status.info {
             background-color: #dbeafe;
             color: #1e40af;
             border: 1px solid #bfdbfe;
         }
-        
+
         .navigation {
             display: flex;
             justify-content: space-between;
             margin-top: 30px;
         }
-        
+
         .tip-box {
             background: #f8fafc;
             border: 1px solid #e5e7eb;
@@ -297,7 +303,7 @@
             font-size: 14px;
             color: #374151;
         }
-        
+
         .error-message {
             background: #fef2f2;
             border: 1px solid #fecaca;
@@ -306,7 +312,7 @@
             color: #991b1b;
             margin: 16px 0;
         }
-        
+
         .feature-info {
             display: flex;
             gap: 24px;
@@ -316,18 +322,18 @@
             border-radius: 6px;
             border: 1px solid #e5e7eb;
         }
-        
+
         .info-item {
             flex: 1;
         }
-        
+
         .info-label {
             font-size: 12px;
             color: #6b7280;
             margin-bottom: 4px;
             display: block;
         }
-        
+
         .info-value {
             color: #111827;
             font-weight: 500;
@@ -346,53 +352,60 @@
     </header>
 
     <main>
-    {% include 'main/stepper.html' with current_step=5 %}
+        {% include 'main/stepper.html' with current_step=5 %}
 
         <div style="margin-bottom: 32px;">
-            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Generated Activity Diagram</h1>
-            <p style="color: #6b7280; font-size: 14px;">View and export activity diagrams generated from your use case specifications.</p>
+            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Generated Activity
+                Diagram</h1>
+            <p style="color: #6b7280; font-size: 14px;">View and export activity diagrams generated from your use case
+                specifications.</p>
         </div>
-        
+
         <!-- Export Options -->
         <div class="export-section">
             <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 4px;">Export Options</h3>
-            <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Export your activity diagrams in different formats.</p>
-            
+            <p style="color: #6b7280; font-size: 14px; margin-bottom: 15px;">Export your activity diagrams in different
+                formats.</p>
+
             <div class="export-buttons">
                 <button id="downloadAllPNGBtn" class="export-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
                     Download All as PNG
                 </button>
                 <button id="downloadAllPlantUMLBtn" class="export-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                     Download All PlantUML
                 </button>
             </div>
             <div id="exportStatus" class="save-status" style="display: none;"></div>
         </div>
-        
+
         <!-- Status Info -->
         <div id="statusInfo" class="card" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <span id="completedCount">0</span> of <span id="totalCount">0</span> diagrams generated
                 </div>
-                <button id="refreshAllBtn" class="btn" style="padding: 6px 12px; font-size: 13px;">🔄 Regenerate All</button>
+                <button id="refreshAllBtn" class="btn" style="padding: 6px 12px; font-size: 13px;">🔄 Regenerate
+                    All</button>
             </div>
         </div>
-        
+
         <!-- Container for diagrams -->
         <div id="diagramContainer">
             <!-- Content will be dynamically generated by JavaScript -->
         </div>
-        
+
         <!-- Tip Box -->
         <div class="tip-box">
-            <strong>💡 Tip:</strong> Activity diagrams are automatically generated from your use case specifications. Each diagram shows:
+            <strong>💡 Tip:</strong> Activity diagrams are automatically generated from your use case specifications.
+            Each diagram shows:
             <ul style="margin-top: 8px; margin-left: 20px; color: #4b5563;">
                 <li>Pre-condition as starting activity</li>
                 <li>Basic flow in sequence</li>
@@ -400,7 +413,7 @@
                 <li>Post-condition as ending activity</li>
             </ul>
         </div>
-        
+
         <!-- Navigation -->
         <div class="navigation">
             <a href="{% url 'main:use_case_spec' %}" class="btn btn-outline">← Back to Specifications</a>
@@ -424,23 +437,23 @@
         // ===== DATA LOADING =====
         let allFeatures = [];
         let featuresLoaded = false;
-        
+
         // Try multiple data sources
         function loadDataFromDjango() {
             const allFeaturesRaw = '{{ all_features|escapejs }}';
-            
+
             if (allFeaturesRaw && allFeaturesRaw !== '[]' && allFeaturesRaw !== 'None') {
                 try {
                     allFeatures = JSON.parse(allFeaturesRaw);
                     console.log("✅ Data loaded from Django:", allFeatures.length, "features");
                     return true;
-                } catch(e) {
+                } catch (e) {
                     console.error("❌ Error parsing Django data:", e);
                 }
             }
             return false;
         }
-        
+
         function loadDataFromSessionStorage() {
             const sessionData = sessionStorage.getItem('all_use_case_data');
             if (sessionData) {
@@ -448,13 +461,13 @@
                     allFeatures = JSON.parse(sessionData);
                     console.log("✅ Data loaded from sessionStorage:", allFeatures.length, "features");
                     return true;
-                } catch(e) {
+                } catch (e) {
                     console.error("❌ Error parsing sessionStorage:", e);
                 }
             }
             return false;
         }
-        
+
         function loadDataFromLocalStorage() {
             const localData = localStorage.getItem('all_use_case_data');
             if (localData) {
@@ -468,30 +481,30 @@
                     }
                     console.log("✅ Data loaded from localStorage:", allFeatures.length, "features");
                     return true;
-                } catch(e) {
+                } catch (e) {
                     console.error("❌ Error parsing localStorage:", e);
                 }
             }
             return false;
         }
-        
+
         function loadDataFromURL() {
             const urlParams = new URLSearchParams(window.location.search);
             const encodedData = urlParams.get('data');
-            
+
             if (encodedData) {
                 try {
                     const decodedData = decodeURIComponent(encodedData);
                     allFeatures = JSON.parse(decodedData);
                     console.log("✅ Data loaded from URL:", allFeatures.length, "features");
                     return true;
-                } catch(e) {
+                } catch (e) {
                     console.error("❌ Error parsing URL data:", e);
                 }
             }
             return false;
         }
-        
+
         function loadAllData() {
             const sources = [
                 { name: 'Django', func: loadDataFromDjango },
@@ -499,7 +512,7 @@
                 { name: 'LocalStorage', func: loadDataFromLocalStorage },
                 { name: 'URL', func: loadDataFromURL }
             ];
-            
+
             for (const source of sources) {
                 if (source.func()) {
                     console.log(`📊 Successfully loaded data from ${source.name}`);
@@ -507,11 +520,11 @@
                     return true;
                 }
             }
-            
+
             console.error("❌ No data available from any source!");
             return false;
         }
-        
+
         // ===== PLANTUML GENERATION =====
         let currentSwimlane = "";
         function switchSwimlane(target) {
@@ -525,7 +538,7 @@
             if (name.includes("login") || name.includes("masuk")) return "Kredensial valid?";
             if (name.includes("regist") || name.includes("daftar") || name.includes("signup")) return "Data valid?";
             if (name.includes("save") || name.includes("simpan") || name.includes("tambah") || name.includes("create")) return "Data valid?";
-            
+
             if (exceptionSteps.length > 0) {
                 const firstStepActor = (exceptionSteps[0].actor || exceptionSteps[0].actorAction || "").toLowerCase();
                 if (firstStepActor.includes("input") || firstStepActor.includes("isi")) return "Input valid?";
@@ -540,51 +553,51 @@
             const basicPath = Array.isArray(feature.basicPath) ? feature.basicPath : [];
             const alternativePath = Array.isArray(feature.alternativePath) ? feature.alternativePath : [];
             const exceptionPath = Array.isArray(feature.exceptionPath) ? feature.exceptionPath : [];
-            
+
             let plantUML = "@startuml\n";
             plantUML += `skinparam monochrome true\nskinparam shadowing false\n`;
             plantUML += `title "${featureName}"\n\n`;
-            
+
             // Define Swimlanes
             plantUML += "|Actor|\n";
             plantUML += "|System|\n\n";
-            
+
             let initialSwimlane = "Actor"; // Default to Actor
             if (basicPath.length > 0) {
                 const firstStep = basicPath[0];
                 const firstActor = firstStep.actor || firstStep.actorAction || "";
                 const firstSystem = firstStep.system || firstStep.systemResponse || "";
-                if ((!firstActor || firstActor.trim() === "" || firstActor === "-") && 
+                if ((!firstActor || firstActor.trim() === "" || firstActor === "-") &&
                     (firstSystem && firstSystem.trim() !== "" && firstSystem !== "-")) {
                     initialSwimlane = "System";
                 }
             }
-            
+
             plantUML += `|${initialSwimlane}|\n`;
             currentSwimlane = initialSwimlane;
             plantUML += "start\n\n";
-            
+
             // Add pre-condition if exists
             if (precondition && precondition.trim() !== "" && precondition !== "-") {
                 plantUML += `:Pre-condition: ${precondition.trim()};\n\n`;
             }
-            
+
             // Separate success step from basic path if there are exceptions
             let basicSteps = [...basicPath];
             let successStep = null;
             const hasException = exceptionPath.some(s => (s.actor || s.system));
             const hasAlternative = alternativePath.some(s => (s.actor || s.system));
-            
+
             if ((hasException || hasAlternative) && basicSteps.length > 1) {
                 successStep = basicSteps.pop();
             }
-            
+
             // Helper function to append steps without forcing horizontal layout
             function appendSteps(steps) {
                 steps.forEach(step => {
                     const actorAction = step.actor || step.actorAction || "";
                     const systemResponse = step.system || step.systemResponse || "";
-                    
+
                     if (actorAction && actorAction.trim() !== "" && actorAction !== "-") {
                         plantUML += switchSwimlane("Actor") + `:${actorAction.trim()};\n`;
                     }
@@ -593,32 +606,32 @@
                     }
                 });
             }
-            
+
             // Basic Flow
             appendSteps(basicSteps);
-            
+
             // Decision node for Exception / Alternative Flows
             if (hasException) {
                 const guard = getGuardCondition(featureName, exceptionPath);
                 plantUML += switchSwimlane("System") + `if (${guard}) then (yes)\n`;
-                
+
                 // YES branch (Success path)
                 if (successStep) {
                     appendSteps([successStep]);
                 }
-                
+
                 if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
                     plantUML += switchSwimlane("System") + `:Post-condition: ${postcondition.trim()};\n`;
                 }
                 plantUML += "  stop\n";
-                
+
                 // NO branch (Exception path)
                 plantUML += "else (no)\n";
                 let exceptionEndsWithLoop = false;
                 exceptionPath.forEach(step => {
                     const actorAction = step.actor || step.actorAction || "";
                     const systemResponse = step.system || step.systemResponse || "";
-                    
+
                     if (systemResponse && systemResponse.trim() !== "" && systemResponse !== "-") {
                         plantUML += switchSwimlane("System") + `  :${systemResponse.trim()};\n`;
                         if (systemResponse.toLowerCase().includes("kembali") || systemResponse.toLowerCase().includes("ulang") || systemResponse.toLowerCase().includes("retry")) {
@@ -632,21 +645,21 @@
                         }
                     }
                 });
-                
+
                 if (exceptionEndsWithLoop) {
                     plantUML += "  note right: Looping back to start\n";
                 }
                 plantUML += "  stop\n";
                 plantUML += "endif\n";
-                
+
             } else if (hasAlternative) {
                 const guard = "Kondisi alternatif terpenuhi?";
                 plantUML += switchSwimlane("System") + `if (${guard}) then (yes)\n`;
-                
+
                 alternativePath.forEach(step => {
                     const actorAction = step.actor || step.actorAction || "";
                     const systemResponse = step.system || step.systemResponse || "";
-                    
+
                     if (systemResponse && systemResponse.trim() !== "" && systemResponse !== "-") {
                         plantUML += switchSwimlane("System") + `  :${systemResponse.trim()};\n`;
                     }
@@ -654,39 +667,39 @@
                         plantUML += switchSwimlane("Actor") + `  :${actorAction.trim()};\n`;
                     }
                 });
-                
+
                 plantUML += "else (no)\n";
                 if (successStep) {
                     appendSteps([successStep]);
                 }
                 plantUML += "endif\n";
-                
+
                 if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
                     plantUML += switchSwimlane("System") + `:Post-condition: ${postcondition.trim()};\n`;
                 }
                 plantUML += "stop\n";
-                
+
             } else {
                 // Default straightforward flow
                 if (successStep) {
                     appendSteps([successStep]);
                 }
-                
+
                 if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
                     plantUML += switchSwimlane(currentSwimlane) + `:Post-condition: ${postcondition.trim()};\n`;
                 }
                 plantUML += "stop\n";
             }
-            
+
             plantUML += "@enduml";
             return plantUML;
         }
-        
+
         // ===== DIAGRAM RENDERING =====
         function renderDiagrams(features) {
             const container = document.getElementById('diagramContainer');
             const statusInfo = document.getElementById('statusInfo');
-            
+
             if (!features || features.length === 0) {
                 container.innerHTML = `
                     <div class="card">
@@ -702,26 +715,26 @@
                 statusInfo.style.display = 'none';
                 return;
             }
-            
+
             // Show status info
             statusInfo.style.display = 'block';
             document.getElementById('totalCount').textContent = features.length;
             document.getElementById('completedCount').textContent = 0;
-            
+
             let html = '';
             let completedCount = 0;
-            
+
             features.forEach((feature, index) => {
                 const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
                 const summary = feature.summary || feature.description || '';
                 const priority = feature.priority || 'Should Have';
                 const status = feature.status || 'Active';
-                
+
                 // Priority color
                 const priorityColor = priority === 'Must Have' ? '#ef4444' :
-                                   priority === 'Should Have' ? '#f59e0b' :
-                                   priority === 'Could Have' ? '#0ea5e9' : '#6b7280';
-                
+                    priority === 'Should Have' ? '#f59e0b' :
+                        priority === 'Could Have' ? '#0ea5e9' : '#6b7280';
+
                 html += `
                     <div class="diagram-container" id="diagram-container-${index}">
                         <div class="feature-header">
@@ -777,16 +790,16 @@
                     </div>
                 `;
             });
-            
+
             container.innerHTML = html;
-            
+
             // Render all diagrams
             features.forEach((feature, index) => {
                 setTimeout(() => {
                     renderDiagram(feature, index);
                 }, index * 500); // Stagger rendering to avoid overwhelming
             });
-            
+
             // Enable next button
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
@@ -794,32 +807,32 @@
                 nextBtn.style.backgroundColor = '#111827';
             }
         }
-        
+
         async function renderDiagram(feature, index) {
             const spinner = document.getElementById(`spinner-${index}`);
             const image = document.getElementById(`image-${index}`);
             const preview = document.getElementById(`preview-${index}`);
             const placeholderIcon = preview.querySelector('.placeholder-icon');
             const placeholderText = preview.querySelector('.placeholder-text');
-            
+
             try {
                 // Generate PlantUML code
                 const plantUMLCode = generatePlantUML(feature);
-                
+
                 // Store PlantUML code for download
                 image.dataset.plantuml = plantUMLCode;
-                
+
                 // Encode and generate image URL
                 const encoded = plantumlEncoder.encode(plantUMLCode);
                 const imageUrl = `https://www.plantuml.com/plantuml/png/${encoded}`;
-                
+
                 // Set up image loading
-                image.onload = function() {
+                image.onload = function () {
                     spinner.style.display = 'none';
                     placeholderIcon.style.display = 'none';
                     placeholderText.style.display = 'none';
                     image.style.display = 'block';
-                    
+
                     // Update completed count
                     const completedCountEl = document.getElementById('completedCount');
                     let currentCount = parseInt(completedCountEl.textContent);
@@ -829,17 +842,17 @@
                     const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
                     saveActivityDiagramToDatabase(featureName, plantUMLCode, imageUrl);
                 };
-                
-                image.onerror = function() {
+
+                image.onerror = function () {
                     spinner.style.display = 'none';
                     placeholderIcon.textContent = '❌';
                     placeholderIcon.style.color = '#ef4444';
                     placeholderText.textContent = 'Failed to generate diagram';
                     placeholderText.style.color = '#ef4444';
                 };
-                
+
                 image.src = imageUrl;
-                
+
             } catch (error) {
                 console.error(`Error rendering diagram ${index}:`, error);
                 spinner.style.display = 'none';
@@ -882,11 +895,11 @@
                         image_url: imageUrl
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`Server returned status ${response.status}`);
                 }
-                
+
                 const result = await response.json();
                 if (result.status === "success") {
                     console.log(`✅ Saved activity diagram for ${featureName} to DB.`);
@@ -897,7 +910,7 @@
                 console.error(`❌ Error saving activity diagram for ${featureName} to DB:`, error);
             }
         }
-        
+
         // ===== TOOL FUNCTIONS =====
         function zoomIn(index) {
             const image = document.getElementById(`image-${index}`);
@@ -906,7 +919,7 @@
                 image.style.width = (currentWidth * 1.2) + 'px';
             }
         }
-        
+
         function zoomOut(index) {
             const image = document.getElementById(`image-${index}`);
             if (image && image.style.display !== 'none') {
@@ -914,27 +927,27 @@
                 image.style.width = (currentWidth * 0.8) + 'px';
             }
         }
-        
+
         function downloadPNG(index) {
             const image = document.getElementById(`image-${index}`);
             if (image && image.src && image.style.display !== 'none') {
                 const feature = allFeatures[index];
                 const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
                 const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                
+
                 const a = document.createElement('a');
                 a.href = image.src;
                 a.download = `${safeFileName}_activity_diagram.png`;
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-                
+
                 showExportStatus(`✅ PNG downloaded: ${safeFileName}_activity_diagram.png`, 'success');
             } else {
                 showExportStatus('⚠️ Please wait for the diagram to load first', 'warning');
             }
         }
-        
+
         function downloadPlantUML(index) {
             const image = document.getElementById(`image-${index}`);
             if (image && image.dataset.plantuml) {
@@ -942,7 +955,7 @@
                 const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
                 const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 const plantUMLCode = image.dataset.plantuml;
-                
+
                 const blob = new Blob([plantUMLCode], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -952,27 +965,27 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
+
                 showExportStatus(`✅ PlantUML downloaded: ${safeFileName}.puml`, 'success');
             }
         }
-        
+
         // ===== BULK EXPORT FUNCTIONS =====
         function downloadAllPNG() {
             if (!allFeatures || allFeatures.length === 0) {
                 showExportStatus('⚠️ No diagrams available', 'warning');
                 return;
             }
-            
+
             showExportStatus('Preparing all PNG files for download...', 'info');
-            
+
             setTimeout(() => {
                 allFeatures.forEach((feature, index) => {
                     const image = document.getElementById(`image-${index}`);
                     if (image && image.src && image.style.display !== 'none') {
                         const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
                         const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                        
+
                         const a = document.createElement('a');
                         a.href = image.src;
                         a.download = `${safeFileName}_activity_diagram.png`;
@@ -981,23 +994,23 @@
                         document.body.removeChild(a);
                     }
                 });
-                
+
                 showExportStatus(`✅ Started download of ${allFeatures.length} PNG files`, 'success');
             }, 500);
         }
-        
+
         function downloadAllPlantUML() {
             if (!allFeatures || allFeatures.length === 0) {
                 showExportStatus('⚠️ No diagrams available', 'warning');
                 return;
             }
-            
+
             let allPlantUML = '';
-            
+
             allFeatures.forEach((feature, index) => {
                 const plantUMLCode = generatePlantUML(feature);
                 const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
-                
+
                 allPlantUML += `' ==============================\n`;
                 allPlantUML += `' Feature: ${featureName}\n`;
                 allPlantUML += `' Priority: ${feature.priority || 'Should Have'}\n`;
@@ -1005,7 +1018,7 @@
                 allPlantUML += `' ==============================\n\n`;
                 allPlantUML += plantUMLCode + '\n\n\n';
             });
-            
+
             const blob = new Blob([allPlantUML], { type: 'text/plain' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1015,20 +1028,20 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
+
             showExportStatus(`✅ Downloaded ${allFeatures.length} PlantUML files as single archive`, 'success');
         }
-        
+
         function regenerateAllDiagrams() {
             if (!allFeatures || allFeatures.length === 0) {
                 return;
             }
-            
+
             showExportStatus('Regenerating all diagrams...', 'info');
-            
+
             // Reset completed count
             document.getElementById('completedCount').textContent = '0';
-            
+
             // Re-render all diagrams
             allFeatures.forEach((feature, index) => {
                 setTimeout(() => {
@@ -1036,42 +1049,42 @@
                 }, index * 500);
             });
         }
-        
+
         function showExportStatus(message, type) {
             const exportStatus = document.getElementById('exportStatus');
             exportStatus.textContent = message;
             exportStatus.className = 'save-status ' + type;
             exportStatus.style.display = 'block';
-            
+
             setTimeout(() => {
                 exportStatus.style.display = 'none';
             }, 5000);
         }
-        
+
         // ===== PAGE INITIALIZATION =====
         document.addEventListener('DOMContentLoaded', () => {
             console.log('=== ACTIVITY DIAGRAM PAGE LOADED ===');
-            
+
             featuresLoaded = loadAllData();
-            
+
             if (featuresLoaded) {
                 console.log(`📊 Total features loaded: ${allFeatures.length}`);
                 renderDiagrams(allFeatures);
-                
+
                 // Set up event listeners
                 document.getElementById('downloadAllPNGBtn').addEventListener('click', downloadAllPNG);
                 document.getElementById('downloadAllPlantUMLBtn').addEventListener('click', downloadAllPlantUML);
                 document.getElementById('refreshAllBtn').addEventListener('click', regenerateAllDiagrams);
-                
+
                 // Set up next button
-                document.getElementById('nextBtn').addEventListener('click', function() {
+                document.getElementById('nextBtn').addEventListener('click', function () {
                     // Save data for next page
                     if (allFeatures && allFeatures.length > 0) {
                         localStorage.setItem('diagram_generated', 'true');
                     }
                     window.location.href = "{% url 'main:input_gui' %}";
                 });
-                
+
             } else {
                 const container = document.getElementById('diagramContainer');
                 container.innerHTML = `
@@ -1085,17 +1098,17 @@
                         </div>
                     </div>
                 `;
-                
+
                 const exportBtns = document.querySelectorAll('.export-btn');
                 exportBtns.forEach(btn => btn.disabled = true);
-                
+
                 const nextBtn = document.getElementById('nextBtn');
                 if (nextBtn) {
                     nextBtn.disabled = true;
                     nextBtn.style.backgroundColor = '#9ca3af';
                 }
             }
-            
+
             // Make functions globally available
             window.zoomIn = zoomIn;
             window.zoomOut = zoomOut;
@@ -1104,4 +1117,17 @@
         });
     </script>
 </body>
+
+</html> }
+}
+
+// Make functions globally available
+window.zoomIn = zoomIn;
+window.zoomOut = zoomOut;
+window.downloadPNG = downloadPNG;
+window.downloadPlantUML = downloadPlantUML;
+});
+</script>
+</body>
+
 </html>
