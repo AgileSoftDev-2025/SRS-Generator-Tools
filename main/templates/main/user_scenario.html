@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Scenario</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+
+        .page-wrapper { max-width: 900px; margin: 0 auto; padding: 32px 24px 80px; }
+
+        h1 { font-size: 22px; font-weight: 600; color: #0f172a; margin-bottom: 4px; }
+        .subtitle { font-size: 13px; color: #64748b; margin-bottom: 28px; }
+
+        /* Feature Card */
+        .feature-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .feature-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .feature-header:hover { background: #f8fafc; }
+
+        .feature-left { display: flex; align-items: center; gap: 14px; }
+        .feature-num {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: #3b82f6; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600; flex-shrink: 0;
+        }
+        .feature-title { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .feature-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+        .chevron { transition: transform 0.25s; color: #94a3b8; }
+        .chevron.open { transform: rotate(180deg); }
+
+        .feature-body { display: none; border-top: 1px solid #f1f5f9; padding: 20px; }
+        .feature-body.open { display: block; }
+
+        /* Flow Panels (Stacked) */
+        .scenario-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .scenario-panel:last-child {
+            margin-bottom: 0;
+        }
+        .flow-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .flow-header.normal { color: #2563eb; }
+        .flow-header.alt { color: #d97706; }
+        .flow-header.exc { color: #e11d48; }
+
+        .path-preview {
+            background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+        }
+        .path-preview-title {
+            font-size: 11px; font-weight: 600; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+        }
+        .path-step {
+            display: flex; gap: 10px; margin-bottom: 6px; font-size: 12px; color: #475569;
+        }
+        .path-step-actor { color: #1d4ed8; font-weight: 500; }
+        .path-step-sys { color: #0f766e; }
+
+        /* Steps Form */
+        .steps-title {
+            font-size: 12px; font-weight: 600; color: #374151;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+        }
+        .step-row {
+            display: grid; grid-template-columns: 28px 90px 140px 1fr 28px;
+            gap: 8px; margin-bottom: 8px; align-items: center;
+        }
+        .step-num {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #e2e8f0; color: #64748b;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: 600;
+        }
+        select, input[type="text"] {
+            width: 100%; padding: 7px 10px; border-radius: 6px;
+            border: 1px solid #e2e8f0; font-size: 13px; font-family: 'Inter', sans-serif;
+            background: #fff; color: #1e293b;
+        }
+        select:focus, input[type="text"]:focus {
+            outline: none; border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+        }
+        .del-btn {
+            width: 28px; height: 28px; border-radius: 6px;
+            background: none; border: 1px solid #fee2e2; color: #ef4444;
+            cursor: pointer; font-size: 14px; line-height: 1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .del-btn:hover { background: #fee2e2; }
+
+        .add-step-btn {
+            margin-top: 6px; padding: 7px 14px; font-size: 12px;
+            background: none; border: 1.5px dashed #cbd5e1; border-radius: 6px;
+            color: #64748b; cursor: pointer; width: 100%;
+        }
+        .add-step-btn:hover { border-color: #3b82f6; color: #3b82f6; }
+
+        /* Navigation */
+        .navigation {
+            display: flex; justify-content: space-between;
+            margin-top: 32px; gap: 12px;
+        }
+        .nav-btn {
+            padding: 11px 24px; border-radius: 7px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
+            border: none; text-decoration: none; transition: opacity 0.2s;
+        }
+        .nav-btn-back { background: #f1f5f9; color: #475569; }
+        .nav-btn-next { background: #1e293b; color: #fff; }
+        .nav-btn:hover { opacity: 0.85; }
+        .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 40px; color: #94a3b8;
+        }
+        .empty-state svg { margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+    {% include 'main/stepper.html' with current_step=7 %}
+    {% csrf_token %}
+
+    <h1>User Scenario</h1>
+    <p class="subtitle">Fill in Given / When / Then for each scenario type derived from Use Case Spec paths.</p>
+
+    {% if specs %}
+        {% for spec in specs %}
+        <div class="feature-card" data-spec-id="{{ spec.id }}">
+            <div class="feature-header" onclick="toggleFeature(this)">
+                <div class="feature-left">
+                    <div class="feature-num">{{ forloop.counter }}</div>
+                    <div>
+                        <div class="feature-title">{{ spec.feature_name }}</div>
+                        <div class="feature-sub">{{ spec.summary_description|default:"-"|truncatechars:80 }}</div>
+                    </div>
+                </div>
+                <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+
+            <div class="feature-body">
+                {# NORMAL scenario panel #}
+                <div class="scenario-panel" data-panel="normal">
+                    <div class="flow-header normal">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        Normal Flow
+                    </div>
+                    {% if spec.basic_paths.all %}
+                    <div class="path-preview">
+                        <div class="path-preview-title">From Basic Path</div>
+                        {% for step in spec.basic_paths.all %}
+                        <div class="path-step">
+                            <span>{{ step.step_number }}.</span>
+                            {% if step.actor_action %}<span class="path-step-actor">Actor: {{ step.actor_action }}</span>{% endif %}
+                            {% if step.system_response %}<span class="path-step-sys">→ System: {{ step.system_response }}</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="steps-title">Given / When / Then Steps</div>
+                    <div class="step-container" data-type="Normal"></div>
+                    <button class="add-step-btn" onclick="addStep(this)">+ Add Step</button>
+                </div>
+
+                {# ALTERNATIVE scenario panel #}
+                {% if spec.alternative_paths.all %}
+                <div class="scenario-panel" data-panel="alt">
+                    <div class="flow-header alt">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        Alternative Flow
+                    </div>
+                    <div class="path-preview">
+                        <div class="path-preview-title">From Alternative Path</div>
+                        {% for step in spec.alternative_paths.all %}
+                        <div class="path-step">
+                            <span>{{ step.step_number }}.</span>
+                            {% if step.actor_action %}<span class="path-step-actor">Actor: {{ step.actor_action }}</span>{% endif %}
+                            {% if step.system_response %}<span class="path-step-sys">→ System: {{ step.system_response }}</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="steps-title">Given / When / Then Steps</div>
+                    <div class="step-container" data-type="Alternative"></div>
+                    <button class="add-step-btn" onclick="addStep(this)">+ Add Step</button>
+                </div>
+                {% endif %}
+
+                {# EXCEPTION scenario panel #}
+                {% if spec.exception_paths.all %}
+                <div class="scenario-panel" data-panel="exc">
+                    <div class="flow-header exc">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        Exception Flow
+                    </div>
+                    <div class="path-preview">
+                        <div class="path-preview-title">From Exception Path</div>
+                        {% for step in spec.exception_paths.all %}
+                        <div class="path-step">
+                            <span>{{ step.step_number }}.</span>
+                            {% if step.actor_action %}<span class="path-step-actor">Actor: {{ step.actor_action }}</span>{% endif %}
+                            {% if step.system_response %}<span class="path-step-sys">→ System: {{ step.system_response }}</span>{% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="steps-title">Given / When / Then Steps</div>
+                    <div class="step-container" data-type="Exception"></div>
+                    <button class="add-step-btn" onclick="addStep(this)">+ Add Step</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p>No Use Case Spec found. Please complete Use Case Specification first.</p>
+        </div>
+    {% endif %}
+
+    <div class="navigation">
+        <a href="{% url 'main:input_gui_with_id' gui.id_gui %}" class="nav-btn nav-btn-back">← Back</a>
+        <button id="nextBtn" class="nav-btn nav-btn-next" onclick="saveAllScenarios()">Save & Next →</button>
+    </div>
+</div>
+
+<script>
+let guiData = { pages: [], elements: [] };
+try {
+    guiData = JSON.parse('{{ gui_data_json|escapejs }}');
+} catch(e) {}
+
+const savedScenarios = {};
+try {
+    Object.assign(savedScenarios, JSON.parse('{{ saved_scenarios_json|escapejs }}'));
+} catch(e) {}
+
+// ---- Toggle feature open/close ----
+function toggleFeature(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.chevron');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+}
+
+// ---- Switch tab inside a feature card (Removed) ----
+// We are now stacking them instead of using tabs.
+
+// ---- Add step row ----
+function addStep(addBtn) {
+    const container = addBtn.previousElementSibling;
+    const num = container.children.length + 1;
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    row.innerHTML = `
+        <div class="step-num">${num}</div>
+        <select class="select-gwt">
+            <option value="Given">Given</option>
+            <option value="When">When</option>
+            <option value="Then">Then</option>
+            <option value="And">And</option>
+        </select>
+        <select class="select-activity" onchange="updateTargetOptions(this)">
+            <option value="">-- Activity --</option>
+            <option value="page">I am on page</option>
+            <option value="click">User click</option>
+            <option value="input">User input</option>
+            <option value="custom">Other / Custom</option>
+        </select>
+        <select class="select-target" disabled>
+            <option value="">-- Target --</option>
+        </select>
+        <button class="del-btn" onclick="removeStep(this)" title="Remove">×</button>
+    `;
+    container.appendChild(row);
+    renumberSteps(container);
+}
+
+function updateTargetOptions(activitySelect) {
+    const row = activitySelect.parentElement;
+    const targetSelect = row.querySelector('.select-target');
+    const activity = activitySelect.value;
+
+    targetSelect.innerHTML = '<option value="">-- Target --</option>';
+    targetSelect.disabled = false;
+    targetSelect.style.display = 'block';
+
+    const existingInput = row.querySelector('.custom-target-input');
+    if(existingInput) existingInput.remove();
+
+    if (activity === 'custom') {
+        targetSelect.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Type custom...';
+        input.className = 'custom-target-input';
+        row.insertBefore(input, row.lastElementChild);
+        return;
+    }
+
+    if (activity === 'page') {
+        guiData.pages.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.text = "[Page] " + p.name;
+            targetSelect.appendChild(opt);
+        });
+    } else if (activity) {
+        guiData.elements.forEach(el => {
+            const opt = document.createElement('option');
+            opt.value = el.id;
+            opt.text = `[${el.type}] ${el.name} (on ${el.page})`;
+            targetSelect.appendChild(opt);
+        });
+    }
+}
+
+function removeStep(btn) {
+    const container = btn.closest('.step-container');
+    btn.closest('.step-row').remove();
+    renumberSteps(container);
+}
+
+function renumberSteps(container) {
+    container.querySelectorAll('.step-num').forEach((el, i) => { el.textContent = i + 1; });
+}
+
+// ---- Load saved data ----
+function loadSaved() {
+    document.querySelectorAll('.feature-card').forEach(card => {
+        const specId = card.dataset.specId;
+        const data = savedScenarios[specId];
+        if (!data) return;
+
+        ['Normal', 'Alternative', 'Exception'].forEach(type => {
+            const steps = data[type];
+            if (!steps || steps.length === 0) return;
+            const panel = card.querySelector(`[data-panel="${type.toLowerCase().replace('alternative','alt').replace('exception','exc')}"]`);
+            if (!panel) return;
+            const container = panel.querySelector('.step-container');
+            if (!container) return;
+            container.innerHTML = '';
+            steps.forEach((s, i) => {
+                const row = document.createElement('div');
+                row.className = 'step-row';
+                row.innerHTML = `
+                    <div class="step-num">${i+1}</div>
+                    <select class="select-gwt">
+                        <option value="Given" ${s.condition==='Given'?'selected':''}>Given</option>
+                        <option value="When" ${s.condition==='When'?'selected':''}>When</option>
+                        <option value="Then" ${s.condition==='Then'?'selected':''}>Then</option>
+                        <option value="And" ${s.condition==='And'?'selected':''}>And</option>
+                    </select>
+                    <select class="select-activity" onchange="updateTargetOptions(this)">
+                        <option value="">-- Activity --</option>
+                        <option value="page" ${s.activity==='page'?'selected':''}>I am on page</option>
+                        <option value="click" ${s.activity==='click'?'selected':''}>User click</option>
+                        <option value="input" ${s.activity==='input'?'selected':''}>User input</option>
+                        <option value="custom" ${s.activity==='custom'?'selected':''}>Other / Custom</option>
+                    </select>
+                    <select class="select-target" disabled>
+                        <option value="">-- Target --</option>
+                    </select>
+                    <button class="del-btn" onclick="removeStep(this)">×</button>
+                `;
+                container.appendChild(row);
+                
+                const activitySelect = row.querySelector('.select-activity');
+                updateTargetOptions(activitySelect);
+                
+                setTimeout(() => {
+                    if (s.activity === 'custom') {
+                        const customInput = row.querySelector('.custom-target-input');
+                        if (customInput) customInput.value = s.target_text;
+                    } else {
+                        const targetSelect = row.querySelector('.select-target');
+                        if (targetSelect && s.target_id) targetSelect.value = s.target_id;
+                    }
+                }, 50);
+            });
+        });
+    });
+}
+
+// ---- Auto seed empty rows ----
+function seedEmptyRows() {
+    document.querySelectorAll('.step-container').forEach(container => {
+        if (container.children.length === 0) {
+            const fakeBtn = container.nextElementSibling;
+            addStep(fakeBtn);
+        }
+    });
+}
+
+// ---- Save all ----
+function saveAllScenarios() {
+    const payload = [];
+    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const btn = document.getElementById('nextBtn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    document.querySelectorAll('.feature-card').forEach(card => {
+        const specId = card.dataset.specId;
+        card.querySelectorAll('.step-container').forEach(container => {
+            const type = container.dataset.type;
+            const steps = [];
+            container.querySelectorAll('.step-row').forEach((row, idx) => {
+                const gwt = row.querySelector('.select-gwt').value;
+                const activity = row.querySelector('.select-activity').value;
+                if (!activity) return;
+
+                let targetId = null;
+                let targetText = "";
+
+                if (activity === 'custom') {
+                    const customInput = row.querySelector('.custom-target-input');
+                    targetText = customInput ? customInput.value : "";
+                } else {
+                    const targetSelect = row.querySelector('.select-target');
+                    targetId = targetSelect.value || null;
+                    targetText = targetSelect.options[targetSelect.selectedIndex]?.text || "";
+                }
+
+                steps.push({ 
+                    step_number: idx+1, 
+                    condition: gwt, 
+                    activity: activity, 
+                    target_id: targetId, 
+                    target_text: targetText 
+                });
+            });
+            if (steps.length > 0) {
+                payload.push({ spec_id: specId, type: type, steps: steps });
+            }
+        });
+    });
+
+    fetch('/save_scenarios/', {
+        method: 'POST',
+        credentials: 'same-origin', // WAJIB
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = "{% url 'main:import_sql' %}";
+        } else {
+            alert('Error: ' + (data.message || 'Unknown error'));
+            btn.disabled = false;
+            btn.textContent = 'Save & Next →';
+        }
+    })
+    .catch(err => {
+        alert('Failed: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Save & Next →';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Open first card by default
+    const firstHeader = document.querySelector('.feature-header');
+    if (firstHeader) toggleFeature(firstHeader);
+
+    const hasData = Object.keys(savedScenarios).length > 0;
+    if (hasData) {
+        loadSaved();
+    } else {
+        seedEmptyRows();
+    }
+});
+</script>
+</body>
+</html>

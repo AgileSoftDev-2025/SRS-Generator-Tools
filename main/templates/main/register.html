@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - One UML</title>
+    <style>
+        /* Global Styles - SAMA SEPERTI FILE LAINNYA */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+        }
+        
+        /* Register Container */
+        .register-container {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        
+        /* Card Styles - SAMA SEPERTI FILE LAINNYA */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 40px;
+        }
+        
+        /* Logo Inside Card */
+        .card-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .card-logo-icon {
+            width: 48px;
+            height: 48px;
+            background-color: #111827;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .card-logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .card-logo-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* Form Styles - SAMA SEPERTI FILE LAINNYA */
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        
+        .form-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* Buttons - SAMA SEPERTI FILE LAINNYA */
+        .btn {
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+        
+        .alert-error {
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+        
+        .alert-success {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #16a34a;
+        }
+        
+        .alert-info {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            color: #2563eb;
+        }
+        
+        .alert ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .alert li {
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+        
+        .alert li:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Password Wrapper */
+        .password-wrapper {
+            position: relative;
+        }
+        
+        .password-wrapper input {
+            padding-right: 40px;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #6b7280;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toggle-password:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+        
+        .toggle-password svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Error Text */
+        .field-error-text {
+            color: #dc2626;
+            font-size: 12px;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Footer - SAMA SEPERTI FILE LAINNYA */
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Register Form Specific */
+        .signin-link {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .signin-link a {
+            color: #111827;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .signin-link a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .card {
+                padding: 24px;
+            }
+            
+            .form-title {
+                font-size: 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 16px;
+            }
+            
+            .card-logo {
+                margin-bottom: 24px;
+            }
+            
+            .card-logo-icon {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .card-logo-text {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main>
+        <div class="register-container">
+            <div class="card">
+                <!-- Logo di dalam card -->
+                <div class="card-logo">
+                    <div class="card-logo-icon">
+                        <span style="color: white; font-size: 20px; font-weight: bold;">⚡</span>
+                    </div>
+                    <div class="card-logo-text">One UML</div>
+                    <div class="card-logo-subtitle">UML Diagram Generator</div>
+                </div>
+                
+                <h1 class="form-title">Create your account</h1>
+                <p class="form-subtitle">Join One UML and start creating UML diagrams today</p>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        <ul>
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                
+                <form method="POST" action="{% url 'main:register' %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="nama_user" class="form-label">Full Name</label>
+                        <input 
+                            type="text" 
+                            id="nama_user" 
+                            name="nama_user" 
+                            class="form-input" 
+                            placeholder="Enter your full name"
+                            value="{{ form.nama_user.value|default:'' }}"
+                            required
+                            autofocus
+                        >
+                        {% if form.nama_user.errors %}
+                            {% for error in form.nama_user.errors %}
+                                <div class="field-error-text">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email_user" class="form-label">Email</label>
+                        <input 
+                            type="email" 
+                            id="email_user" 
+                            name="email_user" 
+                            class="form-input" 
+                            placeholder="Enter your email"
+                            value="{{ form.email_user.value|default:'' }}"
+                            required
+                        >
+                        {% if form.email_user.errors %}
+                            {% for error in form.email_user.errors %}
+                                <div class="field-error-text">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input" 
+                                placeholder="Create a password"
+                                required
+                            >
+                            <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                                <svg id="eye-icon-password" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="field-error-text">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        <div class="help-text">Use at least 8 characters with a mix of letters and numbers</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirm_password" 
+                                name="confirm_password" 
+                                class="form-input" 
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirm_password')">
+                                <svg id="eye-icon-confirm_password" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        </div>
+                        {% if form.confirm_password.errors %}
+                            {% for error in form.confirm_password.errors %}
+                                <div class="field-error-text">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+                        Create Account
+                    </button>
+                </form>
+                
+                <div class="signin-link">
+                    <p>Already have an account? <a href="{% url 'main:login' %}">Sign in</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById('eye-icon-' + fieldId);
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.innerHTML = `
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                `;
+            } else {
+                field.type = 'password';
+                icon.innerHTML = `
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                `;
+            }
+        }
+        
+        // Autofocus on first error field
+        document.addEventListener('DOMContentLoaded', function() {
+            const errorFields = document.querySelectorAll('.field-error-text');
+            if (errorFields.length > 0) {
+                // Find the first input with error
+                for (const errorField of errorFields) {
+                    const input = errorField.previousElementSibling;
+                    if (input && input.classList.contains('form-input')) {
+                        input.focus();
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

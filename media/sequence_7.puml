@@ -1,0 +1,13 @@
+@startuml
+actor User
+control Controller
+
+database customers
+database categories
+database products
+database orders
+database order_details
+database feedback
+
+
+@enduml

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - One UML</title>
+    <style>
+        /* Global Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header - SAMA SEPERTI FILE SEBELUMNYA */
+        header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        /* User Menu */
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        /* Buttons - SAMA SEPERTI FILE SEBELUMNYA */
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        /* Main Content */
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            min-height: calc(100vh - 128px);
+        }
+        
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 48px;
+            padding: 0 20px;
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto 32px;
+            line-height: 1.6;
+        }
+        
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+            margin-top: 32px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Card Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        
+        /* Projects Section */
+        .projects-section .card {
+            height: 100%;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .section-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        /* Project Item */
+        .project-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .project-item:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .project-info {
+            flex: 1;
+        }
+        
+        .project-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+        
+        .project-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .project-meta {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 8px;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* Empty State - SAMA SEPERTI FILE SEBELUMNYA */
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+            padding: 40px 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #e5e7eb;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        /* Form Styles - SAMA SEPERTI FILE SEBELUMNYA */
+        .form-card {
+            background: #fff;
+            padding: 32px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        /* Footer - SAMA SEPERTI FILE SEBELUMNYA */
+        footer {
+            background-color: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px;
+            margin-top: 48px;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .footer-link {
+            font-size: 12px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            color: #374151;
+        }
+        
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .hero-subtitle {
+                font-size: 16px;
+            }
+            
+            .project-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .project-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+                </div>
+                <span class="logo-text">One UML</span>
+            </div>
+            <div class="user-menu">
+                <span class="user-email">Guest Mode</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">Welcome to One UML</h1>
+            <p class="hero-subtitle">
+                Generate UML diagrams and Software Requirements Specification (SRS) automatically, quickly, and in a structured way.
+            </p>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Projects Section -->
+            <div class="projects-section">
+                <div class="card">
+                    <h2 class="section-title">Your Projects</h2>
+                    <p class="section-subtitle">Projects you create will appear here</p>
+                    
+                    <div id="projectsContainer">
+                        <!-- Projects will be dynamically added here -->
+                        <div class="empty-state">
+                            <i>📁</i>
+                            <p>No projects yet</p>
+                            <p>Create your first project to get started</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="quick-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalProjects">0</div>
+                            <div class="stat-label">Total Projects</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="activeProjects">0</div>
+                            <div class="stat-label">Active</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Project Form -->
+            <div>
+                <div class="form-card">
+                    <h3 class="form-title">+ New Project</h3>
+                    
+                    <!-- FIX-01: action mengarah ke /project/new/ agar Django buat project di DB dan update session -->
+                    <form method="post" action="/project/new/" id="addProjectForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label class="form-label">Project Name</label>
+                            <input type="text" name="name" class="form-input" placeholder="Enter project name" required>
+                            <div class="help-text">Required</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-textarea" placeholder="Brief description (optional)" rows="3"></textarea>
+                            <div class="help-text">Optional</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            Create Project
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">Help</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- AFTER FIX-01 & FIX-02:
+         - Hapus JavaScript ProjectManager yang intercept form submit
+         - Render project list dari Django context (bukan localStorage)
+         - Form "New Project" submit langsung ke Django backend
+         - Tombol "Open" memanggil /project/<id_project>/ untuk update session
+    -->
+
+    <!-- Project list dari Django context (server-side, bukan localStorage) -->
+    <script id="initial-projects" type="application/json">
+        {{ projects_json|safe }}
+    </script>
+
+    <script>
+        // =============================================
+        // RENDER PROJECT LIST DARI DATA DJANGO (DB)
+        // =============================================
+        function renderProjectsFromDjango() {
+            const container = document.getElementById('projectsContainer');
+            let projects = [];
+
+            try {
+                const raw = document.getElementById('initial-projects').textContent.trim();
+                if (raw && raw !== '[]' && raw !== 'null') {
+                    projects = JSON.parse(raw);
+                }
+            } catch(e) {
+                console.error('Failed to parse projects:', e);
+            }
+
+            const totalEl = document.getElementById('totalProjects');
+            const activeEl = document.getElementById('activeProjects');
+            if (totalEl) totalEl.textContent = projects.length;
+            if (activeEl) activeEl.textContent = projects.length;
+
+            if (projects.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i>📁</i>
+                        <p>No projects yet</p>
+                        <p>Create your first project to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            projects.forEach(project => {
+                const date = project.created_at ? new Date(project.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                }) : '';
+
+                // FIX-02: Tombol Open memanggil /project/<id_project>/ agar session backend diupdate
+                html += `
+                    <div class="project-item">
+                        <div class="project-info">
+                            <div class="project-name">${project.name}</div>
+                            ${project.description ? `<div class="project-description">${project.description}</div>` : ''}
+                            <div class="project-meta">Created on ${date}</div>
+                        </div>
+                        <div class="project-actions">
+                            <a href="/project/${project.id}/" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">
+                                Open
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // =============================================
+        // FIX-01: Form submit tanpa intercept — dikirim langsung ke Django
+        // Django view project_new yang handle create + set session + redirect
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProjectsFromDjango();
+
+            const form = document.getElementById('addProjectForm');
+            if (form) {
+                // TIDAK ada e.preventDefault() — form submit langsung ke server
+                form.addEventListener('submit', function(e) {
+                    const nameInput = form.querySelector('input[name="name"]');
+                    if (!nameInput || !nameInput.value.trim()) {
+                        e.preventDefault();
+                        alert('Please enter a project name');
+                        return;
+                    }
+                    // Disable tombol untuk mencegah double submit
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.textContent = 'Creating...';
+                    }
+                    // Biarkan form POST ke Django — session akan diupdate oleh backend
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+
+

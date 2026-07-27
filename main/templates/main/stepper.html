@@ -1,0 +1,168 @@
+<style>
+/* Stepper Styles */
+.wizard-stepper-wrapper {
+    background-color: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+.wizard-stepper {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+.stepper-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+}
+.stepper-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 6px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #e5e7eb;
+    transition: all 0.3s;
+}
+.stepper-label {
+    font-size: 11px;
+    color: #6b7280;
+    text-align: center;
+    line-height: 1.2;
+    transition: all 0.3s;
+}
+.stepper-item.active .stepper-circle {
+    background-color: #3b82f6;
+    color: #fff;
+    box-shadow: 0 0 0 2px #bfdbfe;
+    transform: scale(1.1);
+}
+.stepper-item.active .stepper-label {
+    color: #1d4ed8;
+    font-weight: 700;
+}
+.stepper-item.completed .stepper-circle {
+    background-color: #10b981;
+    color: #fff;
+    box-shadow: 0 0 0 1px #10b981;
+}
+.stepper-item::after {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: #e5e7eb;
+    z-index: -1;
+    transition: background-color 0.3s;
+}
+.stepper-item:last-child::after {
+    display: none;
+}
+.stepper-item.completed::after {
+    background-color: #10b981;
+}
+.stepper-info {
+    text-align: center;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 10px;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.stepper-info span {
+    color: #3b82f6;
+}
+</style>
+
+<div class="wizard-stepper-wrapper no-print">
+    <div class="stepper-info" id="stepperInfo">
+        Step {{ current_step }} of 11: 
+        <span>
+            {% if current_step == 1 %}Use Case Diagram
+            {% elif current_step == 2 %}User Story
+            {% elif current_step == 3 %}Input Informasi Tambahan
+            {% elif current_step == 4 %}Use Case Specification
+            {% elif current_step == 5 %}Activity Diagram
+            {% elif current_step == 6 %}Input GUI
+            {% elif current_step == 7 %}User Scenario
+            {% elif current_step == 8 %}Import SQL
+            {% elif current_step == 9 %}Sequence Diagram
+            {% elif current_step == 10 %}Class Diagram
+            {% elif current_step == 11 %}Generate SRS
+            {% endif %}
+        </span>
+        <div style="font-size: 12px; font-weight: normal; color: #6b7280; margin-top: 2px;">
+            {% if current_step < 11 %}
+                {{ 11|add:"-"|add:current_step }} steps remaining
+            {% else %}
+                Final Step
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="wizard-stepper">
+        <div class="stepper-item {% if current_step > 1 %}completed{% elif current_step == 1 %}active{% endif %}">
+            <div class="stepper-circle">1</div>
+            <div class="stepper-label">Use Case<br>Diagram</div>
+        </div>
+        <div class="stepper-item {% if current_step > 2 %}completed{% elif current_step == 2 %}active{% endif %}">
+            <div class="stepper-circle">2</div>
+            <div class="stepper-label">User<br>Story</div>
+        </div>
+        <div class="stepper-item {% if current_step > 3 %}completed{% elif current_step == 3 %}active{% endif %}">
+            <div class="stepper-circle">3</div>
+            <div class="stepper-label">Add<br>Info</div>
+        </div>
+        <div class="stepper-item {% if current_step > 4 %}completed{% elif current_step == 4 %}active{% endif %}">
+            <div class="stepper-circle">4</div>
+            <div class="stepper-label">Use Case<br>Spec</div>
+        </div>
+        <div class="stepper-item {% if current_step > 5 %}completed{% elif current_step == 5 %}active{% endif %}">
+            <div class="stepper-circle">5</div>
+            <div class="stepper-label">Activity<br>Diagram</div>
+        </div>
+        <div class="stepper-item {% if current_step > 6 %}completed{% elif current_step == 6 %}active{% endif %}">
+            <div class="stepper-circle">6</div>
+            <div class="stepper-label">Input<br>GUI</div>
+        </div>
+        <div class="stepper-item {% if current_step > 7 %}completed{% elif current_step == 7 %}active{% endif %}">
+            <div class="stepper-circle">7</div>
+            <div class="stepper-label">User<br>Scenario</div>
+        </div>
+        <div class="stepper-item {% if current_step > 8 %}completed{% elif current_step == 8 %}active{% endif %}">
+            <div class="stepper-circle">8</div>
+            <div class="stepper-label">Import<br>SQL</div>
+        </div>
+        <div class="stepper-item {% if current_step > 9 %}completed{% elif current_step == 9 %}active{% endif %}">
+            <div class="stepper-circle">9</div>
+            <div class="stepper-label">Sequence<br>Diagram</div>
+        </div>
+        <div class="stepper-item {% if current_step > 10 %}completed{% elif current_step == 10 %}active{% endif %}">
+            <div class="stepper-circle">10</div>
+            <div class="stepper-label">Class<br>Diagram</div>
+        </div>
+        <div class="stepper-item {% if current_step == 11 %}active{% endif %}">
+            <div class="stepper-circle">11</div>
+            <div class="stepper-label">Generate<br>SRS</div>
+        </div>
+    </div>
+</div>
