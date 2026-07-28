@@ -405,10 +405,10 @@ function loadSaved() {
                 setTimeout(() => {
                     if (s.activity === 'custom') {
                         const customInput = row.querySelector('.custom-target-input');
-                        if (customInput) customInput.value = s.target_text;
+                        if (customInput && s.target_text) customInput.value = s.target_text;
                     } else {
                         const targetSelect = row.querySelector('.select-target');
-                        if (targetSelect && s.target_id) targetSelect.value = s.target_id;
+                        if (targetSelect && s.target_id) targetSelect.value = String(s.target_id);
                     }
                 }, 50);
             });
@@ -421,7 +421,7 @@ function seedEmptyRows() {
     document.querySelectorAll('.step-container').forEach(container => {
         if (container.children.length === 0) {
             const fakeBtn = container.nextElementSibling;
-            addStep(fakeBtn);
+            if (fakeBtn) addStep(fakeBtn);
         }
     });
 }
@@ -429,10 +429,13 @@ function seedEmptyRows() {
 // ---- Save all ----
 function saveAllScenarios() {
     const payload = [];
-    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    const csrf = csrfElement ? csrfElement.value : '';
     const btn = document.getElementById('nextBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving...';
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+    }
 
     document.querySelectorAll('.feature-card').forEach(card => {
         const specId = card.dataset.specId;
@@ -452,8 +455,8 @@ function saveAllScenarios() {
                     targetText = customInput ? customInput.value : "";
                 } else {
                     const targetSelect = row.querySelector('.select-target');
-                    targetId = targetSelect.value || null;
-                    targetText = targetSelect.options[targetSelect.selectedIndex]?.text || "";
+                    targetId = targetSelect ? targetSelect.value || null : null;
+                    targetText = targetSelect && targetSelect.selectedIndex >= 0 ? targetSelect.options[targetSelect.selectedIndex]?.text || "" : "";
                 }
 
                 steps.push({ 
@@ -472,7 +475,7 @@ function saveAllScenarios() {
 
     fetch('/save_scenarios/', {
         method: 'POST',
-        credentials: 'same-origin', // WAJIB
+        credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
         body: JSON.stringify(payload)
     })
@@ -482,14 +485,18 @@ function saveAllScenarios() {
             window.location.href = "{% url 'main:import_sql' %}";
         } else {
             alert('Error: ' + (data.message || 'Unknown error'));
-            btn.disabled = false;
-            btn.textContent = 'Save & Next →';
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'Save & Next →';
+            }
         }
     })
     .catch(err => {
         alert('Failed: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Save & Next →';
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Save & Next →';
+        }
     });
 }
 
@@ -498,12 +505,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstHeader = document.querySelector('.feature-header');
     if (firstHeader) toggleFeature(firstHeader);
 
-    const hasData = Object.keys(savedScenarios).length > 0;
-    if (hasData) {
-        loadSaved();
-    } else {
-        seedEmptyRows();
+    let hasActualSteps = false;
+    for (let specId in savedScenarios) {
+        const specScens = savedScenarios[specId];
+        if (specScens && (
+            (specScens.Normal && specScens.Normal.length > 0) ||
+            (specScens.Alternative && specScens.Alternative.length > 0) ||
+            (specScens.Exception && specScens.Exception.length > 0)
+        )) {
+            hasActualSteps = true;
+            break;
+        }
     }
+
+    if (hasActualSteps) {
+        loadSaved();
+    }
+    
+    // Seed empty rows for any panels that don't have step rows
+    seedEmptyRows();
 });
 </script>
 </body>

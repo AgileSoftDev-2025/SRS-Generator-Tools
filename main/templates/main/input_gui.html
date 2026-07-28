@@ -328,7 +328,14 @@ input:focus, select:focus, textarea:focus {
         return tokenElement ? tokenElement.value : '';
     }
 
+    let isSavingGui = false;
     function saveData(guiId) {
+        if (isSavingGui) {
+            console.log('Save already in progress, skipping concurrent request...');
+            return Promise.resolve({ status: 'success', message: 'Skipped concurrent save' });
+        }
+        isSavingGui = true;
+
         const pages = [];
         document.querySelectorAll('.page-card').forEach((card) => {
             const pageName = card.querySelector('.page-name-input').value;
@@ -343,7 +350,7 @@ input:focus, select:focus, textarea:focus {
 
         return fetch(`/api/save_gui/${guiId}/`, {
             method: 'POST',
-            credentials: 'same-origin', // WAJIB
+            credentials: 'same-origin',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCsrfToken(),
@@ -358,6 +365,9 @@ input:focus, select:focus, textarea:focus {
         .catch(err => {
             console.error('Error saving GUI:', err);
             throw err;
+        })
+        .finally(() => {
+            isSavingGui = false;
         });
     }
 
@@ -480,28 +490,116 @@ input:focus, select:focus, textarea:focus {
         container.insertBefore(newCard, addPageBtn);
     }
 
-    // Event listener untuk NEXT/BACK
+    // Dynamic rendering of saved GUI pages from Supabase
+    function renderSavedPages(pagesData) {
+        if (!pagesData || !Array.isArray(pagesData) || pagesData.length === 0) {
+            return;
+        }
+
+        const container = document.querySelector('.container');
+        const addPageBtn = document.getElementById('addPageBtn');
+        
+        // Clear existing hardcoded page cards
+        document.querySelectorAll('.page-card').forEach(card => card.remove());
+
+        pagesData.forEach((pageData, pageIdx) => {
+            const pageNumber = pageIdx + 1;
+            const newCard = document.createElement('div');
+            newCard.className = 'page-card';
+
+            let elementRowsHtml = '';
+            const elements = pageData.elements || [];
+
+            if (elements.length > 0) {
+                elements.forEach(el => {
+                    const elName = el.name || '';
+                    const elType = (el.type || '').toLowerCase();
+                    elementRowsHtml += `
+                        <div class="element-row">
+                            <input type="text" placeholder="Element name..." value="${elName.replace(/"/g, '&quot;')}" />
+                            <select>
+                                <option value="">Type</option>
+                                <option value="button" ${elType === 'button' ? 'selected' : ''}>Button</option>
+                                <option value="text" ${elType === 'text' ? 'selected' : ''}>Text</option>
+                                <option value="date" ${elType === 'date' ? 'selected' : ''}>Date</option>
+                                <option value="checkbox" ${elType === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+                                <option value="radio" ${elType === 'radio' ? 'selected' : ''}>Radio Button</option>
+                            </select>
+                        </div>
+                    `;
+                });
+            } else {
+                elementRowsHtml = `
+                    <div class="element-row">
+                        <input type="text" placeholder="Element name..." />
+                        <select>
+                            <option value="">Type</option>
+                            <option value="button">Button</option>
+                            <option value="text">Text</option>
+                            <option value="date">Date</option>
+                            <option value="checkbox">Checkbox</option>
+                            <option value="radio">Radio Button</option>
+                        </select>
+                    </div>
+                `;
+            }
+
+            newCard.innerHTML = `
+                <div class="page-header">
+                    <div class="page-number">${pageNumber}</div>
+                    <div class="page-name-container">
+                        <input type="text" class="page-name-input" placeholder="Fill page name here..." value="${(pageData.name || '').replace(/"/g, '&quot;')}" />
+                    </div>
+                </div>
+                <div class="page-content">
+                    <label class="element-label">Input Element</label>
+                    ${elementRowsHtml}
+                    <button class="add-element-btn" onclick="addElement(this)">+ ADD MORE ELEMENT</button>
+                </div>
+            `;
+
+            container.insertBefore(newCard, addPageBtn);
+        });
+    }
+
+    // Event listener untuk NEXT/BACK & Auto-save Progress
     document.addEventListener('DOMContentLoaded', () => {
         const container = document.querySelector('.container');
         const guiId = container.dataset.guiId;
         const nextBtn = document.querySelector('.nav-btn.next');
         const backBtn = document.querySelector('.nav-btn.back');
 
+        // Restore pages & elements loaded from Supabase DB
+        try {
+            const initialPagesData = JSON.parse('{{ pages_json|escapejs }}');
+            renderSavedPages(initialPagesData);
+        } catch (e) {
+            console.error("Error parsing pages_json from Supabase:", e);
+        }
+
         // Tampilkan info SQL data jika ada
         displaySQLDataInfo();
+
+        // Auto-save debounced when editing inputs
+        let autoSaveTimer = null;
+        container.addEventListener('input', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                console.log("Auto-saving GUI progress to Supabase...");
+                saveData(guiId).catch(err => console.error("Auto-save GUI failed:", err));
+            }, 2000);
+        });
 
         // Event listener untuk NEXT button
         nextBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             
             try {
-                // Ubah teks button menjadi "Saving..."
                 nextBtn.innerText = "Saving...";
                 nextBtn.style.opacity = "0.5";
                 nextBtn.style.cursor = "not-allowed";
 
-                // 1. Simpan data GUI ke database
-                console.log('Saving GUI data...');
+                console.log('Saving GUI data to Supabase...');
                 const guiResult = await saveData(guiId);
 
                 if (guiResult.status !== 'success') {
@@ -510,11 +608,9 @@ input:focus, select:focus, textarea:focus {
                     return;
                 }
 
-                // 2. Simpan data SQL ke backend (jika ada)
                 console.log('Saving SQL data...');
-                const sqlResult = await saveSQLData();
+                await saveSQLData();
 
-                // 3. Lanjutkan ke halaman berikutnya
                 console.log('Proceeding to next page...');
                 window.location.href = nextBtn.href;
 
@@ -528,8 +624,6 @@ input:focus, select:focus, textarea:focus {
         // Event listener untuk BACK button
         backBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Simpan data sebelum kembali
             saveData(guiId)
                 .then(() => {
                     window.location.href = backBtn.href;
@@ -540,23 +634,10 @@ input:focus, select:focus, textarea:focus {
                 });
         });
 
-        // Fungsi untuk reset button NEXT
         function resetNextButton() {
             nextBtn.innerText = "NEXT >";
             nextBtn.style.opacity = "1";
             nextBtn.style.cursor = "pointer";
-        }
-
-        // Fungsi untuk cek perubahan yang belum disimpan
-        function checkForUnsavedChanges() {
-            // Cek apakah ada input yang sudah diisi
-            const inputs = document.querySelectorAll('.page-name-input, .element-row input');
-            for (let input of inputs) {
-                if (input.value.trim() !== '') {
-                    return true;
-                }
-            }
-            return false;
         }
     });
 </script>

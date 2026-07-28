@@ -1061,35 +1061,55 @@ def use_case(request):
     return render(request, 'main/use_case.html')
 
 
-def user_scenario(request, gui_id):
-    gui = get_object_or_404(GUI, id_gui=gui_id)
+def user_scenario(request, gui_id=None):
     project = get_active_project(request)
+    if not project:
+        return redirect('main:home')
 
-    if project:
-        specs = UseCaseSpecification.objects.filter(project=project).prefetch_related('scenarios__steps')
-    else:
-        specs = UseCaseSpecification.objects.filter(gui=gui).prefetch_related('scenarios__steps')
+    gui = None
+    if gui_id:
+        gui = GUI.objects.filter(id_gui=gui_id, project=project).first()
+    if not gui:
+        gui = GUI.objects.filter(project=project).first()
+    if not gui:
+        gui = GUI.objects.create(
+            project=project,
+            id_gui=f"G{project.id_project}",
+            nama_atribut=project.nama_project
+        )
+
+    specs = UseCaseSpecification.objects.filter(project=project).prefetch_related('scenarios__steps')
 
     gui_data = {'pages': [], 'elements': []}
-    for p in Page.objects.filter(gui=gui):
-        gui_data['pages'].append({'id': p.id, 'name': p.name})
-    for el in Element.objects.filter(page__gui=gui):
-        gui_data['elements'].append({
-            'id': el.id, 'name': el.name,
-            'type': el.input_type.lower() if el.input_type else "text",
-            'page': el.page.name
-        })
+    if gui:
+        for p in Page.objects.filter(gui=gui).order_by('order'):
+            gui_data['pages'].append({'id': str(p.id), 'name': p.name})
+        for el in Element.objects.filter(page__gui=gui).order_by('order'):
+            gui_data['elements'].append({
+                'id': str(el.id),
+                'name': el.name,
+                'type': el.element_type.lower() if el.element_type else (el.input_type.lower() if el.input_type else "text"),
+                'page': el.page.name
+            })
 
     saved_scenarios = {}
     for spec in specs:
         saved_scenarios[str(spec.id)] = {'Normal': [], 'Alternative': [], 'Exception': []}
         for scenario in spec.scenarios.all():
-            steps_data = [{'condition': s.condition, 'activity': s.action_type, 'target_id': s.target_id, 'target_text': s.target_text} for s in scenario.steps.all().order_by('step_number')]
+            steps_data = [{
+                'condition': s.condition,
+                'activity': s.action_type,
+                'target_id': str(s.target_id or ''),
+                'target_text': s.target_text or ''
+            } for s in scenario.steps.all().order_by('step_number')]
             scen_type = scenario.scenario_type
-            if scen_type == 'Positive':
+            if scen_type == 'Positive' or scen_type.lower() == 'normal':
                 scen_type = 'Normal'
-            elif scen_type == 'Negative':
+            elif scen_type == 'Negative' or scen_type.lower() == 'exception' or scen_type.lower() == 'exc':
                 scen_type = 'Exception'
+            elif scen_type.lower() == 'alternative' or scen_type.lower() == 'alt':
+                scen_type = 'Alternative'
+
             if scen_type in saved_scenarios[str(spec.id)]:
                 saved_scenarios[str(spec.id)][scen_type] = steps_data
 
@@ -1105,36 +1125,52 @@ def user_scenario(request, gui_id):
 def save_scenarios_api(request):
     if request.method == 'POST':
         try:
+            project = get_active_project(request)
+            if not project:
+                return JsonResponse({'status': 'error', 'message': 'Tidak ada project aktif. Buka project dari dashboard terlebih dahulu.'}, status=400)
+
             data = json.loads(request.body)
             saved_count = 0
             for item in data:
                 spec_id = item.get('spec_id')
-                scen_type = item.get('type')
+                scen_type = item.get('type', '')
                 steps = item.get('steps', [])
                 try:
-                    spec = UseCaseSpecification.objects.get(pk=int(spec_id))
-                except UseCaseSpecification.DoesNotExist:
+                    spec = UseCaseSpecification.objects.get(pk=int(spec_id), project=project)
+                except (UseCaseSpecification.DoesNotExist, ValueError, TypeError):
                     continue
+
+                if scen_type == 'positive' or scen_type.lower() == 'normal':
+                    scen_type = 'Normal'
+                elif scen_type == 'negative' or scen_type.lower() == 'exception' or scen_type.lower() == 'exc':
+                    scen_type = 'Exception'
+                elif scen_type.lower() == 'alternative' or scen_type.lower() == 'alt':
+                    scen_type = 'Alternative'
+
                 TestScenario.objects.filter(use_case=spec, scenario_type=scen_type).delete()
                 scenario = TestScenario.objects.create(use_case=spec, scenario_type=scen_type)
                 for idx, step in enumerate(steps, start=1):
-                    TestStep.objects.create(scenario=scenario, step_number=idx, condition=step.get('condition', 'Given'), action_type=step.get('activity', ''), target_id=step.get('target_id', ''), target_text=step.get('target_text', ''))
+                    TestStep.objects.create(
+                        scenario=scenario,
+                        step_number=idx,
+                        condition=step.get('condition', 'Given'),
+                        action_type=step.get('activity', ''),
+                        target_id=str(step.get('target_id', '') or ''),
+                        target_text=step.get('target_text', '')
+                    )
                 saved_count += 1
-            return JsonResponse({'status': 'success', 'message': f'{saved_count} scenarios saved'})
+            return JsonResponse({'status': 'success', 'message': f'{saved_count} scenarios saved to Supabase'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
 
-def scenario_result(request, gui_id):
+def scenario_result(request, gui_id=None):
     project = get_active_project(request)
     if not project:
         return redirect('main:home')
 
-    # RC-02 fix: scope GUI ke project aktif, tidak ada fallback GUI.objects.first()
-    gui_obj = get_object_or_404(GUI, id_gui=gui_id, project=project) if gui_id else GUI.objects.filter(project=project).first()
-
-    # RC-02 fix: selalu filter ke project aktif, tidak ada .all() global
+    gui_obj = GUI.objects.filter(id_gui=gui_id, project=project).first() if gui_id else GUI.objects.filter(project=project).first()
     specs = UseCaseSpecification.objects.filter(project=project).prefetch_related('scenarios__steps')
 
     return render(request, 'main/scenario_result.html', {'specs': specs, 'gui': gui_obj})
@@ -1146,40 +1182,29 @@ def scenario_result(request, gui_id):
 
 def input_gui(request, gui_id=None):
     project = get_active_project(request)
+    if not project:
+        return redirect('main:home')
+
     gui = None
-
     if gui_id:
-        gui = GUI.objects.filter(id_gui=gui_id).first()
+        gui = GUI.objects.filter(id_gui=gui_id, project=project).first()
 
     if not gui:
-        # Ambil GUI dari project aktif
-        if project:
-            gui = GUI.objects.filter(project=project).first()
-        else:
-            gui = GUI.objects.first()
+        gui = GUI.objects.filter(project=project).first()
 
     if not gui:
-        # Buat GUI baru untuk project aktif
-        if not project:
-            pengguna = get_or_create_guest_user()
-            project = Project.objects.create(
-                nama_project="Default Project",
-                pengguna=pengguna,
-            )
-            set_active_project(request, project)
-
         gui = GUI.objects.create(
             project=project,
             id_gui=f"G{project.id_project}",
             nama_atribut=project.nama_project
         )
-        
+
     pages_data = []
     if gui:
-        pages = Page.objects.filter(gui=gui).prefetch_related('elements')
+        pages = Page.objects.filter(gui=gui).prefetch_related('elements').order_by('order')
         for p in pages:
             elements_data = []
-            for el in p.elements.all():
+            for el in p.elements.all().order_by('order'):
                 elements_data.append({
                     "name": el.name,
                     "type": el.element_type
@@ -1195,21 +1220,37 @@ def input_gui(request, gui_id=None):
     })
 
 
+@csrf_exempt
 def save_gui(request, gui_id):
     try:
-        gui = get_object_or_404(GUI, id_gui=gui_id)
+        project = get_active_project(request)
+        if not project:
+            return JsonResponse({'status': 'error', 'message': 'Tidak ada project aktif.'}, status=400)
+
         data = json.loads(request.body)
         with transaction.atomic():
-            gui.pages.all().delete()
+            # Lock GUI object agar request paralel (auto-save & button click) berurutan dengan aman
+            gui = GUI.objects.select_for_update().filter(id_gui=gui_id, project=project).first() if gui_id else GUI.objects.select_for_update().filter(project=project).first()
+            if not gui:
+                gui = GUI.objects.select_for_update().filter(project=project).first()
+            if not gui:
+                return JsonResponse({'status': 'error', 'message': 'GUI tidak ditemukan.'}, status=404)
+
+            # Clear existing elements and pages for this GUI before recreating
+            Element.objects.filter(page__gui=gui).delete()
+            Page.objects.filter(gui=gui).delete()
+
             for page_idx, page_data in enumerate(data, start=1):
-                page = Page.objects.create(gui=gui, name=page_data.get('name') or f'Page {page_idx}', order=page_idx)
+                page_name = page_data.get('name', '').strip() or f'Page {page_idx}'
+                page = Page.objects.create(gui=gui, name=page_name, order=page_idx)
                 for elem_idx, elem_data in enumerate(page_data.get('elements', []), start=1):
-                    elem_name = elem_data.get('name')
-                    elem_type = elem_data.get('type')
+                    elem_name = elem_data.get('name', '').strip()
+                    elem_type = elem_data.get('type', '').strip()
                     if not elem_name or not elem_type:
                         continue
                     Element.objects.create(page=page, name=elem_name, input_type=elem_type.lower(), element_type=elem_type.lower(), order=elem_idx)
-        return JsonResponse({'status': 'success', 'message': 'Data saved successfully'})
+
+        return JsonResponse({'status': 'success', 'message': 'Data GUI berhasil disimpan ke Supabase'})
     except json.JSONDecodeError:
         return JsonResponse({'status': 'error', 'message': 'Invalid JSON format'}, status=400)
     except Exception as e:

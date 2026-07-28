@@ -159,3 +159,59 @@ class UseCaseSpecificationAPITestCase(TestCase):
         self.assertEqual(spec.basic_paths.count(), 1)
         self.assertEqual(spec.basic_paths.first().actor_action, "User enters credentials")
 
+    def test_save_and_load_input_gui(self):
+        gui_id = f"G{self.project.id_project}"
+        save_gui_url = reverse('main:save_gui', kwargs={'gui_id': gui_id})
+        payload = [
+            {
+                "name": "Halaman Login",
+                "elements": [
+                    {"name": "Email Field", "type": "text"},
+                    {"name": "Submit Button", "type": "button"}
+                ]
+            }
+        ]
+        res = self.client.post(save_gui_url, data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+
+        # GET input_gui page and verify pages_json contains the saved data
+        input_gui_url = reverse('main:input_gui')
+        response = self.client.get(input_gui_url)
+        self.assertEqual(response.status_code, 200)
+        pages_json = response.context['pages_json']
+        parsed_pages = json.loads(pages_json)
+        self.assertEqual(len(parsed_pages), 1)
+        self.assertEqual(parsed_pages[0]['name'], "Halaman Login")
+        self.assertEqual(len(parsed_pages[0]['elements']), 2)
+
+    def test_save_and_load_user_scenario(self):
+        spec = UseCaseSpecification.objects.create(
+            project=self.project,
+            feature_name="Payment Feature",
+            summary_description="User pays order"
+        )
+        save_scen_url = reverse('main:save_scenarios_api')
+        payload = [
+            {
+                "spec_id": spec.id,
+                "type": "Normal",
+                "steps": [
+                    {"condition": "Given", "activity": "page", "target_id": "1", "target_text": "[Page] Halaman Payment"},
+                    {"condition": "When", "activity": "click", "target_id": "2", "target_text": "[button] Pay Now"}
+                ]
+            }
+        ]
+        res = self.client.post(save_scen_url, data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(res.status_code, 200)
+
+        # GET user_scenario page and verify saved_scenarios_json
+        gui_id = f"G{self.project.id_project}"
+        user_scen_url = reverse('main:user_scenario', kwargs={'gui_id': gui_id})
+        response = self.client.get(user_scen_url)
+        self.assertEqual(response.status_code, 200)
+        saved_scenarios_json = response.context['saved_scenarios_json']
+        parsed_saved = json.loads(saved_scenarios_json)
+        self.assertIn(str(spec.id), parsed_saved)
+        self.assertEqual(len(parsed_saved[str(spec.id)]['Normal']), 2)
+
+
