@@ -443,15 +443,33 @@
         async function generateAllDiagrams() {
             showStatus('Generating diagrams via Rule Engine...', 'warning');
             try {
-                const response = await fetch('/api/class-diagram/generate/');
+                const rawSeq = localStorage.getItem('sequenceConfigs');
+                let seqConfigs = null;
+                if (rawSeq) {
+                    try { seqConfigs = JSON.parse(rawSeq); } catch(e) {}
+                }
+
+                const response = await fetch('/api/class-diagram/generate/', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        seq_configs: seqConfigs
+                    })
+                });
                 const data = await response.json();
                 
                 if (data.status === 'success') {
                     plantUmlCodes = data.diagrams;
                     showStatus('All diagrams generated successfully by backend', 'success');
                     
-                    // Show basic by default if available
-                    if (plantUmlCodes['basic']) {
+                    // Show complete BCE view by default if available
+                    if (plantUmlCodes['complete']) {
+                        showDiagram('complete');
+                    } else if (plantUmlCodes['basic']) {
                         showDiagram('basic');
                     }
                 } else {

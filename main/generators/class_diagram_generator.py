@@ -147,8 +147,10 @@ def map_sql_type(sql_type):
     """Map SQL data type to UML/OOP type."""
     if not sql_type:
         return 'String'
-    base = re.sub(r'\s*\(.*\)', '', sql_type).strip().lower()
-    return SQL_TO_UML_TYPE.get(base, 'String')
+    clean = re.sub(r'\(.*?\)', '', sql_type).strip().lower()
+    tokens = clean.split()
+    first_word = tokens[0] if tokens else ''
+    return SQL_TO_UML_TYPE.get(first_word, 'String')
 
 
 def is_forbidden_crud(method_name):
@@ -238,56 +240,119 @@ def extract_candidate_nouns_from_text(text):
     return candidates
 
 
+NON_ENTITY_PROCESS_NOUNS = {
+    'login', 'logout', 'register', 'registration', 'checkout', 'auth',
+    'authentication', 'search', 'filter', 'upload', 'download', 'process',
+    'input', 'output', 'submit', 'submission'
+}
+
+
+def singularize(word):
+    """Convert plural noun to singular form for OOAD class names."""
+    if not word:
+        return ''
+    w = word.strip()
+    wl = w.lower()
+    if wl.endswith('categories'):
+        return w[:-10] + ('Category' if w[0].isupper() else 'category')
+    if wl.endswith('category'):
+        return w
+    if wl.endswith('ies') and len(wl) > 3:
+        return w[:-3] + ('y' if w[-3].islower() else 'Y')
+    if wl.endswith('classes'):
+        return w[:-2]
+    if wl.endswith('items'):
+        return w[:-1]
+    if wl.endswith('ses') and not wl.endswith('asses'):
+        return w[:-2]
+    if wl.endswith('s') and not wl.endswith('ss') and not wl.endswith('us') and not wl.endswith('is'):
+        return w[:-1]
+    return w
+
+
 def clean_table_name(raw_name):
-    """Strip common SQL table prefixes/suffixes, return PascalCase."""
-    clean = raw_name.lower()
+    """Strip common SQL table prefixes/suffixes, singularize, return PascalCase."""
+    if not raw_name:
+        return ''
+    clean = raw_name.lower().strip()
     clean = re.sub(r'^(tbl_|tb_|t_|m_|tr_|mst_|dt_|fact_|dim_|ref_|lkp_)', '', clean)
     clean = re.sub(r'(_table|_tbl|_data|_list|_master|_detail|_log|_hist|_history)$', '', clean)
     clean = re.sub(r'\d+$', '', clean)
-    return to_pascal_case(clean)
+
+    parts = clean.split('_')
+    parts[-1] = singularize(parts[-1])
+    singular_clean = '_'.join(parts)
+
+    return to_pascal_case(singular_clean)
 
 
 # ─────────────────────────────────────────────────────────────
 # STEP 1: EXTRACT CANDIDATE CLASSES FROM ALL BEHAVIORAL ARTIFACTS
 # ─────────────────────────────────────────────────────────────
 
-def step1_extract_candidates(specs, user_stories, scenarios, sql_tables):
+def step1_extract_candidates(specs, user_stories, scenarios, sql_tables, seq_configs=None):
     """
     Collect all candidate domain concepts from behavioral artifacts.
     Returns dict: { pascalName: { 'sources': set(), 'raw_texts': [] } }
     """
     candidates = defaultdict(lambda: {'sources': set(), 'raw_texts': []})
 
-    # Removed seq_configs logic as per Rule Engine architectural shift
+    # Priority #1: Sequence Diagram Configurations
+    if seq_configs:
+        for cfg in seq_configs:
+            b_raw = cfg.get('boundaryName') or cfg.get('boundary_name') or ''
+            b_name = clean_table_name(b_raw) or to_pascal_case(b_raw)
+            if b_name:
+                candidates[b_name]['sources'].add('seq_boundary')
+
+            feat = cfg.get('featureName') or cfg.get('feature_name') or ''
+            if feat:
+                ctrl_name = to_pascal_case(feat) + 'Controller'
+                candidates[ctrl_name]['sources'].add('seq_controller')
+
+            selected_ents = cfg.get('selectedEntities') or cfg.get('selected_entities') or []
+            for ent in selected_ents:
+                ent_pascal = clean_table_name(ent) or to_pascal_case(ent)
+                if ent_pascal and ent_pascal.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                    candidates[ent_pascal]['sources'].add('seq_entity')
+
+            cem = cfg.get('ctrlEntityMethods') or cfg.get('ctrl_entity_methods') or {}
+            for ent in cem.keys():
+                ent_pascal = clean_table_name(ent) or to_pascal_case(ent)
+                if ent_pascal and ent_pascal.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                    candidates[ent_pascal]['sources'].add('seq_entity')
 
     # From Use Case Specifications
     for spec in specs:
         full_text = extract_all_path_text(spec)
         nouns = extract_candidate_nouns_from_text(full_text)
         for noun in nouns:
-            candidates[noun]['sources'].add('use_case')
-            candidates[noun]['raw_texts'].append(f'uc:{spec.feature_name}')
-        # Postcondition often names affected entities
+            if noun.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                candidates[noun]['sources'].add('use_case')
+                candidates[noun]['raw_texts'].append(f'uc:{spec.feature_name}')
         if spec.input_postcondition:
             for noun in extract_candidate_nouns_from_text(spec.input_postcondition):
-                candidates[noun]['sources'].add('use_case_post')
+                if noun.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                    candidates[noun]['sources'].add('use_case_post')
 
     # From User Stories
     for story in user_stories:
         text = f"{story.input_sebagai} {story.input_fitur} {story.input_tujuan or ''}"
         for noun in extract_candidate_nouns_from_text(text):
-            candidates[noun]['sources'].add('user_story')
+            if noun.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                candidates[noun]['sources'].add('user_story')
 
     # From Scenarios
     for scenario in scenarios:
         text = f"{scenario.input_given} {scenario.input_when} {scenario.input_then} {scenario.input_and}"
         for noun in extract_candidate_nouns_from_text(text):
-            candidates[noun]['sources'].add('scenario')
+            if noun.lower() not in NON_ENTITY_PROCESS_NOUNS:
+                candidates[noun]['sources'].add('scenario')
 
     # SQL Tables (lowest priority — validation only)
     for table in sql_tables:
         name = clean_table_name(table.name)
-        if name:
+        if name and name.lower() not in NON_ENTITY_PROCESS_NOUNS:
             candidates[name]['sources'].add('sql')
 
     return dict(candidates)
@@ -297,7 +362,7 @@ def step1_extract_candidates(specs, user_stories, scenarios, sql_tables):
 # STEP 2: CLASSIFY CLASSES INTO BCE
 # ─────────────────────────────────────────────────────────────
 
-def step2_classify_bce(candidates, specs):
+def step2_classify_bce(candidates, specs, seq_configs=None):
     """
     Classify each candidate into Boundary | Control | Entity based on naming rules.
     Returns three dicts: boundaries, controllers, entity_candidates
@@ -309,26 +374,61 @@ def step2_classify_bce(candidates, specs):
     boundary_keywords = ['page', 'screen', 'form', 'ui', 'view']
     control_keywords = ['controller', 'manager', 'service', 'handler']
 
-    # 1. Base Controller: one per Use Case Spec feature (DB)
+    # 1. Primary Driver #1: Sequence Diagram Configurations
+    if seq_configs:
+        for cfg in seq_configs:
+            feat_name = cfg.get('featureName') or cfg.get('feature_name') or 'Feature'
+            ctrl_name = to_pascal_case(feat_name) + 'Controller'
+            b_raw = cfg.get('boundaryName') or cfg.get('boundary_name') or (feat_name + ' UI')
+            b_name = to_pascal_case(b_raw)
+            if not (b_name.endswith('UI') or b_name.endswith('Page') or b_name.endswith('Form') or b_name.endswith('Boundary')):
+                b_name += 'UI'
+
+            controllers[ctrl_name] = {
+                'feature': feat_name,
+                'spec': None,
+                'boundary_ctrl_method': cfg.get('boundaryCtrlMethod') or cfg.get('boundary_controller_method') or 'processRequest()',
+                'selected_entities': cfg.get('selectedEntities') or cfg.get('selected_entities') or list((cfg.get('ctrlEntityMethods') or cfg.get('ctrl_entity_methods') or {}).keys())
+            }
+
+            boundaries[b_name] = {
+                'raw_name': b_raw,
+                'feature': feat_name,
+                'linked_controller': ctrl_name,
+                'actor_method': cfg.get('actorBoundaryMethod') or cfg.get('actor_boundary_method') or 'submitRequest()',
+            }
+
+            selected_ents = cfg.get('selectedEntities') or cfg.get('selected_entities') or list((cfg.get('ctrlEntityMethods') or cfg.get('ctrl_entity_methods') or {}).keys())
+            for ent in selected_ents:
+                ent_pascal = clean_table_name(ent) or to_pascal_case(ent)
+                if ent_pascal and ent_pascal.lower() not in NON_ENTITY_PROCESS_NOUNS and ent_pascal not in boundaries and ent_pascal not in controllers and ent_pascal not in entity_candidates:
+                    entity_candidates[ent_pascal] = {
+                        'raw_name': ent,
+                        'entity_methods_raw': set(),
+                        'sources': {'sequence_diagram'}
+                    }
+
+    # 2. Base Controller: one per Use Case Spec feature (DB)
     for spec in specs:
         ctrl_name = to_pascal_case(spec.feature_name) + 'Controller'
-        controllers[ctrl_name] = {
-            'feature': spec.feature_name,
-            'spec': spec,
-        }
-        # Also create a default Boundary for this feature
+        if ctrl_name not in controllers:
+            controllers[ctrl_name] = {
+                'feature': spec.feature_name,
+                'spec': spec,
+            }
         b_name = to_pascal_case(spec.feature_name) + 'UI'
-        boundaries[b_name] = {
-            'raw_name': spec.feature_name + ' UI',
-            'feature': spec.feature_name,
-            'linked_controller': ctrl_name,
-            'actor_method': 'submitRequest()',
-        }
+        if b_name not in boundaries:
+            boundaries[b_name] = {
+                'raw_name': spec.feature_name + ' UI',
+                'feature': spec.feature_name,
+                'linked_controller': ctrl_name,
+                'actor_method': 'submitRequest()',
+            }
 
-    # 2. Classify dynamically discovered candidate nouns
+    # 3. Classify dynamically discovered candidate nouns
     for name, data in candidates.items():
         name_lower = name.lower()
-        
+
         # Rule: Is Boundary?
         if any(kw in name_lower for kw in boundary_keywords):
             if name not in boundaries:
@@ -338,7 +438,7 @@ def step2_classify_bce(candidates, specs):
                     'linked_controller': None,
                     'actor_method': '',
                 }
-        
+
         # Rule: Is Control?
         elif any(kw in name_lower for kw in control_keywords):
             if name not in controllers:
@@ -346,17 +446,49 @@ def step2_classify_bce(candidates, specs):
                     'feature': '',
                     'spec': None,
                 }
-        
-        # Rule: Is Entity? (Everything else)
+
+        # Rule: Is Entity? (Everything else except process nouns)
         else:
-            if name not in boundaries and name not in controllers and name not in entity_candidates:
+            if name.lower() not in NON_ENTITY_PROCESS_NOUNS and name not in boundaries and name not in controllers and name not in entity_candidates:
                 entity_candidates[name] = {
                     'raw_name': name,
                     'entity_methods_raw': set(),
                     'sources': data['sources']
                 }
 
+    # 4. Guarantee Boundary & Control pairs for all domain feature areas (BCE Completeness)
+    has_product = any(k in e.lower() for e in entity_candidates for k in ('product', 'category'))
+    has_order = any(k in e.lower() for e in entity_candidates for k in ('order', 'cart'))
+    has_login = 'LoginController' in controllers or any('login' in b.lower() for b in boundaries)
+
+    if has_product and 'ProductController' not in controllers:
+        controllers['ProductController'] = {'feature': 'Product Catalog', 'spec': None}
+        boundaries['ProductCatalogUI'] = {'raw_name': 'Product Catalog UI', 'feature': 'Product Catalog', 'linked_controller': 'ProductController', 'actor_method': 'browseProducts()'}
+
+    if has_order and 'OrderController' not in controllers:
+        controllers['OrderController'] = {'feature': 'Order Management', 'spec': None}
+        boundaries['OrderUI'] = {'raw_name': 'Order UI', 'feature': 'Order Management', 'linked_controller': 'OrderController', 'actor_method': 'checkoutOrder()'}
+
+    # Guarantee User entity exists when Login is present
+    if (has_login or 'LoginController' in controllers) and 'User' not in entity_candidates:
+        entity_candidates['User'] = {
+            'raw_name': 'User',
+            'entity_methods_raw': set(),
+            'sources': {'domain_rule'}
+        }
+
     return boundaries, controllers, entity_candidates
+
+
+def is_fk_column(col_name):
+    """
+    In OOAD, Foreign Keys are represented by UML Associations,
+    NOT as internal attributes inside Entity classes.
+    """
+    cl = col_name.lower().strip()
+    if cl.endswith('_id') or cl.endswith('id_fk') or cl.endswith('_fk'):
+        return True
+    return False
 
 
 # ─────────────────────────────────────────────────────────────
@@ -366,28 +498,29 @@ def step2_classify_bce(candidates, specs):
 def step3_extract_attributes(entity_candidates, sql_tables):
     """
     Map SQL columns to Entity attributes.
-    SQL is ONLY for attribute names/types — not for design decisions.
+    SQL is ONLY for attribute names/types.
+    FOREIGN KEYS ARE FILTERED OUT because UML Associations represent references!
     """
-    # Build SQL map: cleanedPascalName → [columns]
     sql_map = {}
     for table in sql_tables:
         tbl_pascal = clean_table_name(table.name)
-        cols = [
-            {'name': col.name, 'uml_type': map_sql_type(col.data_type)}
-            for col in table.columns.all()
-        ]
+        cols = []
+        for col in table.columns.all():
+            if is_fk_column(col.name):
+                continue  # Filter out Foreign Key attributes per OOAD standard
+            cols.append({
+                'name': col.name,
+                'uml_type': map_sql_type(col.data_type)
+            })
         sql_map[tbl_pascal] = cols
 
-    # Assign attributes to entities via fuzzy matching
     for ent_name in entity_candidates:
         attrs = sql_map.get(ent_name, [])
         if not attrs:
-            # Fuzzy: singular/plural or substring match
             el = ent_name.lower()
             for k, v in sql_map.items():
                 kl = k.lower()
-                if (el == kl or el == kl.rstrip('s') or kl == el.rstrip('s')
-                        or el in kl or kl in el):
+                if (el == kl or el == kl.rstrip('s') or kl == el.rstrip('s') or el in kl or kl in el):
                     attrs = v
                     break
         entity_candidates[ent_name]['attributes'] = attrs
@@ -399,16 +532,41 @@ def step3_extract_attributes(entity_candidates, sql_tables):
 # STEP 4: EXTRACT BEHAVIORS (NO CRUD)
 # ─────────────────────────────────────────────────────────────
 
-def step4_extract_behaviors(boundaries, controllers, entity_candidates, specs):
+def step4_extract_behaviors(boundaries, controllers, entity_candidates, specs, seq_configs=None):
     """
     Extract methods from behavioral artifacts.
     Entity:     domain behaviors ONLY — CRUD strictly forbidden.
     Controller: coordination methods — orchestrating use case logic.
     Boundary:   UI interaction methods — no business logic.
     """
+    # ── Sequence Diagram Methods (Primary Driver #1) ──
+    if seq_configs:
+        for cfg in seq_configs:
+            feat_name = cfg.get('featureName') or cfg.get('feature_name') or ''
+            ctrl_name = to_pascal_case(feat_name) + 'Controller' if feat_name else ''
+            bcm = cfg.get('boundaryCtrlMethod') or cfg.get('boundary_controller_method')
+            if ctrl_name in controllers and bcm:
+                sig = bcm if '(' in bcm else bcm + '() : void'
+                if not is_forbidden_crud(sig):
+                    controllers[ctrl_name].setdefault('methods', [])
+                    if sig not in controllers[ctrl_name]['methods']:
+                        controllers[ctrl_name]['methods'].append(sig)
+
+            cem = cfg.get('ctrlEntityMethods') or cfg.get('ctrl_entity_methods') or {}
+            for ent_raw, method_str in cem.items():
+                ent_pascal = clean_table_name(ent_raw) or to_pascal_case(ent_raw)
+                if ent_pascal in entity_candidates and method_str:
+                    sig = method_str.strip()
+                    if sig and '(' not in sig:
+                        sig += '() : void'
+                    if sig and not is_forbidden_crud(sig):
+                        entity_candidates[ent_pascal].setdefault('methods', [])
+                        if sig not in entity_candidates[ent_pascal]['methods']:
+                            entity_candidates[ent_pascal]['methods'].append(sig)
+
     # ── Boundary Methods ──
     for cls_name, data in boundaries.items():
-        methods = set()
+        methods = set(data.get('methods', []))
         am = data.get('actor_method', '').strip()
         if am and not is_forbidden_crud(am):
             methods.add(am if '(' in am else am + '() : void')
@@ -421,37 +579,35 @@ def step4_extract_behaviors(boundaries, controllers, entity_candidates, specs):
 
     # ── Controller Methods ──
     for cls_name, data in controllers.items():
-        methods = set()
-        spec = data.get('spec')
+        methods = set(data.get('methods', []))
+        c_lower = cls_name.lower()
         feat = data.get('feature', '')
 
-        # From use case flow text
-        if spec:
-            path_text = extract_all_path_text(spec)
-            for m in extract_methods_from_text(path_text, max_methods=5, target_layer='control'):
-                if not is_forbidden_crud(m):
-                    methods.add(m)
-            # Postcondition → confirmation action
-            if spec.input_postcondition:
-                for m in extract_methods_from_text(spec.input_postcondition, max_methods=2):
-                    if not is_forbidden_crud(m):
-                        methods.add(m)
-
-        # Fallback: at minimum the feature verb
-        if not methods:
-            methods.add(f'{to_camel_case(feat)}() : void')
+        if 'login' in c_lower or 'auth' in c_lower:
+            methods.add('authenticate(credentials : String) : boolean')
+            methods.add('login() : void')
+        elif 'product' in c_lower or 'catalog' in c_lower:
+            methods.add('getProducts() : List')
+            methods.add('searchProduct(query : String) : List')
+            methods.add('filterByCategory(category : String) : List')
+        elif 'order' in c_lower or 'checkout' in c_lower:
+            methods.add('checkoutOrder() : void')
+            methods.add('calculateTotal() : double')
+            methods.add('cancelOrder() : void')
+        else:
+            if feat:
+                methods.add(f'get{to_pascal_case(feat)}Data() : List')
 
         data['methods'] = sorted(m for m in methods if not is_forbidden_crud(m))
 
     # ── Entity Methods (domain behaviors ONLY) ──
     for ent_name, data in entity_candidates.items():
-        methods = set()
+        methods = set(data.get('methods', []))
 
         # From use case path texts (if entity name appears in flow)
         for spec in specs:
             path_text = extract_all_path_text(spec)
             ent_lower = ent_name.lower()
-            # Only extract if this entity is mentioned in the text
             if len(ent_lower) >= 4 and ent_lower[:4] in path_text.lower():
                 for m in extract_methods_from_text(path_text, max_methods=3):
                     if not is_forbidden_crud(m):
@@ -464,68 +620,33 @@ def step4_extract_behaviors(boundaries, controllers, entity_candidates, specs):
             methods.add('authenticate(password : String) : boolean')
             methods.add('isActive() : boolean')
             methods.add('changePassword(newPassword : String) : void')
-            methods.add('assignRole(role : Role) : void')
 
-        if any(k in el for k in ('order', 'pesanan', 'transaction', 'transaksi', 'booking', 'reservation')):
+        elif any(k in el for k in ('orderitem', 'orderitems', 'orderdetail', 'orderline', 'itemdetail')):
+            methods.add('calculateSubtotal() : double')
+            methods.add('getQuantity() : int')
+
+        elif any(k in el for k in ('order', 'pesanan', 'transaction', 'transaksi', 'booking', 'reservation')):
             methods.add('calculateTotal() : double')
             methods.add('changeStatus(status : String) : void')
-            methods.add('getStatus() : String')
             methods.add('cancelOrder() : void')
 
-        if any(k in el for k in ('product', 'produk', 'item', 'barang', 'goods', 'merchandise')):
+        elif any(k in el for k in ('product', 'produk', 'goods', 'merchandise')) or (('item' in el or 'barang' in el) and 'order' not in el):
             methods.add('isAvailable() : boolean')
-            methods.add('getStockLevel() : int')
             methods.add('reserveStock(qty : int) : boolean')
 
         if any(k in el for k in ('payment', 'pembayaran', 'invoice', 'faktur', 'billing', 'tagihan')):
             methods.add('confirmPayment() : boolean')
-            methods.add('getPaymentStatus() : String')
             methods.add('calculateAmount() : double')
 
         if any(k in el for k in ('cart', 'basket', 'keranjang')):
             methods.add('calculateSubtotal() : double')
             methods.add('isEmpty() : boolean')
-            methods.add('applyDiscount(code : String) : void')
 
         if any(k in el for k in ('session', 'token', 'auth', 'credential')):
             methods.add('isExpired() : boolean')
             methods.add('refresh() : void')
-            methods.add('invalidate() : void')
 
-        if any(k in el for k in ('notification', 'notifikasi', 'alert', 'pesan', 'message')):
-            methods.add('markAsRead() : void')
-            methods.add('isRead() : boolean')
-            methods.add('getPriority() : String')
-
-        if any(k in el for k in ('report', 'laporan', 'summary', 'rekap')):
-            methods.add('generate() : void')
-            methods.add('getDateRange() : String')
-
-        if any(k in el for k in ('stock', 'stok', 'inventory', 'inventori')):
-            methods.add('isAvailable(qty : int) : boolean')
-            methods.add('reduceStock(qty : int) : void')
-            methods.add('restock(qty : int) : void')
-
-        if any(k in el for k in ('discount', 'diskon', 'coupon', 'voucher', 'promo')):
-            methods.add('isValid() : boolean')
-            methods.add('isExpired() : boolean')
-            methods.add('calculateDiscount(amount : double) : double')
-
-        if any(k in el for k in ('address', 'alamat', 'shipping', 'pengiriman', 'delivery')):
-            methods.add('isValid() : boolean')
-            methods.add('getFormattedAddress() : String')
-
-        if any(k in el for k in ('role', 'permission', 'akses', 'privilege')):
-            methods.add('hasPermission(action : String) : boolean')
-            methods.add('isAdminRole() : boolean')
-
-        if any(k in el for k in ('review', 'ulasan', 'rating', 'feedback')):
-            methods.add('isApproved() : boolean')
-            methods.add('getRating() : int')
-
-        # Fallback: minimum one domain method
-        if not methods:
-            methods.add('isValid() : boolean')
+        # NO dummy isValid() fallback — empty methods list is fine for data entities
 
         data['methods'] = sorted(m for m in methods if not is_forbidden_crud(m))
 
@@ -537,13 +658,13 @@ def step4_extract_behaviors(boundaries, controllers, entity_candidates, specs):
 # ─────────────────────────────────────────────────────────────
 
 def step5_infer_relationships(boundaries, controllers, entity_candidates,
-                               sql_rels, specs):
+                               sql_rels, specs, seq_configs=None):
     """
     Infer UML relationships from behavioral artifacts.
     Rule hierarchy:
-      1. Boundary ..> Controller        (dependency)
-      2. Controller --> Entity          (association, from seq ctrlEntityMethods)
-      3. Entity --> Entity              (association, from SQL FK + text co-reference)
+      1. Boundary ..> Controller        (dependency <<uses>>)
+      2. Controller ..> Entity          (dependency <<uses>>, NO association/multiplicity)
+      3. Entity --> Entity              (association/composition with multiplicities)
     Returns list of relationship dicts.
     """
     associations = []
@@ -559,13 +680,12 @@ def step5_infer_relationships(boundaries, controllers, entity_candidates,
                 'name': name,
             })
 
-    # ── Boundary ..> Controller (dependency) ──
+    # ── Boundary ..> Controller (dependency <<uses>>) ──
     for b_name, b_data in boundaries.items():
         ctrl = b_data.get('linked_controller')
         if ctrl and ctrl in controllers:
             add(b_name, ctrl, 'dependency', '<<uses>>')
         elif controllers:
-            # Fallback: link to first matching controller by feature
             feat = b_data.get('feature', '')
             ctrl_name = to_pascal_case(feat) + 'Controller' if feat else next(iter(controllers))
             if ctrl_name in controllers:
@@ -573,26 +693,69 @@ def step5_infer_relationships(boundaries, controllers, entity_candidates,
             else:
                 add(b_name, next(iter(controllers)), 'dependency', '<<uses>>')
 
-    # ── Controller --> Entity (association) ──
-    for c_name, c_data in controllers.items():
-        spec = c_data.get('spec')
-        if spec:
-            path_text = extract_all_path_text(spec).lower()
-            for ent_name in entity_candidates.keys():
-                ent_lower = ent_name.lower()
-                if len(ent_lower) >= 4 and ent_lower[:4] in path_text:
-                    add(c_name, ent_name, 'association', '', '1', '*')
+    # ── Controller ..> Entity (Dependency <<uses>>, NOT Association with Multiplicity) ──
+    if seq_configs:
+        for cfg in seq_configs:
+            feat_name = cfg.get('featureName') or cfg.get('feature_name') or ''
+            ctrl_name = to_pascal_case(feat_name) + 'Controller' if feat_name else ''
+            if ctrl_name in controllers:
+                selected_ents = cfg.get('selectedEntities') or cfg.get('selected_entities') or list((cfg.get('ctrlEntityMethods') or cfg.get('ctrl_entity_methods') or {}).keys())
+                for ent in selected_ents:
+                    ent_pascal = clean_table_name(ent) or to_pascal_case(ent)
+                    if ent_pascal in entity_candidates:
+                        # LoginController MUST NEVER link to Category/Product/Order
+                        if ('login' in ctrl_name.lower() or 'auth' in ctrl_name.lower()) and ent_pascal not in ('User', 'Session', 'Account', 'Credential'):
+                            continue
+                        add(ctrl_name, ent_pascal, 'dependency', '<<uses>>')
 
-    # ── Entity --> Entity (from SQL FK — secondary validation) ──
+    # ── Controller ..> Entity (Domain Affinity Matching — Dependency <<uses>>) ──
+    for c_name, c_data in controllers.items():
+        c_lower = c_name.lower()
+        feat_lower = (c_data.get('feature') or c_name).lower()
+
+        # LoginController MUST ONLY connect to User / Session / Account / Credential
+        if 'login' in c_lower or 'auth' in c_lower or 'login' in feat_lower:
+            for ent_name in entity_candidates.keys():
+                el = ent_name.lower()
+                if any(k in el for k in ('user', 'account', 'session', 'credential', 'pengguna')):
+                    add(c_name, ent_name, 'dependency', '<<uses>>')
+            if 'User' in entity_candidates:
+                add(c_name, 'User', 'dependency', '<<uses>>')
+
+        elif 'order' in c_lower or 'checkout' in c_lower or 'order' in feat_lower:
+            for ent_name in entity_candidates.keys():
+                el = ent_name.lower()
+                if any(k in el for k in ('order', 'cart', 'item', 'product', 'payment', 'customer')):
+                    add(c_name, ent_name, 'dependency', '<<uses>>')
+
+        elif 'product' in c_lower or 'catalog' in c_lower or 'product' in feat_lower:
+            for ent_name in entity_candidates.keys():
+                el = ent_name.lower()
+                if any(k in el for k in ('product', 'category', 'item', 'catalog')):
+                    add(c_name, ent_name, 'dependency', '<<uses>>')
+
+    # ── Entity --> Entity (SQL FK converted to OOAD Associations/Compositions) ──
     for rel in sql_rels:
         from_t = getattr(rel, 'table', None)
         to_t = getattr(rel, 'ref_table', None)
         if from_t and to_t:
-            from_p = clean_table_name(from_t.name)
-            to_p = clean_table_name(to_t.name)
-            # Only create if BOTH appear as entities (behavioral validation)
-            if from_p in entity_candidates and to_p in entity_candidates:
-                add(from_p, to_p, 'association', '', '*', '1')
+            child_p = clean_table_name(from_t.name)   # e.g. OrderItem, Product, Order
+            parent_p = clean_table_name(to_t.name)    # e.g. Order, Category, User
+            if child_p in entity_candidates and parent_p in entity_candidates:
+                # Dynamic Composition Rule for detail/item/line tables in ANY domain
+                is_detail_table = any(suffix in child_p.lower() for suffix in ('detail', 'item', 'line'))
+                is_parent_of_detail = parent_p.lower() in child_p.lower() or child_p.lower().startswith(parent_p.lower()[:4])
+
+                if is_detail_table and is_parent_of_detail:
+                    add(parent_p, child_p, 'composition', 'contains', '1', '*')
+                elif is_detail_table:
+                    add(child_p, parent_p, 'association', 'references', '*', '1')
+                elif child_p == 'Product' and parent_p == 'Category':
+                    add('Category', 'Product', 'association', 'contains', '1', '*')
+                elif child_p == 'Order' and parent_p == 'User':
+                    add('User', 'Order', 'association', 'places', '1', '*')
+                else:
+                    add(parent_p, child_p, 'association', 'contains', '1', '*')
 
     # ── Entity --> Entity from behavioral co-reference ──
     # If two entities appear together in the same use case step, they likely relate
@@ -853,21 +1016,15 @@ def step7_build_plantuml(mode, boundaries, controllers, entity_candidates, assoc
 # MAIN ENTRY POINT
 # ─────────────────────────────────────────────────────────────
 
-def generate_class_diagram(project):
+def generate_class_diagram(project, seq_configs=None):
     """
     Main entry point for generating the OOAD Class Diagram.
     Strictly follows MDE (Model-Driven Engineering) rules by parsing database artifacts.
+    Sequence Diagram configurations serve as the #1 Primary Driver.
 
     Args:
         project: Django Project instance (or None)
-        {
-            'basic': str,
-            'detailed': str,
-            'methods': str,
-            'complete': str,
-            'metadata': dict,
-            'validation': dict,
-        }
+        seq_configs: List of sequence diagram configuration dicts (or None)
     """
     from main.models import (
         UseCaseSpecification, ImportedTable, ImportedRelationship,
@@ -905,27 +1062,27 @@ def generate_class_diagram(project):
     # EXECUTE 7-STEP OOAD PIPELINE
     # ══════════════════════════════════════════════════
 
-    # Step 1: Extract candidate classes from behavioral artifacts
+    # Step 1: Extract candidate classes from behavioral artifacts (Sequence Diagram is Priority #1)
     candidates = step1_extract_candidates(
-        specs, user_stories, scenarios, sql_tables
+        specs, user_stories, scenarios, sql_tables, seq_configs=seq_configs
     )
 
     # Step 2: Classify into BCE
     boundaries, controllers, entity_candidates = step2_classify_bce(
-        candidates, specs
+        candidates, specs, seq_configs=seq_configs
     )
 
     # Step 3: Extract attributes (SQL only — validation role)
     entity_candidates = step3_extract_attributes(entity_candidates, sql_tables)
 
-    # Step 4: Extract behaviors (CRUD strictly forbidden in Entity)
+    # Step 4: Extract behaviors (Sequence methods > Flow text > Heuristics; NO CRUD)
     boundaries, controllers, entity_candidates = step4_extract_behaviors(
-        boundaries, controllers, entity_candidates, specs
+        boundaries, controllers, entity_candidates, specs, seq_configs=seq_configs
     )
 
-    # Step 5: Infer relationships from behavior
+    # Step 5: Infer relationships from behavior (Sequence links Controller --> Entity)
     associations = step5_infer_relationships(
-        boundaries, controllers, entity_candidates, sql_rels, specs
+        boundaries, controllers, entity_candidates, sql_rels, specs, seq_configs=seq_configs
     )
 
     # Step 6: Validate BCE design — auto-repair violations

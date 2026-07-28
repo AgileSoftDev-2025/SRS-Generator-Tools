@@ -234,7 +234,6 @@ def save_actors_and_features(request):
 
             # Bersihkan data LAMA hanya untuk project aktif ini
             UserStory.objects.filter(gui=gui).delete()
-            UseCaseSpecification.objects.filter(project=project).delete()
 
             feature_map = {}
 
@@ -262,19 +261,31 @@ def save_actors_and_features(request):
                     if actor_name not in feature_map[feature_name]['actors']:
                         feature_map[feature_name]['actors'].append(actor_name)
 
-            # Simpan Use Case Specification (unik per fitur, terikat project)
+            # Preservasi UseCaseSpecification yang sudah ada agar detail spec & paths tidak terhapus saat re-save fitur
+            current_feature_names = set(feature_map.keys())
+            UseCaseSpecification.objects.filter(project=project).exclude(feature_name__in=current_feature_names).delete()
+
             saved_count = 0
             for feat_name, info in feature_map.items():
                 actors_str = ", ".join(info['actors'])
                 purpose_text = f" so that {info['purpose']}" if info['purpose'] else ""
-                UseCaseSpecification.objects.create(
-                    project=project,
-                    gui=gui,
-                    feature_name=feat_name,
-                    summary_description=f"Users ({actors_str}) want to {feat_name}{purpose_text}",
-                    priority="Must Have",
-                    status="Active"
-                )
+                default_summary = f"Users ({actors_str}) want to {feat_name}{purpose_text}"
+
+                spec = UseCaseSpecification.objects.filter(project=project, feature_name=feat_name).first()
+                if spec:
+                    spec.gui = gui
+                    if not spec.summary_description:
+                        spec.summary_description = default_summary
+                    spec.save()
+                else:
+                    UseCaseSpecification.objects.create(
+                        project=project,
+                        gui=gui,
+                        feature_name=feat_name,
+                        summary_description=default_summary,
+                        priority="Must Have",
+                        status="Active"
+                    )
                 saved_count += 1
 
             return JsonResponse({
@@ -411,6 +422,35 @@ def input_informasi_tambahan(request):
         specs = UseCaseSpecification.objects.filter(project=project).prefetch_related(
             'basic_paths', 'alternative_paths', 'exception_paths'
         )
+        if not specs.exists():
+            # Inisialisasi otomatis jika belum ada UseCaseSpecification tetapi UserStory sudah dibuat
+            gui = GUI.objects.filter(project=project).first()
+            if gui:
+                stories = UserStory.objects.filter(gui=gui)
+                feature_map = {}
+                for story in stories:
+                    feat_name = story.input_fitur
+                    feat_purpose = story.input_tujuan
+                    actor_name = story.input_sebagai
+                    if feat_name not in feature_map:
+                        feature_map[feat_name] = {'actors': [], 'purpose': feat_purpose}
+                    if actor_name not in feature_map[feat_name]['actors']:
+                        feature_map[feat_name]['actors'].append(actor_name)
+
+                for feat_name, info in feature_map.items():
+                    actors_str = ", ".join(info['actors'])
+                    purpose_text = f" so that {info['purpose']}" if info['purpose'] else ""
+                    UseCaseSpecification.objects.create(
+                        project=project,
+                        gui=gui,
+                        feature_name=feat_name,
+                        summary_description=f"Users ({actors_str}) want to {feat_name}{purpose_text}",
+                        priority="Must Have",
+                        status="Active"
+                    )
+                specs = UseCaseSpecification.objects.filter(project=project).prefetch_related(
+                    'basic_paths', 'alternative_paths', 'exception_paths'
+                )
     else:
         specs = UseCaseSpecification.objects.none()
 
@@ -444,6 +484,8 @@ def save_usecase_spec(request):
         try:
             data = json.loads(request.body)
             project = get_active_project(request)
+            if not project:
+                return JsonResponse({'status': 'error', 'message': 'Tidak ada project aktif. Buka project dari dashboard terlebih dahulu.'}, status=400)
 
             saved_count = 0
             for key, item in data.items():
@@ -708,7 +750,11 @@ def generate_sequence_diagram_by_feature(request, feature_id):
     lines = [
         '@startuml', 'autonumber', 'skinparam style strictuml',
         'skinparam responseMessageBelowArrow true',
-        'skinparam ParticipantPadding 20',
+        '<style>',
+        'participant {',
+        '  Padding 20',
+        '}',
+        '</style>',
         f'title {usecase_spec.feature_name}', ''
     ]
 
@@ -754,6 +800,20 @@ def generate_sequence_diagram_by_feature(request, feature_id):
     lines.append('@enduml')
 
     plantuml_code = '\n'.join(lines)
+
+    # Save sequence diagram config to session for Class Diagram Rule Engine
+    if 'sequence_configs' not in request.session:
+        request.session['sequence_configs'] = {}
+    request.session['sequence_configs'][str(feature_id)] = {
+        'feature_id': feature_id,
+        'feature_name': usecase_spec.feature_name,
+        'selected_entities': selected_entities,
+        'actor_boundary_method': actor_boundary_method,
+        'boundary_controller_method': boundary_ctrl_method,
+        'boundary_name': boundary_name,
+        'ctrl_entity_methods': ctrl_entity_methods
+    }
+    request.session.modified = True
 
     try:
         resp = requests.post('https://kroki.io/plantuml/png', data=plantuml_code, timeout=20)
@@ -872,8 +932,23 @@ def generate_class_diagram_api(request):
 
     project = get_active_project(request)
 
+    seq_configs = None
+    if request.method == 'POST' and request.body:
+        try:
+            body = json.loads(request.body.decode('utf-8') or '{}')
+            seq_configs = body.get('seq_configs')
+        except Exception:
+            pass
+
+    if not seq_configs:
+        sess_configs = request.session.get('sequence_configs', {})
+        if isinstance(sess_configs, dict):
+            seq_configs = list(sess_configs.values())
+        elif isinstance(sess_configs, list):
+            seq_configs = sess_configs
+
     try:
-        result = generate_class_diagram(project)
+        result = generate_class_diagram(project, seq_configs=seq_configs)
         return JsonResponse({
             'status': 'success',
             'diagrams': {

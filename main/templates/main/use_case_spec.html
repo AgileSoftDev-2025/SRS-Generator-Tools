@@ -935,5 +935,8 @@
         return false;
       }
     </script>
+    {% if all_features %}
+    <script id="use-case-data" type="application/json">{{ all_features|safe }}</script>
+    {% endif %}
   </body>
 </html>

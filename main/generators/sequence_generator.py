@@ -78,8 +78,14 @@ def build_sequence_plantuml(usecase_spec, basic_paths, alt_paths, exc_paths, pag
     lines.append("autonumber")
     lines.append("skinparam style strictuml")
     lines.append("skinparam responseMessageBelowArrow true")
-    lines.append("skinparam ParticipantPadding 25")
-    lines.append("skinparam BoxPadding 10")
+    lines.append("<style>")
+    lines.append("participant {")
+    lines.append("  Padding 25")
+    lines.append("}")
+    lines.append("box {")
+    lines.append("  Padding 10")
+    lines.append("}")
+    lines.append("</style>")
     
     lines.append(f"title {usecase_spec.feature_name}")
 

@@ -359,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const boundaryName = boundaryNameElem ? boundaryNameElem.value.trim() : 'System UI';
         const actorBoundary = card.querySelector('.m-actor-boundary').value.trim() || 'requestAction()';
         const boundaryCtrl = card.querySelector('.m-boundary-controller').value.trim() || 'processRequest()';
+        const selectedEntities = [...card.querySelectorAll('.entity-chip input:checked')].map(c => c.value);
         
         const ctrlEntityMethods = {};
         card.querySelectorAll('.m-ctrl-entity').forEach(inp => {
@@ -370,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
           boundaryName,
           actorBoundaryMethod: actorBoundary,
           boundaryCtrlMethod: boundaryCtrl,
+          selectedEntities,
           ctrlEntityMethods
         });
       });
