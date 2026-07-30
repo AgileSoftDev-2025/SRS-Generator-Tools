@@ -175,9 +175,12 @@
             <div class="feature-body">
                 {# NORMAL scenario panel #}
                 <div class="scenario-panel" data-panel="normal">
-                    <div class="flow-header normal">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                        Normal Flow
+                    <div class="flow-header normal" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            Normal Flow
+                        </div>
+                        <input type="text" class="scenario-name-input" value="Normal Flow - {{ spec.feature_name }}" style="width: 50%; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-weight: normal; color: #111827;" placeholder="Scenario Name">
                     </div>
                     {% if spec.basic_paths.all %}
                     <div class="path-preview">
@@ -199,9 +202,12 @@
                 {# ALTERNATIVE scenario panel #}
                 {% if spec.alternative_paths.all %}
                 <div class="scenario-panel" data-panel="alt">
-                    <div class="flow-header alt">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        Alternative Flow
+                    <div class="flow-header alt" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            Alternative Flow
+                        </div>
+                        <input type="text" class="scenario-name-input" value="Alternative Flow - {{ spec.feature_name }}" style="width: 50%; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-weight: normal; color: #111827;" placeholder="Scenario Name">
                     </div>
                     <div class="path-preview">
                         <div class="path-preview-title">From Alternative Path</div>
@@ -222,9 +228,12 @@
                 {# EXCEPTION scenario panel #}
                 {% if spec.exception_paths.all %}
                 <div class="scenario-panel" data-panel="exc">
-                    <div class="flow-header exc">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        Exception Flow
+                    <div class="flow-header exc" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Exception Flow
+                        </div>
+                        <input type="text" class="scenario-name-input" value="Exception Flow - {{ spec.feature_name }}" style="width: 50%; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-weight: normal; color: #111827;" placeholder="Scenario Name">
                     </div>
                     <div class="path-preview">
                         <div class="path-preview-title">From Exception Path</div>
@@ -310,17 +319,59 @@ function addStep(addBtn) {
     renumberSteps(container);
 }
 
+// ---- Helper: Get selected page for a scenario step container ----
+function getSelectedPageForContainer(container) {
+    if (!container) return null;
+    const rows = container.querySelectorAll('.step-row');
+    for (let row of rows) {
+        const activitySel = row.querySelector('.select-activity');
+        if (activitySel && activitySel.value === 'page') {
+            const targetSel = row.querySelector('.select-target');
+            if (targetSel && targetSel.value) {
+                const pageId = targetSel.value;
+                const pageObj = guiData.pages.find(p => String(p.id) === String(pageId));
+                if (pageObj) return pageObj;
+                
+                const selectedText = targetSel.options[targetSel.selectedIndex]?.text || '';
+                const cleanName = selectedText.replace('[Page] ', '').trim();
+                const pageByName = guiData.pages.find(p => p.name === cleanName);
+                if (pageByName) return pageByName;
+            }
+        }
+    }
+    return null;
+}
+
+// ---- Refresh all element dropdowns in a scenario container when page step changes ----
+function refreshElementsInContainer(container) {
+    if (!container) return;
+    const rows = container.querySelectorAll('.step-row');
+    rows.forEach(row => {
+        const activitySel = row.querySelector('.select-activity');
+        if (activitySel && (activitySel.value === 'click' || activitySel.value === 'input')) {
+            const targetSel = row.querySelector('.select-target');
+            const savedVal = targetSel ? targetSel.value : null;
+            updateTargetOptions(activitySel);
+            if (targetSel && savedVal) {
+                targetSel.value = savedVal;
+            }
+        }
+    });
+}
+
 function updateTargetOptions(activitySelect) {
     const row = activitySelect.parentElement;
+    const container = row.closest('.step-container');
     const targetSelect = row.querySelector('.select-target');
     const activity = activitySelect.value;
+    const prevSelectedVal = targetSelect.value;
 
     targetSelect.innerHTML = '<option value="">-- Target --</option>';
     targetSelect.disabled = false;
     targetSelect.style.display = 'block';
 
     const existingInput = row.querySelector('.custom-target-input');
-    if(existingInput) existingInput.remove();
+    if (existingInput) existingInput.remove();
 
     if (activity === 'custom') {
         targetSelect.style.display = 'none';
@@ -339,6 +390,38 @@ function updateTargetOptions(activitySelect) {
             opt.text = "[Page] " + p.name;
             targetSelect.appendChild(opt);
         });
+
+        targetSelect.onchange = function() {
+            refreshElementsInContainer(container);
+        };
+    } else if (activity === 'click' || activity === 'input') {
+        const selectedPage = getSelectedPageForContainer(container);
+
+        if (selectedPage) {
+            const filteredElements = guiData.elements.filter(el => 
+                (el.page_id && String(el.page_id) === String(selectedPage.id)) ||
+                (el.page && el.page === selectedPage.name)
+            );
+
+            if (filteredElements.length > 0) {
+                targetSelect.options[0].text = `-- Target (${selectedPage.name}) --`;
+                filteredElements.forEach(el => {
+                    const opt = document.createElement('option');
+                    opt.value = el.id;
+                    opt.text = `[${el.type}] ${el.name}`;
+                    targetSelect.appendChild(opt);
+                });
+            } else {
+                targetSelect.options[0].text = `-- No elements on ${selectedPage.name} --`;
+            }
+        } else {
+            guiData.elements.forEach(el => {
+                const opt = document.createElement('option');
+                opt.value = el.id;
+                opt.text = `[${el.type}] ${el.name} (on ${el.page})`;
+                targetSelect.appendChild(opt);
+            });
+        }
     } else if (activity) {
         guiData.elements.forEach(el => {
             const opt = document.createElement('option');
@@ -346,6 +429,10 @@ function updateTargetOptions(activitySelect) {
             opt.text = `[${el.type}] ${el.name} (on ${el.page})`;
             targetSelect.appendChild(opt);
         });
+    }
+
+    if (prevSelectedVal) {
+        targetSelect.value = prevSelectedVal;
     }
 }
 
@@ -367,10 +454,18 @@ function loadSaved() {
         if (!data) return;
 
         ['Normal', 'Alternative', 'Exception'].forEach(type => {
-            const steps = data[type];
+            if (!data[type]) return;
+            const steps = Array.isArray(data[type]) ? data[type] : data[type].steps;
+            const scenName = data[type].name;
             if (!steps || steps.length === 0) return;
             const panel = card.querySelector(`[data-panel="${type.toLowerCase().replace('alternative','alt').replace('exception','exc')}"]`);
             if (!panel) return;
+            
+            if (scenName) {
+                const nameInput = panel.querySelector('.scenario-name-input');
+                if (nameInput) nameInput.value = scenName;
+            }
+
             const container = panel.querySelector('.step-container');
             if (!container) return;
             container.innerHTML = '';
@@ -400,17 +495,19 @@ function loadSaved() {
                 container.appendChild(row);
                 
                 const activitySelect = row.querySelector('.select-activity');
+                
+                // Set custom immediately if needed so updateTargetOptions handles it or we handle it after
                 updateTargetOptions(activitySelect);
                 
-                setTimeout(() => {
-                    if (s.activity === 'custom') {
-                        const customInput = row.querySelector('.custom-target-input');
-                        if (customInput && s.target_text) customInput.value = s.target_text;
-                    } else {
-                        const targetSelect = row.querySelector('.select-target');
-                        if (targetSelect && s.target_id) targetSelect.value = String(s.target_id);
+                if (s.activity === 'custom') {
+                    const customInput = row.querySelector('.custom-target-input');
+                    if (customInput && s.target_text) customInput.value = s.target_text;
+                } else {
+                    const targetSelect = row.querySelector('.select-target');
+                    if (targetSelect && s.target_id) {
+                        targetSelect.value = String(s.target_id);
                     }
-                }, 50);
+                }
             });
         });
     });
@@ -439,8 +536,12 @@ function saveAllScenarios() {
 
     document.querySelectorAll('.feature-card').forEach(card => {
         const specId = card.dataset.specId;
-        card.querySelectorAll('.step-container').forEach(container => {
+        card.querySelectorAll('.scenario-panel').forEach(panel => {
+            const container = panel.querySelector('.step-container');
+            if (!container) return;
             const type = container.dataset.type;
+            const nameInput = panel.querySelector('.scenario-name-input');
+            const scenName = nameInput ? nameInput.value.trim() : "";
             const steps = [];
             container.querySelectorAll('.step-row').forEach((row, idx) => {
                 const gwt = row.querySelector('.select-gwt').value;
@@ -468,7 +569,7 @@ function saveAllScenarios() {
                 });
             });
             if (steps.length > 0) {
-                payload.push({ spec_id: specId, type: type, steps: steps });
+                payload.push({ spec_id: specId, type: type, name: scenName, steps: steps });
             }
         });
     });
@@ -509,9 +610,9 @@ document.addEventListener('DOMContentLoaded', () => {
     for (let specId in savedScenarios) {
         const specScens = savedScenarios[specId];
         if (specScens && (
-            (specScens.Normal && specScens.Normal.length > 0) ||
-            (specScens.Alternative && specScens.Alternative.length > 0) ||
-            (specScens.Exception && specScens.Exception.length > 0)
+            (specScens.Normal && (Array.isArray(specScens.Normal) ? specScens.Normal.length > 0 : specScens.Normal.steps.length > 0)) ||
+            (specScens.Alternative && (Array.isArray(specScens.Alternative) ? specScens.Alternative.length > 0 : specScens.Alternative.steps.length > 0)) ||
+            (specScens.Exception && (Array.isArray(specScens.Exception) ? specScens.Exception.length > 0 : specScens.Exception.steps.length > 0))
         )) {
             hasActualSteps = true;
             break;

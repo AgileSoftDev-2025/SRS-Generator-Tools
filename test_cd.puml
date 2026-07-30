@@ -1,0 +1,54 @@
+@startuml
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #0F172A
+    ArrowColor #1E293B
+    FontSize 13
+    FontName Arial
+}
+skinparam stereotypeCBackgroundColor #EEF2FF
+skinparam stereotypeCBorderColor #6366F1
+skinparam stereotypeEBackgroundColor #ECFDF5
+skinparam stereotypeEBorderColor #059669
+skinparam stereotypeIBackgroundColor #FFF7ED
+skinparam stereotypeIBorderColor #EA580C
+skinparam ArrowThickness 1.5
+skinparam linetype ortho
+title Class Diagram - Full BCE Design (UML 2.x / OOAD)
+
+' ═══════════════ BOUNDARY (View Layer) ═══════════════
+class LoginUI <<Boundary>> {
+  + submitRequest() : void
+  + onPage() : void /* on page */
+  + fillTheForm() : void /* fill the form */
+  + displayLoginResult() : void
+  + showLoginForm() : void
+  + handleError(message) : void
+}
+
+' ═══════════════ CONTROL (Application Layer) ═══════════════
+class LoginController <<Control>> {
+  + sendForm() : void /* send form */
+  + completed() : void /* completed */
+  + authenticate(credentials) : void
+  + login() : void
+}
+
+' ═══════════════ ENTITY (Domain Layer) ═══════════════
+class Vendor <<Entity>> {
+  {abstract}
+}
+
+class User <<Entity>> {
+  + authenticate(password) : boolean
+  + isActive() : boolean
+  + changePassword(newPassword) : void
+}
+
+' ═══════════════ RELATIONSHIPS ═══════════════
+LoginUI ..> LoginController : <<uses>>
+LoginController ..> User : <<uses>>
+
+@enduml

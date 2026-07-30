@@ -150,22 +150,43 @@ def build_sequence_plantuml(usecase_spec, basic_paths, alt_paths, exc_paths, pag
     # ====================================================
     # 5. LOGIC FLOW WRITER
     # ====================================================
+    def is_internal_process(text):
+        internal_keywords = ['validate', 'validasi', 'hash', 'save', 'simpan', 'check', 'cek', 'verify', 'verifikasi', 'calculate', 'hitung', 'encrypt', 'decrypt', 'auth', 'otentikasi', 'generate']
+        return any(kw in text.lower() for kw in internal_keywords)
+
     def write_steps(path_list):
         if not path_list: return
 
         for step in path_list:
             # --- ACTION ---
             if step.actor_action:
-                action = step.actor_action.replace('"', "'")
-                lines.append(f"U -> {boundary_alias}: {action}")
+                # Dukung multiple methods (dipisah koma, newline, atau 'dan')
+                actions = re.split(r'\n|,| dan | and ', step.actor_action)
+                for action in actions:
+                    action = action.strip().replace('"', "'")
+                    if not action: continue
+                    
+                    if is_internal_process(action):
+                        # Self-call di Boundary jika User tidak sengaja memasukkan proses internal
+                        lines.append(f"{boundary_alias} -> {boundary_alias}: {action}")
+                    else:
+                        lines.append(f"U -> {boundary_alias}: {action}")
 
             # --- RESPONSE ---
             if step.system_response:
                 resp = step.system_response.replace('"', "'")
                 
+                # Self-call Boundary untuk proses internal sebelum ke Controller
+                if is_internal_process(resp):
+                    lines.append(f"{boundary_alias} -> {boundary_alias}: {resp}")
+                
                 # UI -> Controller
                 lines.append(f"{boundary_alias} -> {ctrl_alias}: Request Process")
                 lines.append(f"activate {ctrl_alias}")
+
+                # Controller self-call untuk logic internal
+                if is_internal_process(resp):
+                    lines.append(f"{ctrl_alias} -> {ctrl_alias}: processLogic()")
 
                 # Controller -> Database (Mana yang dipanggil?)
                 target_alias = get_target_db(resp)
@@ -173,7 +194,7 @@ def build_sequence_plantuml(usecase_spec, basic_paths, alt_paths, exc_paths, pag
                 if target_alias:
                     # Tentukan jenis operasi (Read/Write)
                     method = "Query"
-                    if any(k in resp.lower() for k in ['save', 'simpan', 'add', 'tambah', 'create', 'update']):
+                    if any(k in resp.lower() for k in ['save', 'simpan', 'add', 'tambah', 'create', 'update', 'insert']):
                         method = "Insert/Update"
                     elif any(k in resp.lower() for k in ['delete', 'hapus']):
                         method = "Delete"

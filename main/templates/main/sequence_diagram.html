@@ -66,6 +66,14 @@
     .dl-puml{background:#475569;color:#fff;}
     .gen-error{padding:12px;background:#fee2e2;color:#991b1b;border-radius:6px;font-size:12px;margin-top:8px;}
 
+    /* Dynamic row buttons */
+    .add-row-btn{margin-top:6px;padding:5px 12px;font-size:11px;background:#f1f5f9;color:#475569;border:1px dashed #cbd5e1;border-radius:6px;cursor:pointer;transition:all .15s;}
+    .add-row-btn:hover{background:#e2e8f0;border-color:#94a3b8;}
+    .row-remove-btn{padding:4px 8px;font-size:11px;background:#fee2e2;color:#991b1b;border:none;border-radius:5px;cursor:pointer;flex-shrink:0;transition:opacity .15s;}
+    .row-remove-btn:hover{opacity:.7;}
+    .ab-row,.self-call-row{display:grid;grid-template-columns:1fr auto 1fr auto;gap:8px;align-items:center;margin-bottom:6px;}
+    .self-call-row{grid-template-columns:1fr auto;}
+
     /* Navigation */
     .navigation{display:flex;justify-content:space-between;margin-top:32px;gap:12px;}
     .nav-btn{padding:11px 24px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;text-decoration:none;transition:opacity .2s;}
@@ -131,21 +139,88 @@ async function loadFeatures() {
 }
 
 function buildFeatureCard(feat, num, container) {
+  let cfg = {};
+  if (feat.sequence_config_json) {
+    try { cfg = JSON.parse(feat.sequence_config_json); } catch(e) {}
+  }
+
+  const selectedEntities = cfg.selected_entities || [];
+  const actorBoundaryMethods = cfg.actor_boundary_methods && cfg.actor_boundary_methods.length > 0 ? cfg.actor_boundary_methods : ['requestAction()'];
+  const boundarySelfCalls = cfg.boundary_self_calls || [];
+  const controllerSelfCalls = cfg.controller_self_calls || [];
+  const bndName = cfg.boundary_name || (guiPages.length ? guiPages[0] : 'System UI');
+  const bndCtrlMethod = cfg.boundary_controller_method || 'processRequest()';
+  const ctrlEntityMethods = cfg.ctrl_entity_methods || {};
+
+  const altCond = cfg.alt_condition || '';
+  const altAB = cfg.alt_actor_boundary || '';
+  const altBS = cfg.alt_boundary_self || '';
+  const altBC = cfg.alt_boundary_ctrl || '';
+  const altRes = cfg.alt_response || '';
+
+  const excCond = cfg.exc_condition || '';
+  const excAB = cfg.exc_actor_boundary || '';
+  const excBS = cfg.exc_boundary_self || '';
+  const excBC = cfg.exc_boundary_ctrl || '';
+  const excRes = cfg.exc_response || '';
+
   const card = document.createElement('div');
   card.className = 'feat-card';
   card.dataset.featureId = feat.id;
 
   // Entity chips HTML
   const entityHtml = sqlTables.length
-    ? sqlTables.map(t => `
-        <label class="entity-chip">
-          <input type="checkbox" value="${t}" onchange="toggleChip(this)"> ${t}
-        </label>`).join('')
+    ? sqlTables.map(t => {
+        const isChecked = selectedEntities.includes(t) ? 'checked' : '';
+        const chipClass = isChecked ? 'entity-chip checked' : 'entity-chip';
+        return `
+        <label class="${chipClass}">
+          <input type="checkbox" value="${t}" onchange="toggleChip(this)" ${isChecked}> ${t}
+        </label>`;
+      }).join('')
     : `<div class="no-sql-hint">No SQL tables imported yet. <a href="{% url 'main:import_sql' %}" style="color:#3b82f6;">Import SQL first</a> to select DB entities.</div>`;
 
   const pageOptions = guiPages.length 
-    ? guiPages.map(p => `<option value="${p}">${p}</option>`).join('')
-    : '<option value="System UI">System UI (Default)</option>';
+    ? guiPages.map(p => `<option value="${p}" ${p === bndName ? 'selected' : ''}>${p}</option>`).join('')
+    : `<option value="System UI" ${bndName === 'System UI' ? 'selected' : ''}>System UI (Default)</option>`;
+
+  const abHtml = actorBoundaryMethods.map(m => `
+    <div class="method-row ab-row">
+      <input type="text" class="m-actor-boundary" placeholder="e.g. submitLoginForm()" value="${m}"/>
+      <div class="method-arrow">→</div>
+      <div class="display-boundary-name" style="color:#64748b;font-size:12px;font-weight:500;">${bndName}</div>
+      <button class="row-remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+    </div>
+  `).join('');
+
+  const bndSelfHtml = boundarySelfCalls.map(m => `
+    <div class="method-row self-call-row">
+      <input type="text" class="m-self-call" data-list="boundary-self-list" placeholder="e.g. validateInput()" value="${m}"/>
+      <button class="row-remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+    </div>
+  `).join('');
+
+  const ctrlSelfHtml = controllerSelfCalls.map(m => `
+    <div class="method-row self-call-row">
+      <input type="text" class="m-self-call" data-list="controller-self-list" placeholder="e.g. calculateTotal()" value="${m}"/>
+      <button class="row-remove-btn" onclick="removeRow(this)" title="Remove">✕</button>
+    </div>
+  `).join('');
+
+  const ctrlEntityHtml = selectedEntities.length
+    ? selectedEntities.map(name => {
+        const val = ctrlEntityMethods[name] || 'query()';
+        return `
+        <div class="method-row" data-entity="${name}">
+          <div style="color:#0f172a;font-size:12px;font-weight:500;">Controller</div>
+          <div class="method-arrow">→</div>
+          <div style="flex:1;">
+            <input type="text" class="m-ctrl-entity" placeholder="e.g. findUser(id)" value="${val}" data-entity="${name}"/>
+            <div style="font-size:11px;color:#94a3b8;margin-top:3px;">on: ${name}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="font-size:12px;color:#94a3b8;">Select entities above to define methods.</div>';
 
   card.innerHTML = `
     <div class="feat-header" onclick="toggleCard(this)">
@@ -175,29 +250,104 @@ function buildFeatureCard(feat, num, container) {
       <!-- 3. Method names -->
       <div class="section-label">3. Define Method Names</div>
       <div class="method-grid">
+
+        <!-- Actor → Boundary (multiple) -->
         <div>
-          <div class="method-label">Actor → Boundary</div>
-          <div class="method-row">
-            <input type="text" class="m-actor-boundary" placeholder="e.g. submitLoginForm()" value="requestAction()"/>
-            <div class="method-arrow">→</div>
-            <div class="display-boundary-name" style="color:#64748b;font-size:12px; font-weight: 500;">${guiPages.length ? guiPages[0] : 'System UI'}</div>
+          <div class="method-label">Actor → Boundary <span style="color:#94a3b8;font-weight:400;">(bisa lebih dari 1)</span></div>
+          <div class="actor-boundary-list">
+            ${abHtml}
           </div>
+          <button class="add-row-btn" onclick="addActorBoundaryRow(this)">+ Add Method</button>
         </div>
-        <div>
+
+        <!-- Boundary Self-Call (optional) -->
+        <div style="margin-top:14px;">
+          <div class="method-label">Boundary Self-Call <span style="color:#94a3b8;font-weight:400;">(opsional — proses internal Boundary)</span></div>
+          <div class="boundary-self-list">${bndSelfHtml}</div>
+          <button class="add-row-btn" onclick="addSelfCallRow(this, 'boundary-self-list', 'Boundary → Boundary')">+ Add Self-Call</button>
+        </div>
+
+        <!-- Boundary → Controller -->
+        <div style="margin-top:14px;">
           <div class="method-label">Boundary → Controller</div>
           <div class="method-row">
-            <div class="display-boundary-name" style="color:#64748b;font-size:12px;">${guiPages.length ? guiPages[0] : 'System UI'}</div>
+            <div class="display-boundary-name" style="color:#64748b;font-size:12px;">${bndName}</div>
             <div class="method-arrow">→</div>
-            <input type="text" class="m-boundary-controller" placeholder="e.g. processRequest()" value="processRequest()"/>
+            <input type="text" class="m-boundary-controller" placeholder="e.g. processRequest()" value="${bndCtrlMethod}"/>
           </div>
         </div>
-        <div>
+
+        <!-- Controller Self-Call (optional) -->
+        <div style="margin-top:14px;">
+          <div class="method-label">Controller Self-Call <span style="color:#94a3b8;font-weight:400;">(opsional — logic internal Controller)</span></div>
+          <div class="controller-self-list">${ctrlSelfHtml}</div>
+          <button class="add-row-btn" onclick="addSelfCallRow(this, 'controller-self-list', 'Controller → Controller')">+ Add Self-Call</button>
+        </div>
+
+        <!-- Controller → Entity -->
+        <div style="margin-top:14px;">
           <div class="method-label">Controller → Entity (per selected entity)</div>
           <div class="entity-method-rows">
-            <div style="font-size:12px;color:#94a3b8;">Select entities above to define methods.</div>
+            ${ctrlEntityHtml}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 4. Alternative Flow (Optional) -->
+      <div style="margin-top:14px;padding:14px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px; display: ${feat.has_alt ? 'block' : 'none'};">
+        <div class="section-label" style="color:#15803d;margin-bottom:10px;">4. Alternative Flow (Optional)</div>
+        <div class="method-grid">
+          <div>
+            <div class="method-label">Condition / Trigger</div>
+            <input type="text" class="m-alt-condition" placeholder="e.g. Asset Not Found" value="${altCond}"/>
+          </div>
+          <div>
+            <div class="method-label">Actor → Boundary</div>
+            <input type="text" class="m-alt-actor-boundary" placeholder="e.g. searchAgain()" value="${altAB}"/>
+          </div>
+          <div>
+            <div class="method-label">Boundary Self-call</div>
+            <input type="text" class="m-alt-boundary-self" placeholder="e.g. validateInput()" value="${altBS}"/>
+          </div>
+          <div>
+            <div class="method-label">Boundary → Controller</div>
+            <input type="text" class="m-alt-boundary-ctrl" placeholder="e.g. searchAsset()" value="${altBC}"/>
+          </div>
+          <div>
+            <div class="method-label">Return Message (Response)</div>
+            <input type="text" class="m-alt-response" placeholder="e.g. displayNoData()" value="${altRes}"/>
           </div>
         </div>
       </div>
+
+      <!-- 5. Exception Flow (Optional) -->
+      <div style="margin-top:14px;padding:14px 16px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px; display: ${feat.has_exc ? 'block' : 'none'};">
+        <div class="section-label" style="color:#c2410c;margin-bottom:10px;">5. Exception Flow (Optional)</div>
+        <div class="method-grid">
+          <div>
+            <div class="method-label">Condition / Trigger</div>
+            <input type="text" class="m-exc-condition" placeholder="e.g. Connection Timeout" value="${excCond}"/>
+          </div>
+          <div>
+            <div class="method-label">Actor → Boundary</div>
+            <input type="text" class="m-exc-actor-boundary" placeholder="e.g. retryRequest()" value="${excAB}"/>
+          </div>
+          <div>
+            <div class="method-label">Boundary Self-call</div>
+            <input type="text" class="m-exc-boundary-self" placeholder="e.g. logError()" value="${excBS}"/>
+          </div>
+          <div>
+            <div class="method-label">Boundary → Controller</div>
+            <input type="text" class="m-exc-boundary-ctrl" placeholder="e.g. requestMarket()" value="${excBC}"/>
+          </div>
+          <div>
+            <div class="method-label">Return Message (Response)</div>
+            <input type="text" class="m-exc-response" placeholder="e.g. showConnectionError()" value="${excRes}"/>
+          </div>
+        </div>
+      </div>
+
 
       <!-- 3. Generate button -->
       <button class="gen-btn" onclick="generateDiagram(this, ${feat.id})">
@@ -259,6 +409,41 @@ function updateEntityMethodRows(card) {
     </div>`).join('');
 }
 
+// ── Dynamic row helpers ──────────────────────────────────────
+function addActorBoundaryRow(btn) {
+  const list = btn.previousElementSibling; // .actor-boundary-list
+  const card = btn.closest('.feat-card');
+  const boundaryName = card.querySelector('.m-boundary-name').value || (guiPages[0] || 'System UI');
+  const row = document.createElement('div');
+  row.className = 'method-row ab-row';
+  row.innerHTML = `
+    <input type="text" class="m-actor-boundary" placeholder="e.g. enterPassword()" value=""/>
+    <div class="method-arrow">→</div>
+    <div class="display-boundary-name" style="color:#64748b;font-size:12px;font-weight:500;">${boundaryName}</div>
+    <button class="row-remove-btn" onclick="removeRow(this)" title="Remove">✕</button>`;
+  list.appendChild(row);
+  syncExceptionStepOptions(card);
+}
+
+// removed syncExceptionStepOptions and addFlowMethodRow
+
+function addSelfCallRow(btn, listClass, label) {
+  const list = btn.previousElementSibling; // .boundary-self-list or .controller-self-list
+  const row = document.createElement('div');
+  row.className = 'method-row self-call-row';
+  row.innerHTML = `
+    <input type="text" class="m-self-call" data-list="${listClass}" placeholder="e.g. validateInput()" value=""/>
+    <button class="row-remove-btn" onclick="removeRow(this)" title="Remove">✕</button>`;
+  list.appendChild(row);
+}
+
+function removeRow(btn) {
+  const card = btn.closest('.feat-card');
+  btn.closest('.method-row').remove();
+  if (card) syncExceptionStepOptions(card);
+}
+
+// ── Generate ─────────────────────────────────────────────────
 async function generateDiagram(btn, featureId) {
   const card = btn.closest('.feat-card');
   const resultBox = card.querySelector('.result-box');
@@ -268,9 +453,37 @@ async function generateDiagram(btn, featureId) {
 
   // Collect form data
   const selectedEntities = [...card.querySelectorAll('.entity-chip input:checked')].map(c => c.value);
-  const actorBoundary = card.querySelector('.m-actor-boundary').value.trim() || 'requestAction()';
-  const boundaryCtrl  = card.querySelector('.m-boundary-controller').value.trim() || 'processRequest()';
-  const boundaryName  = card.querySelector('.m-boundary-name').value.trim() || 'System UI';
+
+  // Multiple Actor→Boundary methods (Basic Flow)
+  const actorBoundaryMethods = [...card.querySelectorAll('.m-actor-boundary')]
+    .map(i => i.value.trim()).filter(Boolean);
+  if (!actorBoundaryMethods.length) actorBoundaryMethods.push('requestAction()');
+
+  // Alternative Flow config
+  const altCondition = card.querySelector('.m-alt-condition')?.value.trim() || '';
+  const altActorBoundary = card.querySelector('.m-alt-actor-boundary')?.value.trim() || '';
+  const altBoundarySelf = card.querySelector('.m-alt-boundary-self')?.value.trim() || '';
+  const altBoundaryCtrl = card.querySelector('.m-alt-boundary-ctrl')?.value.trim() || '';
+  const altResponse = card.querySelector('.m-alt-response')?.value.trim() || '';
+
+  // Exception Flow config
+  const excCondition = card.querySelector('.m-exc-condition')?.value.trim() || '';
+  const excActorBoundary = card.querySelector('.m-exc-actor-boundary')?.value.trim() || '';
+  const excBoundarySelf = card.querySelector('.m-exc-boundary-self')?.value.trim() || '';
+  const excBoundaryCtrl = card.querySelector('.m-exc-boundary-ctrl')?.value.trim() || '';
+  const excResponse = card.querySelector('.m-exc-response')?.value.trim() || '';
+
+  // Boundary self-calls
+  const boundarySelfCalls = [...card.querySelectorAll('.boundary-self-list .m-self-call')]
+    .map(i => i.value.trim()).filter(Boolean);
+
+  // Controller self-calls
+  const controllerSelfCalls = [...card.querySelectorAll('.controller-self-list .m-self-call')]
+    .map(i => i.value.trim()).filter(Boolean);
+
+  const boundaryCtrl = card.querySelector('.m-boundary-controller').value.trim() || 'processRequest()';
+  const boundaryName = card.querySelector('.m-boundary-name').value.trim() || 'System UI';
+
   const ctrlEntityMethods = {};
   card.querySelectorAll('.m-ctrl-entity').forEach(inp => {
     ctrlEntityMethods[inp.dataset.entity] = inp.value.trim() || 'query()';
@@ -283,17 +496,26 @@ async function generateDiagram(btn, featureId) {
   try {
     const res = await fetch(`/api/sequence/${featureId}/generate/`, {
       method: 'POST',
-      credentials: 'same-origin', // WAJIB
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': getCsrf()
-      },
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
       body: JSON.stringify({
-        selected_entities: selectedEntities,
-        actor_boundary_method: actorBoundary,
+        selected_entities:          selectedEntities,
+        actor_boundary_methods:     actorBoundaryMethods,
         boundary_controller_method: boundaryCtrl,
-        boundary_name: boundaryName,
-        ctrl_entity_methods: ctrlEntityMethods
+        boundary_name:              boundaryName,
+        ctrl_entity_methods:        ctrlEntityMethods,
+        boundary_self_calls:        boundarySelfCalls,
+        controller_self_calls:      controllerSelfCalls,
+        alt_condition:              altCondition,
+        alt_actor_boundary:         altActorBoundary,
+        alt_boundary_self:          altBoundarySelf,
+        alt_boundary_ctrl:          altBoundaryCtrl,
+        alt_response:               altResponse,
+        exc_condition:              excCondition,
+        exc_actor_boundary:         excActorBoundary,
+        exc_boundary_self:          excBoundarySelf,
+        exc_boundary_ctrl:          excBoundaryCtrl,
+        exc_response:               excResponse,
       })
     });
     const data = await res.json();

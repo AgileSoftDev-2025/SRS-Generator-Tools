@@ -818,21 +818,15 @@
                         </div>
                     `;
         });
-      } else {
+      } else if (isRequired) {
         pathRows = `
                     <div class="path-row" data-index="0">
                         <div class="path-column">
-                            <span class="path-label">Actor Action ${isRequired
-            ? '<small style="color: #6b7280;">(Required)</small>'
-            : ""
-          }</span>
+                            <span class="path-label">Actor Action <small style="color: #6b7280;">(Required)</small></span>
                             <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does..."></textarea>
                         </div>
                         <div class="path-column">
-                            <span class="path-label">System Response ${isRequired
-            ? '<small style="color: #6b7280;">(Required)</small>'
-            : ""
-          }</span>
+                            <span class="path-label">System Response <small style="color: #6b7280;">(Required)</small></span>
                             <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds..."></textarea>
                         </div>
                     </div>
@@ -951,9 +945,11 @@
               const rows = container.querySelectorAll(".path-row");
               const paths = [];
               rows.forEach((row) => {
-                const actor = row.querySelector(".path-actor").value;
-                const system = row.querySelector(".path-system").value;
-                paths.push({ actor, system });
+                const actor = row.querySelector(".path-actor").value.trim();
+                const system = row.querySelector(".path-system").value.trim();
+                if (actor !== "" || system !== "") {
+                  paths.push({ actor, system });
+                }
               });
               feature[`${type}Path`] = paths;
             }
@@ -1036,7 +1032,9 @@
         rows.forEach((row) => {
           const actor = row.querySelector(".path-actor").value.trim();
           const system = row.querySelector(".path-system").value.trim();
-          paths.push({ actor, system });
+          if (actor !== "" || system !== "") {
+            paths.push({ actor, system });
+          }
         });
 
         feature[`${type}Path`] = paths;

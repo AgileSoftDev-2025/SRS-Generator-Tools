@@ -169,9 +169,12 @@
         <div class="scenario-container">
             {% for scenario in spec.scenarios.all %}
             <div class="scenario-group">
-                <span class="scenario-badge {% if scenario.scenario_type == 'Positive' %}bg-pos{% else %}bg-neg{% endif %}">
+                <span class="scenario-badge {% if scenario.scenario_type == 'Positive' or scenario.scenario_type == 'Normal' %}bg-pos{% else %}bg-neg{% endif %}">
                     {{ scenario.scenario_type }} Scenario
                 </span>
+                {% if scenario.scenario_name %}
+                <span style="font-weight: 600; font-size: 14px; margin-left: 8px; color: var(--gray-700);">{{ scenario.scenario_name }}</span>
+                {% endif %}
                 
                 <table class="result-table">
                     <thead>

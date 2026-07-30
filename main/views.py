@@ -716,7 +716,11 @@ def sequence_feature_list(request):
             data.append({
                 "id": spec.id,
                 "title": spec.feature_name,
-                "gui": gui_name
+                "gui": gui_name,
+                "has_alt": spec.alternative_paths.exists(),
+                "has_exc": spec.exception_paths.exists(),
+                "sequence_config_json": spec.sequence_config_json,
+                "sequence_plantuml": spec.sequence_plantuml
             })
 
         return JsonResponse(data, safe=False)
@@ -737,15 +741,41 @@ def generate_sequence_diagram_by_feature(request, feature_id):
         except Exception:
             body = {}
 
-    selected_entities = body.get('selected_entities', [])
-    actor_boundary_method = body.get('actor_boundary_method', 'requestAction()')
-    boundary_ctrl_method = body.get('boundary_controller_method', 'processRequest()')
-    boundary_name = body.get('boundary_name', 'System UI')
-    ctrl_entity_methods = body.get('ctrl_entity_methods', {})
+    selected_entities       = body.get('selected_entities', [])
+
+    # ── Basic Flow methods ──
+    raw = body.get('actor_boundary_methods', None)
+    if raw is None:
+        single = body.get('actor_boundary_method', 'requestAction()')
+        actor_boundary_methods = [m.strip() for m in single.split(',') if m.strip()]
+    else:
+        actor_boundary_methods = [m.strip() for m in raw if m.strip()]
+    if not actor_boundary_methods:
+        actor_boundary_methods = ['requestAction()']
+
+    # ── Alternative Flow config ──
+    alt_condition      = body.get('alt_condition', '').strip()
+    alt_actor_boundary = body.get('alt_actor_boundary', '').strip()
+    alt_boundary_self  = body.get('alt_boundary_self', '').strip()
+    alt_boundary_ctrl  = body.get('alt_boundary_ctrl', '').strip()
+    alt_response       = body.get('alt_response', '').strip()
+
+    # ── Exception Flow config ──
+    exc_condition      = body.get('exc_condition', '').strip()
+    exc_actor_boundary = body.get('exc_actor_boundary', '').strip()
+    exc_boundary_self  = body.get('exc_boundary_self', '').strip()
+    exc_boundary_ctrl  = body.get('exc_boundary_ctrl', '').strip()
+    exc_response       = body.get('exc_response', '').strip()
+
+    boundary_ctrl_method    = body.get('boundary_controller_method', 'processRequest()')
+    boundary_name           = body.get('boundary_name', 'System UI')
+    ctrl_entity_methods     = body.get('ctrl_entity_methods', {})
+    boundary_self_calls     = [m.strip() for m in body.get('boundary_self_calls', []) if m.strip()]
+    controller_self_calls   = [m.strip() for m in body.get('controller_self_calls', []) if m.strip()]
 
     basic_paths = usecase_spec.basic_paths.order_by('step_number')
-    alt_paths = usecase_spec.alternative_paths.order_by('step_number')
-    exc_paths = usecase_spec.exception_paths.order_by('step_number')
+    alt_paths   = usecase_spec.alternative_paths.order_by('step_number')
+    exc_paths   = usecase_spec.exception_paths.order_by('step_number')
 
     lines = [
         '@startuml', 'autonumber', 'skinparam style strictuml',
@@ -759,7 +789,7 @@ def generate_sequence_diagram_by_feature(request, feature_id):
     ]
 
     boundary_alias = 'Boundary'
-    ctrl_alias = 'Controller'
+    ctrl_alias     = 'Controller'
     lines.append('actor "User" as U')
     lines.append(f'boundary "{boundary_name}" as {boundary_alias}')
     lines.append(f'control "{usecase_spec.feature_name}Controller" as {ctrl_alias}')
@@ -768,52 +798,132 @@ def generate_sequence_diagram_by_feature(request, feature_id):
         lines.append(f'entity "{ent}" as {alias}')
     lines.append('')
 
-    def write_flow(paths, group_name):
-        if not paths.exists():
-            return
-        lines.append(f'group {group_name}')
-        for step in paths:
-            if step.actor_action:
-                action = step.actor_action.replace('"', "'")
-                lines.append(f'U -> {boundary_alias}: {actor_boundary_method} // {action}')
-            if step.system_response:
-                resp = step.system_response.replace('"', "'")
-                lines.append(f'{boundary_alias} -> {ctrl_alias}: {boundary_ctrl_method}')
-                lines.append(f'activate {ctrl_alias}')
-                for ent in selected_entities:
-                    alias = f'E_{ent.replace(" ", "_")}'
-                    method = ctrl_entity_methods.get(ent, 'query()')
-                    lines.append(f'{ctrl_alias} -> {alias}: {method}')
-                    lines.append(f'activate {alias}')
-                    lines.append(f'{alias} --> {ctrl_alias}: result')
-                    lines.append(f'deactivate {alias}')
-                lines.append(f'{ctrl_alias} --> {boundary_alias}: response // {resp}')
-                lines.append(f'deactivate {ctrl_alias}')
-                lines.append(f'{boundary_alias} --> U: display result')
-                lines.append('')
+    def _one_event(method, step, is_error=False, error_msg='showError()'):
+        """Render satu event user lengkap: Actor→Boundary→Controller→Entity→response."""
+        comment = ''
+        if step and step.actor_action:
+            comment = f' // {step.actor_action.replace(chr(34), chr(39))}'
+
+        lines.append(f'U -> {boundary_alias}: {method}{comment}')
+
+        for sc in boundary_self_calls:
+            lines.append(f'{boundary_alias} -> {boundary_alias}: {sc}')
+
+        lines.append(f'{boundary_alias} -> {ctrl_alias}: {boundary_ctrl_method}')
+        lines.append(f'activate {ctrl_alias}')
+
+        for sc in controller_self_calls:
+            lines.append(f'{ctrl_alias} -> {ctrl_alias}: {sc}')
+
+        if not is_error:
+            for ent in selected_entities:
+                alias      = f'E_{ent.replace(" ", "_")}'
+                ent_method = ctrl_entity_methods.get(ent, 'query()')
+                lines.append(f'{ctrl_alias} -> {alias}: {ent_method}')
+                lines.append(f'activate {alias}')
+                lines.append(f'{alias} --> {ctrl_alias}: result')
+                lines.append(f'deactivate {alias}')
+
+        if is_error:
+            lines.append(f'{ctrl_alias} --> {boundary_alias}: ERROR')
+            lines.append(f'deactivate {ctrl_alias}')
+            lines.append(f'{boundary_alias} --> U: {error_msg}')
+        else:
+            resp_comment = ''
+            if step and step.system_response:
+                resp_comment = f' // {step.system_response.replace(chr(34), chr(39))}'
+            lines.append(f'{ctrl_alias} --> {boundary_alias}: response{resp_comment}')
+            lines.append(f'deactivate {ctrl_alias}')
+            lines.append(f'{boundary_alias} --> U: display result')
+
+        lines.append('')
+
+    def write_basic_flow(paths, methods):
+        if not paths.exists(): return
+        steps = [s for s in paths if s.actor_action]
+        lines.append('group Basic Flow')
+        for i, method in enumerate(methods):
+            step = steps[i] if i < len(steps) else None
+            _one_event(method, step)
         lines.append('end')
         lines.append('')
 
-    write_flow(basic_paths, 'Basic Flow')
-    write_flow(alt_paths, 'Alternative Flow')
-    write_flow(exc_paths, 'Exception Flow')
+    def write_custom_flow(group_name, condition, actor_bnd, bnd_self, bnd_ctrl, response, is_error):
+        if not condition: return
+        lines.append(f'group {group_name} [{condition}]')
+
+        if actor_bnd:
+            lines.append(f'U -> {boundary_alias}: {actor_bnd}')
+
+        if bnd_self:
+            lines.append(f'{boundary_alias} -> {boundary_alias}: {bnd_self}')
+
+        if bnd_ctrl:
+            lines.append(f'{boundary_alias} -> {ctrl_alias}: {bnd_ctrl}')
+            lines.append(f'activate {ctrl_alias}')
+
+            if not is_error:
+                # Normal interaction with entities for alternative flow
+                for ent in selected_entities:
+                    alias      = f'E_{ent.replace(" ", "_")}'
+                    ent_method = ctrl_entity_methods.get(ent, 'query()')
+                    lines.append(f'{ctrl_alias} -> {alias}: {ent_method}')
+                    lines.append(f'activate {alias}')
+                    lines.append(f'{alias} --> {ctrl_alias}: result')
+                    lines.append(f'deactivate {alias}')
+
+            if is_error:
+                lines.append(f'{ctrl_alias} --> {boundary_alias}: ERROR')
+            else:
+                lines.append(f'{ctrl_alias} --> {boundary_alias}: response')
+            lines.append(f'deactivate {ctrl_alias}')
+
+        if response:
+            lines.append(f'{boundary_alias} --> U: {response}')
+
+        lines.append('end')
+        lines.append('')
+
+    write_basic_flow(basic_paths, actor_boundary_methods)
+    if alt_paths.exists():
+        write_custom_flow('Alternative Flow', alt_condition, alt_actor_boundary, alt_boundary_self, alt_boundary_ctrl, alt_response, is_error=False)
+    if exc_paths.exists():
+        write_custom_flow('Exception Flow', exc_condition, exc_actor_boundary, exc_boundary_self, exc_boundary_ctrl, exc_response, is_error=True)
     lines.append('@enduml')
 
     plantuml_code = '\n'.join(lines)
 
-    # Save sequence diagram config to session for Class Diagram Rule Engine
+    # Save to session for Class Diagram Rule Engine
     if 'sequence_configs' not in request.session:
         request.session['sequence_configs'] = {}
     request.session['sequence_configs'][str(feature_id)] = {
-        'feature_id': feature_id,
-        'feature_name': usecase_spec.feature_name,
-        'selected_entities': selected_entities,
-        'actor_boundary_method': actor_boundary_method,
+        'feature_id':              feature_id,
+        'feature_name':            usecase_spec.feature_name,
+        'selected_entities':       selected_entities,
+        'actor_boundary_methods':  actor_boundary_methods,
         'boundary_controller_method': boundary_ctrl_method,
-        'boundary_name': boundary_name,
-        'ctrl_entity_methods': ctrl_entity_methods
+        'boundary_name':           boundary_name,
+        'ctrl_entity_methods':     ctrl_entity_methods,
+        'boundary_self_calls':     boundary_self_calls,
+        'controller_self_calls':   controller_self_calls,
+        'alt_condition':           alt_condition,
+        'alt_actor_boundary':      alt_actor_boundary,
+        'alt_boundary_self':       alt_boundary_self,
+        'alt_boundary_ctrl':       alt_boundary_ctrl,
+        'alt_response':            alt_response,
+        'exc_condition':           exc_condition,
+        'exc_actor_boundary':      exc_actor_boundary,
+        'exc_boundary_self':       exc_boundary_self,
+        'exc_boundary_ctrl':       exc_boundary_ctrl,
+        'exc_response':            exc_response,
     }
     request.session.modified = True
+
+    # Save config to database permanently
+    config_dict = request.session['sequence_configs'][str(feature_id)]
+    usecase_spec.sequence_config_json = json.dumps(config_dict)
+    usecase_spec.sequence_plantuml = plantuml_code
+    usecase_spec.save()
 
     try:
         resp = requests.post('https://kroki.io/plantuml/png', data=plantuml_code, timeout=20)
@@ -823,6 +933,7 @@ def generate_sequence_diagram_by_feature(request, feature_id):
         return JsonResponse({'status': 'error', 'message': f'Kroki error {resp.status_code}'}, status=500)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
 
 
 # ============================================================
@@ -1084,12 +1195,17 @@ def user_scenario(request, gui_id=None):
     if gui:
         for p in Page.objects.filter(gui=gui).order_by('order'):
             gui_data['pages'].append({'id': str(p.id), 'name': p.name})
-        for el in Element.objects.filter(page__gui=gui).order_by('order'):
+        for el in Element.objects.filter(page__gui=gui).select_related('page').order_by('order'):
+            try:
+                page_name = el.page.name
+            except Page.DoesNotExist:
+                continue
             gui_data['elements'].append({
                 'id': str(el.id),
                 'name': el.name,
                 'type': el.element_type.lower() if el.element_type else (el.input_type.lower() if el.input_type else "text"),
-                'page': el.page.name
+                'page': page_name,
+                'page_id': str(el.page_id)
             })
 
     saved_scenarios = {}
@@ -1103,6 +1219,7 @@ def user_scenario(request, gui_id=None):
                 'target_text': s.target_text or ''
             } for s in scenario.steps.all().order_by('step_number')]
             scen_type = scenario.scenario_type
+            scen_name = scenario.scenario_name or ""
             if scen_type == 'Positive' or scen_type.lower() == 'normal':
                 scen_type = 'Normal'
             elif scen_type == 'Negative' or scen_type.lower() == 'exception' or scen_type.lower() == 'exc':
@@ -1111,7 +1228,10 @@ def user_scenario(request, gui_id=None):
                 scen_type = 'Alternative'
 
             if scen_type in saved_scenarios[str(spec.id)]:
-                saved_scenarios[str(spec.id)][scen_type] = steps_data
+                saved_scenarios[str(spec.id)][scen_type] = {
+                    'steps': steps_data,
+                    'name': scen_name
+                }
 
     return render(request, 'main/user_scenario.html', {
         'specs': specs,
@@ -1134,6 +1254,7 @@ def save_scenarios_api(request):
             for item in data:
                 spec_id = item.get('spec_id')
                 scen_type = item.get('type', '')
+                scen_name = item.get('name', '')
                 steps = item.get('steps', [])
                 try:
                     spec = UseCaseSpecification.objects.get(pk=int(spec_id), project=project)
@@ -1148,7 +1269,7 @@ def save_scenarios_api(request):
                     scen_type = 'Alternative'
 
                 TestScenario.objects.filter(use_case=spec, scenario_type=scen_type).delete()
-                scenario = TestScenario.objects.create(use_case=spec, scenario_type=scen_type)
+                scenario = TestScenario.objects.create(use_case=spec, scenario_type=scen_type, scenario_name=scen_name)
                 for idx, step in enumerate(steps, start=1):
                     TestStep.objects.create(
                         scenario=scenario,

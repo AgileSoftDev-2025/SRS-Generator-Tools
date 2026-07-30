@@ -149,6 +149,9 @@ class UseCaseSpecification(models.Model):
 
 # UPDATE TABEL JALUR (Biar bisa nampung Actor & System) 👇
 
+    sequence_config_json = models.TextField(null=True, blank=True)
+    sequence_plantuml = models.TextField(null=True, blank=True)
+
 class BasicPath(models.Model):
     usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='basic_paths')
     step_number = models.IntegerField()
@@ -326,6 +329,7 @@ class TestScenario(models.Model):
     # Menghubungkan ke Use Case Spec
     use_case = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='scenarios')
     scenario_type = models.CharField(max_length=20, choices=SCENARIO_TYPES)
+    scenario_name = models.CharField(max_length=255, null=True, blank=True)
     
     def __str__(self):
         return f"{self.use_case.feature_name} - {self.scenario_type}"

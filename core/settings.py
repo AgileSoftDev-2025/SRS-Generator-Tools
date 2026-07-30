@@ -91,8 +91,9 @@ _is_postgres = _DATABASE_URL.startswith('postgres')
 DATABASES = {
     'default': dj_database_url.parse(
         _DATABASE_URL,
-        # PostgreSQL: gunakan persistent connection (lebih efisien)
-        conn_max_age=600 if _is_postgres else 0,
+        # Karena menggunakan Supabase Connection Pooler (Port 6543 - Transaction Mode),
+        # conn_max_age HARUS 0 agar Django tidak bentrok dengan pooling dari Supavisor.
+        conn_max_age=0,
         conn_health_checks=_is_postgres,
     )
 }
@@ -102,10 +103,12 @@ if not _is_postgres:
     DATABASES['default'].setdefault('OPTIONS', {})
     DATABASES['default']['OPTIONS']['timeout'] = 60
 
-# Khusus PostgreSQL: aktifkan server-side cursor agar query besar tidak OOM
-if _is_postgres:
-    DATABASES['default'].setdefault('OPTIONS', {})
-    DATABASES['default']['OPTIONS']['server_side_binding'] = True
+# Khusus PostgreSQL:
+# JANGAN gunakan server_side_binding=True saat menggunakan pooler di mode transaction (port 6543),
+# karena cursors bersifat session-bound dan akan error/ditutup paksa oleh server.
+# if _is_postgres:
+#     DATABASES['default'].setdefault('OPTIONS', {})
+#     DATABASES['default']['OPTIONS']['server_side_binding'] = True
 
 # ============================================================
 # SESSION
