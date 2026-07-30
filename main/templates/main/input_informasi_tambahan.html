@@ -1,694 +1,750 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>One UML - Additional Information</title>
-  <style>
-    /* Global Styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        sans-serif;
-      background-color: #f9fafb;
-      color: #111827;
-      line-height: 1.5;
-    }
-
-    /* Header */
-    header {
-      background: #fff;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 1rem 2rem;
-    }
-
-    footer {
-      background: #fff;
-      border-top: 1px solid #e5e7eb;
-      padding: 1rem 2rem;
-      margin-top: 2rem;
-    }
-
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      border: 1px solid #e5e7eb;
-      padding: 24px;
-      margin-bottom: 24px;
-    }
-
-    .btn {
-      background-color: #111827;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 10px 16px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background-color 0.2s;
-    }
-
-    .btn:hover {
-      background-color: #1f2937;
-    }
-
-    .btn-outline {
-      background-color: white;
-      color: #374151;
-      border: 1px solid #d1d5db;
-    }
-
-    .btn-outline:hover {
-      background-color: #f9fafb;
-    }
-
-    .btn:disabled {
-      background-color: #9ca3af;
-      cursor: not-allowed;
-    }
-
-    .empty-state {
-      color: #6b7280;
-      padding: 32px;
-      text-align: center;
-    }
-
-    .empty-state i {
-      font-size: 48px;
-      margin-bottom: 16px;
-      display: block;
-    }
-
-    .navigation {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .logo-icon {
-      width: 24px;
-      height: 24px;
-      background-color: #111827;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .logo-text {
-      font-size: 20px;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    /* Feature Card Styles */
-    .feature-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      min-height: 80px;
-    }
-
-    .feature-card:hover {
-      border-color: #d1d5db;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .feature-info {
-      font-size: 12px;
-      color: #6b7280;
-      margin-top: 4px;
-    }
-
-    .feature-complete {
-      border-left: 4px solid #10b981;
-    }
-
-    .feature-incomplete {
-      border-left: 4px solid #f59e0b;
-    }
-
-    /* Grid Layout */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 16px;
-      margin-top: 20px;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-container {
-      background: white;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 800px;
-      max-height: 90vh;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #e5e7eb;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #111827;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 24px;
-      color: #6b7280;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-    }
-
-    .modal-close:hover {
-      background-color: #f3f4f6;
-    }
-
-    .modal-body {
-      padding: 24px;
-      flex: 1;
-      overflow-y: auto;
-    }
-
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #e5e7eb;
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-
-    /* Form Styles */
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #111827;
-      margin-bottom: 6px;
-    }
-
-    .form-input,
-    .form-select,
-    .form-textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 14px;
-      background-color: #ffffff;
-      transition: border-color 0.2s ease;
-    }
-
-    .form-textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .form-input:focus,
-    .form-select:focus,
-    .form-textarea:focus {
-      outline: none;
-      border-color: #111827;
-    }
-
-    /* Path Section Styles */
-    .path-section {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .path-section-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #111827;
-      margin-bottom: 12px;
-    }
-
-    .path-row {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 12px;
-      align-items: flex-start;
-    }
-
-    .path-column {
-      flex: 1;
-    }
-
-    .path-label {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 4px;
-      display: block;
-    }
-
-    .add-path-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: none;
-      border: 1px dashed #d1d5db;
-      color: #6b7280;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: all 0.2s;
-      margin-top: 8px;
-    }
-
-    .add-path-btn:hover {
-      border-color: #111827;
-      color: #111827;
-    }
-
-    .loading-spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      border-top: 2px solid white;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 6px;
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .status-info {
-      background: #f8fafc;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 14px;
-      color: #374151;
-    }
-
-    .delete-path-btn {
-      background: none;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-      font-size: 14px;
-      padding: 4px 8px;
-      margin-top: 4px;
-    }
-
-    .delete-path-btn:hover {
-      background-color: #fef2f2;
-      border-radius: 4px;
-    }
-  </style>
-</head>
-
-<body>
-  <header>
-    <div class="logo">
-      <div class="logo-icon">
-        <span style="color: white; font-size: 12px; font-weight: bold">⚡</span>
-      </div>
-      <span class="logo-text">One UML</span>
-    </div>
-  </header>
-
-  <main>
-    {% include 'main/stepper.html' with current_step=3 %}
-
-    <div style="margin-bottom: 32px">
-      <h1 style="
-            font-size: 28px;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One UML - Additional Information</title>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+        }
+        
+        /* Header */
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+        }
+        
+        footer {
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            padding: 1rem 2rem;
+            margin-top: 2rem;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .btn {
+            background-color: #111827;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #1f2937;
+        }
+        
+        .btn-outline {
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+        }
+        
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            color: #6b7280;
+            padding: 32px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #111827;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text {
+            font-size: 20px;
             font-weight: 600;
             color: #111827;
-            margin-bottom: 8px;
-          ">
-        Additional Information
-      </h1>
-      <p style="color: #6b7280; font-size: 14px">
-        Click cards below to complete Use Case details.
-      </p>
-    </div>
-
-    <!-- Status Info -->
-    <div id="statusInfo" class="status-info">
-      <span id="completedCount">0</span> of <span id="totalCount">0</span> use
-      cases completed
-    </div>
-
-    <!-- Features Grid -->
-    <div class="card">
-      <div style="margin-bottom: 16px">
-        <h3 style="font-size: 18px; font-weight: 600; color: #111827">
-          Use Cases
-        </h3>
-        <p style="color: #6b7280; font-size: 14px; margin-top: 4px">
-          Click to add specifications
-        </p>
-      </div>
-
-      <div id="featuresGrid" class="features-grid">
-        <!-- Features will be dynamically added here -->
-      </div>
-    </div>
-
-    <!-- Navigation -->
-    <div class="navigation">
-      <button class="btn btn-outline" id="backButton">← Back</button>
-      <button class="btn" id="nextButton" disabled>Next →</button>
-    </div>
-  </main>
-
-  <footer>
-    <div style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        ">
-      <p style="font-size: 12px; color: #6b7280">
-        © 2025 One UML. All rights reserved.
-      </p>
-      <div style="display: flex; gap: 24px">
-        <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none">Help</a>
-        <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none">Privacy</a>
-        <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none">Terms</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Modal Container -->
-  <div id="modalContainer" class="modal-overlay"></div>
-
-  <script>
-    // Data management
-    let features = [];
-    let currentFeatureId = null;
-
-    // Load data from storage
-    function loadDataFromStorage() {
-      console.log("Loading data from storage...");
-
-      // PERBAIKAN 1: Prioritas Utama adalah Data dari Database (Django)
-      try {
-        const djangoDataElement =
-          document.getElementById("djangoUseCaseData");
-        if (djangoDataElement && djangoDataElement.textContent) {
-          const djangoData = JSON.parse(djangoDataElement.textContent);
-          if (djangoData && djangoData.length > 0) {
-            // Konversi format ID database ke format frontend jika perlu, atau gunakan langsung
-            // Kita gunakan fungsi helper yang sudah ada
-            features = formatDjangoDataForFeatures(djangoData);
-            console.log(
-              "✅ Loaded from Database (Django):",
-              features.length,
-              "features"
-            );
-
-            // Update localStorage agar sinkron
-            localStorage.setItem("useCaseDetails", JSON.stringify(features));
-            return features;
-          }
         }
-      } catch (e) {
-        console.error("Error parsing Django data:", e);
-      }
-
-      // ... (kode sisa localStorage biarkan sebagai fallback) ...
-      // Priority 2: Check localStorage...
-      const savedFeatures = localStorage.getItem("useCaseDetails");
-      // ... dst
-    }
-
-    // Format Django data into features
-    function formatDjangoDataForFeatures(djangoData) {
-      if (!djangoData || !Array.isArray(djangoData)) {
-        return [];
-      }
-
-      const uniqueFeatures = new Map();
-
-      djangoData.forEach((item) => {
-        if (!item || !item.name) return;
-
-        const featureKey = item.name.trim().toLowerCase();
-        if (!uniqueFeatures.has(featureKey)) {
-          uniqueFeatures.set(featureKey, {
-            id: `feature-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
-            name: item.name,
-            summary: item.summary || "",
-            priority: item.priority || "Should Have",
-            status: item.status || "Active",
-            precondition: item.precondition || "",
-            postcondition: item.postcondition || "",
-            basicPath: (item.basicPath && item.basicPath.length > 0) ? item.basicPath : [{ actor: "", system: "" }],
-            alternativePath: item.alternativePath || [],
-            exceptionPath: item.exceptionPath || [],
-            actors: item.actors || [],
-          });
+        
+        /* Feature Card Styles */
+        .feature-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            min-height: 80px;
         }
-      });
-
-      return Array.from(uniqueFeatures.values());
-    }
-
-    // Format use cases into features (for old format)
-    function formatUseCasesForFeatures(useCasesData) {
-      if (!useCasesData || !Array.isArray(useCasesData)) {
-        return [];
-      }
-
-      const uniqueFeatures = new Map();
-
-      useCasesData.forEach((useCase) => {
-        if (!useCase || !useCase.feature) return;
-
-        const featureKey = useCase.feature.trim().toLowerCase();
-        if (!uniqueFeatures.has(featureKey)) {
-          uniqueFeatures.set(featureKey, {
-            id: `feature-${Date.now()}-${Math.random()
-              .toString(36)
-              .substr(2, 9)}`,
-            name: useCase.feature,
-            summary: useCase.purpose || "",
-            priority: "Should Have",
-            status: "Active",
-            precondition: "",
-            postcondition: "",
-            basicPath: [{ actor: "", system: "" }],
-            alternativePath: [],
-            exceptionPath: [],
-            actors: useCase.actor ? [useCase.actor] : [],
-          });
-        } else {
-          // Add actor if not already in list
-          if (
-            useCase.actor &&
-            !uniqueFeatures.get(featureKey).actors.includes(useCase.actor)
-          ) {
-            uniqueFeatures.get(featureKey).actors.push(useCase.actor);
-          }
+        
+        .feature-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
-      });
+        
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .feature-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .feature-complete {
+            border-left: 4px solid #10b981;
+        }
+        
+        .feature-incomplete {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        /* Grid Layout */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-container {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6b7280;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        
+        .modal-close:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .modal-body {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #ffffff;
+            transition: border-color 0.2s ease;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #111827;
+        }
+        
+        /* Path Section Styles */
+        .path-section {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .path-section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+        
+        .path-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .path-column {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .path-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        .add-path-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 1px dashed #d1d5db;
+            color: #6b7280;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+        
+        .add-path-btn:hover {
+            border-color: #111827;
+            color: #111827;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 6px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-info {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #374151;
+        }
+        
+        .delete-path-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            margin-top: 4px;
+        }
+        
+        .delete-path-btn:hover {
+            background-color: #fef2f2;
+            border-radius: 4px;
+        }
+        
+        /* Step numbering badges (baru) */
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 6px;
+            background: #111827;
+            color: #fff;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .branch-label-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 28px;
+            padding: 0 8px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .subject-col {
+            flex: 0 0 130px;
+        }
+        
+        .branch-col {
+            flex: 0 0 130px;
+        }
+        
+        .step-col {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 10px;
+        }
+        
+        .label-col {
+            flex: 0 0 60px;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 10px;
+        }
+        
+        .delete-col {
+            flex: 0 0 32px;
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">
+                <span style="color: white; font-size: 12px; font-weight: bold;">⚡</span>
+            </div>
+            <span class="logo-text">One UML</span>
+        </div>
+    </header>
 
-      return Array.from(uniqueFeatures.values());
-    }
+    <main>
+        <div style="margin-bottom: 32px;">
+            <h1 style="font-size: 28px; font-weight: 600; color: #111827; margin-bottom: 8px;">Additional Information</h1>
+            <p style="color: #6b7280; font-size: 14px;">Click cards below to complete Use Case details.</p>
+        </div>
+        
+        <!-- Status Info -->
+        <div id="statusInfo" class="status-info">
+            <span id="completedCount">0</span> of <span id="totalCount">0</span> use cases completed
+        </div>
+        
+        <!-- Features Grid -->
+        <div class="card">
+            <div style="margin-bottom: 16px;">
+                <h3 style="font-size: 18px; font-weight: 600; color: #111827;">Use Cases</h3>
+                <p style="color: #6b7280; font-size: 14px; margin-top: 4px;">Click to add specifications</p>
+            </div>
+            
+            <div id="featuresGrid" class="features-grid">
+                <!-- Features will be dynamically added here -->
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-outline" id="backButton">
+                ← Back
+            </button>
+            <button class="btn" id="nextButton" disabled>
+                Next →
+            </button>
+        </div>
+    </main>
 
-    // Render features grid
-    function renderFeaturesGrid() {
-      const grid = document.getElementById("featuresGrid");
+    <footer>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <p style="font-size: 12px; color: #6b7280;">© 2025 One UML. All rights reserved.</p>
+            <div style="display: flex; gap: 24px;">
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Help</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Privacy</a>
+                <a href="#" style="font-size: 12px; color: #6b7280; text-decoration: none;">Terms</a>
+            </div>
+        </div>
+    </footer>
 
-      if (!features || features.length === 0) {
-        grid.innerHTML = `
+    <!-- Modal Container -->
+    <div id="modalContainer" class="modal-overlay"></div>
+
+    <script>
+        // Data management
+        let features = [];
+        let currentFeatureId = null;
+        
+        // =========================================================================
+        // HELPERS: penomoran step & label cabang (A, B, C, ... tidak terbatas)
+        // =========================================================================
+        function letterFromIndex(idx) {
+            let n = idx + 1;
+            let s = '';
+            while (n > 0) {
+                const rem = (n - 1) % 26;
+                s = String.fromCharCode(65 + rem) + s;
+                n = Math.floor((n - 1) / 26);
+            }
+            return s;
+        }
+        
+        // items: array angka step acuan (basic step yang jadi cabang)
+        function computeBranchLabels(steps) {
+            const counters = {};
+            return steps.map(step => {
+                const key = String(step);
+                if (counters[key] === undefined) counters[key] = 0;
+                const letter = letterFromIndex(counters[key]);
+                counters[key]++;
+                return `${step}${letter}`;
+            });
+        }
+        
+        // Load data from storage
+        function loadDataFromStorage() {
+            console.log('Loading data from storage...');
+            
+            // Priority 1: Check localStorage for saved features
+            const savedFeatures = localStorage.getItem('useCaseDetails');
+            if (savedFeatures) {
+                try {
+                    features = JSON.parse(savedFeatures);
+                    console.log('✅ Loaded from localStorage:', features.length, 'features');
+                    return features;
+                } catch (e) {
+                    console.error('Error parsing localStorage:', e);
+                }
+            }
+            
+            // Priority 2: Check Django data from backend
+            try {
+                const djangoDataElement = document.getElementById('djangoUseCaseData');
+                if (djangoDataElement && djangoDataElement.textContent) {
+                    const djangoData = JSON.parse(djangoDataElement.textContent);
+                    if (djangoData && djangoData.length > 0) {
+                        features = formatDjangoDataForFeatures(djangoData);
+                        console.log('✅ Loaded from Django data:', features.length, 'features');
+                        localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                        return features;
+                    }
+                }
+            } catch (e) {
+                console.error('Error parsing Django data:', e);
+            }
+            
+            // Priority 3: Check generatedUseCaseData from user-story
+            const generatedData = localStorage.getItem('generatedUseCaseData');
+            if (generatedData) {
+                try {
+                    const data = JSON.parse(generatedData);
+                    if (data.useCases && data.useCases.length > 0) {
+                        features = formatUseCasesForFeatures(data.useCases);
+                        console.log('✅ Loaded from generatedData:', features.length, 'features');
+                        localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                        return features;
+                    }
+                } catch (e) {
+                    console.error('Error parsing generatedData:', e);
+                }
+            }
+            
+            console.log('❌ No data found');
+            return [];
+        }
+        
+        // Format Django data into features
+        function formatDjangoDataForFeatures(djangoData) {
+            if (!djangoData || !Array.isArray(djangoData)) {
+                return [];
+            }
+            
+            const uniqueFeatures = new Map();
+            
+            djangoData.forEach(item => {
+                if (!item || !item.name) return;
+                
+                const featureKey = item.name.trim().toLowerCase();
+                if (!uniqueFeatures.has(featureKey)) {
+                    uniqueFeatures.set(featureKey, {
+                        id: `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: item.name,
+                        summary: item.summary || '',
+                        priority: item.priority || 'Should Have',
+                        status: item.status || 'Active',
+                        precondition: item.precondition || '',
+                        postcondition: item.postcondition || '',
+                        basicPath: item.basicPath || [{ subject: 'user', text: '' }],
+                        alternativePath: item.alternativePath || [],
+                        exceptionPath: item.exceptionPath || [],
+                        actors: item.actors || []
+                    });
+                }
+            });
+            
+            return Array.from(uniqueFeatures.values());
+        }
+        
+        // Format use cases into features (for old format)
+        function formatUseCasesForFeatures(useCasesData) {
+            if (!useCasesData || !Array.isArray(useCasesData)) {
+                return [];
+            }
+            
+            const uniqueFeatures = new Map();
+            
+            useCasesData.forEach(useCase => {
+                if (!useCase || !useCase.feature) return;
+                
+                const featureKey = useCase.feature.trim().toLowerCase();
+                if (!uniqueFeatures.has(featureKey)) {
+                    uniqueFeatures.set(featureKey, {
+                        id: `feature-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        name: useCase.feature,
+                        summary: useCase.purpose || '',
+                        priority: 'Should Have',
+                        status: 'Active',
+                        precondition: '',
+                        postcondition: '',
+                        basicPath: [{ subject: 'user', text: '' }],
+                        alternativePath: [],
+                        exceptionPath: [],
+                        actors: useCase.actor ? [useCase.actor] : []
+                    });
+                } else {
+                    if (useCase.actor && !uniqueFeatures.get(featureKey).actors.includes(useCase.actor)) {
+                        uniqueFeatures.get(featureKey).actors.push(useCase.actor);
+                    }
+                }
+            });
+            
+            return Array.from(uniqueFeatures.values());
+        }
+        
+        // Render features grid
+        function renderFeaturesGrid() {
+            const grid = document.getElementById('featuresGrid');
+            
+            if (!features || features.length === 0) {
+                grid.innerHTML = `
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <i>📋</i>
                         <p>No use cases found.</p>
                         <p>Please go back and define actors and features first.</p>
                     </div>
                 `;
-        updateStatusInfo();
-        return;
-      }
-
-      grid.innerHTML = "";
-
-      features.forEach((feature) => {
-        const isComplete = checkIfFeatureComplete(feature);
-
-        const featureCard = document.createElement("div");
-        featureCard.className = `feature-card ${isComplete ? "feature-complete" : "feature-incomplete"
-          }`;
-        featureCard.setAttribute("data-feature-id", feature.id);
-
-        featureCard.innerHTML = `
+                updateStatusInfo();
+                return;
+            }
+            
+            grid.innerHTML = '';
+            
+            features.forEach(feature => {
+                const isComplete = checkIfFeatureComplete(feature);
+                
+                const featureCard = document.createElement('div');
+                featureCard.className = `feature-card ${isComplete ? 'feature-complete' : 'feature-incomplete'}`;
+                featureCard.setAttribute('data-feature-id', feature.id);
+                
+                featureCard.innerHTML = `
                     <div style="flex: 1;">
                         <div class="feature-title">${feature.name}</div>
                         <div class="feature-info">
-                            ${feature.actors && feature.actors.length > 0
-            ? feature.actors.length +
-            " actor" +
-            (feature.actors.length !== 1 ? "s" : "") +
-            " • "
-            : ""
-          }
-                            ${feature.summary
-            ? feature.summary.substring(0, 50) + "..."
-            : "No summary"
-          }
-                            ${isComplete ? " • ✅ Complete" : " • ⚠️ Incomplete"
-          }
+                            ${feature.actors && feature.actors.length > 0 ? feature.actors.length + ' actor' + (feature.actors.length !== 1 ? 's' : '') + ' • ' : ''}
+                            ${feature.summary ? feature.summary.substring(0, 50) + '...' : 'No summary'}
+                            ${isComplete ? ' • ✅ Complete' : ' • ⚠️ Incomplete'}
                         </div>
                     </div>
                 `;
-
-        featureCard.addEventListener("click", () =>
-          openFeatureModal(feature.id)
-        );
-        grid.appendChild(featureCard);
-      });
-
-      updateStatusInfo();
-    }
-
-    // Check if a feature is complete
-    function checkIfFeatureComplete(feature) {
-      if (!feature) return false;
-
-      // Check required fields
-      if (!feature.precondition || feature.precondition.trim() === "")
-        return false;
-      if (!feature.postcondition || feature.postcondition.trim() === "")
-        return false;
-
-      // Basic path must have at least one valid step
-      if (!feature.basicPath || feature.basicPath.length === 0) return false;
-      const hasValidBasicStep = feature.basicPath.some(
-        (step) =>
-          (step.actor && step.actor.trim() !== "") ||
-          (step.system && step.system.trim() !== "")
-      );
-
-      return hasValidBasicStep;
-    }
-
-    // Update status info
-    function updateStatusInfo() {
-      const totalCount = features.length;
-      const completedCount = features.filter((f) =>
-        checkIfFeatureComplete(f)
-      ).length;
-
-      document.getElementById("totalCount").textContent = totalCount;
-      document.getElementById("completedCount").textContent = completedCount;
-
-      // Enable/disable next button
-      const nextButton = document.getElementById("nextButton");
-      if (totalCount > 0 && completedCount === totalCount) {
-        nextButton.disabled = false;
-        nextButton.style.backgroundColor = "#111827";
-      } else {
-        nextButton.disabled = true;
-        nextButton.style.backgroundColor = "#9ca3af";
-      }
-    }
-
-    // Open feature modal
-    function openFeatureModal(featureId) {
-      const feature = features.find((f) => f.id === featureId);
-      if (!feature) return;
-
-      currentFeatureId = featureId;
-
-      const modalHTML = createModalHTML(feature);
-      const modalContainer = document.getElementById("modalContainer");
-      modalContainer.innerHTML = modalHTML;
-      modalContainer.classList.add("active");
-
-      setupModalListeners();
-    }
-
-    // Create modal HTML
-    function createModalHTML(feature) {
-      return `
+                
+                featureCard.addEventListener('click', () => openFeatureModal(feature.id));
+                grid.appendChild(featureCard);
+            });
+            
+            updateStatusInfo();
+        }
+        
+        // Check if a feature is complete
+        function checkIfFeatureComplete(feature) {
+            if (!feature) return false;
+            
+            if (!feature.precondition || feature.precondition.trim() === '') return false;
+            if (!feature.postcondition || feature.postcondition.trim() === '') return false;
+            
+            if (!feature.basicPath || feature.basicPath.length === 0) return false;
+            const hasValidBasicStep = feature.basicPath.some(step =>
+                step && step.text && step.text.trim() !== ''
+            );
+            
+            return hasValidBasicStep;
+        }
+        
+        // Update status info
+        function updateStatusInfo() {
+            const totalCount = features.length;
+            const completedCount = features.filter(f => checkIfFeatureComplete(f)).length;
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('completedCount').textContent = completedCount;
+            
+            const nextButton = document.getElementById('nextButton');
+            if (totalCount > 0 && completedCount === totalCount) {
+                nextButton.disabled = false;
+                nextButton.style.backgroundColor = '#111827';
+            } else {
+                nextButton.disabled = true;
+                nextButton.style.backgroundColor = '#9ca3af';
+            }
+        }
+        
+        // Open feature modal
+        function openFeatureModal(featureId) {
+            const feature = features.find(f => f.id === featureId);
+            if (!feature) return;
+            
+            currentFeatureId = featureId;
+            
+            const modalHTML = createModalHTML(feature);
+            const modalContainer = document.getElementById('modalContainer');
+            modalContainer.innerHTML = modalHTML;
+            modalContainer.classList.add('active');
+            
+            setupModalListeners();
+            
+            // Sinkronkan badge nomor step & pilihan cabang saat modal pertama dibuka
+            const basicCount = refreshBasicBadges();
+            refreshBranchDropdowns(basicCount);
+            refreshBranchLabels('alternative');
+            refreshBranchLabels('exception');
+        }
+        
+        // Create modal HTML
+        function createModalHTML(feature) {
+            const basicCount = (feature.basicPath && feature.basicPath.length) ? feature.basicPath.length : 1;
+            
+            return `
                 <div class="modal-container">
                     <div class="modal-header">
                         <div class="modal-title">${feature.name}</div>
@@ -696,83 +752,46 @@
                     </div>
                     
                     <div class="modal-body">
-                        <input type="hidden" id="featureId" value="${feature.id
-        }">
+                        <input type="hidden" id="featureId" value="${feature.id}">
                         
                         <div class="form-group">
                             <label class="form-label">Summary</label>
-                            <textarea class="form-textarea" id="summary" rows="2" placeholder="Brief description of the use case...">${feature.summary || ""
-        }</textarea>
+                            <textarea class="form-textarea" id="summary" rows="2" placeholder="Brief description of the use case...">${feature.summary || ''}</textarea>
                         </div>
                         
                         <div style="display: flex; gap: 16px;">
                             <div style="flex: 1;">
                                 <label class="form-label">Priority</label>
                                 <select class="form-select" id="priority">
-                                    <option value="Must Have" ${feature.priority === "Must Have"
-          ? "selected"
-          : ""
-        }>Must Have</option>
-                                    <option value="Should Have" ${feature.priority === "Should Have"
-          ? "selected"
-          : ""
-        }>Should Have</option>
-                                    <option value="Could Have" ${feature.priority === "Could Have"
-          ? "selected"
-          : ""
-        }>Could Have</option>
-                                    <option value="Won't Have" ${feature.priority === "Won't Have"
-          ? "selected"
-          : ""
-        }>Won't Have</option>
+                                    <option value="Must Have" ${feature.priority === 'Must Have' ? 'selected' : ''}>Must Have</option>
+                                    <option value="Should Have" ${feature.priority === 'Should Have' ? 'selected' : ''}>Should Have</option>
+                                    <option value="Could Have" ${feature.priority === 'Could Have' ? 'selected' : ''}>Could Have</option>
+                                    <option value="Won't Have" ${feature.priority === "Won't Have" ? 'selected' : ''}>Won't Have</option>
                                 </select>
                             </div>
                             
                             <div style="flex: 1;">
                                 <label class="form-label">Status</label>
                                 <select class="form-select" id="status">
-                                    <option value="Active" ${feature.status === "Active"
-          ? "selected"
-          : ""
-        }>Active</option>
-                                    <option value="Inactive" ${feature.status === "Inactive"
-          ? "selected"
-          : ""
-        }>Inactive</option>
+                                    <option value="Active" ${feature.status === 'Active' ? 'selected' : ''}>Active</option>
+                                    <option value="Inactive" ${feature.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="form-group" style="margin-top: 20px;">
                             <label class="form-label">Pre-Condition <small style="color: #6b7280;">(Required)</small></label>
-                            <textarea class="form-textarea" id="precondition" rows="2" placeholder="What must be true before this use case starts...">${feature.precondition || ""
-        }</textarea>
+                            <textarea class="form-textarea" id="precondition" rows="2" placeholder="What must be true before this use case starts...">${feature.precondition || ''}</textarea>
                         </div>
                         
                         <div class="form-group" style="margin-top: 20px;">
                             <label class="form-label">Post-Condition <small style="color: #6b7280;">(Required)</small></label>
-                            <textarea class="form-textarea" id="postcondition" rows="2" placeholder="What will be true after this use case completes...">${feature.postcondition || ""
-        }</textarea>
+                            <textarea class="form-textarea" id="postcondition" rows="2" placeholder="What will be true after this use case completes...">${feature.postcondition || ''}</textarea>
                         </div>
                         
-                        ${createPathSection(
-          "Basic Path",
-          "basic",
-          feature.basicPath || [{ actor: "", system: "" }],
-          true
-        )}
-                        ${createPathSection(
-          "Alternative Path",
-          "alternative",
-          feature.alternativePath || [],
-          false
-        )}
-                        ${createPathSection(
-          "Exception Path",
-          "exception",
-          feature.exceptionPath || [],
-          false
-        )}
+                        ${createPathSection('Basic Path', 'basic', feature.basicPath || [{ subject: 'user', text: '' }], true, basicCount)}
+                        ${createPathSection('Alternative Path', 'alternative', feature.alternativePath || [], false, basicCount)}
+                        ${createPathSection('Exception Path', 'exception', feature.exceptionPath || [], false, basicCount)}
                     </div>
                     
                     <div class="modal-footer">
@@ -781,72 +800,21 @@
                     </div>
                 </div>
             `;
-    }
-
-    // Create path section HTML
-    function createPathSection(title, type, paths, isRequired = false) {
-      let pathRows = "";
-
-      if (paths && paths.length > 0) {
-        paths.forEach((path, index) => {
-          pathRows += `
-                        <div class="path-row" data-index="${index}">
-                            <div class="path-column">
-                                <span class="path-label">Actor Action ${isRequired && index === 0
-              ? '<small style="color: #6b7280;">(Required)</small>'
-              : ""
-            }</span>
-                                <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does...">${path.actor || ""
-            }</textarea>
-                            </div>
-                            <div class="path-column">
-                                <span class="path-label">System Response ${isRequired && index === 0
-              ? '<small style="color: #6b7280;">(Required)</small>'
-              : ""
-            }</span>
-                                <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds...">${path.system || ""
-            }</textarea>
-                            </div>
-                            ${index > 0
-              ? `
-                            <div style="align-self: flex-end;">
-                                <button class="delete-path-btn" data-type="${type}" data-index="${index}">🗑️</button>
-                            </div>
-                            `
-              : ""
-            }
-                        </div>
-                    `;
-        });
-      } else {
-        pathRows = `
-                    <div class="path-row" data-index="0">
-                        <div class="path-column">
-                            <span class="path-label">Actor Action ${isRequired
-            ? '<small style="color: #6b7280;">(Required)</small>'
-            : ""
-          }</span>
-                            <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does..."></textarea>
-                        </div>
-                        <div class="path-column">
-                            <span class="path-label">System Response ${isRequired
-            ? '<small style="color: #6b7280;">(Required)</small>'
-            : ""
-          }</span>
-                            <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds..."></textarea>
-                        </div>
-                    </div>
-                `;
-      }
-
-      return `
+        }
+        
+        // Create path section HTML
+        // Setiap baris = 1 step. Basic Path bernomor otomatis 1,2,3,4...
+        // Alternative/Exception Path memilih "cabang dari step" lalu diberi
+        // label huruf otomatis (mis. 3A, 3B) di halaman Use Case Spec.
+        function createPathSection(title, type, paths, isRequired, basicStepCount) {
+            const items = (paths && paths.length > 0) ? paths : [{ subject: 'user', text: '' }];
+            const rowsHTML = items.map((item, idx) => buildPathRowHTML(item, type, idx, isRequired, basicStepCount)).join('');
+            
+            return `
                 <div class="path-section">
-                    <div class="path-section-title">${title} ${isRequired
-          ? '<small style="color: #6b7280;">(At least one step required)</small>'
-          : ""
-        }</div>
-                    <div class="path-container" data-type="${type}">
-                        ${pathRows}
+                    <div class="path-section-title">${title} ${isRequired ? '<small style="color: #6b7280;">(At least one step required)</small>' : ''}</div>
+                    <div class="path-container" data-type="${type}" data-basic-count="${basicStepCount}">
+                        ${rowsHTML}
                     </div>
                     <button class="add-path-btn" data-type="${type}">
                         <span style="font-size: 16px;">+</span>
@@ -854,420 +822,387 @@
                     </button>
                 </div>
             `;
-    }
-
-    // Setup modal event listeners
-    function setupModalListeners() {
-      // Close modal buttons
-      document
-        .getElementById("modalCloseBtn")
-        .addEventListener("click", closeModal);
-      document
-        .getElementById("cancelBtn")
-        .addEventListener("click", closeModal);
-
-      // Add path buttons
-      document.querySelectorAll(".add-path-btn").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const type = e.target.getAttribute("data-type");
-          const container = document.querySelector(
-            `.path-container[data-type="${type}"]`
-          );
-          const rowCount = container.querySelectorAll(".path-row").length;
-
-          container.insertAdjacentHTML(
-            "beforeend",
-            `
-                        <div class="path-row" data-index="${rowCount}">
-                            <div class="path-column">
-                                <span class="path-label">Actor Action</span>
-                                <textarea class="form-textarea path-actor" rows="2" placeholder="What the actor does..."></textarea>
-                            </div>
-                            <div class="path-column">
-                                <span class="path-label">System Response</span>
-                                <textarea class="form-textarea path-system" rows="2" placeholder="How the system responds..."></textarea>
-                            </div>
-                            <div style="align-self: flex-end;">
-                                <button class="delete-path-btn" data-type="${type}" data-index="${rowCount}">🗑️</button>
-                            </div>
-                        </div>
-                    `
-          );
-
-          // Add delete button listener for new row
-          const newDeleteBtn = container.querySelector(
-            `.delete-path-btn[data-index="${rowCount}"]`
-          );
-          if (newDeleteBtn) {
-            newDeleteBtn.addEventListener("click", function () {
-              const type = this.getAttribute("data-type");
-              const index = parseInt(this.getAttribute("data-index"));
-              deletePathRow(type, index);
+        }
+        
+        function buildPathRowHTML(item, type, index, isRequired, basicStepCount) {
+            const subject = item && item.subject === 'system' ? 'system' : 'user';
+            const text = (item && item.text) || '';
+            const step = (item && item.step) || 1;
+            const isBasic = type === 'basic';
+            
+            const leftCol = isBasic
+                ? `<div class="step-col"><span class="step-badge">${index + 1}</span></div>`
+                : `
+                    <div class="branch-col">
+                        <span class="path-label">Cabang dari Step</span>
+                        <select class="form-select path-branch">
+                            ${Array.from({ length: Math.max(basicStepCount, 1) }, (_, i) => i + 1)
+                                .map(n => `<option value="${n}" ${n === step ? 'selected' : ''}>Step ${n}</option>`)
+                                .join('')}
+                        </select>
+                    </div>
+                    <div class="label-col">
+                        <span class="path-label">Label</span>
+                        <span class="branch-label-badge">-</span>
+                    </div>
+                `;
+            
+            return `
+                <div class="path-row" data-index="${index}">
+                    ${leftCol}
+                    <div class="subject-col">
+                        <span class="path-label">Subjek</span>
+                        <select class="form-select path-subject">
+                            <option value="user" ${subject === 'user' ? 'selected' : ''}>👤 User</option>
+                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 Sistem</option>
+                        </select>
+                    </div>
+                    <div class="path-column">
+                        <span class="path-label">Predikat + Objek ${isRequired && index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                        <textarea class="form-textarea path-text" rows="2" placeholder="mis. membuka halaman AI Mentor">${text}</textarea>
+                    </div>
+                    ${index > 0 ? `
+                    <div class="delete-col">
+                        <button class="delete-path-btn" data-type="${type}" title="Hapus step">🗑️</button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // Beri ulang nomor 1,2,3,... pada Basic Path & kembalikan jumlah barisnya
+        function refreshBasicBadges() {
+            const container = document.querySelector('.path-container[data-type="basic"]');
+            if (!container) return 1;
+            const rows = container.querySelectorAll('.path-row');
+            rows.forEach((row, i) => {
+                row.setAttribute('data-index', i);
+                const badge = row.querySelector('.step-badge');
+                if (badge) badge.textContent = i + 1;
             });
-          }
-        });
-      });
-
-      // Delete path buttons (for existing rows)
-      document.querySelectorAll(".delete-path-btn").forEach((btn) => {
-        btn.addEventListener("click", function () {
-          const type = this.getAttribute("data-type");
-          const index = parseInt(this.getAttribute("data-index"));
-          deletePathRow(type, index);
-        });
-      });
-
-      // Save button
-      document
-        .getElementById("saveBtn")
-        .addEventListener("click", saveFeature);
-
-      // Close modal when clicking outside
-      document
-        .getElementById("modalContainer")
-        .addEventListener("click", (e) => {
-          if (e.target.id === "modalContainer") {
-            closeModal();
-          }
-        });
-
-      // AUTOSAVE: Update memory and localStorage on every input
-      const modalContainer = document.getElementById("modalContainer");
-      modalContainer.addEventListener("input", (e) => {
-        const featureId = document.getElementById("featureId").value;
-        const feature = features.find((f) => f.id === featureId);
-        if (!feature) return;
-
-        if (e.target.id === "summary") feature.summary = e.target.value;
-        if (e.target.id === "priority") feature.priority = e.target.value;
-        if (e.target.id === "status") feature.status = e.target.value;
-        if (e.target.id === "precondition") feature.precondition = e.target.value;
-        if (e.target.id === "postcondition") feature.postcondition = e.target.value;
-
-        if (e.target.classList.contains("path-actor") || e.target.classList.contains("path-system")) {
-          ["basic", "alternative", "exception"].forEach((type) => {
+            return rows.length || 1;
+        }
+        
+        // Perbarui pilihan "Cabang dari Step" di Alternative/Exception sesuai
+        // jumlah step Basic Path yang terkini
+        function refreshBranchDropdowns(basicCount) {
+            ['alternative', 'exception'].forEach(type => {
+                const container = document.querySelector(`.path-container[data-type="${type}"]`);
+                if (!container) return;
+                container.setAttribute('data-basic-count', basicCount);
+                container.querySelectorAll('.path-branch').forEach(select => {
+                    const currentVal = parseInt(select.value) || 1;
+                    const options = Array.from({ length: Math.max(basicCount, 1) }, (_, i) => i + 1);
+                    const keepVal = options.includes(currentVal) ? currentVal : options[options.length - 1];
+                    select.innerHTML = options
+                        .map(n => `<option value="${n}" ${n === keepVal ? 'selected' : ''}>Step ${n}</option>`)
+                        .join('');
+                });
+            });
+        }
+        
+        // Hitung ulang label cabang (3A, 3B, ...) sesuai urutan baris & step yang dipilih
+        function refreshBranchLabels(type) {
             const container = document.querySelector(`.path-container[data-type="${type}"]`);
-            if (container) {
-              const rows = container.querySelectorAll(".path-row");
-              const paths = [];
-              rows.forEach((row) => {
-                const actor = row.querySelector(".path-actor").value;
-                const system = row.querySelector(".path-system").value;
-                paths.push({ actor, system });
-              });
-              feature[`${type}Path`] = paths;
-            }
-          });
-        }
-        localStorage.setItem("useCaseDetails", JSON.stringify(features));
-      });
-    }
-
-    // Delete a path row
-    function deletePathRow(type, index) {
-      const container = document.querySelector(
-        `.path-container[data-type="${type}"]`
-      );
-      const row = container.querySelector(`.path-row[data-index="${index}"]`);
-      if (row) {
-        row.remove();
-
-        // Re-index remaining rows
-        const rows = container.querySelectorAll(".path-row");
-        rows.forEach((row, newIndex) => {
-          row.setAttribute("data-index", newIndex);
-          const deleteBtn = row.querySelector(".delete-path-btn");
-          if (deleteBtn) {
-            deleteBtn.setAttribute("data-index", newIndex);
-          }
-        });
-      }
-    }
-
-    // Close modal
-    function closeModal() {
-      const modalContainer = document.getElementById("modalContainer");
-      modalContainer.classList.remove("active");
-      currentFeatureId = null;
-    }
-
-    // Save feature data
-    async function saveFeature() {
-      const featureId = document.getElementById("featureId").value;
-      const feature = features.find((f) => f.id === featureId);
-
-      if (!feature) {
-        alert("Feature not found!");
-        return;
-      }
-
-      // Collect data from form
-      feature.summary = document.getElementById("summary").value.trim();
-      feature.priority = document.getElementById("priority").value;
-      feature.status = document.getElementById("status").value;
-      feature.precondition = document
-        .getElementById("precondition")
-        .value.trim();
-      feature.postcondition = document
-        .getElementById("postcondition")
-        .value.trim();
-
-      // Validate required fields
-      if (!feature.precondition) {
-        alert("Please fill in the Pre-Condition field");
-        document.getElementById("precondition").focus();
-        return;
-      }
-
-      if (!feature.postcondition) {
-        alert("Please fill in the Post-Condition field");
-        document.getElementById("postcondition").focus();
-        return;
-      }
-
-      // Collect path data
-      ["basic", "alternative", "exception"].forEach((type) => {
-        const container = document.querySelector(
-          `.path-container[data-type="${type}"]`
-        );
-        const rows = container.querySelectorAll(".path-row");
-        const paths = [];
-
-        rows.forEach((row) => {
-          const actor = row.querySelector(".path-actor").value.trim();
-          const system = row.querySelector(".path-system").value.trim();
-          paths.push({ actor, system });
-        });
-
-        feature[`${type}Path`] = paths;
-      });
-
-      // Validate basic path has at least one valid step
-      const hasValidBasicStep = feature.basicPath.some(
-        (step) =>
-          (step.actor && step.actor.trim() !== "") ||
-          (step.system && step.system.trim() !== "")
-      );
-
-      if (!hasValidBasicStep) {
-        alert(
-          "Basic Path must have at least one step with Actor Action or System Response"
-        );
-        return;
-      }
-
-      // Show loading
-      const saveBtn = document.getElementById("saveBtn");
-      const originalText = saveBtn.textContent;
-      saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
-      saveBtn.disabled = true;
-
-      try {
-        // Save to localStorage
-        localStorage.setItem("useCaseDetails", JSON.stringify(features));
-        console.log("✅ Saved to localStorage:", features);
-
-        // Also save to database via API if needed
-        await saveUseCaseToDatabase(feature);
-
-        // Update UI
-        renderFeaturesGrid();
-
-        // Close modal
-        closeModal();
-
-        // Show success
-        setTimeout(() => {
-          alert("✅ Feature saved successfully!");
-        }, 100);
-      } catch (error) {
-        console.error("Error saving:", error);
-        alert("Error saving data: " + error.message);
-      } finally {
-        saveBtn.textContent = originalText;
-        saveBtn.disabled = false;
-      }
-    }
-    // Save to database via API
-    async function saveUseCaseToDatabase(feature) {
-      try {
-        // FIX: Gunakan URL underscore sesuai urls.py
-        const response = await fetch("/api/save_usecase_spec/", {
-          method: "POST",
-          credentials: "same-origin", // WAJIB
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken"),
-          },
-          body: JSON.stringify({
-            [feature.id]: {
-              featureName: feature.name,
-              summary: feature.summary,
-              priority: feature.priority,
-              status: feature.status,
-              precondition: feature.precondition,
-              postcondition: feature.postcondition,
-              basicPath: feature.basicPath,
-              alternativePath: feature.alternativePath,
-              exceptionPath: feature.exceptionPath,
-            }
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server returned status ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        if (result.status === "success") {
-          console.log("✅ Saved to database:", result.message);
-        } else {
-          throw new Error(result.message || "Unknown database error");
-        }
-      } catch (error) {
-        console.error("❌ Database save error:", error);
-        throw error; // Lempar error agar modal save dapat menampilkan alert ke user
-      }
-    }
-
-    // Get CSRF token
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== "") {
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-          const cookie = cookies[i].trim();
-          if (cookie.substring(0, name.length + 1) === name + "=") {
-            cookieValue = decodeURIComponent(
-              cookie.substring(name.length + 1)
-            );
-            break;
-          }
-        }
-      }
-      return cookieValue;
-    }
-
-    // Prepare data for next page
-    function prepareDataForNextPage() {
-      // Format features for use-case-spec page
-      const formattedFeatures = {};
-      features.forEach((feature, index) => {
-        formattedFeatures[`feature_${index}`] = {
-          featureName: feature.name,
-          summary: feature.summary || "",
-          priority: feature.priority || "Should Have",
-          status: feature.status || "Active",
-          precondition: feature.precondition || "",
-          postcondition: feature.postcondition || "",
-          basicPath: feature.basicPath || [],
-          alternativePath: feature.alternativePath || [],
-          exceptionPath: feature.exceptionPath || [],
-        };
-      });
-      return formattedFeatures;
-    }
-
-    // Initialize page
-    document.addEventListener("DOMContentLoaded", () => {
-      console.log("Page loaded");
-
-      // Load data
-      features = loadDataFromStorage();
-      renderFeaturesGrid();
-
-      // Event listeners
-      document.getElementById("backButton").addEventListener("click", () => {
-        // Save data before leaving
-        if (features.length > 0) {
-          localStorage.setItem("useCaseDetails", JSON.stringify(features));
-        }
-        window.location.href = "/user-story/";
-      });
-
-      document
-        .getElementById("nextButton")
-        .addEventListener("click", async () => {
-          // Validate all features are complete
-          const incompleteFeatures = features.filter(
-            (f) => !checkIfFeatureComplete(f)
-          );
-
-          if (incompleteFeatures.length > 0) {
-            const featureNames = incompleteFeatures
-              .map((f) => f.name)
-              .join(", ");
-            alert(
-              `Please complete all use cases before proceeding.\n\nIncomplete: ${featureNames}`
-            );
-            return;
-          }
-
-          // Show loading
-          const nextBtn = document.getElementById("nextButton");
-          const originalText = nextBtn.innerHTML;
-          nextBtn.innerHTML =
-            '<span class="loading-spinner"></span>Preparing...';
-          nextBtn.disabled = true;
-
-          try {
-            // Format data for next page
-            const formattedData = prepareDataForNextPage();
-
-            // GUARANTEE: Jalankan bulk save ke database Supabase
-            // agar data tidak hanya tersimpan di localStorage, tapi masuk DB secara utuh.
-            const bulkResponse = await fetch("/api/save_usecase_spec/", {
-              method: "POST",
-              credentials: "same-origin",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken"),
-              },
-              body: JSON.stringify(formattedData),
+            if (!container) return;
+            const rows = Array.from(container.querySelectorAll('.path-row'));
+            const steps = rows.map(row => parseInt(row.querySelector('.path-branch')?.value || '1'));
+            const labels = computeBranchLabels(steps);
+            rows.forEach((row, i) => {
+                const badge = row.querySelector('.branch-label-badge');
+                if (badge) badge.textContent = labels[i];
             });
-
-            if (!bulkResponse.ok) {
-              throw new Error(`Gagal menyimpan data massal ke DB (Status ${bulkResponse.status})`);
+        }
+        
+        // Setup modal event listeners (pakai event delegation supaya baris
+        // yang ditambah/dihapus secara dinamis tetap otomatis ke-handle)
+        function setupModalListeners() {
+            const modalContainer = document.getElementById('modalContainer');
+            
+            modalContainer.addEventListener('click', function(e) {
+                if (e.target.id === 'modalCloseBtn' || e.target.id === 'cancelBtn') {
+                    closeModal();
+                    return;
+                }
+                
+                if (e.target.id === 'modalContainer') {
+                    closeModal();
+                    return;
+                }
+                
+                if (e.target.id === 'saveBtn') {
+                    saveFeature();
+                    return;
+                }
+                
+                if (e.target.closest('.add-path-btn')) {
+                    const btn = e.target.closest('.add-path-btn');
+                    const type = btn.getAttribute('data-type');
+                    const container = document.querySelector(`.path-container[data-type="${type}"]`);
+                    const rowCount = container.querySelectorAll('.path-row').length;
+                    const basicCount = type === 'basic'
+                        ? rowCount + 1
+                        : parseInt(container.getAttribute('data-basic-count') || '1');
+                    
+                    container.insertAdjacentHTML('beforeend', buildPathRowHTML({ subject: 'user', text: '' }, type, rowCount, false, basicCount));
+                    
+                    if (type === 'basic') {
+                        const newCount = refreshBasicBadges();
+                        refreshBranchDropdowns(newCount);
+                    }
+                    refreshBranchLabels('alternative');
+                    refreshBranchLabels('exception');
+                    return;
+                }
+                
+                if (e.target.closest('.delete-path-btn')) {
+                    const btn = e.target.closest('.delete-path-btn');
+                    const type = btn.getAttribute('data-type');
+                    const row = btn.closest('.path-row');
+                    deletePathRow(type, row);
+                    return;
+                }
+            });
+            
+            modalContainer.addEventListener('change', function(e) {
+                if (e.target.classList.contains('path-branch')) {
+                    const type = e.target.closest('.path-container').getAttribute('data-type');
+                    refreshBranchLabels(type);
+                }
+            });
+        }
+        
+        // Delete a path row
+        function deletePathRow(type, rowElement) {
+            if (!rowElement) return;
+            const container = rowElement.closest('.path-container');
+            rowElement.remove();
+            
+            const rows = container.querySelectorAll('.path-row');
+            rows.forEach((row, newIndex) => {
+                row.setAttribute('data-index', newIndex);
+            });
+            
+            if (type === 'basic') {
+                const newCount = refreshBasicBadges();
+                refreshBranchDropdowns(newCount);
             }
-
-            const bulkResult = await bulkResponse.json();
-            if (bulkResult.status !== "success") {
-              throw new Error(bulkResult.message || "Gagal menyimpan ke database");
+            refreshBranchLabels('alternative');
+            refreshBranchLabels('exception');
+        }
+        
+        // Close modal
+        function closeModal() {
+            const modalContainer = document.getElementById('modalContainer');
+            modalContainer.classList.remove('active');
+            currentFeatureId = null;
+        }
+        
+        // Save feature data
+        async function saveFeature() {
+            const featureId = document.getElementById('featureId').value;
+            const feature = features.find(f => f.id === featureId);
+            
+            if (!feature) {
+                alert('Feature not found!');
+                return;
             }
-            console.log("✅ Bulk save to database success:", bulkResult.message);
-
-            // Save to localStorage in the format expected by use-case-spec
-            localStorage.setItem(
-              "formattedUseCaseDetails",
-              JSON.stringify(formattedData)
-            );
-
-            // Save to sessionStorage as backup
-            sessionStorage.setItem(
-              "useCaseDetails",
-              JSON.stringify(features)
-            );
-
-            // Navigate to next page with data in URL
-            const dataString = encodeURIComponent(JSON.stringify(features));
-            window.location.href = `/use-case-spec/?data=${dataString}`;
-          } catch (error) {
-            console.error("Error:", error);
-            alert("Error preparing/saving data: " + error.message);
-
-            // Restore button
-            nextBtn.innerHTML = originalText;
-            nextBtn.disabled = false;
-          }
+            
+            feature.summary = document.getElementById('summary').value.trim();
+            feature.priority = document.getElementById('priority').value;
+            feature.status = document.getElementById('status').value;
+            feature.precondition = document.getElementById('precondition').value.trim();
+            feature.postcondition = document.getElementById('postcondition').value.trim();
+            
+            if (!feature.precondition) {
+                alert('Please fill in the Pre-Condition field');
+                document.getElementById('precondition').focus();
+                return;
+            }
+            
+            if (!feature.postcondition) {
+                alert('Please fill in the Post-Condition field');
+                document.getElementById('postcondition').focus();
+                return;
+            }
+            
+            // Collect path data: setiap baris = { subject, text, step? }
+            ['basic', 'alternative', 'exception'].forEach(type => {
+                const container = document.querySelector(`.path-container[data-type="${type}"]`);
+                const rows = container.querySelectorAll('.path-row');
+                const paths = [];
+                
+                rows.forEach(row => {
+                    const subject = row.querySelector('.path-subject').value;
+                    const text = row.querySelector('.path-text').value.trim();
+                    const item = { subject, text };
+                    
+                    if (type !== 'basic') {
+                        const branchSelect = row.querySelector('.path-branch');
+                        item.step = parseInt(branchSelect ? branchSelect.value : '1') || 1;
+                    }
+                    
+                    paths.push(item);
+                });
+                
+                feature[`${type}Path`] = paths;
+            });
+            
+            const hasValidBasicStep = feature.basicPath.some(step => step.text && step.text.trim() !== '');
+            
+            if (!hasValidBasicStep) {
+                alert('Basic Path must have at least one step with text filled in');
+                return;
+            }
+            
+            const saveBtn = document.getElementById('saveBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '<span class="loading-spinner"></span>Saving...';
+            saveBtn.disabled = true;
+            
+            try {
+                localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                console.log('✅ Saved to localStorage:', features);
+                
+                await saveToDatabase(feature);
+                
+                renderFeaturesGrid();
+                closeModal();
+                
+                setTimeout(() => {
+                    alert('✅ Feature saved successfully!');
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Error saving data: ' + error.message);
+            } finally {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
+        }
+        
+        // Save to database via API
+        async function saveToDatabase(feature) {
+            try {
+                const response = await fetch('/save-usecase-spec/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        [feature.name]: {
+                            featureName: feature.name,
+                            summary: feature.summary,
+                            priority: feature.priority,
+                            status: feature.status,
+                            precondition: feature.precondition,
+                            postcondition: feature.postcondition,
+                            basicPath: feature.basicPath,
+                            alternativePath: feature.alternativePath,
+                            exceptionPath: feature.exceptionPath
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    console.log('✅ Saved to database:', result.message);
+                } else {
+                    console.warn('⚠️ Database save warning:', result.message);
+                }
+            } catch (error) {
+                console.error('❌ Database save error:', error);
+            }
+        }
+        
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // Prepare data for next page
+        function prepareDataForNextPage() {
+            const formattedFeatures = {};
+            features.forEach((feature, index) => {
+                formattedFeatures[`feature_${index}`] = {
+                    featureName: feature.name,
+                    summary: feature.summary || '',
+                    priority: feature.priority || 'Should Have',
+                    status: feature.status || 'Active',
+                    precondition: feature.precondition || '',
+                    postcondition: feature.postcondition || '',
+                    basicPath: feature.basicPath || [],
+                    alternativePath: feature.alternativePath || [],
+                    exceptionPath: feature.exceptionPath || []
+                };
+            });
+            return formattedFeatures;
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Page loaded');
+            
+            features = loadDataFromStorage();
+            renderFeaturesGrid();
+            
+            document.getElementById('backButton').addEventListener('click', () => {
+                if (features.length > 0) {
+                    localStorage.setItem('useCaseDetails', JSON.stringify(features));
+                }
+                window.location.href = '/use-case/';
+            });
+            
+            document.getElementById('nextButton').addEventListener('click', async () => {
+                const incompleteFeatures = features.filter(f => !checkIfFeatureComplete(f));
+                
+                if (incompleteFeatures.length > 0) {
+                    const featureNames = incompleteFeatures.map(f => f.name).join(', ');
+                    alert(`Please complete all use cases before proceeding.\n\nIncomplete: ${featureNames}`);
+                    return;
+                }
+                
+                const nextBtn = document.getElementById('nextButton');
+                const originalText = nextBtn.innerHTML;
+                nextBtn.innerHTML = '<span class="loading-spinner"></span>Preparing...';
+                nextBtn.disabled = true;
+                
+                try {
+                    const formattedData = prepareDataForNextPage();
+                    
+                    localStorage.setItem('formattedUseCaseDetails', JSON.stringify(formattedData));
+                    sessionStorage.setItem('useCaseDetails', JSON.stringify(features));
+                    
+                    const dataString = encodeURIComponent(JSON.stringify(features));
+                    window.location.href = `/use-case-spec/?data=${dataString}`;
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error preparing data: ' + error.message);
+                    
+                    nextBtn.innerHTML = originalText;
+                    nextBtn.disabled = false;
+                }
+            });
         });
-    });
-  </script>
-
-  <!-- Hidden element for Django data -->
-  {% if use_cases_json %}
-  <div id="djangoUseCaseData" style="display: none">{{ use_cases_json }}</div>
-  {% endif %}
+    </script>
+    
+    <!-- Hidden element for Django data -->
+    {% if use_cases_json %}
+    <div id="djangoUseCaseData" style="display: none;">{{ use_cases_json }}</div>
+    {% endif %}
 </body>
-
 </html>

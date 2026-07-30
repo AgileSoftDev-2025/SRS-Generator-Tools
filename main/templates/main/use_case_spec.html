@@ -264,6 +264,10 @@
             min-width: 0;
         }
         
+        .cell-empty {
+            opacity: 0.35;
+        }
+        
         .export-section {
             background: #f8fafc;
             border: 1px solid #e5e7eb;
@@ -553,17 +557,6 @@
         
         function loadDataFromDjango() {
             // HAPUS ATAU COMMENT BAGIAN INI - karena kita tidak mengirim data dari Django template
-            // Jika ada data dari Django, uncomment dan sesuaikan
-            // const allFeaturesRaw = '{{ all_features|escapejs }}';
-            // if (allFeaturesRaw && allFeaturesRaw !== '[]' && allFeaturesRaw !== 'None') {
-            //     try {
-            //         allFeatures = JSON.parse(allFeaturesRaw);
-            //         console.log("✅ Data loaded from Django:", allFeatures.length, "features");
-            //         return true;
-            //     } catch(e) {
-            //         console.error("❌ Error parsing Django data:", e);
-            //     }
-            // }
             return false;
         }
         
@@ -627,11 +620,10 @@
         }
         
         // =========================================================================
-        // HELPERS: Subjek-Predikat-Objek (SPO) formatting & Alternative/Exception
-        // step labeling (contoh: step basic ke-3 => 3A, 3B, 3C, ... bisa banyak)
+        // HELPERS: Subjek-Predikat-Objek (SPO) + penomoran step & label cabang
+        // Skema data step sekarang: { subject: 'user'|'system', text: '...', step? }
         // =========================================================================
         
-        // Ubah index 0,1,2,...,25,26,... menjadi A,B,C,...,Z,AA,AB,... (gaya kolom Excel)
         function letterFromIndex(idx) {
             let n = idx + 1;
             let s = '';
@@ -643,9 +635,7 @@
             return s;
         }
         
-        // Pastikan teks berbentuk kalimat Subjek-Predikat-Objek.
-        // Jika teks sudah diawali subjek (mis. "User ..." / "Sistem ..."), dibiarkan.
-        // Jika belum, subjek otomatis ditambahkan di depan.
+        // Pastikan teks berbentuk kalimat Subjek-Predikat-Objek
         function formatSPOText(text, subject) {
             if (!text || typeof text !== 'string' || text.trim() === '') {
                 return null;
@@ -660,30 +650,24 @@
             return `${subject} ${firstChar}${rest}`;
         }
         
-        // Hanya ambil path yang punya isi (actor dan/atau system diisi)
         function getValidPaths(paths) {
-            return (paths || []).filter(path =>
-                (path.actor && path.actor.trim() !== '') ||
-                (path.system && path.system.trim() !== '')
-            );
+            return (paths || []).filter(item => item && item.text && item.text.trim() !== '');
         }
         
-        // Beri label bertingkat untuk Alternative/Exception Flow berdasarkan step
-        // basic yang jadi acuan cabang. Item dengan field "step" (atau "stepRef")
-        // yang sama akan diberi huruf berurutan: 3A, 3B, 3C, dst — tidak terbatas
-        // jumlahnya. Jika field step tidak ada, dianggap bercabang dari step
-        // basic terakhir.
-        function computeStepLabels(paths, basicStepCount) {
+        // Label Basic Flow: 1,2,3,... | Label Alternative/Exception: {step}{Huruf}, mis. 3A, 3B
+        function computeLabeledPaths(paths, type, basicStepCount) {
+            const validPaths = getValidPaths(paths);
+            if (type === 'basic') {
+                return validPaths.map((p, i) => Object.assign({}, p, { label: String(i + 1) }));
+            }
             const stepCounters = {};
-            return paths.map(path => {
-                const rawStep = (path.step != null) ? path.step
-                    : (path.stepRef != null) ? path.stepRef
-                    : (basicStepCount || 1);
-                const stepKey = String(rawStep);
-                if (stepCounters[stepKey] === undefined) stepCounters[stepKey] = 0;
-                const letter = letterFromIndex(stepCounters[stepKey]);
-                stepCounters[stepKey] += 1;
-                return Object.assign({}, path, { label: `${rawStep}${letter}` });
+            return validPaths.map(p => {
+                const stepRef = (p.step != null) ? p.step : (basicStepCount || 1);
+                const key = String(stepRef);
+                if (stepCounters[key] === undefined) stepCounters[key] = 0;
+                const letter = letterFromIndex(stepCounters[key]);
+                stepCounters[key] += 1;
+                return Object.assign({}, p, { label: `${stepRef}${letter}` });
             });
         }
         
@@ -715,7 +699,6 @@
                             (feature.exceptionPath?.length || 0);
             });
             
-            // Show status info
             statusInfo.style.display = 'block';
             document.getElementById('totalCount').textContent = features.length;
             document.getElementById('completedCount').textContent = features.length;
@@ -734,9 +717,9 @@
                 const alternativePath = Array.isArray(feature.alternativePath) ? feature.alternativePath : [];
                 const exceptionPath = Array.isArray(feature.exceptionPath) ? feature.exceptionPath : [];
                 
-                // Subjek untuk kalimat SPO — tetap dibagi User (aktor) vs Sistem
                 const actorSubject = feature.actorName || feature.actor || 'User';
                 const systemSubject = 'Sistem';
+                const basicStepCount = getValidPaths(basicPath).length;
                 
                 const priorityColors = {
                     'Must Have': '#ef4444',
@@ -811,9 +794,9 @@
                             </div>
                         </div>
                         
-                        ${renderPathSection('Basic Flow', basicPath, 'basic', index, basicPath.length, actorSubject, systemSubject)}
-                        ${renderPathSection('Alternative Flow', alternativePath, 'alternative', index, basicPath.length, actorSubject, systemSubject)}
-                        ${renderPathSection('Exception Flow', exceptionPath, 'exception', index, basicPath.length, actorSubject, systemSubject)}
+                        ${renderPathSection('Basic Flow', basicPath, 'basic', basicStepCount, actorSubject, systemSubject)}
+                        ${renderPathSection('Alternative Flow', alternativePath, 'alternative', basicStepCount, actorSubject, systemSubject)}
+                        ${renderPathSection('Exception Flow', exceptionPath, 'exception', basicStepCount, actorSubject, systemSubject)}
                     </div>
                 `;
             });
@@ -827,38 +810,33 @@
             }
         }
         
-        function renderPathSection(title, paths, type, featureIndex, basicStepCount, actorSubject, systemSubject) {
-            const validPaths = getValidPaths(paths);
+        function renderPathSection(title, paths, type, basicStepCount, actorSubject, systemSubject) {
+            const labeledPaths = computeLabeledPaths(paths, type, basicStepCount);
             
-            if (validPaths.length === 0) {
+            if (labeledPaths.length === 0) {
                 return '';
             }
             
-            // Basic Flow tetap 1,2,3,...
-            // Alternative/Exception Flow diberi label bertingkat: 3A, 3B, 3C, dst.
-            const labeledPaths = (type === 'basic')
-                ? validPaths.map((path, i) => Object.assign({}, path, { label: String(i + 1) }))
-                : computeStepLabels(validPaths, basicStepCount);
-            
             let rows = '';
-            labeledPaths.forEach((path) => {
-                const actorText = formatSPOText(path.actor, actorSubject) || 'No actor action specified';
-                const systemText = formatSPOText(path.system, systemSubject) || 'No system response specified';
+            labeledPaths.forEach((item) => {
+                const isUser = item.subject !== 'system';
+                const subjectLabel = isUser ? actorSubject : systemSubject;
+                const formattedText = formatSPOText(item.text, subjectLabel) || '-';
                 
                 rows += `
                     <tr>
                         <td style="width: 50%;">
-                            <div class="actor-action">
-                                <span class="step-number">${path.label}</span>
+                            <div class="actor-action ${isUser ? '' : 'cell-empty'}">
+                                <span class="step-number">${item.label}</span>
                                 <div class="step-content">
-                                    ${actorText}
+                                    ${isUser ? formattedText : '—'}
                                 </div>
                             </div>
                         </td>
                         <td style="width: 50%;">
-                            <div class="system-response">
+                            <div class="system-response ${!isUser ? '' : 'cell-empty'}">
                                 <div class="step-content">
-                                    ${systemText}
+                                    ${!isUser ? formattedText : '—'}
                                 </div>
                             </div>
                         </td>
@@ -878,7 +856,7 @@
                 <div class="content-section">
                     <div class="section-title">
                         <span class="section-icon">${icon}</span>
-                        ${title} (${validPaths.length} steps)
+                        ${title} (${labeledPaths.length} steps)
                     </div>
                     <div class="path-table-container">
                         <table class="path-table">
@@ -887,13 +865,13 @@
                                     <th style="width: 50%;">
                                         <div class="column-header">
                                             <span class="column-icon">👤</span>
-                                            Actor Action (User)
+                                            User
                                         </div>
                                     </th>
                                     <th style="width: 50%;">
                                         <div class="column-header">
                                             <span class="column-icon">💻</span>
-                                            System Response
+                                            Sistem
                                         </div>
                                     </th>
                                 </tr>
@@ -969,17 +947,24 @@
                 .replace(/'/g, '&apos;');
         }
         
+        function getPriorityColor(priority) {
+            const colors = {
+                'Must Have': '#ef4444',
+                'Should Have': '#f59e0b',
+                'Could Have': '#0ea5e9',
+                'Won\'t Have': '#6b7280'
+            };
+            return colors[priority] || '#6b7280';
+        }
+        
         function createSVGContent(feature, featureName) {
             const actorSubject = feature.actorName || feature.actor || 'User';
             const systemSubject = 'Sistem';
+            const basicStepCount = getValidPaths(feature.basicPath || []).length;
             
-            const basicValid = getValidPaths(feature.basicPath || []);
-            const altValid = getValidPaths(feature.alternativePath || []);
-            const excValid = getValidPaths(feature.exceptionPath || []);
-            
-            const basicLabeled = basicValid.map((p, i) => Object.assign({}, p, { label: String(i + 1) }));
-            const altLabeled = computeStepLabels(altValid, basicValid.length);
-            const excLabeled = computeStepLabels(excValid, basicValid.length);
+            const basicLabeled = computeLabeledPaths(feature.basicPath || [], 'basic', basicStepCount);
+            const altLabeled = computeLabeledPaths(feature.alternativePath || [], 'alternative', basicStepCount);
+            const excLabeled = computeLabeledPaths(feature.exceptionPath || [], 'exception', basicStepCount);
             
             const rowHeight = 25;
             const sectionTopPad = 40;
@@ -998,12 +983,16 @@
             const svgHeight = Math.max(600, cursorY + 60);
             
             function pathRows(labeled, sectionY) {
-                return labeled.map((path, i) => `
+                return labeled.map((item, i) => {
+                    const isUser = item.subject !== 'system';
+                    const subjectLabel = isUser ? actorSubject : systemSubject;
+                    const text = formatSPOText(item.text, subjectLabel) || 'N/A';
+                    return `
         <text x="80" y="${sectionY + 55 + i * rowHeight}" class="text">
-            <tspan class="step-number">${escapeXml(path.label)}.</tspan> 
-            <tspan font-weight="bold">${escapeXml(actorSubject)}:</tspan> ${escapeXml(formatSPOText(path.actor, actorSubject) || 'N/A')} | 
-            <tspan font-weight="bold">${escapeXml(systemSubject)}:</tspan> ${escapeXml(formatSPOText(path.system, systemSubject) || 'N/A')}
-        </text>`).join('');
+            <tspan class="step-number">${escapeXml(item.label)}.</tspan> 
+            <tspan font-weight="bold">${escapeXml(subjectLabel)}:</tspan> ${escapeXml(text)}
+        </text>`;
+                }).join('');
             }
             
             return `<?xml version="1.0" encoding="UTF-8"?>
@@ -1080,16 +1069,6 @@
 </svg>`;
         }
         
-        function getPriorityColor(priority) {
-            const colors = {
-                'Must Have': '#ef4444',
-                'Should Have': '#f59e0b',
-                'Could Have': '#0ea5e9',
-                'Won\'t Have': '#6b7280'
-            };
-            return colors[priority] || '#6b7280';
-        }
-        
         // SPEC EXPORT FUNCTIONS
         function saveSingleAsSpec(featureIndex) {
             if (!allFeatures || allFeatures.length === 0) {
@@ -1137,21 +1116,23 @@
             showExportStatus(`✅ All specifications saved to single file`, 'success');
         }
         
+        function stepBlock(labeled, actorSubject, systemSubject) {
+            return labeled.map((item) => {
+                const isUser = item.subject !== 'system';
+                const subjectLabel = isUser ? actorSubject : systemSubject;
+                const text = formatSPOText(item.text, subjectLabel) || 'N/A';
+                return `\n${item.label}. ${subjectLabel.toUpperCase()}:\n   ${text}\n`;
+            }).join('\n---\n');
+        }
+        
         function createSpecContent(feature, featureName) {
             const actorSubject = feature.actorName || feature.actor || 'User';
             const systemSubject = 'Sistem';
+            const basicStepCount = getValidPaths(feature.basicPath || []).length;
             
-            const basicValid = getValidPaths(feature.basicPath || []);
-            const altValid = getValidPaths(feature.alternativePath || []);
-            const excValid = getValidPaths(feature.exceptionPath || []);
-            
-            const basicLabeled = basicValid.map((p, i) => Object.assign({}, p, { label: String(i + 1) }));
-            const altLabeled = computeStepLabels(altValid, basicValid.length);
-            const excLabeled = computeStepLabels(excValid, basicValid.length);
-            
-            const formatBlock = (labeled) => labeled.map((path) =>
-                `\n${path.label}. ${actorSubject.toUpperCase()}:\n   ${formatSPOText(path.actor, actorSubject) || 'N/A'}\n\n   ${systemSubject.toUpperCase()}:\n   ${formatSPOText(path.system, systemSubject) || 'N/A'}\n`
-            ).join('\n---\n');
+            const basicLabeled = computeLabeledPaths(feature.basicPath || [], 'basic', basicStepCount);
+            const altLabeled = computeLabeledPaths(feature.alternativePath || [], 'alternative', basicStepCount);
+            const excLabeled = computeLabeledPaths(feature.exceptionPath || [], 'exception', basicStepCount);
             
             return `===============================================================================
                              USE CASE SPECIFICATION
@@ -1181,20 +1162,20 @@ ${feature.postcondition || 'None specified.'}
 ===============================================================================
 BASIC PATH
 ===============================================================================
-${formatBlock(basicLabeled)}
+${stepBlock(basicLabeled, actorSubject, systemSubject)}
 
 ${altLabeled.length > 0 ? `
 ===============================================================================
 ALTERNATIVE PATHS
 ===============================================================================
-${formatBlock(altLabeled)}
+${stepBlock(altLabeled, actorSubject, systemSubject)}
 ` : ''}
 
 ${excLabeled.length > 0 ? `
 ===============================================================================
 EXCEPTION PATHS
 ===============================================================================
-${formatBlock(excLabeled)}
+${stepBlock(excLabeled, actorSubject, systemSubject)}
 ` : ''}
 
 ===============================================================================
@@ -1219,14 +1200,11 @@ Total Use Cases: ${allFeatures.length}
                 const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
                 const actorSubject = feature.actorName || feature.actor || 'User';
                 const systemSubject = 'Sistem';
+                const basicStepCount = getValidPaths(feature.basicPath || []).length;
                 
-                const basicValid = getValidPaths(feature.basicPath || []);
-                const altValid = getValidPaths(feature.alternativePath || []);
-                const excValid = getValidPaths(feature.exceptionPath || []);
-                
-                const basicLabeled = basicValid.map((p, i) => Object.assign({}, p, { label: String(i + 1) }));
-                const altLabeled = computeStepLabels(altValid, basicValid.length);
-                const excLabeled = computeStepLabels(excValid, basicValid.length);
+                const basicLabeled = computeLabeledPaths(feature.basicPath || [], 'basic', basicStepCount);
+                const altLabeled = computeLabeledPaths(feature.alternativePath || [], 'alternative', basicStepCount);
+                const excLabeled = computeLabeledPaths(feature.exceptionPath || [], 'exception', basicStepCount);
                 
                 content += `\n\n${'='.repeat(80)}\n`;
                 content += `USE CASE ${index + 1}: ${featureName}\n`;
@@ -1237,24 +1215,27 @@ Total Use Cases: ${allFeatures.length}
                 content += `Post-condition: ${feature.postcondition || 'None'}\n\n`;
                 
                 content += `Basic Path:\n`;
-                basicLabeled.forEach((path) => {
-                    content += `  ${path.label}. ${actorSubject}: ${formatSPOText(path.actor, actorSubject) || 'N/A'}\n`;
-                    content += `       ${systemSubject}: ${formatSPOText(path.system, systemSubject) || 'N/A'}\n\n`;
+                basicLabeled.forEach((item) => {
+                    const isUser = item.subject !== 'system';
+                    const subjectLabel = isUser ? actorSubject : systemSubject;
+                    content += `  ${item.label}. ${subjectLabel}: ${formatSPOText(item.text, subjectLabel) || 'N/A'}\n\n`;
                 });
                 
                 if (altLabeled.length > 0) {
                     content += `Alternative Paths:\n`;
-                    altLabeled.forEach((path) => {
-                        content += `  ${path.label}. ${actorSubject}: ${formatSPOText(path.actor, actorSubject) || 'N/A'}\n`;
-                        content += `       ${systemSubject}: ${formatSPOText(path.system, systemSubject) || 'N/A'}\n\n`;
+                    altLabeled.forEach((item) => {
+                        const isUser = item.subject !== 'system';
+                        const subjectLabel = isUser ? actorSubject : systemSubject;
+                        content += `  ${item.label}. ${subjectLabel}: ${formatSPOText(item.text, subjectLabel) || 'N/A'}\n\n`;
                     });
                 }
                 
                 if (excLabeled.length > 0) {
                     content += `Exception Paths:\n`;
-                    excLabeled.forEach((path) => {
-                        content += `  ${path.label}. ${actorSubject}: ${formatSPOText(path.actor, actorSubject) || 'N/A'}\n`;
-                        content += `       ${systemSubject}: ${formatSPOText(path.system, systemSubject) || 'N/A'}\n\n`;
+                    excLabeled.forEach((item) => {
+                        const isUser = item.subject !== 'system';
+                        const subjectLabel = isUser ? actorSubject : systemSubject;
+                        content += `  ${item.label}. ${subjectLabel}: ${formatSPOText(item.text, subjectLabel) || 'N/A'}\n\n`;
                     });
                 }
             });
@@ -1277,7 +1258,6 @@ Total Use Cases: ${allFeatures.length}
             showExportStatus(`Starting export of ${allFeatures.length} use cases in all formats...`, 'info');
             
             setTimeout(() => {
-                // Export all as SVG
                 allFeatures.forEach((feature, index) => {
                     const featureName = feature.featureName || feature.name || `Use_Case_${index + 1}`;
                     const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
@@ -1294,7 +1274,6 @@ Total Use Cases: ${allFeatures.length}
                     URL.revokeObjectURL(svgUrl);
                 });
                 
-                // Export combined spec
                 const allSpecContent = createAllSpecContent();
                 const specBlob = new Blob([allSpecContent], { type: 'text/plain;charset=utf-8' });
                 const specUrl = URL.createObjectURL(specBlob);
@@ -1363,7 +1342,6 @@ Total Use Cases: ${allFeatures.length}
                 
                 renderUseCaseSpecs(allFeatures);
                 
-                // Setup export buttons
                 const saveAllSvgBtn = document.getElementById('saveAllSvgBtn');
                 const saveAllSpecBtn = document.getElementById('saveAllSpecBtn');
                 const exportAllBtn = document.getElementById('exportAllBtn');
@@ -1380,7 +1358,6 @@ Total Use Cases: ${allFeatures.length}
                     exportAllBtn.addEventListener('click', exportAllFormats);
                 }
                 
-                // Setup navigation buttons
                 const backBtn = document.getElementById('backButton');
                 const nextBtn = document.getElementById('nextButton');
                 
@@ -1396,7 +1373,6 @@ Total Use Cases: ${allFeatures.length}
                             e.preventDefault();
                             showExportStatus('⚠️ Please go back to input data first.', 'warning');
                         } else {
-                            // Redirect to activity diagram page
                             window.location.href = '/activity-diagram/';
                         }
                     });
@@ -1423,7 +1399,6 @@ Total Use Cases: ${allFeatures.length}
                     </div>
                 `;
                 
-                // Disable buttons if no data
                 const saveAllSvgBtn = document.getElementById('saveAllSvgBtn');
                 const saveAllSpecBtn = document.getElementById('saveAllSpecBtn');
                 const exportAllBtn = document.getElementById('exportAllBtn');
@@ -1438,7 +1413,6 @@ Total Use Cases: ${allFeatures.length}
                 }
             }
             
-            // Make functions available globally
             window.saveSingleAsSVG = saveSingleAsSVG;
             window.saveSingleAsSpec = saveSingleAsSpec;
             window.saveAllAsSVG = saveAllAsSVG;
