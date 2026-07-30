@@ -187,7 +187,7 @@
             background: white;
             border-radius: 12px;
             width: 100%;
-            max-width: 900px;
+            max-width: 960px;
             max-height: 90vh;
             overflow: hidden;
             display: flex;
@@ -312,7 +312,7 @@
             display: block;
         }
         
-        .add-path-btn {
+        .add-path-btn, .add-step-btn, .add-group-btn {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -327,9 +327,21 @@
             margin-top: 8px;
         }
         
-        .add-path-btn:hover {
+        .add-path-btn:hover, .add-step-btn:hover, .add-group-btn:hover {
             border-color: #111827;
             color: #111827;
+        }
+        
+        .add-group-btn {
+            border-color: #a5b4fc;
+            color: #4338ca;
+            background: #eef2ff;
+            border-style: solid;
+        }
+        
+        .add-group-btn:hover {
+            background: #e0e7ff;
+            border-color: #4338ca;
         }
         
         .loading-spinner {
@@ -358,7 +370,7 @@
             color: #374151;
         }
         
-        .delete-path-btn {
+        .delete-path-btn, .delete-step-btn {
             background: none;
             border: none;
             color: #ef4444;
@@ -368,12 +380,12 @@
             margin-top: 4px;
         }
         
-        .delete-path-btn:hover {
+        .delete-path-btn:hover, .delete-step-btn:hover {
             background-color: #fef2f2;
             border-radius: 4px;
         }
         
-        /* Step numbering badges (baru) */
+        /* Step numbering badges */
         .step-badge {
             display: inline-flex;
             align-items: center;
@@ -393,7 +405,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 40px;
+            min-width: 46px;
             height: 28px;
             padding: 0 8px;
             background: #fef3c7;
@@ -409,18 +421,18 @@
         }
         
         .branch-col {
-            flex: 0 0 130px;
+            flex: 0 0 140px;
         }
         
-        .step-col {
-            flex: 0 0 50px;
+        .label-col {
+            flex: 0 0 60px;
             display: flex;
             align-items: flex-end;
             padding-bottom: 10px;
         }
         
-        .label-col {
-            flex: 0 0 60px;
+        .step-col {
+            flex: 0 0 50px;
             display: flex;
             align-items: flex-end;
             padding-bottom: 10px;
@@ -431,6 +443,56 @@
             display: flex;
             align-items: flex-end;
             padding-bottom: 6px;
+        }
+        
+        /* Flow group (Alternative/Exception) styles */
+        .flow-group {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .flow-group-header {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        
+        .flow-group-header-spacer {
+            flex: 1;
+        }
+        
+        .delete-group-btn {
+            background: #fff;
+            border: 1px solid #fecaca;
+            color: #ef4444;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            height: 38px;
+        }
+        
+        .delete-group-btn:hover {
+            background-color: #fef2f2;
+        }
+        
+        .flow-group-steps {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .flow-group-empty {
+            grid-column: 1 / -1;
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 13px;
+            padding: 12px 0;
         }
     </style>
 </head>
@@ -493,13 +555,33 @@
     <div id="modalContainer" class="modal-overlay"></div>
 
     <script>
-        // Data management
+        // =========================================================================
+        // DATA MODEL
+        // -------------------------------------------------------------------------
+        // feature = {
+        //   id, name, summary, priority, status, precondition, postcondition,
+        //   basicPath: [ { subject: 'user'|'system', predicate: '', object: '' } ],
+        //   alternativePath: [
+        //     { fromStep: <basic step number>,
+        //       steps: [ { subject, predicate, object } ]  // one or more sequential steps
+        //     }
+        //   ],
+        //   exceptionPath: [ ...same shape as alternativePath... ]
+        // }
+        //
+        // Labeling convention (standard use case spec / RUP-style):
+        //   Basic Path        -> 1, 2, 3, 4, ...
+        //   Alternative/Exception flow group branching from step 4
+        //                     -> 4A (first group), 4B (second group), ...
+        //   Steps inside a group -> 4A.1, 4A.2, 4A.3, ...
+        // =========================================================================
+        
         let features = [];
         let currentFeatureId = null;
         
-        // =========================================================================
-        // HELPERS: penomoran step & label cabang (A, B, C, ... tidak terbatas)
-        // =========================================================================
+        // -------------------------------------------------------------------------
+        // Letter / label helpers
+        // -------------------------------------------------------------------------
         function letterFromIndex(idx) {
             let n = idx + 1;
             let s = '';
@@ -511,10 +593,11 @@
             return s;
         }
         
-        // items: array angka step acuan (basic step yang jadi cabang)
-        function computeBranchLabels(steps) {
+        // refs: array of basic-step numbers (one per group, in the order groups appear)
+        // returns matching array of labels, e.g. [4,4,7] -> ["4A","4B","7A"]
+        function computeGroupLabels(refs) {
             const counters = {};
-            return steps.map(step => {
+            return refs.map(step => {
                 const key = String(step);
                 if (counters[key] === undefined) counters[key] = 0;
                 const letter = letterFromIndex(counters[key]);
@@ -596,7 +679,7 @@
                         status: item.status || 'Active',
                         precondition: item.precondition || '',
                         postcondition: item.postcondition || '',
-                        basicPath: item.basicPath || [{ subject: 'user', text: '' }],
+                        basicPath: item.basicPath || [{ subject: 'user', predicate: '', object: '' }],
                         alternativePath: item.alternativePath || [],
                         exceptionPath: item.exceptionPath || [],
                         actors: item.actors || []
@@ -628,7 +711,7 @@
                         status: 'Active',
                         precondition: '',
                         postcondition: '',
-                        basicPath: [{ subject: 'user', text: '' }],
+                        basicPath: [{ subject: 'user', predicate: '', object: '' }],
                         alternativePath: [],
                         exceptionPath: [],
                         actors: useCase.actor ? [useCase.actor] : []
@@ -643,7 +726,9 @@
             return Array.from(uniqueFeatures.values());
         }
         
-        // Render features grid
+        // -------------------------------------------------------------------------
+        // Feature completeness / grid rendering
+        // -------------------------------------------------------------------------
         function renderFeaturesGrid() {
             const grid = document.getElementById('featuresGrid');
             
@@ -686,7 +771,14 @@
             updateStatusInfo();
         }
         
-        // Check if a feature is complete
+        // A basic step is valid if predicate or object has content
+        function isStepFilled(step) {
+            if (!step) return false;
+            const predicate = (step.predicate || '').trim();
+            const object = (step.object || '').trim();
+            return predicate !== '' || object !== '';
+        }
+        
         function checkIfFeatureComplete(feature) {
             if (!feature) return false;
             
@@ -694,14 +786,11 @@
             if (!feature.postcondition || feature.postcondition.trim() === '') return false;
             
             if (!feature.basicPath || feature.basicPath.length === 0) return false;
-            const hasValidBasicStep = feature.basicPath.some(step =>
-                step && step.text && step.text.trim() !== ''
-            );
+            const hasValidBasicStep = feature.basicPath.some(isStepFilled);
             
             return hasValidBasicStep;
         }
         
-        // Update status info
         function updateStatusInfo() {
             const totalCount = features.length;
             const completedCount = features.filter(f => checkIfFeatureComplete(f)).length;
@@ -719,7 +808,9 @@
             }
         }
         
-        // Open feature modal
+        // -------------------------------------------------------------------------
+        // Modal
+        // -------------------------------------------------------------------------
         function openFeatureModal(featureId) {
             const feature = features.find(f => f.id === featureId);
             if (!feature) return;
@@ -733,14 +824,13 @@
             
             setupModalListeners();
             
-            // Sinkronkan badge nomor step & pilihan cabang saat modal pertama dibuka
+            // Sync basic step numbering and all branch selectors/labels on first open
             const basicCount = refreshBasicBadges();
-            refreshBranchDropdowns(basicCount);
-            refreshBranchLabels('alternative');
-            refreshBranchLabels('exception');
+            refreshGroupDropdowns(basicCount);
+            refreshGroupLabels('alternative');
+            refreshGroupLabels('exception');
         }
         
-        // Create modal HTML
         function createModalHTML(feature) {
             const basicCount = (feature.basicPath && feature.basicPath.length) ? feature.basicPath.length : 1;
             
@@ -789,9 +879,9 @@
                             <textarea class="form-textarea" id="postcondition" rows="2" placeholder="What will be true after this use case completes...">${feature.postcondition || ''}</textarea>
                         </div>
                         
-                        ${createPathSection('Basic Path', 'basic', feature.basicPath || [{ subject: 'user', text: '' }], true, basicCount)}
-                        ${createPathSection('Alternative Path', 'alternative', feature.alternativePath || [], false, basicCount)}
-                        ${createPathSection('Exception Path', 'exception', feature.exceptionPath || [], false, basicCount)}
+                        ${createBasicPathSection(feature.basicPath || [{ subject: 'user', predicate: '', object: '' }])}
+                        ${createGroupPathSection('Alternative Path', 'alternative', feature.alternativePath || [], basicCount)}
+                        ${createGroupPathSection('Exception Path', 'exception', feature.exceptionPath || [], basicCount)}
                     </div>
                     
                     <div class="modal-footer">
@@ -802,54 +892,35 @@
             `;
         }
         
-        // Create path section HTML
-        // Setiap baris = 1 step. Basic Path bernomor otomatis 1,2,3,4...
-        // Alternative/Exception Path memilih "cabang dari step" lalu diberi
-        // label huruf otomatis (mis. 3A, 3B) di halaman Use Case Spec.
-        function createPathSection(title, type, paths, isRequired, basicStepCount) {
-            const items = (paths && paths.length > 0) ? paths : [{ subject: 'user', text: '' }];
-            const rowsHTML = items.map((item, idx) => buildPathRowHTML(item, type, idx, isRequired, basicStepCount)).join('');
+        // -------------------------------------------------------------------------
+        // Basic Path section (numbered 1, 2, 3, ...)
+        // -------------------------------------------------------------------------
+        function createBasicPathSection(basicPath) {
+            const items = (basicPath && basicPath.length > 0) ? basicPath : [{ subject: 'user', predicate: '', object: '' }];
+            const rowsHTML = items.map((item, idx) => buildBasicRowHTML(item, idx)).join('');
             
             return `
                 <div class="path-section">
-                    <div class="path-section-title">${title} ${isRequired ? '<small style="color: #6b7280;">(At least one step required)</small>' : ''}</div>
-                    <div class="path-container" data-type="${type}" data-basic-count="${basicStepCount}">
+                    <div class="path-section-title">Basic Path <small style="color: #6b7280;">(At least one step required)</small></div>
+                    <div class="path-container" data-type="basic">
                         ${rowsHTML}
                     </div>
-                    <button class="add-path-btn" data-type="${type}">
+                    <button class="add-path-btn" data-type="basic">
                         <span style="font-size: 16px;">+</span>
-                        Add Row
+                        Add Step
                     </button>
                 </div>
             `;
         }
         
-        function buildPathRowHTML(item, type, index, isRequired, basicStepCount) {
+        function buildBasicRowHTML(item, index) {
             const subject = item && item.subject === 'system' ? 'system' : 'user';
-            const text = (item && item.text) || '';
-            const step = (item && item.step) || 1;
-            const isBasic = type === 'basic';
-            
-            const leftCol = isBasic
-                ? `<div class="step-col"><span class="step-badge">${index + 1}</span></div>`
-                : `
-                    <div class="branch-col">
-                        <span class="path-label">Cabang dari Step</span>
-                        <select class="form-select path-branch">
-                            ${Array.from({ length: Math.max(basicStepCount, 1) }, (_, i) => i + 1)
-                                .map(n => `<option value="${n}" ${n === step ? 'selected' : ''}>Step ${n}</option>`)
-                                .join('')}
-                        </select>
-                    </div>
-                    <div class="label-col">
-                        <span class="path-label">Label</span>
-                        <span class="branch-label-badge">-</span>
-                    </div>
-                `;
+            const predicate = (item && item.predicate) || '';
+            const object = (item && item.object) || '';
             
             return `
                 <div class="path-row" data-index="${index}">
-                    ${leftCol}
+                    <div class="step-col"><span class="step-badge">${index + 1}</span></div>
                     <div class="subject-col">
                         <span class="path-label">Subjek</span>
                         <select class="form-select path-subject">
@@ -858,19 +929,121 @@
                         </select>
                     </div>
                     <div class="path-column">
-                        <span class="path-label">Predikat + Objek ${isRequired && index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
-                        <textarea class="form-textarea path-text" rows="2" placeholder="mis. membuka halaman AI Mentor">${text}</textarea>
+                        <span class="path-label">Predikat ${index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                        <textarea class="form-textarea path-predicate" rows="2" placeholder="mis. membuka">${predicate}</textarea>
+                    </div>
+                    <div class="path-column">
+                        <span class="path-label">Objek</span>
+                        <textarea class="form-textarea path-object" rows="2" placeholder="mis. halaman AI Mentor">${object}</textarea>
                     </div>
                     ${index > 0 ? `
                     <div class="delete-col">
-                        <button class="delete-path-btn" data-type="${type}" title="Hapus step">🗑️</button>
+                        <button class="delete-path-btn" data-type="basic" title="Hapus step">🗑️</button>
                     </div>
                     ` : ''}
                 </div>
             `;
         }
         
-        // Beri ulang nomor 1,2,3,... pada Basic Path & kembalikan jumlah barisnya
+        // -------------------------------------------------------------------------
+        // Alternative / Exception Path section — grouped flows
+        // Each group = one branch/alur starting at a given Basic Path step.
+        // A group can contain multiple sequential steps (User -> Sistem -> ...).
+        // A section (Alternative or Exception) can contain multiple groups.
+        // -------------------------------------------------------------------------
+        function createGroupPathSection(title, type, groups, basicStepCount) {
+            const list = (groups && groups.length > 0) ? groups : [];
+            const groupsHTML = list.map((g, gi) => buildGroupHTML(g, type, gi, basicStepCount)).join('');
+            const emptyMsg = list.length === 0
+                ? `<div class="flow-group-empty">Belum ada alur ${title.toLowerCase()}. Klik "+ Add ${title}" untuk menambah cabang baru.</div>`
+                : '';
+            
+            return `
+                <div class="path-section">
+                    <div class="path-section-title">${title}</div>
+                    <div class="group-container" data-type="${type}" data-basic-count="${basicStepCount}">
+                        ${groupsHTML}
+                        ${emptyMsg}
+                    </div>
+                    <button class="add-group-btn" data-type="${type}">
+                        <span style="font-size: 16px;">+</span>
+                        Add ${title}
+                    </button>
+                </div>
+            `;
+        }
+        
+        function buildGroupHTML(group, type, groupIndex, basicStepCount) {
+            const fromStep = (group && group.fromStep) || 1;
+            const steps = (group && group.steps && group.steps.length > 0) ? group.steps : [{ subject: 'user', predicate: '', object: '' }];
+            const stepsHTML = steps.map((s, si) => buildGroupStepRowHTML(s, si)).join('');
+            
+            return `
+                <div class="flow-group" data-group-index="${groupIndex}">
+                    <div class="flow-group-header">
+                        <div class="branch-col">
+                            <span class="path-label">Cabang dari Step</span>
+                            <select class="form-select group-from-step">
+                                ${Array.from({ length: Math.max(basicStepCount, 1) }, (_, i) => i + 1)
+                                    .map(n => `<option value="${n}" ${n === fromStep ? 'selected' : ''}>Step ${n}</option>`)
+                                    .join('')}
+                            </select>
+                        </div>
+                        <div class="label-col">
+                            <span class="path-label">Label</span>
+                            <span class="branch-label-badge">-</span>
+                        </div>
+                        <div class="flow-group-header-spacer"></div>
+                        <button class="delete-group-btn" data-type="${type}" title="Hapus seluruh alur ini">🗑️ Hapus Alur</button>
+                    </div>
+                    <div class="flow-group-steps">
+                        ${stepsHTML}
+                    </div>
+                    <button class="add-step-btn" data-type="${type}">
+                        <span style="font-size: 16px;">+</span>
+                        Add Step in this Flow
+                    </button>
+                </div>
+            `;
+        }
+        
+        function buildGroupStepRowHTML(step, index) {
+            const subject = step && step.subject === 'system' ? 'system' : 'user';
+            const predicate = (step && step.predicate) || '';
+            const object = (step && step.object) || '';
+            
+            return `
+                <div class="path-row" data-step-index="${index}">
+                    <div class="step-col"><span class="step-badge sub-step-badge">-</span></div>
+                    <div class="subject-col">
+                        <span class="path-label">Subjek</span>
+                        <select class="form-select path-subject">
+                            <option value="user" ${subject === 'user' ? 'selected' : ''}>👤 User</option>
+                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 Sistem</option>
+                        </select>
+                    </div>
+                    <div class="path-column">
+                        <span class="path-label">Predikat</span>
+                        <textarea class="form-textarea path-predicate" rows="2" placeholder="mis. memasukkan">${predicate}</textarea>
+                    </div>
+                    <div class="path-column">
+                        <span class="path-label">Objek</span>
+                        <textarea class="form-textarea path-object" rows="2" placeholder="mis. data yang tidak valid">${object}</textarea>
+                    </div>
+                    ${index > 0 ? `
+                    <div class="delete-col">
+                        <button class="delete-step-btn" title="Hapus step">🗑️</button>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        // -------------------------------------------------------------------------
+        // Renumbering / relabeling
+        // -------------------------------------------------------------------------
+        
+        // Renumber Basic Path badges 1,2,3,... and return the count
         function refreshBasicBadges() {
             const container = document.querySelector('.path-container[data-type="basic"]');
             if (!container) return 1;
@@ -883,14 +1056,14 @@
             return rows.length || 1;
         }
         
-        // Perbarui pilihan "Cabang dari Step" di Alternative/Exception sesuai
-        // jumlah step Basic Path yang terkini
-        function refreshBranchDropdowns(basicCount) {
+        // Update "Cabang dari Step" dropdown options in Alternative/Exception groups
+        // to match the current number of Basic Path steps
+        function refreshGroupDropdowns(basicCount) {
             ['alternative', 'exception'].forEach(type => {
-                const container = document.querySelector(`.path-container[data-type="${type}"]`);
+                const container = document.querySelector(`.group-container[data-type="${type}"]`);
                 if (!container) return;
                 container.setAttribute('data-basic-count', basicCount);
-                container.querySelectorAll('.path-branch').forEach(select => {
+                container.querySelectorAll('.group-from-step').forEach(select => {
                     const currentVal = parseInt(select.value) || 1;
                     const options = Array.from({ length: Math.max(basicCount, 1) }, (_, i) => i + 1);
                     const keepVal = options.includes(currentVal) ? currentVal : options[options.length - 1];
@@ -901,21 +1074,31 @@
             });
         }
         
-        // Hitung ulang label cabang (3A, 3B, ...) sesuai urutan baris & step yang dipilih
-        function refreshBranchLabels(type) {
-            const container = document.querySelector(`.path-container[data-type="${type}"]`);
+        // Recompute group labels (4A, 4B, ...) and sub-step labels (4A.1, 4A.2, ...)
+        function refreshGroupLabels(type) {
+            const container = document.querySelector(`.group-container[data-type="${type}"]`);
             if (!container) return;
-            const rows = Array.from(container.querySelectorAll('.path-row'));
-            const steps = rows.map(row => parseInt(row.querySelector('.path-branch')?.value || '1'));
-            const labels = computeBranchLabels(steps);
-            rows.forEach((row, i) => {
-                const badge = row.querySelector('.branch-label-badge');
-                if (badge) badge.textContent = labels[i];
+            const groupEls = Array.from(container.querySelectorAll('.flow-group'));
+            const refs = groupEls.map(g => parseInt(g.querySelector('.group-from-step')?.value || '1'));
+            const labels = computeGroupLabels(refs);
+            
+            groupEls.forEach((groupEl, gi) => {
+                groupEl.setAttribute('data-group-index', gi);
+                const labelBadge = groupEl.querySelector('.branch-label-badge');
+                if (labelBadge) labelBadge.textContent = labels[gi];
+                
+                const stepRows = groupEl.querySelectorAll('.path-row');
+                stepRows.forEach((row, si) => {
+                    row.setAttribute('data-step-index', si);
+                    const subBadge = row.querySelector('.sub-step-badge');
+                    if (subBadge) subBadge.textContent = `${labels[gi]}.${si + 1}`;
+                });
             });
         }
         
-        // Setup modal event listeners (pakai event delegation supaya baris
-        // yang ditambah/dihapus secara dinamis tetap otomatis ke-handle)
+        // -------------------------------------------------------------------------
+        // Event delegation
+        // -------------------------------------------------------------------------
         function setupModalListeners() {
             const modalContainer = document.getElementById('modalContainer');
             
@@ -935,45 +1118,103 @@
                     return;
                 }
                 
+                // Add a step to Basic Path
                 if (e.target.closest('.add-path-btn')) {
                     const btn = e.target.closest('.add-path-btn');
-                    const type = btn.getAttribute('data-type');
+                    const type = btn.getAttribute('data-type'); // 'basic'
                     const container = document.querySelector(`.path-container[data-type="${type}"]`);
                     const rowCount = container.querySelectorAll('.path-row').length;
-                    const basicCount = type === 'basic'
-                        ? rowCount + 1
-                        : parseInt(container.getAttribute('data-basic-count') || '1');
                     
-                    container.insertAdjacentHTML('beforeend', buildPathRowHTML({ subject: 'user', text: '' }, type, rowCount, false, basicCount));
+                    container.insertAdjacentHTML('beforeend', buildBasicRowHTML({ subject: 'user', predicate: '', object: '' }, rowCount));
                     
-                    if (type === 'basic') {
-                        const newCount = refreshBasicBadges();
-                        refreshBranchDropdowns(newCount);
-                    }
-                    refreshBranchLabels('alternative');
-                    refreshBranchLabels('exception');
+                    const newCount = refreshBasicBadges();
+                    refreshGroupDropdowns(newCount);
+                    refreshGroupLabels('alternative');
+                    refreshGroupLabels('exception');
                     return;
                 }
                 
+                // Delete a Basic Path step
                 if (e.target.closest('.delete-path-btn')) {
                     const btn = e.target.closest('.delete-path-btn');
-                    const type = btn.getAttribute('data-type');
                     const row = btn.closest('.path-row');
-                    deletePathRow(type, row);
+                    deleteBasicRow(row);
+                    return;
+                }
+                
+                // Add a new flow group (branch) to Alternative/Exception
+                if (e.target.closest('.add-group-btn')) {
+                    const btn = e.target.closest('.add-group-btn');
+                    const type = btn.getAttribute('data-type');
+                    const container = document.querySelector(`.group-container[data-type="${type}"]`);
+                    const emptyMsg = container.querySelector('.flow-group-empty');
+                    if (emptyMsg) emptyMsg.remove();
+                    
+                    const basicCount = parseInt(container.getAttribute('data-basic-count') || '1');
+                    const groupIndex = container.querySelectorAll('.flow-group').length;
+                    
+                    container.insertAdjacentHTML('beforeend', buildGroupHTML(
+                        { fromStep: basicCount, steps: [{ subject: 'user', predicate: '', object: '' }] },
+                        type, groupIndex, basicCount
+                    ));
+                    
+                    refreshGroupLabels(type);
+                    return;
+                }
+                
+                // Delete an entire flow group
+                if (e.target.closest('.delete-group-btn')) {
+                    const btn = e.target.closest('.delete-group-btn');
+                    const type = btn.getAttribute('data-type');
+                    const groupEl = btn.closest('.flow-group');
+                    groupEl.remove();
+                    
+                    const container = document.querySelector(`.group-container[data-type="${type}"]`);
+                    if (container && container.querySelectorAll('.flow-group').length === 0) {
+                        const title = type === 'alternative' ? 'Alternative Path' : 'Exception Path';
+                        container.insertAdjacentHTML('beforeend', `<div class="flow-group-empty">Belum ada alur ${title.toLowerCase()}. Klik "+ Add ${title}" untuk menambah cabang baru.</div>`);
+                    }
+                    
+                    refreshGroupLabels(type);
+                    return;
+                }
+                
+                // Add a step inside a specific flow group
+                if (e.target.closest('.add-step-btn')) {
+                    const btn = e.target.closest('.add-step-btn');
+                    const type = btn.getAttribute('data-type');
+                    const groupEl = btn.closest('.flow-group');
+                    const stepsContainer = groupEl.querySelector('.flow-group-steps');
+                    const stepCount = stepsContainer.querySelectorAll('.path-row').length;
+                    
+                    stepsContainer.insertAdjacentHTML('beforeend', buildGroupStepRowHTML({ subject: 'system', predicate: '', object: '' }, stepCount));
+                    
+                    refreshGroupLabels(type);
+                    return;
+                }
+                
+                // Delete a step inside a flow group
+                if (e.target.closest('.delete-step-btn')) {
+                    const btn = e.target.closest('.delete-step-btn');
+                    const groupEl = btn.closest('.flow-group');
+                    const row = btn.closest('.path-row');
+                    const container = groupEl.closest('.group-container');
+                    const type = container.getAttribute('data-type');
+                    row.remove();
+                    refreshGroupLabels(type);
                     return;
                 }
             });
             
             modalContainer.addEventListener('change', function(e) {
-                if (e.target.classList.contains('path-branch')) {
-                    const type = e.target.closest('.path-container').getAttribute('data-type');
-                    refreshBranchLabels(type);
+                if (e.target.classList.contains('group-from-step')) {
+                    const type = e.target.closest('.group-container').getAttribute('data-type');
+                    refreshGroupLabels(type);
                 }
             });
         }
         
-        // Delete a path row
-        function deletePathRow(type, rowElement) {
+        function deleteBasicRow(rowElement) {
             if (!rowElement) return;
             const container = rowElement.closest('.path-container');
             rowElement.remove();
@@ -983,22 +1224,21 @@
                 row.setAttribute('data-index', newIndex);
             });
             
-            if (type === 'basic') {
-                const newCount = refreshBasicBadges();
-                refreshBranchDropdowns(newCount);
-            }
-            refreshBranchLabels('alternative');
-            refreshBranchLabels('exception');
+            const newCount = refreshBasicBadges();
+            refreshGroupDropdowns(newCount);
+            refreshGroupLabels('alternative');
+            refreshGroupLabels('exception');
         }
         
-        // Close modal
         function closeModal() {
             const modalContainer = document.getElementById('modalContainer');
             modalContainer.classList.remove('active');
             currentFeatureId = null;
         }
         
-        // Save feature data
+        // -------------------------------------------------------------------------
+        // Save
+        // -------------------------------------------------------------------------
         async function saveFeature() {
             const featureId = document.getElementById('featureId').value;
             const feature = features.find(f => f.id === featureId);
@@ -1026,32 +1266,41 @@
                 return;
             }
             
-            // Collect path data: setiap baris = { subject, text, step? }
-            ['basic', 'alternative', 'exception'].forEach(type => {
-                const container = document.querySelector(`.path-container[data-type="${type}"]`);
-                const rows = container.querySelectorAll('.path-row');
-                const paths = [];
-                
-                rows.forEach(row => {
-                    const subject = row.querySelector('.path-subject').value;
-                    const text = row.querySelector('.path-text').value.trim();
-                    const item = { subject, text };
-                    
-                    if (type !== 'basic') {
-                        const branchSelect = row.querySelector('.path-branch');
-                        item.step = parseInt(branchSelect ? branchSelect.value : '1') || 1;
-                    }
-                    
-                    paths.push(item);
+            // Collect Basic Path
+            const basicContainer = document.querySelector('.path-container[data-type="basic"]');
+            const basicPath = [];
+            basicContainer.querySelectorAll('.path-row').forEach(row => {
+                basicPath.push({
+                    subject: row.querySelector('.path-subject').value,
+                    predicate: row.querySelector('.path-predicate').value.trim(),
+                    object: row.querySelector('.path-object').value.trim()
                 });
-                
-                feature[`${type}Path`] = paths;
+            });
+            feature.basicPath = basicPath;
+            
+            // Collect Alternative / Exception groups
+            ['alternative', 'exception'].forEach(type => {
+                const groupContainer = document.querySelector(`.group-container[data-type="${type}"]`);
+                const groups = [];
+                groupContainer.querySelectorAll('.flow-group').forEach(groupEl => {
+                    const fromStep = parseInt(groupEl.querySelector('.group-from-step').value) || 1;
+                    const steps = [];
+                    groupEl.querySelectorAll('.path-row').forEach(row => {
+                        steps.push({
+                            subject: row.querySelector('.path-subject').value,
+                            predicate: row.querySelector('.path-predicate').value.trim(),
+                            object: row.querySelector('.path-object').value.trim()
+                        });
+                    });
+                    groups.push({ fromStep, steps });
+                });
+                feature[`${type}Path`] = groups;
             });
             
-            const hasValidBasicStep = feature.basicPath.some(step => step.text && step.text.trim() !== '');
+            const hasValidBasicStep = feature.basicPath.some(isStepFilled);
             
             if (!hasValidBasicStep) {
-                alert('Basic Path must have at least one step with text filled in');
+                alert('Basic Path must have at least one step with Predikat/Objek filled in');
                 return;
             }
             
