@@ -28,6 +28,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 # Parse ALLOWED_HOSTS dari env var (comma-separated)
 _raw_hosts = config('ALLOWED_HOSTS', default='127.0.0.1,localhost')
 ALLOWED_HOSTS = [h.strip() for h in _raw_hosts.split(',') if h.strip()]
+ALLOWED_HOSTS.extend(['.vercel.app', 'srs-generator-tools.vercel.app'])
 
 # ============================================================
 # INSTALLED APPS
