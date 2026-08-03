@@ -431,12 +431,64 @@
         let allFeatures = [];
         let featuresLoaded = false;
 
+        // =====================================================================
+        // NORMALISASI DATA
+        // Semua field yang punya kemungkinan penamaan berbeda dari halaman
+        // sebelumnya (use_case_spec.html / input-informasi-tambahan) disatukan
+        // di sini, supaya seluruh fungsi di bawah cukup pakai satu nama saja.
+        // Ini titik utama perbaikan dari hasil review sebelumnya.
+        // =====================================================================
+        function normalizeFeature(feature, index) {
+            const norm = Object.assign({}, feature);
+
+            norm.featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
+            norm.actorName = feature.actorName || feature.actor || feature.actorSubject || 'Actor';
+            norm.summary = feature.summary || feature.description || '';
+            norm.priority = feature.priority || 'Should Have';
+            norm.status = feature.status || 'Active';
+            norm.precondition = feature.precondition || feature.preCondition || '';
+            norm.postcondition = feature.postcondition || feature.postCondition || '';
+
+            function normalizeBasicPath(path) {
+                return (Array.isArray(path) ? path : []).map(step => ({
+                    actor: (step.actor || step.actorAction || '').toString(),
+                    system: (step.system || step.systemResponse || '').toString(),
+                    step: step.step != null ? step.step : (step.stepRef != null ? step.stepRef : null)
+                }));
+            }
+            
+            function normalizeGroupedPath(paths) {
+                if (!Array.isArray(paths)) return [];
+                if (paths.length > 0 && paths[0] && (paths[0].actor !== undefined || paths[0].actorAction !== undefined)) {
+                    return [{
+                        fromStep: 1,
+                        steps: normalizeBasicPath(paths)
+                    }];
+                }
+                return paths.map(group => ({
+                    fromStep: parseInt(group.fromStep) || 1,
+                    steps: normalizeBasicPath(group.steps)
+                }));
+            }
+
+            norm.basicPath = normalizeBasicPath(feature.basicPath);
+            norm.alternativePath = normalizeGroupedPath(feature.alternativePath);
+            norm.exceptionPath = normalizeGroupedPath(feature.exceptionPath);
+
+            return norm;
+        }
+
+        function normalizeAllFeatures(rawFeatures) {
+            return (rawFeatures || []).map((f, i) => normalizeFeature(f, i));
+        }
+
         function loadDataFromDjango() {
             const allFeaturesRaw = '{{ all_features|escapejs }}';
 
             if (allFeaturesRaw && allFeaturesRaw !== '[]' && allFeaturesRaw !== 'None') {
                 try {
-                    allFeatures = JSON.parse(allFeaturesRaw);
+                    const parsed = JSON.parse(allFeaturesRaw);
+                    allFeatures = normalizeAllFeatures(parsed);
                     console.log("Data loaded from Django:", allFeatures.length, "features");
                     return true;
                 } catch (e) {
@@ -450,7 +502,9 @@
             const sessionData = sessionStorage.getItem('all_use_case_data');
             if (sessionData) {
                 try {
-                    allFeatures = JSON.parse(sessionData);
+                    const parsed = JSON.parse(sessionData);
+                    const asArray = Array.isArray(parsed) ? parsed : Object.values(parsed);
+                    allFeatures = normalizeAllFeatures(asArray);
                     console.log("Data loaded from sessionStorage:", allFeatures.length, "features");
                     return true;
                 } catch (e) {
@@ -465,11 +519,10 @@
             if (localData) {
                 try {
                     const parsed = JSON.parse(localData);
-                    if (typeof parsed === 'object' && !Array.isArray(parsed)) {
-                        allFeatures = Object.values(parsed);
-                    } else {
-                        allFeatures = parsed;
-                    }
+                    const asArray = (typeof parsed === 'object' && !Array.isArray(parsed))
+                        ? Object.values(parsed)
+                        : parsed;
+                    allFeatures = normalizeAllFeatures(asArray);
                     console.log("Data loaded from localStorage:", allFeatures.length, "features");
                     return true;
                 } catch (e) {
@@ -486,7 +539,8 @@
             if (encodedData) {
                 try {
                     const decodedData = decodeURIComponent(encodedData);
-                    allFeatures = JSON.parse(decodedData);
+                    const parsed = JSON.parse(decodedData);
+                    allFeatures = normalizeAllFeatures(parsed);
                     console.log("Data loaded from URL:", allFeatures.length, "features");
                     return true;
                 } catch (e) {
@@ -507,7 +561,7 @@
             for (const source of sources) {
                 if (source.func()) {
                     console.log(`Successfully loaded data from ${source.name}`);
-                    console.log("Sample feature:", allFeatures[0]);
+                    console.log("Sample feature (normalized):", allFeatures[0]);
                     return true;
                 }
             }
@@ -530,16 +584,19 @@
             if (name.includes("save") || name.includes("simpan") || name.includes("tambah") || name.includes("create")) return "Data valid?";
 
             if (exceptionSteps.length > 0) {
-                const firstStepActor = (exceptionSteps[0].actor || exceptionSteps[0].actorAction || "").toLowerCase();
+                const firstStepActor = (exceptionSteps[0].actor || "").toLowerCase();
                 if (firstStepActor.includes("input") || firstStepActor.includes("isi")) return "Input valid?";
             }
             return "Proses berhasil?";
         }
 
+        // Catatan: sejak data dinormalisasi lewat normalizeFeature(), seluruh
+        // step di basicPath/alternativePath/exceptionPath sudah pasti punya
+        // field .actor dan .system (bukan lagi .actorAction/.systemResponse).
         function generatePlantUML(feature) {
-            const featureName = feature.featureName || feature.name || "Untitled Feature";
-            const precondition = feature.precondition || feature.preCondition || "";
-            const postcondition = feature.postcondition || feature.postCondition || "";
+            const featureName = feature.featureName || "Untitled Feature";
+            const precondition = feature.precondition || "";
+            const postcondition = feature.postcondition || "";
             const basicPath = Array.isArray(feature.basicPath) ? feature.basicPath : [];
             const alternativePath = Array.isArray(feature.alternativePath) ? feature.alternativePath : [];
             const exceptionPath = Array.isArray(feature.exceptionPath) ? feature.exceptionPath : [];
@@ -549,13 +606,13 @@
             plantUML += `title "${featureName}"\n\n`;
             plantUML += "|Actor|\n|System|\n\n";
 
+            let currentSwimlane = "Actor";
             let initialSwimlane = "Actor";
             if (basicPath.length > 0) {
                 const firstStep = basicPath[0];
-                const firstActor = firstStep.actor || firstStep.actorAction || "";
-                const firstSystem = firstStep.system || firstStep.systemResponse || "";
-                if ((!firstActor || firstActor.trim() === "" || firstActor === "-") &&
-                    (firstSystem && firstSystem.trim() !== "" && firstSystem !== "-")) {
+                const firstActor = (firstStep.actor || "").trim();
+                const firstSystem = (firstStep.system || "").trim();
+                if ((!firstActor || firstActor === "-") && (firstSystem && firstSystem !== "-")) {
                     initialSwimlane = "System";
                 }
             }
@@ -564,25 +621,22 @@
             currentSwimlane = initialSwimlane;
             plantUML += "start\n\n";
 
+            function switchSwimlane(target) {
+                if (currentSwimlane !== target) {
+                    currentSwimlane = target;
+                    return `|${target}|\n`;
+                }
+                return "";
+            }
+
             if (precondition && precondition.trim() !== "" && precondition !== "-") {
                 plantUML += `:Pre-condition: ${precondition.trim()};\n\n`;
             }
 
-            const firstBasicActorText = ((basicPath[0]?.actor || basicPath[0]?.actorAction || "") + "").trim().toLowerCase();
-
-            let basicSteps = [...basicPath];
-            let successStep = null;
-            const hasException = exceptionPath.some(s => (s.actor || s.system || s.actorAction || s.systemResponse));
-            const hasAlternative = alternativePath.some(s => (s.actor || s.system || s.actorAction || s.systemResponse));
-
-            if ((hasException || hasAlternative) && basicSteps.length > 1) {
-                successStep = basicSteps.pop();
-            }
-
             function appendSteps(steps, indent = "") {
                 steps.forEach(step => {
-                    const actorAction = (step.actor || step.actorAction || "").trim();
-                    const systemResponse = (step.system || step.systemResponse || "").trim();
+                    const actorAction = (step.actor || "").trim();
+                    const systemResponse = (step.system || "").trim();
                     if (actorAction && actorAction !== "-") {
                         plantUML += switchSwimlane("Actor") + `${indent}:${actorAction};\n`;
                     }
@@ -592,77 +646,65 @@
                 });
             }
 
-            if (hasException) {
-                const guard = getGuardCondition(featureName, exceptionPath);
-
-                const isRetryFlow = exceptionPath.some(step => {
-                    const a = (step.actor || step.actorAction || "").trim().toLowerCase();
-                    return (firstBasicActorText && a === firstBasicActorText) || /kembali|ulang|retry/i.test(a);
-                });
-
-                if (isRetryFlow) {
-                    plantUML += "repeat\n";
-                    appendSteps(basicSteps, "  ");
-
-                    const differingLabels = [];
-                    exceptionPath.forEach(step => {
-                        const a = (step.actor || step.actorAction || "").trim();
-                        const s = (step.system || step.systemResponse || "").trim();
-                        const isRepeatOfStart = a && a.toLowerCase() === firstBasicActorText;
-
-                        if (s && s !== "-") differingLabels.push(s);
-                        if (a && a !== "-" && !isRepeatOfStart) differingLabels.push(a);
-                    });
-
-                    if (differingLabels.length > 0) {
-                        plantUML += `backward:${differingLabels.join("\\n")};\n`;
-                    } else {
-                        plantUML += "backward:retry;\n";
-                    }
-
-                    plantUML += `repeat while (${guard}) is (no)\n`;
-                    plantUML += "->yes;\n";
-                    if (successStep) appendSteps([successStep]);
+            function renderStep(stepIndex, branchIndex = 0) {
+                if (stepIndex >= basicPath.length) {
                     if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
-                        plantUML += switchSwimlane("System") + `:Post-condition: ${postcondition.trim()};\n`;
+                        plantUML += switchSwimlane(currentSwimlane) + `:Post-condition: ${postcondition.trim()};\n`;
                     }
                     plantUML += "stop\n";
+                    return;
+                }
 
-                } else {
-                    appendSteps(basicSteps);
-                    plantUML += switchSwimlane("System") + `if (${guard}) then (yes)\n`;
-                    if (successStep) appendSteps([successStep]);
-                    if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
-                        plantUML += switchSwimlane("System") + `:Post-condition: ${postcondition.trim()};\n`;
+                const step = basicPath[stepIndex];
+                const stepNum = stepIndex + 1;
+                
+                if (branchIndex === 0) {
+                    appendSteps([step]);
+                }
+                
+                const alts = alternativePath.filter(g => g.fromStep === stepNum);
+                const excs = exceptionPath.filter(g => g.fromStep === stepNum);
+                
+                const allBranches = [];
+                alts.forEach((a, idx) => allBranches.push({type: 'Alternatif', label: `Alt ${idx+1}`, branch: a}));
+                excs.forEach((e, idx) => allBranches.push({type: 'Exception', label: `Exc ${idx+1}`, branch: e}));
+                
+                if (branchIndex < allBranches.length) {
+                    const b = allBranches[branchIndex]; 
+                    let conditionStr = `Kondisi ${b.type}?`;
+                    const firstStep = b.branch.steps && b.branch.steps.length > 0 ? b.branch.steps[0] : null;
+                    let branchGoesToActor = false;
+                    
+                    if (firstStep) {
+                        const actorTxt = (firstStep.actor || "").trim();
+                        const systemTxt = (firstStep.system || "").trim();
+                        if (actorTxt && actorTxt !== "-") branchGoesToActor = true;
+                        
+                        let firstAction = actorTxt && actorTxt !== "-" ? actorTxt : (systemTxt && systemTxt !== "-" ? systemTxt : "");
+                        if (firstAction) {
+                            if (firstAction.length > 40) firstAction = firstAction.substring(0, 40) + "...";
+                            conditionStr = firstAction + "?";
+                        }
+                    }
+                    
+                    plantUML += switchSwimlane("System"); // Selalu di System sesuai permintaan user
+                    
+                    plantUML += `if (${conditionStr}) then (yes)\n`;
+                    appendSteps(b.branch.steps, "  ");
+                    if (b.type === 'Alternatif' && postcondition && postcondition.trim() !== "" && postcondition !== "-") {
+                        plantUML += switchSwimlane(currentSwimlane) + `  :Post-condition: ${postcondition.trim()};\n`;
                     }
                     plantUML += "  stop\n";
-                    plantUML += "else (no)\n";
-                    appendSteps(exceptionPath, "  ");
-                    plantUML += "  stop\n";
-                    plantUML += "endif\n";
+                    plantUML += switchSwimlane("System") + `else (no)\n`;
+                    plantUML += `endif\n`;
+                    
+                    renderStep(stepIndex, branchIndex + 1);
+                } else {
+                    renderStep(stepIndex + 1, 0);
                 }
-
-            } else if (hasAlternative) {
-                appendSteps(basicSteps);
-                const altGuard = "Kondisi alternatif terpenuhi?";
-                plantUML += switchSwimlane("System") + `if (${altGuard}) then (yes)\n`;
-                appendSteps(alternativePath, "  ");
-                plantUML += "else (no)\n";
-                if (successStep) appendSteps([successStep]);
-                plantUML += "endif\n";
-                if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
-                    plantUML += switchSwimlane("System") + `:Post-condition: ${postcondition.trim()};\n`;
-                }
-                plantUML += "stop\n";
-
-            } else {
-                appendSteps(basicSteps);
-                if (successStep) appendSteps([successStep]);
-                if (postcondition && postcondition.trim() !== "" && postcondition !== "-") {
-                    plantUML += switchSwimlane(currentSwimlane) + `:Post-condition: ${postcondition.trim()};\n`;
-                }
-                plantUML += "stop\n";
             }
+
+            renderStep(0, 0);
 
             plantUML += "@enduml";
             return plantUML;
@@ -695,8 +737,8 @@
             let html = '';
 
             features.forEach((feature, index) => {
-                const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
-                const summary = feature.summary || feature.description || '';
+                const featureName = feature.featureName || `Use Case ${index + 1}`;
+                const summary = feature.summary || '';
                 const priority = feature.priority || 'Should Have';
                 const status = feature.status || 'Active';
 
@@ -723,11 +765,11 @@
                         <div class="feature-info">
                             <div class="info-item">
                                 <span class="info-label">Pre-Condition</span>
-                                <span class="info-value">${feature.precondition || feature.preCondition || 'None'}</span>
+                                <span class="info-value">${feature.precondition || 'None'}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Post-Condition</span>
-                                <span class="info-value">${feature.postcondition || feature.postCondition || 'None'}</span>
+                                <span class="info-value">${feature.postcondition || 'None'}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Total Steps</span>
@@ -800,7 +842,7 @@
                     let currentCount = parseInt(completedCountEl.textContent);
                     completedCountEl.textContent = currentCount + 1;
 
-                    const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
+                    const featureName = feature.featureName || `Use Case ${index + 1}`;
                     saveActivityDiagramToDatabase(featureName, plantUMLCode, imageUrl);
                 };
 
@@ -891,7 +933,7 @@
             const image = document.getElementById(`image-${index}`);
             if (image && image.src && image.style.display !== 'none') {
                 const feature = allFeatures[index];
-                const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
+                const featureName = feature.featureName || `diagram_${index + 1}`;
                 const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
                 const a = document.createElement('a');
@@ -911,7 +953,7 @@
             const image = document.getElementById(`image-${index}`);
             if (image && image.dataset.plantuml) {
                 const feature = allFeatures[index];
-                const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
+                const featureName = feature.featureName || `diagram_${index + 1}`;
                 const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 const plantUMLCode = image.dataset.plantuml;
 
@@ -941,7 +983,7 @@
                 allFeatures.forEach((feature, index) => {
                     const image = document.getElementById(`image-${index}`);
                     if (image && image.src && image.style.display !== 'none') {
-                        const featureName = feature.featureName || feature.name || `diagram_${index + 1}`;
+                        const featureName = feature.featureName || `diagram_${index + 1}`;
                         const safeFileName = featureName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
 
                         const a = document.createElement('a');
@@ -967,7 +1009,7 @@
 
             allFeatures.forEach((feature, index) => {
                 const plantUMLCode = generatePlantUML(feature);
-                const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
+                const featureName = feature.featureName || `Use Case ${index + 1}`;
 
                 allPlantUML += `' ==============================\n`;
                 allPlantUML += `' Feature: ${featureName}\n`;

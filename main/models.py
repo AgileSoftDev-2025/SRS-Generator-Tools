@@ -162,14 +162,18 @@ class BasicPath(models.Model):
 
 class AlternativePath(models.Model):
     usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='alternative_paths')
-    step_number = models.IntegerField() # Ini buat nyimpen urutan baris
+    step_number = models.IntegerField() # Urutan langkah di dalam grup/cabang
+    group_index = models.IntegerField(default=0) # Index grup percabangan
+    from_step = models.IntegerField(default=1) # Step BasicPath darimana cabang ini bermula
     
     actor_action = models.TextField(null=True, blank=True)
     system_response = models.TextField(null=True, blank=True)
 
 class ExceptionPath(models.Model):
     usecase_spec = models.ForeignKey(UseCaseSpecification, on_delete=models.CASCADE, related_name='exception_paths')
-    step_number = models.IntegerField()
+    step_number = models.IntegerField() # Urutan langkah di dalam grup/cabang
+    group_index = models.IntegerField(default=0) # Index grup percabangan
+    from_step = models.IntegerField(default=1) # Step BasicPath darimana cabang ini bermula
     
     actor_action = models.TextField(null=True, blank=True)
     system_response = models.TextField(null=True, blank=True)

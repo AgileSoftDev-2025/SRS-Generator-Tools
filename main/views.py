@@ -456,8 +456,27 @@ def input_informasi_tambahan(request):
 
     use_cases_list = []
     for spec in specs:
-        def get_paths(path_manager):
-            return [{'actor': p.actor_action or '', 'system': p.system_response or ''} for p in path_manager.all().order_by('step_number')]
+        def get_basic_paths(path_manager):
+            paths = []
+            for p in path_manager.all().order_by('step_number'):
+                subject = 'user' if p.actor_action else 'system'
+                text = p.actor_action if p.actor_action else (p.system_response or '')
+                paths.append({'subject': subject, 'predicate': text, 'object': ''})
+            return paths
+            
+        def get_grouped_paths(path_manager):
+            groups = {}
+            for p in path_manager.all().order_by('group_index', 'step_number'):
+                if p.group_index not in groups:
+                    groups[p.group_index] = {'fromStep': p.from_step, 'steps': []}
+                subject = 'user' if p.actor_action else 'system'
+                text = p.actor_action if p.actor_action else (p.system_response or '')
+                groups[p.group_index]['steps'].append({
+                    'subject': subject,
+                    'predicate': text,
+                    'object': ''
+                })
+            return list(groups.values())
 
         use_cases_list.append({
             'id': spec.id,
@@ -467,9 +486,9 @@ def input_informasi_tambahan(request):
             'status': spec.status,
             'precondition': spec.input_precondition or "",
             'postcondition': spec.input_postcondition or "",
-            'basicPath': get_paths(spec.basic_paths),
-            'alternativePath': get_paths(spec.alternative_paths),
-            'exceptionPath': get_paths(spec.exception_paths),
+            'basicPath': get_basic_paths(spec.basic_paths),
+            'alternativePath': get_grouped_paths(spec.alternative_paths),
+            'exceptionPath': get_grouped_paths(spec.exception_paths),
             'actors': []
         })
 
@@ -506,16 +525,32 @@ def save_usecase_spec(request):
                 spec.exception_paths.all().delete()
 
                 for index, path in enumerate(item.get('basicPath', []), start=1):
-                    if path.get('actor') or path.get('system'):
-                        BasicPath.objects.create(usecase_spec=spec, step_number=index, actor_action=path.get('actor', ''), system_response=path.get('system', ''))
+                    subject = path.get('subject', '')
+                    text = f"{path.get('predicate', '')} {path.get('object', '')}".strip()
+                    actor_action = text if subject == 'user' else path.get('actor', '')
+                    system_response = text if subject == 'system' else path.get('system', '')
+                    if actor_action or system_response:
+                        BasicPath.objects.create(usecase_spec=spec, step_number=index, actor_action=actor_action, system_response=system_response)
 
-                for index, path in enumerate(item.get('alternativePath', []), start=1):
-                    if path.get('actor') or path.get('system'):
-                        AlternativePath.objects.create(usecase_spec=spec, step_number=index, actor_action=path.get('actor', ''), system_response=path.get('system', ''))
+                for group_idx, group in enumerate(item.get('alternativePath', [])):
+                    from_step = group.get('fromStep', 1)
+                    for step_idx, path in enumerate(group.get('steps', []), start=1):
+                        subject = path.get('subject', '')
+                        text = f"{path.get('predicate', '')} {path.get('object', '')}".strip()
+                        actor_action = text if subject == 'user' else path.get('actor', '')
+                        system_response = text if subject == 'system' else path.get('system', '')
+                        if actor_action or system_response:
+                            AlternativePath.objects.create(usecase_spec=spec, group_index=group_idx, from_step=from_step, step_number=step_idx, actor_action=actor_action, system_response=system_response)
 
-                for index, path in enumerate(item.get('exceptionPath', []), start=1):
-                    if path.get('actor') or path.get('system'):
-                        ExceptionPath.objects.create(usecase_spec=spec, step_number=index, actor_action=path.get('actor', ''), system_response=path.get('system', ''))
+                for group_idx, group in enumerate(item.get('exceptionPath', [])):
+                    from_step = group.get('fromStep', 1)
+                    for step_idx, path in enumerate(group.get('steps', []), start=1):
+                        subject = path.get('subject', '')
+                        text = f"{path.get('predicate', '')} {path.get('object', '')}".strip()
+                        actor_action = text if subject == 'user' else path.get('actor', '')
+                        system_response = text if subject == 'system' else path.get('system', '')
+                        if actor_action or system_response:
+                            ExceptionPath.objects.create(usecase_spec=spec, group_index=group_idx, from_step=from_step, step_number=step_idx, actor_action=actor_action, system_response=system_response)
 
                 saved_count += 1
 
@@ -584,14 +619,25 @@ def activity_diagram(request):
         'basic_paths', 'alternative_paths', 'exception_paths'
     )
     for spec in specs:
+        def get_grouped_paths_for_ad(path_manager):
+            groups = {}
+            for p in path_manager.all().order_by('group_index', 'step_number'):
+                if p.group_index not in groups:
+                    groups[p.group_index] = {'fromStep': p.from_step, 'steps': []}
+                groups[p.group_index]['steps'].append({
+                    'actor': p.actor_action or '',
+                    'system': p.system_response or ''
+                })
+            return list(groups.values())
+            
         all_features.append({
             'featureName': spec.feature_name,
             'summary': spec.summary_description or '',
             'precondition': spec.input_precondition or '',
             'postcondition': spec.input_postcondition or '',
             'basicPath': [{'actor': p.actor_action or '', 'system': p.system_response or ''} for p in spec.basic_paths.all().order_by('step_number')],
-            'alternativePath': [{'actor': p.actor_action or '', 'system': p.system_response or ''} for p in spec.alternative_paths.all().order_by('step_number')],
-            'exceptionPath': [{'actor': p.actor_action or '', 'system': p.system_response or ''} for p in spec.exception_paths.all().order_by('step_number')],
+            'alternativePath': get_grouped_paths_for_ad(spec.alternative_paths),
+            'exceptionPath': get_grouped_paths_for_ad(spec.exception_paths),
         })
 
     context = {
