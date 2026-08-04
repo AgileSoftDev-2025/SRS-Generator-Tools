@@ -758,7 +758,7 @@
                 const postcondition = feature.postcondition || 'None specified';
                 
                 const actorSubject = feature.actorName || feature.actor || 'User';
-                const systemSubject = 'Sistem';
+                const systemSubject = 'System';
                 
                 const labeledBasic = getLabeledBasicPath(feature.basicPath || []);
                 const labeledAlt = getLabeledGroups(feature.alternativePath || []);
@@ -905,7 +905,7 @@
                                         <div class="column-header"><span class="column-icon">👤</span>User</div>
                                     </th>
                                     <th style="width: 50%;">
-                                        <div class="column-header"><span class="column-icon">💻</span>Sistem</div>
+                                        <div class="column-header"><span class="column-icon">💻</span>System</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -928,7 +928,7 @@
             labeledGroups.forEach(group => {
                 rows += `
                     <tr class="group-header-row">
-                        <td colspan="2">Alur ${group.label} — Cabang dari Step ${group.fromStep}</td>
+                        <td colspan="2">Flow ${group.label} — Branch from Step ${group.fromStep}</td>
                     </tr>
                 `;
                 group.steps.forEach(item => {
@@ -953,7 +953,7 @@
                                         <div class="column-header"><span class="column-icon">👤</span>User</div>
                                     </th>
                                     <th style="width: 50%;">
-                                        <div class="column-header"><span class="column-icon">💻</span>Sistem</div>
+                                        <div class="column-header"><span class="column-icon">💻</span>System</div>
                                     </th>
                                 </tr>
                             </thead>
@@ -1064,7 +1064,7 @@
             let svg = '';
             labeledGroups.forEach(group => {
                 svg += `
-        <text x="80" y="${y}" class="text" font-weight="bold" fill="#3730a3">Alur ${escapeXml(group.label)} — Cabang dari Step ${group.fromStep}</text>`;
+        <text x="80" y="${y}" class="text" font-weight="bold" fill="#3730a3">Flow ${escapeXml(group.label)} — Branch from Step ${group.fromStep}</text>`;
                 y += rowHeight;
                 group.steps.forEach(item => {
                     const isUser = item.subject !== 'system';
@@ -1087,7 +1087,7 @@
         
         function createSVGContent(feature, featureName) {
             const actorSubject = feature.actorName || feature.actor || 'User';
-            const systemSubject = 'Sistem';
+            const systemSubject = 'System';
             
             const labeledBasic = getLabeledBasicPath(feature.basicPath || []);
             const labeledAlt = getLabeledGroups(feature.alternativePath || []);
@@ -1247,7 +1247,7 @@
         
         function groupTextBlock(labeledGroups, actorSubject, systemSubject) {
             return labeledGroups.map(group => {
-                const header = `\nAlur ${group.label} — Cabang dari Step ${group.fromStep}\n${'-'.repeat(50)}`;
+                const header = `\nFlow ${group.label} — Branch from Step ${group.fromStep}\n${'-'.repeat(50)}`;
                 const steps = group.steps.map(item => {
                     const isUser = item.subject !== 'system';
                     const subjectLabel = isUser ? actorSubject : systemSubject;
@@ -1260,7 +1260,7 @@
         
         function createSpecContent(feature, featureName) {
             const actorSubject = feature.actorName || feature.actor || 'User';
-            const systemSubject = 'Sistem';
+            const systemSubject = 'System';
             
             const labeledBasic = getLabeledBasicPath(feature.basicPath || []);
             const labeledAlt = getLabeledGroups(feature.alternativePath || []);
@@ -1331,7 +1331,7 @@ Total Use Cases: ${allFeatures.length}
             allFeatures.forEach((feature, index) => {
                 const featureName = feature.featureName || feature.name || `Use Case ${index + 1}`;
                 const actorSubject = feature.actorName || feature.actor || 'User';
-                const systemSubject = 'Sistem';
+                const systemSubject = 'System';
                 
                 const labeledBasic = getLabeledBasicPath(feature.basicPath || []);
                 const labeledAlt = getLabeledGroups(feature.alternativePath || []);
@@ -1355,7 +1355,7 @@ Total Use Cases: ${allFeatures.length}
                 if (labeledAlt.length > 0) {
                     content += `Alternative Paths:\n`;
                     labeledAlt.forEach(group => {
-                        content += `  Alur ${group.label} (Cabang dari Step ${group.fromStep}):\n`;
+                        content += `  Flow ${group.label} (Branch from Step ${group.fromStep}):\n`;
                         group.steps.forEach(item => {
                             const isUser = item.subject !== 'system';
                             const subjectLabel = isUser ? actorSubject : systemSubject;
@@ -1367,7 +1367,7 @@ Total Use Cases: ${allFeatures.length}
                 if (labeledExc.length > 0) {
                     content += `Exception Paths:\n`;
                     labeledExc.forEach(group => {
-                        content += `  Alur ${group.label} (Cabang dari Step ${group.fromStep}):\n`;
+                        content += `  Flow ${group.label} (Branch from Step ${group.fromStep}):\n`;
                         group.steps.forEach(item => {
                             const isUser = item.subject !== 'system';
                             const subjectLabel = isUser ? actorSubject : systemSubject;
@@ -1526,7 +1526,7 @@ Total Use Cases: ${allFeatures.length}
                             <div style="text-align: left; background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
                                 <p style="color: #374151; margin-bottom: 8px; font-weight: 500;">Possible solutions:</p>
                                 <ol style="color: #6b7280; padding-left: 20px; margin-bottom: 0;">
-                                    <li>Go back to <a href="/input-informasi-tambahan/" style="color: #111827; text-decoration: underline;">Input Informasi Tambahan</a></li>
+                                    <li>Go back to <a href="/input-informasi-tambahan/" style="color: #111827; text-decoration: underline;">Additional Information Input</a></li>
                                     <li>Complete all forms and click "Next"</li>
                                     <li>Check browser console (F12) for errors</li>
                                 </ol>

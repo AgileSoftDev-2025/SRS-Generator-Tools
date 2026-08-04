@@ -587,7 +587,7 @@
                 const firstStepActor = (exceptionSteps[0].actor || "").toLowerCase();
                 if (firstStepActor.includes("input") || firstStepActor.includes("isi")) return "Input valid?";
             }
-            return "Proses berhasil?";
+            return "Process successful?";
         }
 
         // Catatan: sejak data dinormalisasi lewat normalizeFeature(), seluruh
@@ -671,7 +671,7 @@
                 
                 if (branchIndex < allBranches.length) {
                     const b = allBranches[branchIndex]; 
-                    let conditionStr = `Kondisi ${b.type}?`;
+                    let conditionStr = `Condition ${b.type}?`;
                     const firstStep = b.branch.steps && b.branch.steps.length > 0 ? b.branch.steps[0] : null;
                     let branchGoesToActor = false;
                     

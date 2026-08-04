@@ -156,12 +156,16 @@ function buildFeatureCard(feat, num, container) {
   const altAB = cfg.alt_actor_boundary || '';
   const altBS = cfg.alt_boundary_self || '';
   const altBC = cfg.alt_boundary_ctrl || '';
+  const altCS = cfg.alt_ctrl_self || '';
+  const altCE = cfg.alt_ctrl_entity || '';
   const altRes = cfg.alt_response || '';
 
   const excCond = cfg.exc_condition || '';
   const excAB = cfg.exc_actor_boundary || '';
   const excBS = cfg.exc_boundary_self || '';
   const excBC = cfg.exc_boundary_ctrl || '';
+  const excCS = cfg.exc_ctrl_self || '';
+  const excCE = cfg.exc_ctrl_entity || '';
   const excRes = cfg.exc_response || '';
 
   const card = document.createElement('div');
@@ -315,6 +319,14 @@ function buildFeatureCard(feat, num, container) {
             <input type="text" class="m-alt-boundary-ctrl" placeholder="e.g. searchAsset()" value="${altBC}"/>
           </div>
           <div>
+            <div class="method-label">Controller Self-call</div>
+            <input type="text" class="m-alt-ctrl-self" placeholder="e.g. revalidate()" value="${altCS}"/>
+          </div>
+          <div>
+            <div class="method-label">Controller → Entity</div>
+            <input type="text" class="m-alt-ctrl-entity" placeholder="e.g. checkStatus()" value="${altCE}"/>
+          </div>
+          <div>
             <div class="method-label">Return Message (Response)</div>
             <input type="text" class="m-alt-response" placeholder="e.g. displayNoData()" value="${altRes}"/>
           </div>
@@ -340,6 +352,14 @@ function buildFeatureCard(feat, num, container) {
           <div>
             <div class="method-label">Boundary → Controller</div>
             <input type="text" class="m-exc-boundary-ctrl" placeholder="e.g. requestMarket()" value="${excBC}"/>
+          </div>
+          <div>
+            <div class="method-label">Controller Self-call</div>
+            <input type="text" class="m-exc-ctrl-self" placeholder="e.g. logError()" value="${excCS}"/>
+          </div>
+          <div>
+            <div class="method-label">Controller → Entity</div>
+            <input type="text" class="m-exc-ctrl-entity" placeholder="e.g. updateStatus()" value="${excCE}"/>
           </div>
           <div>
             <div class="method-label">Return Message (Response)</div>
@@ -464,6 +484,8 @@ async function generateDiagram(btn, featureId) {
   const altActorBoundary = card.querySelector('.m-alt-actor-boundary')?.value.trim() || '';
   const altBoundarySelf = card.querySelector('.m-alt-boundary-self')?.value.trim() || '';
   const altBoundaryCtrl = card.querySelector('.m-alt-boundary-ctrl')?.value.trim() || '';
+  const altCtrlSelf = card.querySelector('.m-alt-ctrl-self')?.value.trim() || '';
+  const altCtrlEntity = card.querySelector('.m-alt-ctrl-entity')?.value.trim() || '';
   const altResponse = card.querySelector('.m-alt-response')?.value.trim() || '';
 
   // Exception Flow config
@@ -471,6 +493,8 @@ async function generateDiagram(btn, featureId) {
   const excActorBoundary = card.querySelector('.m-exc-actor-boundary')?.value.trim() || '';
   const excBoundarySelf = card.querySelector('.m-exc-boundary-self')?.value.trim() || '';
   const excBoundaryCtrl = card.querySelector('.m-exc-boundary-ctrl')?.value.trim() || '';
+  const excCtrlSelf = card.querySelector('.m-exc-ctrl-self')?.value.trim() || '';
+  const excCtrlEntity = card.querySelector('.m-exc-ctrl-entity')?.value.trim() || '';
   const excResponse = card.querySelector('.m-exc-response')?.value.trim() || '';
 
   // Boundary self-calls
@@ -510,11 +534,15 @@ async function generateDiagram(btn, featureId) {
         alt_actor_boundary:         altActorBoundary,
         alt_boundary_self:          altBoundarySelf,
         alt_boundary_ctrl:          altBoundaryCtrl,
+        alt_ctrl_self:              altCtrlSelf,
+        alt_ctrl_entity:            altCtrlEntity,
         alt_response:               altResponse,
         exc_condition:              excCondition,
         exc_actor_boundary:         excActorBoundary,
         exc_boundary_self:          excBoundarySelf,
         exc_boundary_ctrl:          excBoundaryCtrl,
+        exc_ctrl_self:              excCtrlSelf,
+        exc_ctrl_entity:            excCtrlEntity,
         exc_response:               excResponse,
       })
     });

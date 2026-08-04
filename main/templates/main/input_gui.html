@@ -371,7 +371,7 @@ input:focus, select:focus, textarea:focus {
         });
     }
 
-    // FUNGSI BARU: Simpan data SQL ke backend
+    // FUNGSI BARU: Save data SQL ke backend
     function saveSQLData() {
         // Cek apakah ada data SQL di localStorage
         const sqlData = localStorage.getItem('sqlData');
@@ -402,7 +402,7 @@ input:focus, select:focus, textarea:focus {
         });
     }
 
-    // FUNGSI BARU: Tampilkan info SQL data
+    // FUNGSI BARU: Display info SQL data
     function displaySQLDataInfo() {
         const sqlData = localStorage.getItem('sqlData');
         const sqlStatus = document.getElementById('sqlStatus');
@@ -577,7 +577,7 @@ input:focus, select:focus, textarea:focus {
             console.error("Error parsing pages_json from Supabase:", e);
         }
 
-        // Tampilkan info SQL data jika ada
+        // Display info SQL data jika ada
         displaySQLDataInfo();
 
         // Auto-save debounced when editing inputs

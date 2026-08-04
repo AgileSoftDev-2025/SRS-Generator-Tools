@@ -922,23 +922,23 @@
                 <div class="path-row" data-index="${index}">
                     <div class="step-col"><span class="step-badge">${index + 1}</span></div>
                     <div class="subject-col">
-                        <span class="path-label">Subjek</span>
+                        <span class="path-label">Subject</span>
                         <select class="form-select path-subject">
                             <option value="user" ${subject === 'user' ? 'selected' : ''}>👤 User</option>
-                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 Sistem</option>
+                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 System</option>
                         </select>
                     </div>
                     <div class="path-column">
-                        <span class="path-label">Predikat ${index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
-                        <textarea class="form-textarea path-predicate" rows="2" placeholder="mis. membuka">${predicate}</textarea>
+                        <span class="path-label">Predicate ${index === 0 ? '<small style="color: #6b7280;">(Required)</small>' : ''}</span>
+                        <textarea class="form-textarea path-predicate" rows="2" placeholder="e.g. open">${predicate}</textarea>
                     </div>
                     <div class="path-column">
-                        <span class="path-label">Objek</span>
-                        <textarea class="form-textarea path-object" rows="2" placeholder="mis. halaman AI Mentor">${object}</textarea>
+                        <span class="path-label">Object</span>
+                        <textarea class="form-textarea path-object" rows="2" placeholder="e.g. AI Mentor page">${object}</textarea>
                     </div>
                     ${index > 0 ? `
                     <div class="delete-col">
-                        <button class="delete-path-btn" data-type="basic" title="Hapus step">🗑️</button>
+                        <button class="delete-path-btn" data-type="basic" title="Remove step">🗑️</button>
                     </div>
                     ` : ''}
                 </div>
@@ -948,14 +948,14 @@
         // -------------------------------------------------------------------------
         // Alternative / Exception Path section — grouped flows
         // Each group = one branch/alur starting at a given Basic Path step.
-        // A group can contain multiple sequential steps (User -> Sistem -> ...).
+        // A group can contain multiple sequential steps (User -> System -> ...).
         // A section (Alternative or Exception) can contain multiple groups.
         // -------------------------------------------------------------------------
         function createGroupPathSection(title, type, groups, basicStepCount) {
             const list = (groups && groups.length > 0) ? groups : [];
             const groupsHTML = list.map((g, gi) => buildGroupHTML(g, type, gi, basicStepCount)).join('');
             const emptyMsg = list.length === 0
-                ? `<div class="flow-group-empty">Belum ada alur ${title.toLowerCase()}. Klik "+ Add ${title}" untuk menambah cabang baru.</div>`
+                ? `<div class="flow-group-empty">No ${title.toLowerCase()} flow yet. Click "+ Add ${title}" to add a new branch.</div>`
                 : '';
             
             return `
@@ -982,7 +982,7 @@
                 <div class="flow-group" data-group-index="${groupIndex}">
                     <div class="flow-group-header">
                         <div class="branch-col">
-                            <span class="path-label">Cabang dari Step</span>
+                            <span class="path-label">Branch from Step</span>
                             <select class="form-select group-from-step">
                                 ${Array.from({ length: Math.max(basicStepCount, 1) }, (_, i) => i + 1)
                                     .map(n => `<option value="${n}" ${n === fromStep ? 'selected' : ''}>Step ${n}</option>`)
@@ -994,7 +994,7 @@
                             <span class="branch-label-badge">-</span>
                         </div>
                         <div class="flow-group-header-spacer"></div>
-                        <button class="delete-group-btn" data-type="${type}" title="Hapus seluruh alur ini">🗑️ Hapus Alur</button>
+                        <button class="delete-group-btn" data-type="${type}" title="Remove this entire flow">🗑️ Remove Flow</button>
                     </div>
                     <div class="flow-group-steps">
                         ${stepsHTML}
@@ -1016,23 +1016,23 @@
                 <div class="path-row" data-step-index="${index}">
                     <div class="step-col"><span class="step-badge sub-step-badge">-</span></div>
                     <div class="subject-col">
-                        <span class="path-label">Subjek</span>
+                        <span class="path-label">Subject</span>
                         <select class="form-select path-subject">
                             <option value="user" ${subject === 'user' ? 'selected' : ''}>👤 User</option>
-                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 Sistem</option>
+                            <option value="system" ${subject === 'system' ? 'selected' : ''}>💻 System</option>
                         </select>
                     </div>
                     <div class="path-column">
-                        <span class="path-label">Predikat</span>
-                        <textarea class="form-textarea path-predicate" rows="2" placeholder="mis. memasukkan">${predicate}</textarea>
+                        <span class="path-label">Predicate</span>
+                        <textarea class="form-textarea path-predicate" rows="2" placeholder="e.g. enter">${predicate}</textarea>
                     </div>
                     <div class="path-column">
-                        <span class="path-label">Objek</span>
-                        <textarea class="form-textarea path-object" rows="2" placeholder="mis. data yang tidak valid">${object}</textarea>
+                        <span class="path-label">Object</span>
+                        <textarea class="form-textarea path-object" rows="2" placeholder="e.g. invalid data">${object}</textarea>
                     </div>
                     ${index > 0 ? `
                     <div class="delete-col">
-                        <button class="delete-step-btn" title="Hapus step">🗑️</button>
+                        <button class="delete-step-btn" title="Remove step">🗑️</button>
                     </div>
                     ` : ''}
                 </div>
@@ -1172,7 +1172,7 @@
                     const container = document.querySelector(`.group-container[data-type="${type}"]`);
                     if (container && container.querySelectorAll('.flow-group').length === 0) {
                         const title = type === 'alternative' ? 'Alternative Path' : 'Exception Path';
-                        container.insertAdjacentHTML('beforeend', `<div class="flow-group-empty">Belum ada alur ${title.toLowerCase()}. Klik "+ Add ${title}" untuk menambah cabang baru.</div>`);
+                        container.insertAdjacentHTML('beforeend', `<div class="flow-group-empty">No ${title.toLowerCase()} flow yet. Click "+ Add ${title}" to add a new branch.</div>`);
                     }
                     
                     refreshGroupLabels(type);

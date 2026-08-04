@@ -269,7 +269,7 @@
     </div>
     
     <div class="info-text">
-        <p><strong>Note:</strong> Diagram Use Case dan User Story dihasilkan secara otomatis berdasarkan data yang telah Anda input sebelumnya. Fitur yang sama digunakan oleh beberapa aktor akan muncul sebagai <strong>satu use case</strong> dengan <strong>multiple associations</strong>.</p>
+        <p><strong>Note:</strong> Diagram Use Case dan User Story dihasilkan secara otomatis berdasarkan data yang telah Anda input sebelumnya. Feature yang sama digunakan oleh beberapa aktor akan muncul sebagai <strong>satu use case</strong> dengan <strong>multiple associations</strong>.</p>
     </div>
     
     <!-- Use Case Diagram Section -->
@@ -454,7 +454,7 @@ function loadUseCasesFromPreviousPage() {
         }
     }
     
-    // FIX-04: Hapus dead code — kode di bawah return tidak pernah dieksekusi.
+    // FIX-04: Remove dead code — kode di bawah return tidak pernah dieksekusi.
     console.log('⚠️ No use cases found in DB or Session.');
     return false;
 }
@@ -819,7 +819,7 @@ function handleImageError(img) {
 // ============================================
 
 function saveDataForNextPage() {
-    // FIX-03: Hapus localStorage global (generatedUseCaseData, useCases).
+    // FIX-03: Remove localStorage global (generatedUseCaseData, useCases).
     // Data use case sudah tersimpan di DB via API save-actors.
     // sessionStorage hanya dipakai sebagai cache sementara per tab.
     sessionStorage.setItem('currentUseCases', JSON.stringify(useCases));

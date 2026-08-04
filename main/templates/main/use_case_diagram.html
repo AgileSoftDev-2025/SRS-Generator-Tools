@@ -562,7 +562,7 @@
 
             init() {
                 this.bindEvents();
-                // Prioritaskan data dari database jika ada
+                // Prioritykan data dari database jika ada
                 let initialData = [];
                 try {
                     const dataText = document.getElementById('initial-data').textContent;
@@ -570,7 +570,7 @@
                         initialData = JSON.parse(dataText);
                     }
                 } catch(e) {
-                    console.error("Gagal parse initial data", e);
+                    console.error("Failed to parse initial data", e);
                 }
                 
                 if (initialData && initialData.length > 0) {
@@ -609,7 +609,7 @@
                             window.location.href = nextPage;
                         }).catch(err => {
                             console.error("Save failed:", err);
-                            alert("Gagal menyimpan data ke database. Silakan coba lagi.");
+                            alert("Failed to save data ke database. Silakan coba lagi.");
                             btn.innerText = originalText;
                             btn.disabled = false;
                         });
@@ -618,8 +618,8 @@
 
                 // 🔥 PERUBAHAN: Event listener untuk tombol back - sekarang ke home.html dengan path yang benar
                 document.getElementById('backBtn').addEventListener('click', () => {
-                    this.saveData(); // Simpan data sebelum kembali
-                    // 🔥 PERUBAHAN: Kembali ke root / dashboard
+                    this.saveData(); // Save data sebelum kembali
+                    // 🔥 PERUBAHAN: Back ke root / dashboard
                     window.location.href = '/'; 
                 });
             }
@@ -818,7 +818,7 @@
             saveData() {
                 const formattedData = this.formatDataForOutput();
 
-                // FIX-05: Hapus localStorage global — data disimpan ke DB via API,
+                // FIX-05: Remove localStorage global — data disimpan ke DB via API,
                 // tidak perlu localStorage yang bisa bocor ke project lain.
                 // Bersihkan sisa data lama jika ada.
                 localStorage.removeItem('actorsAndFeatures');

@@ -804,6 +804,8 @@ def generate_sequence_diagram_by_feature(request, feature_id):
     alt_actor_boundary = body.get('alt_actor_boundary', '').strip()
     alt_boundary_self  = body.get('alt_boundary_self', '').strip()
     alt_boundary_ctrl  = body.get('alt_boundary_ctrl', '').strip()
+    alt_ctrl_self      = body.get('alt_ctrl_self', '').strip()
+    alt_ctrl_entity    = body.get('alt_ctrl_entity', '').strip()
     alt_response       = body.get('alt_response', '').strip()
 
     # ── Exception Flow config ──
@@ -811,6 +813,8 @@ def generate_sequence_diagram_by_feature(request, feature_id):
     exc_actor_boundary = body.get('exc_actor_boundary', '').strip()
     exc_boundary_self  = body.get('exc_boundary_self', '').strip()
     exc_boundary_ctrl  = body.get('exc_boundary_ctrl', '').strip()
+    exc_ctrl_self      = body.get('exc_ctrl_self', '').strip()
+    exc_ctrl_entity    = body.get('exc_ctrl_entity', '').strip()
     exc_response       = body.get('exc_response', '').strip()
 
     boundary_ctrl_method    = body.get('boundary_controller_method', 'processRequest()')
@@ -894,7 +898,7 @@ def generate_sequence_diagram_by_feature(request, feature_id):
         lines.append('end')
         lines.append('')
 
-    def write_custom_flow(group_name, condition, actor_bnd, bnd_self, bnd_ctrl, response, is_error):
+    def write_custom_flow(group_name, condition, actor_bnd, bnd_self, bnd_ctrl, ctrl_self, ctrl_entity, response, is_error):
         if not condition: return
         lines.append(f'group {group_name} [{condition}]')
 
@@ -908,11 +912,14 @@ def generate_sequence_diagram_by_feature(request, feature_id):
             lines.append(f'{boundary_alias} -> {ctrl_alias}: {bnd_ctrl}')
             lines.append(f'activate {ctrl_alias}')
 
-            if not is_error:
-                # Normal interaction with entities for alternative flow
+            if ctrl_self:
+                lines.append(f'{ctrl_alias} -> {ctrl_alias}: {ctrl_self}')
+
+            if not is_error or ctrl_entity:
+                # Interaction with entities for alternative/exception flow
                 for ent in selected_entities:
                     alias      = f'E_{ent.replace(" ", "_")}'
-                    ent_method = ctrl_entity_methods.get(ent, 'query()')
+                    ent_method = ctrl_entity if ctrl_entity else ctrl_entity_methods.get(ent, 'query()')
                     lines.append(f'{ctrl_alias} -> {alias}: {ent_method}')
                     lines.append(f'activate {alias}')
                     lines.append(f'{alias} --> {ctrl_alias}: result')
@@ -932,9 +939,9 @@ def generate_sequence_diagram_by_feature(request, feature_id):
 
     write_basic_flow(basic_paths, actor_boundary_methods)
     if alt_paths.exists():
-        write_custom_flow('Alternative Flow', alt_condition, alt_actor_boundary, alt_boundary_self, alt_boundary_ctrl, alt_response, is_error=False)
+        write_custom_flow('Alternative Flow', alt_condition, alt_actor_boundary, alt_boundary_self, alt_boundary_ctrl, alt_ctrl_self, alt_ctrl_entity, alt_response, is_error=False)
     if exc_paths.exists():
-        write_custom_flow('Exception Flow', exc_condition, exc_actor_boundary, exc_boundary_self, exc_boundary_ctrl, exc_response, is_error=True)
+        write_custom_flow('Exception Flow', exc_condition, exc_actor_boundary, exc_boundary_self, exc_boundary_ctrl, exc_ctrl_self, exc_ctrl_entity, exc_response, is_error=True)
     lines.append('@enduml')
 
     plantuml_code = '\n'.join(lines)
@@ -956,11 +963,15 @@ def generate_sequence_diagram_by_feature(request, feature_id):
         'alt_actor_boundary':      alt_actor_boundary,
         'alt_boundary_self':       alt_boundary_self,
         'alt_boundary_ctrl':       alt_boundary_ctrl,
+        'alt_ctrl_self':           alt_ctrl_self,
+        'alt_ctrl_entity':         alt_ctrl_entity,
         'alt_response':            alt_response,
         'exc_condition':           exc_condition,
         'exc_actor_boundary':      exc_actor_boundary,
         'exc_boundary_self':       exc_boundary_self,
         'exc_boundary_ctrl':       exc_boundary_ctrl,
+        'exc_ctrl_self':           exc_ctrl_self,
+        'exc_ctrl_entity':         exc_ctrl_entity,
         'exc_response':            exc_response,
     }
     request.session.modified = True
