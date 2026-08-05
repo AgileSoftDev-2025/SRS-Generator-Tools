@@ -595,14 +595,25 @@
         
         // refs: array of basic-step numbers (one per group, in the order groups appear)
         // returns matching array of labels, e.g. [4,4,7] -> ["4A","4B","7A"]
-        function computeGroupLabels(refs) {
+        function computeGroupLabels(refs, type = 'alternative') {
             const counters = {};
             return refs.map(step => {
                 const key = String(step);
                 if (counters[key] === undefined) counters[key] = 0;
-                const letter = letterFromIndex(counters[key]);
+                
+                let label;
+                if (type === 'exception') {
+                    label = `E${step}`;
+                    if (counters[key] > 0) {
+                        label = `E${step}-${counters[key] + 1}`;
+                    }
+                } else {
+                    const letter = letterFromIndex(counters[key]);
+                    label = `${step}${letter}`;
+                }
+                
                 counters[key]++;
-                return `${step}${letter}`;
+                return label;
             });
         }
         
@@ -1080,7 +1091,7 @@
             if (!container) return;
             const groupEls = Array.from(container.querySelectorAll('.flow-group'));
             const refs = groupEls.map(g => parseInt(g.querySelector('.group-from-step')?.value || '1'));
-            const labels = computeGroupLabels(refs);
+            const labels = computeGroupLabels(refs, type);
             
             groupEls.forEach((groupEl, gi) => {
                 groupEl.setAttribute('data-group-index', gi);
@@ -1091,7 +1102,8 @@
                 stepRows.forEach((row, si) => {
                     row.setAttribute('data-step-index', si);
                     const subBadge = row.querySelector('.sub-step-badge');
-                    if (subBadge) subBadge.textContent = `${labels[gi]}.${si + 1}`;
+                    const sep = type === 'exception' ? '-' : '.';
+                    if (subBadge) subBadge.textContent = `${labels[gi]}${sep}${si + 1}`;
                 });
             });
         }
@@ -1334,7 +1346,7 @@
         // Save to database via API
         async function saveToDatabase(feature) {
             try {
-                const response = await fetch('/save-usecase-spec/', {
+                const response = await fetch('/api/save_usecase_spec/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

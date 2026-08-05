@@ -690,7 +690,7 @@
         
         // Alternative/Exception: keep only groups that have at least one filled step,
         // compute group labels (4A, 4B, ...) and sub-step labels (4A.1, 4A.2, ...)
-        function getLabeledGroups(groups) {
+        function getLabeledGroups(groups, type = 'alternative') {
             const cleanGroups = (groups || [])
                 .map(g => ({
                     fromStep: (g && g.fromStep) || 1,
@@ -702,10 +702,23 @@
             return cleanGroups.map(g => {
                 const key = String(g.fromStep);
                 if (counters[key] === undefined) counters[key] = 0;
-                const letter = letterFromIndex(counters[key]);
+                
+                let label;
+                let stepSeparator = '.';
+                if (type === 'exception') {
+                    label = `E${g.fromStep}`;
+                    if (counters[key] > 0) {
+                        label = `E${g.fromStep}-${counters[key] + 1}`;
+                    }
+                    stepSeparator = '-';
+                } else {
+                    const letter = letterFromIndex(counters[key]);
+                    label = `${g.fromStep}${letter}`;
+                    stepSeparator = '.';
+                }
+                
                 counters[key]++;
-                const label = `${g.fromStep}${letter}`;
-                const steps = g.steps.map((s, si) => Object.assign({}, s, { label: `${label}.${si + 1}` }));
+                const steps = g.steps.map((s, si) => Object.assign({}, s, { label: `${label}${stepSeparator}${si + 1}` }));
                 return { fromStep: g.fromStep, label, steps };
             });
         }
@@ -761,8 +774,8 @@
                 const systemSubject = 'System';
                 
                 const labeledBasic = getLabeledBasicPath(feature.basicPath || []);
-                const labeledAlt = getLabeledGroups(feature.alternativePath || []);
-                const labeledExc = getLabeledGroups(feature.exceptionPath || []);
+                const labeledAlt = getLabeledGroups(feature.alternativePath || [], 'alternative');
+                const labeledExc = getLabeledGroups(feature.exceptionPath || [], 'exception');
                 
                 const totalStepCount = labeledBasic.length +
                     labeledAlt.reduce((a, g) => a + g.steps.length, 0) +
