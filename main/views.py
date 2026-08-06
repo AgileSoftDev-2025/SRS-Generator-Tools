@@ -332,9 +332,7 @@ def generate_usecase_diagram(request):
         plantuml.append("@enduml")
         final_code = "\n".join(plantuml)
 
-        encoded_code = urllib.parse.quote(final_code)
-        plantuml_url = f"http://www.plantuml.com/plantuml/png/{encoded_code}"
-        response = requests.get(plantuml_url, timeout=15)
+        response = requests.post("https://kroki.io/plantuml/png", data=final_code, timeout=20)
 
         if response.status_code == 200:
             diagram, _ = Usecase.objects.update_or_create(
@@ -1075,9 +1073,7 @@ def class_diagram(request):
         uml.append("@enduml")
 
         plantuml_code = "\n".join(uml)
-        encoded = urllib.parse.quote(plantuml_code)
-        plantuml_png_url = f"http://www.plantuml.com/plantuml/png/{encoded}"
-        response = requests.get(plantuml_png_url)
+        response = requests.post("https://kroki.io/plantuml/png", data=plantuml_code, timeout=20)
 
         if response.status_code != 200:
             return JsonResponse({"status": "error", "message": "Failed to generate image"})

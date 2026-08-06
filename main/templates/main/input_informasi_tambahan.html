@@ -1424,7 +1424,7 @@
                 if (features.length > 0) {
                     localStorage.setItem('useCaseDetails', JSON.stringify(features));
                 }
-                window.location.href = '/use-case/';
+                window.location.href = '/user-story/';
             });
             
             document.getElementById('nextButton').addEventListener('click', async () => {
@@ -1448,7 +1448,7 @@
                     sessionStorage.setItem('useCaseDetails', JSON.stringify(features));
                     
                     const dataString = encodeURIComponent(JSON.stringify(features));
-                    window.location.href = `/use-case-spec/?data=${dataString}`;
+                    window.location.href = `/use-case-spec/`;
                     
                 } catch (error) {
                     console.error('Error:', error);

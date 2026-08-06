@@ -1,15 +1,3 @@
-"""
-Django settings for core project.
-Konfigurasi ini mendukung:
-- Development lokal: SQLite (default, jika DATABASE_URL tidak di-set)
-- Production (Supabase/Railway/Render): PostgreSQL via DATABASE_URL env var
-
-Setup untuk Supabase:
-1. Salin .env.example ke .env
-2. Isi DATABASE_URL dengan connection string dari Supabase > Settings > Database > Connection string (URI mode)
-   Format: postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
-3. Jalankan: python manage.py migrate
-"""
 
 import os
 from pathlib import Path
